@@ -75,6 +75,14 @@
         <input type="password" id="secret" autocomplete="off" required>
       </div>
       <div class="field">
+        <label for="isletme">İşletme Adı veya Kişi Adı</label>
+        <input type="text" id="isletme" placeholder="ör. Cafe Şölen" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="banka">Banka Adı (opsiyonel)</label>
+        <input type="text" id="banka" placeholder="ör. Ziraat Bankası" autocomplete="off">
+      </div>
+      <div class="field">
         <label for="iban">IBAN</label>
         <input type="text" id="iban" placeholder="TR.." autocomplete="off" required>
       </div>
@@ -109,9 +117,13 @@
     var qs = new URLSearchParams(window.location.search);
     var qIban = qs.get('iban');
     var qIsim = qs.get('isim');
+    var qIsletme = qs.get('isletme');
+    var qBanka = qs.get('banka');
     if (qIban) document.getElementById('iban').value = qIban;
     if (qIsim) document.getElementById('isim').value = qIsim;
-    if (qIban || qIsim){
+    if (qIsletme) document.getElementById('isletme').value = qIsletme;
+    if (qBanka) document.getElementById('banka').value = qBanka;
+    if (qIban || qIsim || qIsletme || qBanka){
       if (secretEl.value){ document.getElementById('submitBtn').focus(); }
       else { secretEl.focus(); }
     }
@@ -129,6 +141,8 @@
     var secret = secretEl.value.trim();
     var iban = document.getElementById('iban').value.trim();
     var isim = document.getElementById('isim').value.trim();
+    var isletme = document.getElementById('isletme').value.trim();
+    var banka = document.getElementById('banka').value.trim();
 
     if (!secret || !iban || !isim){
       msg.textContent = 'Tüm alanları doldurun.';
@@ -142,7 +156,7 @@
     fetch('/api/olustur', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-admin-secret': secret },
-      body: JSON.stringify({ iban: iban, isim: isim })
+      body: JSON.stringify({ iban: iban, isim: isim, isletme: isletme, banka: banka })
     }).then(function(r){ return r.json().then(function(data){ return { status: r.status, data: data }; }); })
     .then(function(res){
       btn.disabled = false;
@@ -157,6 +171,8 @@
         msg.className = 'msg good';
         document.getElementById('iban').value = '';
         document.getElementById('isim').value = '';
+        document.getElementById('isletme').value = '';
+        document.getElementById('banka').value = '';
       } else {
         msg.textContent = (res.data && res.data.error) || 'Bir hata oluştu.';
         msg.className = 'msg bad';
