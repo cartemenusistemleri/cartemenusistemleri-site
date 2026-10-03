@@ -105,6 +105,18 @@
     if (saved) secretEl.value = saved;
   }catch(e){}
 
+  try{
+    var qs = new URLSearchParams(window.location.search);
+    var qIban = qs.get('iban');
+    var qIsim = qs.get('isim');
+    if (qIban) document.getElementById('iban').value = qIban;
+    if (qIsim) document.getElementById('isim').value = qIsim;
+    if (qIban || qIsim){
+      if (secretEl.value){ document.getElementById('submitBtn').focus(); }
+      else { secretEl.focus(); }
+    }
+  }catch(e){}
+
   document.getElementById('form').addEventListener('submit', function(ev){
     ev.preventDefault();
     var btn = document.getElementById('submitBtn');
