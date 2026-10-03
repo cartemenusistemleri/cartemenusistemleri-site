@@ -69,6 +69,15 @@ function renderPage(data) {
   .copy-btn svg{ width:17px; height:17px; }
   .copy-note{ font-size:11.5px; font-weight:600; min-height:14px; }
   .copy-note.good{ color:var(--good); }
+  .site-footer{ margin-top:2px; display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; }
+  .site-footer-text{ font-size:12px; color:var(--cream-soft); line-height:1.5; max-width:300px; }
+  .site-footer-links{ display:flex; align-items:center; gap:10px; }
+  .site-footer-links a{
+    font-size:12.5px; font-weight:600; color:var(--cream); text-decoration:none;
+    border:1px solid rgba(255,253,246,0.28); border-radius:999px; padding:7px 15px;
+    transition:background .15s ease;
+  }
+  .site-footer-links a:hover{ background:rgba(255,253,246,0.12); }
   @media (max-width:420px){ .card{ padding:18px 15px 16px; } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap">
@@ -110,6 +119,14 @@ function renderPage(data) {
         </button>
       </div>
       <span class="copy-note" id="copyAdNote"></span>
+    </div>
+  </div>
+
+  <div class="site-footer">
+    <p class="site-footer-text">Bu kartı <strong>Carte Menü Sistemleri</strong> hazırladı — siz de işletmeniz için ister misiniz?</p>
+    <div class="site-footer-links">
+      <a href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">Instagram</a>
+      <a href="mailto:cartemenusistemleri@gmail.com">E-posta</a>
     </div>
   </div>
 </div>
