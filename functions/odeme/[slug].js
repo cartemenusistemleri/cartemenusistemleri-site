@@ -83,7 +83,7 @@ function renderPage(data) {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap">
 
 <div class="wrap">
-  <div class="wordmark"><span class="logo">Carte</span><span class="tag">IBAN ile Öde</span></div>
+  <a class="wordmark" href="https://cartemenusistemleri.com.tr/" style="text-decoration:none;"><span class="logo">Carte</span><span class="tag">IBAN ile Öde</span></a>
   <div class="heading">
     <h1>Ödeme Bilgileri</h1>
     <p class="subtitle">Kartı okutan herkes bu bilgilerle havale/EFT gönderebilir.</p>
@@ -125,6 +125,7 @@ function renderPage(data) {
   <div class="site-footer">
     <p class="site-footer-text">Bu kartı <strong>Carte Menü Sistemleri</strong> hazırladı — siz de işletmeniz için ister misiniz?</p>
     <div class="site-footer-links">
+      <a href="https://cartemenusistemleri.com.tr/">İnternet Sitemiz</a>
       <a href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">Instagram</a>
       <a href="mailto:cartemenusistemleri@gmail.com">E-posta</a>
     </div>
