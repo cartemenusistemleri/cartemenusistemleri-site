@@ -37,6 +37,8 @@ export async function onRequestPost(context) {
 
   const iban = cleanIban(body.iban);
   const isim = (body.isim || '').trim().slice(0, 80);
+  const isletme = (body.isletme || '').trim().slice(0, 80);
+  const banka = (body.banka || '').trim().slice(0, 80);
 
   if (!iban || iban.length < 15 || iban.length > 34 || !iban.startsWith('TR')) {
     return jsonResponse({ ok: false, error: "Geçerli bir IBAN girin (TR ile başlamalı)" }, 400);
@@ -58,7 +60,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ ok: false, error: 'Link üretilemedi, tekrar deneyin' }, 500);
   }
 
-  await env.ODEME_LINKS.put(slug, JSON.stringify({ iban, isim, created_at: new Date().toISOString() }));
+  await env.ODEME_LINKS.put(slug, JSON.stringify({ iban, isim, isletme, banka, created_at: new Date().toISOString() }));
 
   const origin = new URL(request.url).origin;
   return jsonResponse({ ok: true, slug, url: `${origin}/odeme/${slug}` });
