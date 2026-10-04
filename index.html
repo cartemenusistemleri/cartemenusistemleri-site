@@ -1,294 +1,671 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Carte Menü Sistemleri</title>
-<link rel="icon" href="data:,">
-<meta name="description" content="İşletmeniz için NFC destekli dijital menü ve ödeme çözümleri.">
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carte Menü Sistemleri · NFC ve QR Masa Kartları</title>
+<meta name="description" content="Kafe, restoran ve mağazalar için NFC ve QR destekli menü, Google yorum, Instagram ve IBAN ödeme kartları. Her kart işletmenize özel tasarlanır.">
+<meta name="theme-color" content="#3A121D">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://cartemenusistemleri.com.tr/">
 <meta property="og:title" content="Carte Menü Sistemleri">
-<meta property="og:description" content="İşletmeniz için NFC destekli dijital menü ve ödeme çözümleri.">
-<meta property="og:image" content="https://cartemenusistemleri.com.tr/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="tr_TR">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Carte Menü Sistemleri">
-<meta name="twitter:description" content="İşletmeniz için NFC destekli dijital menü ve ödeme çözümleri.">
-<meta name="twitter:image" content="https://cartemenusistemleri.com.tr/og-image.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Jost:wght@300;400;500;600;700&display=swap">
+<meta property="og:description" content="Masanıza yakışan tek kart. Menü, yorum ve ödeme, telefonu yaklaştırmak yeter.">
+<!-- DEPLOY STEP: og:url ve og:image canlı adrese göre ayarlandı; alan adı değişirse güncelle -->
+<meta property="og:url" content="https://cartemenusistemleri.com.tr/">
+<meta property="og:image" content="https://cartemenusistemleri.com.tr/assets/hero-3-kart.jpg">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Jost:wght@300;400;500;600&display=swap">
 <style>
-/* Layout: bordo hero band (centered "Carte" wordmark, white text) is the
-only colored surface; every other section is plain white with bordo
-type. Single typeface (Jost) for all running text/headings; Allura
-reserved for the "Carte" wordmark only, as its own distinct mark. This
-is a fixed brand identity page — colors are intentionally committed and
-do NOT follow the viewer's light/dark system setting, so the brand
-palette never gets inverted into something darker/different. */
 :root{
---bg:#FFFFFF; --fg:#4A1826; --fg-soft:#8B6E76; --fg-faint:#B49CA0;
---surface:#FFFFFF; --surface-2:#F6ECE4;
---line: rgba(74,24,38,0.14); --line-soft: rgba(74,24,38,0.08);
---accent:#9CA3AC; --gold:#C9A869;
---hero-bg:#4A1826; --hero-bg-soft:#5A2130; --hero-fg:#FFFDF6; --hero-fg-soft:rgba(255,253,246,0.78);
---hero-line: rgba(255,253,246,0.22);
-color-scheme: light only;
+  --canvas:#3A121D;
+  --canvas-deep:#2A0D15;
+  --panel:#4A1826;
+  --panel-2:#5A2130;
+  --accent:#FFFDF6;
+  --accent-hover:#FFFFFF;
+  --accent-muted:rgba(255,253,246,.14);
+  --text-primary:#FFFDF6;
+  --text-secondary:#E6D6C7;
+  --text-faint:#BFA6A0;
+  --line:rgba(255,253,246,.14);
+  --line-strong:rgba(255,253,246,.42);
+  --cream:#FAF3E4;
+  --ink:#4A1826;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-io:cubic-bezier(.65,0,.35,1);
+  --tshadow:0 1px 2px rgba(20,4,8,.95),0 3px 12px rgba(20,4,8,.78),0 10px 44px rgba(20,4,8,.8);
+  --serif:'Jost',-apple-system,'Segoe UI',sans-serif;
+  --sans:'Jost',-apple-system,'Segoe UI',sans-serif;
+  --mono:'Jost',-apple-system,'Segoe UI',sans-serif;
 }
+*{box-sizing:border-box}
+html{overflow-x:hidden;overflow-x:clip;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{overflow-x:hidden;overflow-x:clip;margin:0;background:var(--canvas);color:var(--text-primary);font-family:var(--sans);font-weight:300;font-size:17px;line-height:1.6;animation:pagein .9s var(--ease-out) both}
+@keyframes pagein{from{opacity:0}to{opacity:1}}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+p{margin:0}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:fixed;left:16px;top:-60px;z-index:100;background:var(--accent);color:var(--ink);padding:10px 16px;border-radius:10px;font-weight:500;text-decoration:none;transition:top .3s var(--ease-out)}
+.skip:focus{top:12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1160px,100% - 32px);margin-inline:auto}
+.mono{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-faint)}
 
-*{ box-sizing:border-box; }
-html{ scroll-behavior:smooth; }
+/* environment layer */
+.env{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(120% 80% at 50% 0%,#451622 0%,var(--canvas) 55%,var(--canvas-deep) 100%)}
+.env i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;will-change:transform}
+.env i:nth-child(1){width:46vmax;height:46vmax;left:-14vmax;top:8vh;background:radial-gradient(circle,rgba(255,240,236,.16),transparent 65%);animation:drift1 90s linear infinite;animation-delay:-20s}
+.env i:nth-child(2){width:38vmax;height:38vmax;right:-12vmax;top:46vh;background:radial-gradient(circle,rgba(150,40,62,.32),transparent 65%);animation:drift2 110s linear infinite;animation-delay:-45s}
+.env i:nth-child(3){width:30vmax;height:30vmax;left:30vw;bottom:-14vmax;background:radial-gradient(circle,rgba(255,240,236,.10),transparent 65%);animation:drift1 130s linear infinite reverse;animation-delay:-70s}
+@keyframes drift1{0%{transform:translate(0,0)}25%{transform:translate(8vw,6vh)}50%{transform:translate(2vw,14vh)}75%{transform:translate(-6vw,5vh)}100%{transform:translate(0,0)}}
+@keyframes drift2{0%{transform:translate(0,0)}33%{transform:translate(-9vw,-6vh)}66%{transform:translate(-3vw,8vh)}100%{transform:translate(0,0)}}
+.grain{position:fixed;inset:-50%;z-index:-1;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.2s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+body.paused *,body.paused *::before,body.paused *::after{animation-play-state:paused!important}
+
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .5s var(--ease-out),border-color .5s var(--ease-out)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
+.nav.solid{background:rgba(42,13,21,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.logo{font-family:'Allura',cursive;font-size:38px;line-height:1;text-decoration:none;color:var(--text-primary);display:inline-flex;align-items:baseline;gap:10px}
+.logo{align-items:center}
+.logo small{font-family:var(--sans);font-weight:600;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--text-primary);background:var(--panel);border:1px solid var(--text-primary);border-radius:999px;padding:4px 11px;line-height:1.4}
+.nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0;align-items:center}
+.nav ul a{text-decoration:none;font-size:14.5px;color:var(--text-secondary);transition:color .3s var(--ease-out)}
+.nav ul a:hover{color:var(--text-primary)}
+.nav ul a.btn,.nav ul a.btn:hover{color:#2A0D15}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:var(--sans);font-weight:500;font-size:15px;letter-spacing:.01em;padding:14px 24px;border-radius:999px;text-decoration:none;cursor:pointer;border:1px solid transparent;transition:background .35s var(--ease-out),color .35s var(--ease-out),border-color .35s var(--ease-out),transform .35s var(--ease-out);white-space:nowrap}
+.btn-accent{background:var(--accent);color:#2A0D15}
+.btn-accent:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.btn-ghost{color:var(--text-primary);border-color:var(--line-strong);background:rgba(42,13,21,.25)}
+.btn-ghost:hover{border-color:var(--text-primary);background:rgba(42,13,21,.5)}
+.btn-sm{padding:10px 18px;font-size:14px}
+.btn svg{width:18px;height:18px}
+@media (pointer:coarse){.btn{min-height:44px}}
+@media (max-width:860px){.nav ul li:not(:last-child){display:none}}
+.nav .btn .short{display:none}
+
+/* intro */
+.intro{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;display:grid;place-items:center;isolation:isolate}
+.intro::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(122,38,58,.55),transparent 70%)}
+.words{position:absolute;inset:0;z-index:0;pointer-events:none;transform:translate3d(calc(var(--mx,0)*-14px),calc(var(--my,0)*-10px),0);transition:transform 1.2s var(--ease-out)}
+.wd{position:absolute;left:var(--x);top:var(--y);font-family:var(--sans);font-weight:300;font-size:var(--s,clamp(17px,2.1vw,34px));letter-spacing:-.01em;line-height:1;white-space:nowrap;color:rgba(255,253,246,.16);transform:translate(-50%,-50%) translate3d(calc((var(--x) - 50%)*var(--p,0)*0.5),calc(var(--p,0)*-40px),0);opacity:calc(1 - var(--p,0)*1.2)}
+.wd i{display:inline-block;font-style:normal;opacity:0;filter:blur(8px);animation:wdin 1.6s var(--ease-out) forwards,float var(--f,12s) ease-in-out infinite;animation-delay:var(--d,0s),calc(var(--d,0s) - 4s)}
+@keyframes wdin{to{opacity:1;filter:blur(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.brand{position:relative;z-index:1;margin:0;display:flex;flex-direction:column;align-items:center;gap:clamp(10px,1.6vw,22px);transform:translateY(calc(var(--p,0)*-60px)) scale(calc(1 - var(--p,0)*.12));opacity:calc(1 - var(--p,0)*1.1)}
+.brand .script{font-family:'Allura',cursive;font-weight:400;font-size:clamp(104px,16vw,250px);line-height:.9;color:var(--text-primary);text-shadow:0 0 60px rgba(255,253,246,.12),0 6px 30px rgba(20,4,8,.5);padding:0 .12em;clip-path:inset(-20% 100% -20% 0);animation:write 2.2s cubic-bezier(.65,0,.35,1) .35s forwards}
+@keyframes write{to{clip-path:inset(-20% -5% -20% 0)}}
+.brand .pill{font-family:var(--sans);font-weight:600;font-size:clamp(11px,1vw,13px);letter-spacing:.32em;text-transform:uppercase;color:var(--text-primary);border:1px solid var(--text-primary);border-radius:999px;padding:7px 16px 7px 20px;background:rgba(42,13,21,.4);opacity:0;transform:translateY(10px);animation:rise 1s var(--ease-out) 2.1s forwards}
+.intro-sub{position:absolute;left:0;right:0;bottom:clamp(84px,13vh,130px);z-index:1;display:flex;justify-content:center;opacity:calc(1 - var(--p,0)*2.2)}
+.intro-sub p{width:min(90vw,520px);text-align:center;font-size:clamp(14px,1.2vw,16px);color:var(--text-secondary);opacity:0;transform:translateY(10px);animation:rise 1s var(--ease-out) 2.5s forwards}
+@keyframes rise{to{opacity:1;transform:translate(var(--tx,0),0)}}
+.cue{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:1;opacity:0;animation:cuein 1s var(--ease-out) 2.9s forwards;text-decoration:none}
+@keyframes cuein{to{opacity:calc(1 - var(--p,0)*3)}}
+.cue svg{width:22px;height:36px}
+.cue .dot{animation:cue 2.4s var(--ease-io) infinite;animation-delay:-.6s}
+@keyframes cue{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(12px);opacity:0}}
+.nav{transform:translateY(-100%);transition:transform .7s var(--ease-out),background .5s var(--ease-out),border-color .5s var(--ease-out)}
+.nav.show{transform:none}
+@media (max-width:720px){
+  .wd{--s:clamp(12px,3.4vw,16px);left:calc(14% + var(--x) * .72)}
+}
+@media (max-height:560px){.cue,.intro-sub{display:none}}
 @media (prefers-reduced-motion: reduce){
-html{ scroll-behavior:auto; }
-}
-body{
-margin:0; background:var(--bg); color:var(--fg);
-font-family:'Jost', -apple-system, 'Segoe UI', sans-serif;
-font-variant-numeric:tabular-nums;
-}
-h1,h2,h3{ font-family:'Jost', sans-serif; font-style:normal; margin:0; text-wrap:balance; }
-h1{ font-weight:700; }
-h2,h3{ font-weight:600; }
-p{ margin:0; }
-a{ color:inherit; }
-.wrap{ max-width:1040px; margin:0 auto; padding-inline:20px; }
-section{ padding-block:56px; }
-
-/* ---------- Hero ---------- */
-.hero{
-background:linear-gradient(170deg, var(--hero-bg) 0%, var(--hero-bg-soft) 100%);
-color:var(--hero-fg); padding-block:64px 60px;
-}
-.hero .wrap{ display:flex; flex-direction:column; align-items:center; text-align:center; }
-.wordmark{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:30px; }
-.wordmark .logo{ font-family:'Allura',cursive; font-size:clamp(56px,9vw,86px); color:var(--hero-fg); line-height:1; }
-.wordmark .tag{
-font-size:10.5px; letter-spacing:0.26em; text-transform:uppercase; color:var(--hero-fg); font-weight:600;
-background:rgba(0,0,0,0.18); border:1px solid var(--hero-line); border-radius:999px; padding:5px 13px;
-}
-.hero h1{ font-size:clamp(18px,2.4vw,24px); max-width:580px; line-height:1.32; margin-bottom:10px; font-weight:600; }
-.hero .lead{ font-size:13.5px; color:var(--hero-fg-soft); max-width:480px; line-height:1.6; margin-bottom:24px; }
-.hero-cta{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
-.btn{
-font-family:'Jost',sans-serif; font-size:14px; font-weight:600; letter-spacing:0.01em;
-padding:13px 22px; border-radius:10px; border:1px solid transparent; cursor:pointer;
-display:inline-flex; align-items:center; gap:8px; text-decoration:none; white-space:nowrap;
-transition:filter .15s ease;
-}
-.btn:hover{ filter:brightness(1.08); }
-.btn-light{ background:var(--hero-fg); color:var(--hero-bg); }
-.btn-outline{ background:transparent; color:var(--hero-fg); border-color:var(--hero-line); }
-.hero-strip{
-margin-top:30px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
-}
-.strip-chip{
-font-size:11.5px; color:var(--hero-fg-soft); background:rgba(0,0,0,0.14);
-border:1px solid var(--hero-line); border-radius:999px; padding:6px 13px;
+  .wd i{opacity:1;filter:none}
+  .brand .script{clip-path:none}
+  .brand .pill,.intro-sub p,.cue{opacity:1;transform:none}
+  .words{transform:none}
 }
 
-/* ---------- Section heads ---------- */
-.eyebrow{
-font-size:11px; letter-spacing:0.22em; text-transform:uppercase; font-weight:600;
-color:var(--fg-faint); margin-bottom:8px;
+/* second screen: the card on the table */
+.masa{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:0}
+.masa .bg{position:absolute;inset:0}
+.masa .bg img{width:100%;height:100%;object-fit:cover;object-position:62% 50%}
+.masa .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(26,6,12,.8) 0%,rgba(26,6,12,.5) 34%,rgba(26,6,12,0) 62%),linear-gradient(180deg,var(--canvas) 0%,rgba(58,18,29,0) 16%,rgba(58,18,29,0) 82%,var(--canvas) 100%)}
+.masa .wrap{position:relative;padding-block:120px}
+.masa .mono{display:block;margin-bottom:18px;color:var(--text-primary)}
+.masa .big{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5.2vw,74px);line-height:1.06;letter-spacing:-.025em;max-width:12ch;text-shadow:var(--tshadow)}
+.masa .sub{font-size:clamp(16px,1.4vw,19px);color:var(--text-secondary);max-width:44ch;margin-top:20px;text-shadow:0 1px 10px rgba(20,4,8,.8)}
+.masa .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+@media (max-width:720px){
+  .masa{align-items:flex-end}
+  .masa .bg img{object-position:72% 50%}
+  .masa .bg::after{background:linear-gradient(180deg,var(--canvas) 0%,rgba(20,4,8,.15) 30%,rgba(26,6,12,.8) 62%,var(--canvas) 100%)}
+  .masa .wrap{padding-block:60px 56px}
 }
-.section-head h2{ font-size:clamp(22px,3vw,30px); margin-bottom:10px; }
-.section-head p{ color:var(--fg-soft); font-size:14.5px; max-width:560px; line-height:1.6; }
 
-/* ---------- Services ---------- */
-.services{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
-.service-card{
-background:var(--surface); border:1px solid var(--line); border-radius:16px;
-padding:24px 22px; display:flex; flex-direction:column; gap:10px;
-}
-.service-card .num{
-font-family:'Jost',sans-serif; font-style:normal; font-size:12.5px; letter-spacing:0.12em; color:var(--gold); font-weight:600;
-}
-.service-card h3{ font-size:19px; }
-.service-card p{ color:var(--fg-soft); font-size:13.8px; line-height:1.55; }
+/* sections */
+section{position:relative;padding-block:clamp(88px,12vw,150px)}
+.kick{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.kick .arcs{width:22px;height:22px;color:var(--accent)}
+h2.title{font-family:var(--serif);font-weight:400;font-size:clamp(34px,4.2vw,56px);line-height:1.08;letter-spacing:-.025em}
+.lede{color:var(--text-secondary);font-size:clamp(17px,1.4vw,19px);max-width:52ch;margin-top:20px}
 
-/* ---------- Nasıl çalışır ---------- */
-.steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:32px; position:relative; }
-.step{ position:relative; padding:0 18px; display:flex; flex-direction:column; gap:10px; }
-.step:first-child{ padding-left:0; }
-.step:last-child{ padding-right:0; }
-.step-num{
-width:34px; height:34px; border-radius:50%; background:var(--fg); color:var(--bg);
-display:flex; align-items:center; justify-content:center; font-weight:600; font-size:15px;
-}
-.step h3{ font-size:16.5px; font-style:normal; font-family:'Jost',sans-serif; font-weight:600; }
-.step p{ color:var(--fg-soft); font-size:13.5px; line-height:1.55; }
-.step-line{
-position:absolute; top:17px; left:-8px; width:calc(100% + 16px); height:1px; background:var(--line); z-index:-1;
-}
-.step:first-child .step-line{ left:17px; width:calc(100% - 9px); }
-.step:last-child .step-line{ width:calc(100% - 9px); }
+/* reveal choreography */
+.rv .r{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease-out),transform .9s var(--ease-out)}
+.rv.in .r{opacity:1;transform:none}
+.rv.in .r:nth-child(2){transition-delay:.09s}
+.rv.in .r:nth-child(3){transition-delay:.18s}
+.rv.in .r:nth-child(4){transition-delay:.27s}
+.rv.in .r:nth-child(5){transition-delay:.36s}
+.rv.done .r,.rv.done .r:nth-child(n){transition-delay:0s!important}
 
-/* ---------- Kart formatları ---------- */
-.formats{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
-.format-card{
-border:1px solid var(--line); border-radius:16px; padding:22px; text-align:center;
-background:var(--surface-2);
-}
-.format-swatch{
-margin:0 auto 14px; border-radius:10px; background:var(--fg); position:relative;
-box-shadow:0 8px 18px -10px var(--line);
-}
-.format-swatch::after{
-content:"NFC"; position:absolute; top:7px; left:9px; font-size:8px; letter-spacing:0.14em;
-color:var(--bg); font-weight:600;
-}
-.f-44 .format-swatch{ width:58px; height:58px; }
-.f-88 .format-swatch{ width:78px; height:78px; }
-.f-84 .format-swatch{ width:88px; height:48px; }
-.format-card .fname{ font-weight:600; font-size:15px; margin-bottom:4px; }
-.format-card .fdesc{ color:var(--fg-soft); font-size:13px; line-height:1.5; }
+/* pains */
+.pains{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,90px);align-items:start}
+.quotes{display:flex;flex-direction:column;gap:34px;padding-top:10px}
+.q{position:relative;padding-left:34px;border-left:1px solid var(--line)}
+.q p{font-family:var(--serif);font-weight:300;font-size:clamp(21px,2vw,27px);line-height:1.35;letter-spacing:-.01em}
+.q .mono{display:block;margin-top:10px;font-size:11px}
+.q::before{content:"";position:absolute;left:-1px;top:0;width:1px;height:100%;background:var(--accent);transform-origin:top;transform:scaleY(0);transition:transform 1.4s var(--ease-out) .3s}
+.rv.in .q::before{transform:scaleY(1)}
+.pains .close{margin-top:40px;font-size:clamp(18px,1.5vw,21px);color:var(--text-primary);max-width:34ch}
+.pains .close b{font-weight:500;color:var(--accent)}
 
-/* ---------- İletişim ---------- */
-.contact-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:560px; margin:28px auto 0; }
-.contact-card{
-background:var(--surface); border:1px solid var(--line); border-radius:14px;
-padding:18px 20px; display:flex; flex-direction:column; gap:8px;
-text-decoration:none; cursor:pointer; transition:background .15s ease, border-color .15s ease;
+/* cards gallery */
+.gallery-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;margin-bottom:60px}
+.gallery{display:grid;grid-template-columns:repeat(6,1fr);gap:22px}
+.prod{grid-column:span 2;position:relative;background:linear-gradient(180deg,rgba(255,253,246,.05),rgba(255,253,246,.015));border:1px solid var(--line);border-radius:22px;padding:26px 26px 28px;display:flex;flex-direction:column;gap:14px;transition:border-color .5s var(--ease-out),transform .5s var(--ease-out)}
+.prod:hover{border-color:rgba(255,240,236,.45);transform:translateY(-4px)}
+.prod.wide{grid-column:span 3}
+.prod .art{position:relative;aspect-ratio:1/1;display:grid;place-items:center;border-radius:16px;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(255,255,255,.06),transparent 70%),linear-gradient(180deg,#121011,#080708);overflow:hidden}
+.prod .art::after{content:"";position:absolute;left:12%;right:12%;bottom:9%;height:10%;background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%);filter:blur(6px)}
+.prod .art img,.demo .dcard img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}
+.prod .art img{-webkit-user-drag:none;user-select:none;position:relative;z-index:1;width:62%;height:auto;border-radius:6px;box-shadow:0 22px 40px -18px rgba(0,0,0,.8),0 2px 0 rgba(255,255,255,.04);transition:transform .8s var(--ease-out)}
+.prod:hover .art img{transform:translateY(-6px) rotate(-1.2deg)}
+.prod .art.pair img{width:44%}
+.prod .art.pair img:first-child{transform:translate(-18%,-6%) rotate(-5deg)}
+.prod .art.pair img:last-child{position:absolute;transform:translate(22%,8%) rotate(4deg)}
+.prod:hover .art.pair img:first-child{transform:translate(-20%,-10%) rotate(-7deg)}
+.prod:hover .art.pair img:last-child{transform:translate(24%,4%) rotate(6deg)}
+.prod .art .glow{position:absolute;z-index:0;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 65%);animation:breathe 6s ease-in-out infinite;animation-delay:-2s}
+@keyframes breathe{0%,100%{opacity:.5;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}
+.prod h3{font-family:var(--serif);font-weight:500;font-size:24px;line-height:1.2;letter-spacing:-.01em;margin-top:8px}
+.prod p{color:var(--text-secondary);font-size:15.5px;line-height:1.55}
+.prod .opens{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--text-secondary)}
+.prod .opens .mono{font-size:10.5px;color:var(--accent)}
+.tagline{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint);border:1px solid var(--line);border-radius:999px;padding:5px 11px;align-self:flex-start}
+
+/* try it */
+.try{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(40px,5vw,80px);align-items:center}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}
+.tab{font-family:var(--sans);font-size:14.5px;color:var(--text-secondary);background:transparent;border:1px solid var(--line);border-radius:999px;padding:9px 16px;cursor:pointer;transition:all .35s var(--ease-out)}
+.tab:hover{border-color:var(--line-strong);color:var(--text-primary)}
+.tab[aria-selected="true"]{background:var(--text-primary);color:var(--ink);border-color:var(--text-primary)}
+@media (pointer:coarse){.tab{min-height:44px;display:inline-flex;align-items:center;justify-content:center}}
+.hold{margin-top:34px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hold-btn{position:relative;width:86px;height:86px;border-radius:50%;border:1px solid var(--line-strong);background:rgba(42,13,21,.4);color:var(--accent);cursor:pointer;display:grid;place-items:center;touch-action:none;-webkit-user-select:none;user-select:none;transition:border-color .3s var(--ease-out),transform .3s var(--ease-out)}
+.hold-btn:hover{border-color:var(--accent)}
+.hold-btn.pressing{transform:scale(.96)}
+.hold-btn svg.ring{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);transform:rotate(-90deg)}
+.hold-btn svg.ring circle{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:264;stroke-dashoffset:calc(264 - 264*var(--h,0))}
+.hold-btn .ico{width:30px;height:30px}
+.hold-txt b{display:block;font-weight:500;font-size:16px}
+.hold-txt span{color:var(--text-faint);font-size:14px}
+.demo{position:relative;aspect-ratio:1.15/1;border-radius:28px;background:radial-gradient(ellipse 70% 55% at 38% 70%,rgba(255,255,255,.06),transparent 70%),linear-gradient(180deg,#121011,#080708);border:1px solid var(--line);overflow:hidden}
+.demo .table-edge{position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg,#1A1718,#0E0C0D);border-top:1px solid rgba(255,255,255,.10)}
+.demo .dcard{position:absolute;left:24%;bottom:26%;width:18%;transform:rotate(-2deg);filter:drop-shadow(0 16px 18px rgba(0,0,0,.6));transition:left .6s var(--ease-out),width .6s var(--ease-out),bottom .6s var(--ease-out)}
+.demo .dcard.big{left:9%;bottom:20%;width:33%}
+.demo .dcard img{width:100%;border-radius:6px}
+.demo .waves{position:absolute;left:43%;bottom:34%;width:11%;color:var(--accent)}
+.demo .waves path{opacity:calc(.12 + .88*clamp(0,(var(--h,0) - var(--wd,0))*3,1));transition:opacity .2s}
+.phone{position:absolute;right:8%;top:8%;width:30%;aspect-ratio:9/18.5;border-radius:26px;background:#120A08;border:1px solid rgba(255,253,246,.22);box-shadow:0 30px 60px -20px rgba(0,0,0,.8),inset 0 0 0 4px #1C110D;transform:translate(calc(var(--h,0)*-62%),calc(var(--h,0)*12%)) rotate(calc(8deg - var(--h,0)*14deg));transition:transform .08s linear}
+.phone .notch{position:absolute;top:9px;left:50%;width:30%;height:5%;transform:translateX(-50%);background:#000;border-radius:999px;z-index:3}
+.screen{position:absolute;inset:6px;border-radius:21px;overflow:hidden;background:#0D0705;clip-path:inset(0 round 21px);-webkit-mask-image:-webkit-radial-gradient(white,black);isolation:isolate}
+.screen .idle{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,253,246,.28);font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;transition:opacity .5s}
+.pg{position:absolute;inset:0;border-radius:21px;background:var(--cream);color:var(--ink);padding:22% 9% 8%;display:flex;flex-direction:column;gap:7px;font-size:clamp(8px,.95vw,12px);opacity:0;transform:translateY(8%);transition:opacity .6s var(--ease-out),transform .6s var(--ease-out)}
+.demo.open .pg.cur{opacity:1;transform:none}
+.demo.open .screen .idle{opacity:0}
+.pg .t{font-family:var(--serif);font-weight:500;font-size:1.6em;line-height:1.1}
+.pg .s{color:#8B6E76;font-size:.9em}
+.pg .li{display:flex;justify-content:space-between;border-bottom:1px solid rgba(74,24,38,.12);padding-bottom:5px}
+.pg .box{background:#fff;border:1px solid rgba(74,24,38,.12);border-radius:8px;padding:7px 8px}
+.pg .box small{display:block;font-size:.75em;letter-spacing:.08em;text-transform:uppercase;color:#8B6E76}
+.pg .box b{font-weight:500;letter-spacing:.03em}
+.pg .cta{margin-top:auto;background:var(--ink);color:var(--cream);text-align:center;border-radius:999px;padding:7px}
+.pg .stars{color:#4A1826;font-size:1.6em;letter-spacing:.1em}
+.pg .av{width:38%;aspect-ratio:1;border-radius:50%;object-fit:cover;background:#fff;border:1px solid rgba(74,24,38,.15);align-self:center}
+.pg .lg{width:22%;aspect-ratio:1;border-radius:50%;object-fit:cover;background:#fff;border:1px solid rgba(74,24,38,.15);margin-bottom:2px}
+.pg .brandrow{display:flex;align-items:center;gap:8%}
+.pg .mlogo{flex:none;width:32%;overflow:hidden;aspect-ratio:1;border-radius:50%;background:#fff;border:1px solid rgba(74,24,38,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink);line-height:1}
+.pg .mlogo .mw{width:68%;height:auto;margin-top:6%;display:block}
+.pg .mlogo small{font-family:var(--sans);font-weight:600;text-transform:uppercase;font-size:.4em;letter-spacing:.2em;margin-top:5%;padding-left:.2em;white-space:nowrap}
+.pg .bn{font-family:var(--sans);font-weight:500;font-size:1.45em;line-height:1.1;color:var(--ink)}
+.pg .bn small{display:block;font-weight:400;font-size:.6em;color:#8B6E76;margin-top:3px}
+.pg .grid.cars img{width:100%;aspect-ratio:1.2;height:auto;object-fit:cover;border-radius:5px}
+.pg .grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pg .grid div{aspect-ratio:1.2;border-radius:5px;background:linear-gradient(135deg,#EFE3E0,#D9C3C3)}
+.pg.cur > *{opacity:0;transform:translateY(6px);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out)}
+.demo.open .pg.cur > *{opacity:1;transform:none}
+.demo.open .pg.cur > *:nth-child(2){transition-delay:.08s}
+.demo.open .pg.cur > *:nth-child(3){transition-delay:.16s}
+.demo.open .pg.cur > *:nth-child(4){transition-delay:.24s}
+.demo.open .pg.cur > *:nth-child(5){transition-delay:.32s}
+.demo.open .pg.cur > *:nth-child(6){transition-delay:.4s}
+.demo-note{position:absolute;left:6%;top:6%;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);opacity:0;transform:translateY(-6px);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out)}
+.demo.open .demo-note{opacity:1;transform:none}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:70px;position:relative}
+.steps svg.line{position:absolute;left:0;top:27px;width:100%;height:4px;overflow:visible}
+.steps svg.line path{stroke:var(--accent);stroke-width:1;fill:none;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 2.2s var(--ease-out) .2s}
+.steps.in svg.line path{stroke-dashoffset:0}
+.step{position:relative;padding-right:40px}
+.step .n{width:56px;height:56px;border-radius:50%;border:1px solid var(--accent);display:grid;place-items:center;font-family:var(--serif);font-weight:400;font-size:22px;color:var(--accent);background:var(--canvas);position:relative;z-index:1}
+.step h3{font-family:var(--serif);font-weight:500;font-size:24px;margin-top:28px;line-height:1.2;letter-spacing:-.01em}
+.step p{color:var(--text-secondary);margin-top:12px;max-width:30ch}
+
+/* sizes */
+.sizes{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(40px,6vw,90px);align-items:center}
+.scale{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:clamp(26px,4vw,60px);padding:50px 20px 40px;border:1px solid var(--line);border-radius:26px;background:linear-gradient(180deg,rgba(255,253,246,.04),transparent)}
+.sz{display:flex;flex-direction:column;align-items:center;gap:16px}
+.sz svg{overflow:visible}
+.sz rect{fill:rgba(74,24,38,.9);stroke:var(--accent);stroke-width:1;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s var(--ease-out),fill-opacity .8s}
+.sz .dim{stroke:var(--text-faint);stroke-width:.8;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.2s var(--ease-out) .6s}
+.scale.in rect,.scale.in .dim{stroke-dashoffset:0}
+.sz:nth-of-type(2) rect{transition-delay:.15s}.sz:nth-of-type(3) rect{transition-delay:.3s}
+.sz text{fill:var(--accent);font-family:var(--mono);font-size:7px;letter-spacing:.1em}
+.sz b{font-family:var(--serif);font-weight:500;font-size:22px;line-height:1;letter-spacing:-.01em}
+.sz span{font-size:14px;color:var(--text-secondary);text-align:center;max-width:16ch;line-height:1.4}
+.scale .note{position:absolute;left:20px;top:16px}
+
+/* faq */
+.faq{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(40px,6vw,90px)}
+details{border-top:1px solid var(--line)}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:24px 44px 24px 0;position:relative;font-family:var(--serif);font-weight:400;font-size:clamp(19px,1.6vw,22px);line-height:1.35}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:6px;top:50%;width:14px;height:14px;border-right:1px solid var(--accent);border-bottom:1px solid var(--accent);transform:translateY(-70%) rotate(45deg);transition:transform .45s var(--ease-out)}
+details[open] summary::after{transform:translateY(-20%) rotate(-135deg)}
+details .a{color:var(--text-secondary);padding:0 40px 28px 0;max-width:60ch}
+
+/* final cta */
+.final{position:relative;padding:0;overflow:hidden;min-height:90vh;display:flex;align-items:center}
+.final .bg{position:absolute;top:0;bottom:0;right:0;left:30%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 34%);mask-image:linear-gradient(90deg,transparent 0,#000 34%)}
+.final .bg img{width:100%;height:100%;object-fit:cover;object-position:60% 50%;transform:scale(1.04)}
+.final .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(26,6,12,.55) 0%,rgba(26,6,12,.1) 45%),linear-gradient(180deg,var(--canvas) 0%,rgba(58,18,29,0) 18%,rgba(58,18,29,0) 80%,var(--canvas-deep) 100%)}
+.final .wrap{position:relative;padding-block:120px}
+.final h2{text-shadow:var(--tshadow);max-width:13ch}
+.final .lede{text-shadow:0 1px 8px rgba(20,4,8,.8);max-width:38ch}
+.final .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
+.contact-line{display:flex;gap:28px;flex-wrap:wrap;margin-top:34px;font-size:15px;color:var(--text-secondary)}
+.contact-line a{text-decoration:none;border-bottom:1px solid var(--line-strong);padding-bottom:2px;transition:border-color .3s}
+.contact-line a:hover{border-color:var(--accent)}
+
+footer{background:var(--canvas-deep);border-top:1px solid var(--line);padding-block:44px 54px}
+footer .wrap{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap}
+footer p{font-size:13.5px;color:var(--text-faint)}
+footer nav{display:flex;gap:22px;font-size:14px}
+footer nav a{text-decoration:none;color:var(--text-secondary)}
+footer nav a:hover{color:var(--text-primary)}
+footer .disc{flex-basis:100%;font-size:12px;margin-top:6px}
+
+@media (max-width:960px){
+  .gallery{grid-template-columns:1fr 1fr}
+  .prod,.prod.wide{grid-column:span 1}
+  .pains,.try,.sizes,.faq{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:44px}
+  .steps svg.line{display:none}
 }
-.contact-card:hover{ background:var(--surface-2); border-color:var(--fg-faint); }
-.contact-card .clabel{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--fg-faint); font-weight:600; }
-.contact-card .cval{ font-size:15px; font-weight:600; word-break:break-word; }
+@media (max-width:860px){.final .bg{left:0;-webkit-mask-image:none;mask-image:none}}
+@media (max-width:600px){
+  .gallery{grid-template-columns:1fr}
+  .phone{width:36%}
+  .demo .dcard{width:21%;left:16%}
+  .demo .dcard.big{width:36%;left:5%}
+  .scale{gap:14px;padding:50px 12px 30px}
+  .sz:nth-of-type(1) svg{width:14vw;height:14vw}
+  .sz:nth-of-type(2) svg,.sz:nth-of-type(3) svg{width:28vw;height:auto}
+  .sz b{font-size:18px;white-space:nowrap}
+  .sz span{font-size:12.5px}
+  .logo{gap:7px;font-size:34px}
+  .logo small{font-size:8.5px;letter-spacing:.2em;padding:3px 8px}
+  .nav .btn .long{display:none}
+  .nav .btn .short{display:inline}
+  .final .bg img{object-position:78% 50%}
+  .final .bg::after{background:linear-gradient(180deg,var(--canvas) 0%,rgba(26,6,12,.6) 30%,rgba(26,6,12,.85) 70%,var(--canvas-deep) 100%)}
+}
 
-footer{ padding-block:30px 44px; border-top:1px solid var(--line); margin-top:10px; }
-footer .wrap{ display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
-footer .logo{ font-family:'Allura',cursive; font-size:22px; color:var(--fg); }
-footer .fnote{ font-size:12.5px; color:var(--fg-faint); }
-
-@media (max-width:760px){
-.services, .formats, .steps, .contact-grid{ grid-template-columns:1fr; gap:14px; }
-.step{ padding:0; }
-.step-line{ display:none; }
-section{ padding-block:40px; }
-.hero{ padding-block:40px 48px; }
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;transition-delay:0s!important}
+  html{scroll-behavior:auto}
+  .rv .r{opacity:1;transform:none}
+  .q::before{transform:scaleY(1)}
+  .steps svg.line path,.sz rect,.sz .dim{stroke-dashoffset:0}
 }
 </style>
+</head>
+<body>
+<a class="skip" href="#main">İçeriğe geç</a>
+<div class="env" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grain" aria-hidden="true"></div>
 
-<header class="hero">
-<div class="wrap">
-<div class="wordmark"><span class="logo">Carte</span><span class="tag">Menü Sistemleri</span></div>
-<h1>Menü, yorum ve ödeme — işletmenize özel tek kart</h1>
-<p class="lead">Kafe, restoran ve mağazalar için NFC ve QR destekli kart sistemleri. Müşterileriniz menünüzü görür, Google veya Instagram'da yorum bırakır, IBAN'ınıza ödeme yapar — hepsi işletmenize özel tasarlanmış tek bir kartla.</p>
-<div class="hero-cta">
-<a class="btn btn-light" href="#iletisim">İletişime Geç</a>
-<a class="btn btn-outline" href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">Instagram'da İncele</a>
-</div>
-<div class="hero-strip">
-<span class="strip-chip">Dijital Menü</span>
-<span class="strip-chip">Google &amp; Instagram Yorum Kartı</span>
-<span class="strip-chip">NFC Ödeme Kartı</span>
-</div>
-</div>
+<nav class="nav" id="nav" aria-label="Ana menü">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Carte, sayfanın başı">Carte <small>Menü Sistemleri</small></a>
+    <ul>
+      <li><a href="#kartlar">Kartlar</a></li>
+      <li><a href="#dene">Dokunun</a></li>
+      <li><a href="#olculer">Ölçüler</a></li>
+      <li><a href="#sss">Sorular</a></li>
+      <li><a class="btn btn-accent btn-sm" href="#iletisim"><span class="long">Kartınızı tasarlayalım</span><span class="short">İletişim</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="intro" id="top">
+  <div class="words" aria-hidden="true"><span class="wd" style="--x:12%;--y:10%;--d:0.12s;--f:11s"><i>Çalışkanlık</i></span><span class="wd" style="--x:36%;--y:8%;--d:0.19s;--f:12s"><i>Disiplin</i></span><span class="wd" style="--x:62%;--y:11%;--d:0.26s;--f:13s"><i>Doğruluk</i></span><span class="wd" style="--x:87%;--y:9%;--d:0.33s;--f:14s"><i>İstek</i></span><span class="wd" style="--x:24%;--y:19%;--d:0.40s;--f:15s"><i>Azim</i></span><span class="wd" style="--x:50%;--y:20%;--d:0.47s;--f:16s"><i>Dürüstlük</i></span><span class="wd" style="--x:76%;--y:21%;--d:0.54s;--f:11s"><i>Çalışkanlık</i></span><span class="wd" style="--x:6%;--y:29%;--d:0.61s;--f:12s"><i>Disiplin</i></span><span class="wd" style="--x:92%;--y:28%;--d:0.68s;--f:13s"><i>Doğruluk</i></span><span class="wd" style="--x:16%;--y:38%;--d:0.75s;--f:14s"><i>İstek</i></span><span class="wd" style="--x:84%;--y:39%;--d:0.82s;--f:15s"><i>Azim</i></span><span class="wd" style="--x:8%;--y:50%;--d:0.89s;--f:16s"><i>Dürüstlük</i></span><span class="wd" style="--x:92%;--y:51%;--d:0.96s;--f:11s"><i>Çalışkanlık</i></span><span class="wd" style="--x:18%;--y:62%;--d:1.03s;--f:12s"><i>Disiplin</i></span><span class="wd" style="--x:82%;--y:61%;--d:1.10s;--f:13s"><i>Doğruluk</i></span><span class="wd" style="--x:6%;--y:72%;--d:1.17s;--f:14s"><i>İstek</i></span><span class="wd" style="--x:30%;--y:73%;--d:1.24s;--f:15s"><i>Azim</i></span><span class="wd" style="--x:56%;--y:73%;--d:1.31s;--f:16s"><i>Dürüstlük</i></span><span class="wd" style="--x:76%;--y:76%;--d:1.38s;--f:11s"><i>Çalışkanlık</i></span><span class="wd" style="--x:94%;--y:72%;--d:1.45s;--f:12s"><i>Disiplin</i></span><span class="wd" style="--x:14%;--y:86%;--d:1.52s;--f:13s"><i>Doğruluk</i></span><span class="wd" style="--x:84%;--y:88%;--d:1.59s;--f:14s"><i>İstek</i></span><span class="wd" style="--x:26%;--y:95%;--d:1.66s;--f:15s"><i>Azim</i></span><span class="wd" style="--x:74%;--y:96%;--d:1.73s;--f:16s"><i>Dürüstlük</i></span></div>
+  <h1 class="brand"><span class="sr">Carte Menü Sistemleri</span><span class="script" aria-hidden="true">Carte</span><span class="pill" aria-hidden="true">Menü Sistemleri</span></h1>
+  <a class="cue" href="#masa" aria-label="Aşağı kaydır">
+    <span class="mono">Kaydırın</span>
+    <svg viewBox="0 0 22 36" fill="none" aria-hidden="true"><rect x="1" y="1" width="20" height="34" rx="10" stroke="currentColor" stroke-opacity=".5"/><circle class="dot" cx="11" cy="10" r="2.5" fill="#FFFDF6"/></svg>
+  </a>
 </header>
 
-<section id="hizmetler">
-<div class="wrap">
-<div class="section-head">
-<div class="eyebrow">Hizmetler</div>
-<h2>İşletmenize özel üç sistem</h2>
-<p>Her kart, işletmenizin logosu ve renkleriyle tek tek tasarlanır; şablon bir ürün değildir.</p>
-</div>
-<div class="services">
-<div class="service-card">
-<span class="num">01</span>
-<h3>Dijital Menü Sistemi</h3>
-<p>İnternet siteniz olmasa da menünüzü NFC/QR etiketiyle paylaşın. Fiyat veya ürün değiştiğinde menüyü siz güncellersiniz, kartı değiştirmenize gerek kalmaz.</p>
-</div>
-<div class="service-card">
-<span class="num">02</span>
-<h3>Google &amp; Instagram Yorum Kartı</h3>
-<p>Müşterileriniz telefonlarını kartınıza yaklaştırdığında doğrudan yorum sayfanıza veya Instagram hesabınıza yönlendirilir.</p>
-</div>
-<div class="service-card">
-<span class="num">03</span>
-<h3>NFC Ödeme Kartı</h3>
-<p>IBAN bilginizi ve hesap sahibinizin adını paylaşan bir kart; müşteriniz dokunur, bilgiler anında ekranında belirir.</p>
-</div>
-</div>
-</div>
-</section>
+<main id="main" tabindex="-1">
 
-<section id="nasil-calisir" style="border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
-<div class="wrap">
-<div class="section-head">
-<div class="eyebrow">Nasıl Çalışır</div>
-<h2>Kurulum üç adımda biter</h2>
-</div>
-<div class="steps">
-<div class="step">
-<span class="step-line"></span>
-<div class="step-num">1</div>
-<h3>Kart tasarlanır</h3>
-<p>Logonuzu ve marka renklerinizi bize iletin, kartı işletmenize özel hazırlayalım.</p>
-</div>
-<div class="step">
-<span class="step-line"></span>
-<div class="step-num">2</div>
-<h3>Yerine yerleştirilir</h3>
-<p>Masaya, duvara, vitrine ya da kasaya — kartı nerede kullanacaksanız oraya koyarsınız.</p>
-</div>
-<div class="step">
-<span class="step-line"></span>
-<div class="step-num">3</div>
-<h3>Müşteri dokunur</h3>
-<p>Telefonunu yaklaştırır, doğru sayfaya anında yönlendirilir — uygulama indirmesi gerekmez.</p>
-</div>
-</div>
-</div>
-</section>
+  <section class="masa" id="masa" aria-labelledby="masa-t">
+    <div class="bg" aria-hidden="true"><img src="assets/hero-3-kart.jpg" srcset="assets/hero-3-kart-sm.jpg 848w, assets/hero-3-kart.jpg 1696w" sizes="100vw" alt="" width="1696" height="960"></div>
+    <div class="wrap rv">
+      <span class="mono r">NFC &amp; QR Kartlar</span>
+      <h2 class="big r" id="masa-t">Masanıza yakışan tek kart.</h2>
+      <p class="sub r">Kafe, restoran ve mağazalar için NFC ve QR destekli menü, yorum ve ödeme kartları. Her biri işletmenize özel tasarlanır.</p>
+      <div class="row r">
+        <a class="btn btn-accent" href="#iletisim">Kartınızı tasarlayalım</a>
+        <a class="btn btn-ghost" href="#kartlar">Kartları gör</a>
+      </div>
+    </div>
+  </section>
 
-<section id="kartlar">
-<div class="wrap">
-<div class="section-head">
-<div class="eyebrow">Kart Formatları</div>
-<h2>İhtiyacınıza uygun üç ölçü</h2>
-</div>
-<div class="formats">
-<div class="format-card f-44">
-<div class="format-swatch"></div>
-<div class="fname">4×4 cm</div>
-<div class="fdesc">Masaüstü mini etiket</div>
-</div>
-<div class="format-card f-88">
-<div class="format-swatch"></div>
-<div class="fname">8×8 cm</div>
-<div class="fdesc">Masa standı / duvar etiketi</div>
-</div>
-<div class="format-card f-84">
-<div class="format-swatch"></div>
-<div class="fname">8×4 cm</div>
-<div class="fdesc">NFC + QR bir arada</div>
-</div>
-</div>
-</div>
-</section>
+  <section id="dertler" aria-labelledby="dertler-t">
+    <div class="wrap pains rv">
+      <div>
+        <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Tanıdık geldi mi?</span></div>
+        <h2 class="title r" id="dertler-t">Masada her gün olan üç küçük dert.</h2>
+        <p class="close r">Hepsi aynı masada oluyor. <b>Çözümü de oraya koyuyoruz.</b></p>
+      </div>
+      <div class="quotes">
+        <div class="q r"><p>"Müşteri memnun kalkıyor ama yorum bırakmıyor."</p><span class="mono">Google yorumları</span></div>
+        <div class="q r"><p>"Fiyat değişti, menüleri yine bastırmak gerekiyor."</p><span class="mono">Basılı menü</span></div>
+        <div class="q r"><p>"IBAN'ı kâğıda yazdık, yine yanlış gönderildi."</p><span class="mono">Havale ve EFT</span></div>
+      </div>
+    </div>
+  </section>
 
-<section id="iletisim" style="border-top:1px solid var(--line);">
-<div class="wrap">
-<div class="section-head">
-<div class="eyebrow">İletişim</div>
-<h2>Kartınızı birlikte tasarlayalım</h2>
-<p>Aşağıdaki bilgilerden bize ulaşın, işletmeniz için en uygun sistemi birlikte planlayalım.</p>
-</div>
-<div class="contact-grid">
-<a class="contact-card" href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">
-<span class="clabel">Instagram</span>
-<span class="cval">@cartemenusistemleri</span>
-</a>
-<a class="contact-card" href="mailto:cartemenusistemleri@gmail.com">
-<span class="clabel">E-posta</span>
-<span class="cval">cartemenusistemleri@gmail.com</span>
-</a>
-</div>
-</div>
-</section>
+  <section id="kartlar" aria-labelledby="kartlar-t">
+    <div class="wrap">
+      <div class="gallery-head rv">
+        <div>
+          <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Kartlar</span></div>
+          <h2 class="title r" id="kartlar-t">Her dert için bir kart.</h2>
+        </div>
+        <p class="lede r" style="margin-top:0;max-width:40ch">Hepsi işletmenizin logosu ve renkleriyle tek tek tasarlanır. Şablon değil, sizin kartınız.</p>
+      </div>
+      <div class="gallery rv">
+        <article class="prod wide r">
+          <div class="art pair"><span class="glow" aria-hidden="true"></span><img src="assets/kart-menu-kirmizi.webp" alt="Kırmızı NFC menü kartı" width="300" height="300" draggable="false" loading="lazy"><img src="assets/kart-menu-bordo.webp" alt="Bordo NFC menü kartı" width="300" height="300" draggable="false" loading="lazy"></div>
+          <span class="tagline">Kafe ve restoran</span>
+          <h3>Menü Kartı</h3>
+          <p>İnternet siteniz olmasa da menünüz bir dokunuşta açılır. Fiyat değişince menüyü siz güncellersiniz, kart aynı kalır.</p>
+          <div class="opens"><span class="mono">Açılan</span>Dijital menünüz</div>
+        </article>
+        <article class="prod wide r">
+          <div class="art"><span class="glow" aria-hidden="true"></span><img src="assets/kart-google.webp" alt="Google yorum kartı, 'Yorumlarınız Bizim için Değerli'" width="300" height="300" draggable="false" loading="lazy"></div>
+          <span class="tagline">Her işletme</span>
+          <h3>Google Yorum Kartı</h3>
+          <p>Memnun müşteri yorum sayfanıza tek dokunuşla gider. Arama yok, link yok.</p>
+          <div class="opens"><span class="mono">Açılan</span>Google yorum sayfanız</div>
+        </article>
+        <article class="prod r">
+          <div class="art"><span class="glow" aria-hidden="true"></span><img src="assets/kart-instagram.webp" alt="Instagram takip kartı, 'Bizi Instagram'da Takip Edin'" width="300" height="300" draggable="false" loading="lazy"></div>
+          <span class="tagline">Her işletme</span>
+          <h3>Instagram Kartı</h3>
+          <p>Masadan kalkmadan sizi takip eder.</p>
+          <div class="opens"><span class="mono">Açılan</span>Instagram profiliniz</div>
+        </article>
+        <article class="prod r">
+          <div class="art"><span class="glow" aria-hidden="true"></span><img src="assets/kart-iban.webp" alt="IBAN ödeme kartı, 'İban Bilgilerine Burdan Ulaşabilirsiniz'" width="300" height="300" draggable="false" loading="lazy"></div>
+          <span class="tagline">Kasa ve masa</span>
+          <h3>IBAN Kartı</h3>
+          <p>IBAN ve hesap sahibi anında ekranda belirir, tek tıkla kopyalanır. Yanlış yazılan IBAN derdi biter.</p>
+          <div class="opens"><span class="mono">Açılan</span>Ödeme bilgileriniz</div>
+        </article>
+        <article class="prod r">
+          <div class="art"><span class="glow" aria-hidden="true"></span><img src="assets/kart-sahibinden.webp" alt="Sahibinden ilan kartı, 'Diğer İlanlarımıza Göz Atın'" width="300" height="300" draggable="false" loading="lazy"></div>
+          <span class="tagline">Emlak ve galeri</span>
+          <h3>İlan Kartı</h3>
+          <p>Vitrindeki karta dokunan, tüm ilanlarınızı görür.</p>
+          <div class="opens"><span class="mono">Açılan</span>Sahibinden mağazanız</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="dene" aria-labelledby="dene-t">
+    <div class="wrap try rv">
+      <div>
+        <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Dokunun</span></div>
+        <h2 class="title r" id="dene-t">Müşteriniz ne görüyor, siz de görün.</h2>
+        <p class="lede r">Bir kart seçin, düğmeyi basılı tutun. Telefon karta yaklaşır ve sayfa açılır.</p>
+        <div class="tabs r" role="tablist" aria-label="Kart seçin">
+          <button class="tab" role="tab" aria-selected="true" data-t="menu" data-img="assets/kart-menu-bordo.webp" data-alt="Bordo menü kartı">Menü</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="yorum" data-img="assets/kart-google.webp" data-alt="Google yorum kartı">Yorum</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="insta" data-img="assets/kart-instagram.webp" data-alt="Instagram kartı">Instagram</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="iban" data-img="assets/kart-iban.webp" data-alt="IBAN kartı">IBAN</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="ilan" data-img="assets/kart-sahibinden.webp" data-alt="İlan kartı">İlan</button>
+        </div>
+        <div class="hold r">
+          <button class="hold-btn" id="holdBtn" type="button" aria-describedby="holdHint">
+            <svg class="ring" viewBox="0 0 88 88" aria-hidden="true"><circle cx="44" cy="44" r="42"/></svg>
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+            <span class="sr">Telefonu karta yaklaştır</span>
+          </button>
+          <div class="hold-txt" id="holdHint"><b>Basılı tutun</b><span>Telefonu karta yaklaştırır</span></div>
+        </div>
+      </div>
+      <div class="demo r" id="demo" aria-live="polite">
+        <div class="table-edge" aria-hidden="true"></div>
+        <div class="dcard"><img id="demoImg" src="assets/kart-menu-bordo.webp" alt="Bordo menü kartı" width="300" height="300" draggable="false" loading="lazy"></div>
+        <svg class="waves" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path style="--wd:0" d="M10 12a11 11 0 0 1 0 16"/><path style="--wd:.25" d="M18 7a18 18 0 0 1 0 26"/><path style="--wd:.5" d="M26 2a25 25 0 0 1 0 36"/></svg>
+        <div class="phone" aria-hidden="true">
+          <span class="notch"></span>
+          <div class="screen">
+            <div class="idle">Kilit ekranı</div>
+            <div class="pg cur" data-p="menu"><img class="lg" src="assets/cartekafe-logo.webp" alt="" width="240" height="240"><span class="s">Carte Kafe</span><span class="t">Menü</span><div class="li"><span>Filtre kahve</span><span>85 ₺</span></div><div class="li"><span>Cheesecake</span><span>140 ₺</span></div><div class="li"><span>Limonata</span><span>90 ₺</span></div><div class="cta">Tümünü gör</div></div>
+            <div class="pg" data-p="yorum"><img class="lg" src="assets/cartekafe-logo.webp" alt="" width="240" height="240"><span class="s">Carte Kafe</span><span class="t">Deneyiminizi paylaşın</span><span class="stars">★★★★★</span><span class="s">Puanınızı seçin ve birkaç kelime yazın.</span><div class="cta">Yorum yaz</div></div>
+            <div class="pg" data-p="insta"><img class="av" src="assets/cartekafe-logo.webp" alt="" width="240" height="240"><span class="t" style="text-align:center">@cartekafe</span><span class="s" style="text-align:center">248 gönderi · 3.120 takipçi</span><div class="grid cars"><img src="assets/kafe-1.webp" alt="" width="480" height="400"><img src="assets/kafe-2.webp" alt="" width="480" height="400"></div><div class="cta">Takip et</div></div>
+            <div class="pg" data-p="iban"><img class="lg" src="assets/cartekafe-logo.webp" alt="" width="240" height="240"><span class="s">Ödeme yapılacak işletme</span><span class="t">Carte Kafe</span><div class="box"><small>IBAN</small><b>TR00 0000 0000 0000 0000 0000 00</b></div><div class="box"><small>Hesap Sahibi</small><b>Carte Kafe İşletmeciliği</b></div><div class="cta">IBAN'ı kopyala</div></div>
+            <div class="pg" data-p="ilan"><div class="brandrow"><span class="mlogo"><svg class="mw" viewBox="1 -617 1932 683" aria-hidden="true"><path d="M211 46Q159 46 115.5 28.5Q72 11 46.5 -25.5Q21 -62 21 -119Q21 -151 30 -188Q44 -247 76.5 -306.0Q109 -365 154.5 -417.0Q200 -469 254.0 -509.5Q308 -550 365.5 -573.5Q423 -597 480 -597Q497 -597 515 -594Q555 -587 574.5 -564.5Q594 -542 594 -513Q594 -479 572.0 -445.0Q550 -411 514.5 -380.5Q479 -350 437.5 -326.0Q396 -302 356.0 -287.0Q316 -272 285 -270Q266 -269 266 -281Q266 -287 272.5 -293.5Q279 -300 291 -301Q369 -308 436.5 -348.5Q504 -389 540 -459Q548 -474 552.5 -489.5Q557 -505 557 -519Q557 -541 544.5 -556.5Q532 -572 501 -572Q467 -572 421.0 -551.5Q375 -531 324.5 -494.0Q274 -457 225.5 -406.5Q177 -356 138.5 -296.5Q100 -237 79 -171Q66 -131 66 -97Q66 -36 108.0 -7.5Q150 21 217 21Q275 21 344.5 1.0Q414 -19 480.0 -60.5Q546 -102 591 -166Q594 -170 598 -170Q602 -170 605.5 -166.0Q609 -162 606 -158Q554 -86 486.5 -41.0Q419 4 347.0 25.0Q275 46 211 46Z M853 10Q836 10 821.5 2.0Q807 -6 800 -28Q797 -37 797 -53Q797 -75 803.0 -102.0Q809 -129 816 -148Q811 -146 797.5 -130.5Q784 -115 764.5 -93.5Q745 -72 721.5 -50.5Q698 -29 673.0 -15.0Q648 -1 624 -1Q608 -1 590.0 -10.5Q572 -20 561 -35Q546 -55 546 -76Q546 -103 564.5 -132.0Q583 -161 612.5 -188.5Q642 -216 675.5 -238.5Q709 -261 739.5 -276.5Q770 -292 789 -297Q809 -303 834 -303Q848 -303 863.0 -299.5Q878 -296 888 -288Q896 -284 901.0 -277.0Q906 -270 906 -262Q906 -254 899 -257Q891 -269 877.5 -272.5Q864 -276 850 -276Q810 -276 762.0 -250.0Q714 -224 676 -189Q664 -179 643.5 -154.5Q623 -130 606.0 -101.0Q589 -72 589 -48Q589 -35 596 -25Q600 -18 609 -18Q623 -18 646.5 -33.0Q670 -48 695.0 -69.5Q720 -91 740.5 -111.0Q761 -131 770 -140Q775 -145 789.5 -160.5Q804 -176 821.0 -194.0Q838 -212 851.5 -225.0Q865 -238 869 -238Q874 -238 885.5 -235.5Q897 -233 905.0 -228.0Q913 -223 908 -215Q882 -177 866.5 -135.5Q851 -94 848 -70Q847 -66 847.0 -62.5Q847 -59 847 -55Q847 -15 875 -15Q890 -15 915.0 -33.0Q940 -51 966.0 -76.0Q992 -101 1013.5 -124.5Q1035 -148 1043 -160Q1046 -163 1049 -163Q1053 -163 1056.0 -159.5Q1059 -156 1056 -151Q1045 -133 1024.0 -108.0Q1003 -83 977.0 -58.0Q951 -33 926 -15Q913 -5 893.0 2.5Q873 10 853 10Z M1159 12Q1142 12 1129.0 4.5Q1116 -3 1111 -24Q1108 -35 1108 -46Q1108 -76 1123.5 -104.5Q1139 -133 1160.0 -157.5Q1181 -182 1196 -199Q1204 -207 1214.5 -220.0Q1225 -233 1225 -246Q1225 -254 1217.0 -261.5Q1209 -269 1188 -272Q1176 -274 1165.5 -275.5Q1155 -277 1144 -277Q1116 -239 1089.5 -200.5Q1063 -162 1033 -125Q1026 -118 1021 -118Q1015 -118 1015 -124Q1015 -130 1021 -136Q1075 -202 1114 -277Q1109 -277 1099.0 -277.5Q1089 -278 1083 -279Q1076 -281 1072.0 -285.0Q1068 -289 1068 -293Q1068 -299 1073 -300Q1086 -304 1101.0 -312.0Q1116 -320 1129 -333Q1143 -347 1155.0 -362.5Q1167 -378 1174 -386Q1181 -391 1189 -391Q1194 -391 1198.5 -388.0Q1203 -385 1203 -379Q1203 -372 1197 -361Q1188 -347 1177.5 -330.0Q1167 -313 1158 -299Q1176 -298 1194.0 -297.0Q1212 -296 1231 -296Q1241 -296 1250.5 -296.5Q1260 -297 1270 -297Q1300 -297 1300 -282Q1300 -272 1289.5 -257.5Q1279 -243 1264 -226Q1230 -187 1206.0 -144.0Q1182 -101 1174 -78Q1166 -54 1166 -42Q1166 -18 1185 -18Q1202 -18 1226.5 -35.0Q1251 -52 1277.0 -76.5Q1303 -101 1324.0 -124.5Q1345 -148 1354 -160Q1356 -163 1360 -163Q1364 -163 1367.0 -159.5Q1370 -156 1367 -151Q1356 -134 1335.0 -108.5Q1314 -83 1288.0 -58.0Q1262 -33 1237 -15Q1224 -5 1201.5 3.5Q1179 12 1159 12Z M1390 10Q1372 10 1357.5 2.0Q1343 -6 1336 -28Q1335 -31 1334.5 -34.0Q1334 -37 1334 -41Q1334 -61 1343.0 -91.0Q1352 -121 1365 -149Q1359 -141 1351.0 -129.5Q1343 -118 1328 -100Q1324 -96 1319 -96Q1312 -96 1312 -104Q1312 -110 1316 -114Q1342 -147 1362.5 -173.0Q1383 -199 1393 -217Q1393 -219 1399.0 -229.5Q1405 -240 1415 -259Q1407 -258 1401.5 -257.5Q1396 -257 1392 -257Q1385 -257 1380.0 -263.0Q1375 -269 1379 -278Q1384 -292 1401.0 -294.0Q1418 -296 1431 -297Q1432 -299 1435 -299Q1447 -321 1458.0 -342.0Q1469 -363 1476.5 -377.0Q1484 -391 1484 -392Q1504 -424 1510.0 -434.5Q1516 -445 1526 -447Q1537 -448 1549.5 -446.0Q1562 -444 1566 -437Q1569 -433 1569 -427Q1569 -418 1565.0 -409.5Q1561 -401 1557 -396Q1553 -389 1546.5 -386.5Q1540 -384 1535 -374Q1525 -355 1513.0 -333.0Q1501 -311 1488 -291L1500 -292Q1524 -294 1545.5 -297.0Q1567 -300 1595 -299Q1600 -299 1605.5 -297.5Q1611 -296 1611 -293Q1611 -289 1585 -282Q1575 -278 1541.5 -273.5Q1508 -269 1473 -265Q1463 -246 1455.0 -233.5Q1447 -221 1444 -215Q1422 -169 1404.5 -131.5Q1387 -94 1385 -70Q1384 -66 1384.0 -62.5Q1384 -59 1384 -55Q1384 -15 1410 -15Q1426 -15 1451.0 -32.5Q1476 -50 1502.0 -75.5Q1528 -101 1549.5 -124.5Q1571 -148 1579 -160Q1582 -163 1585 -163Q1589 -163 1591.5 -160.0Q1594 -157 1592 -152Q1583 -135 1561.5 -109.5Q1540 -84 1513.5 -58.5Q1487 -33 1462 -15Q1449 -5 1429.5 2.5Q1410 10 1390 10Z M1658 15Q1613 15 1580.0 -6.0Q1547 -27 1547 -70Q1547 -93 1561 -126Q1571 -149 1598.0 -179.0Q1625 -209 1661.0 -237.5Q1697 -266 1734.0 -284.5Q1771 -303 1801 -303Q1812 -303 1821 -300Q1838 -294 1844.5 -281.0Q1851 -268 1851 -254Q1851 -241 1847.0 -229.0Q1843 -217 1837 -208Q1819 -181 1785.5 -160.0Q1752 -139 1717.5 -127.0Q1683 -115 1661 -113H1659Q1646 -113 1646 -121Q1646 -126 1654 -126Q1678 -128 1714.5 -148.5Q1751 -169 1779 -191Q1791 -201 1807.5 -219.0Q1824 -237 1824 -254Q1824 -272 1807 -272Q1798 -272 1788.5 -268.0Q1779 -264 1773 -262Q1744 -248 1709.0 -218.5Q1674 -189 1645.5 -152.5Q1617 -116 1606 -79Q1603 -71 1602.0 -63.5Q1601 -56 1601 -49Q1601 -25 1616.5 -15.0Q1632 -5 1654 -5Q1687 -5 1722.0 -19.5Q1757 -34 1790.0 -57.0Q1823 -80 1850.5 -106.5Q1878 -133 1897 -158Q1900 -162 1904.0 -162.5Q1908 -163 1909 -161Q1913 -160 1913.0 -155.5Q1913 -151 1911 -147Q1883 -108 1843.5 -71.0Q1804 -34 1756.5 -9.5Q1709 15 1658 15Z" fill="currentColor"/></svg><small>Motors</small></span><span class="bn">Carte Motors<small>153 ilan</small></span></div><span class="t">Tüm ilanlar</span><div class="grid cars"><img src="assets/motors-1.webp" alt="" width="480" height="400"><img src="assets/motors-2.webp" alt="" width="480" height="400"><img src="assets/motors-3.webp" alt="" width="480" height="400"><img src="assets/motors-4.webp" alt="" width="480" height="400"></div><div class="cta">Mağazaya git</div></div>
+          </div>
+        </div>
+        <span class="demo-note">Açıldı. Uygulama yok, kamera yok.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="kurulum" aria-labelledby="kurulum-t">
+    <div class="wrap">
+      <div class="rv">
+        <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Kurulum</span></div>
+        <h2 class="title r" id="kurulum-t">Üç adımda masanızda.</h2>
+      </div>
+      <div class="steps rv" id="steps">
+        <svg class="line" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><path d="M2 2H98" pathLength="1"/></svg>
+        <div class="step r"><div class="n">1</div><h3>Kartınızı tasarlarız.</h3><p>Logonuzu ve renklerinizi iletin, kart işletmenize özel hazırlanır.</p></div>
+        <div class="step r"><div class="n">2</div><h3>Masaya koyarsınız.</h3><p>Masa, duvar, vitrin ya da kasa. Nerede lazımsa orada.</p></div>
+        <div class="step r"><div class="n">3</div><h3>Müşteri dokunur.</h3><p>Doğru sayfa anında açılır, uygulama gerekmez.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="olculer" aria-labelledby="olculer-t">
+    <div class="wrap sizes rv">
+      <div>
+        <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Ölçüler</span></div>
+        <h2 class="title r" id="olculer-t">Üç ölçü, her köşeye bir tane.</h2>
+        <p class="lede r">Çizimler birbirine göre gerçek oranında. Hangisinin size uyduğundan emin değilseniz, mekânınızın fotoğrafını gönderin, birlikte seçelim.</p>
+      </div>
+      <div class="scale r" id="scale">
+        <span class="mono note">Gerçek oranında</span>
+        <div class="sz">
+          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><rect x=".5" y=".5" width="63" height="63" rx="6" pathLength="1"/><text x="6" y="12">NFC</text></svg>
+          <b>4×4 cm</b><span>Masaüstü mini etiket</span>
+        </div>
+        <div class="sz">
+          <svg width="128" height="128" viewBox="0 0 128 128" aria-hidden="true"><rect x=".5" y=".5" width="127" height="127" rx="10" pathLength="1"/><text x="9" y="16">NFC</text><path class="dim" d="M0 138H128M0 134v8M128 134v8" pathLength="1"/></svg>
+          <b>8×8 cm</b><span>Masa standı, duvar etiketi</span>
+        </div>
+        <div class="sz">
+          <svg width="128" height="64" viewBox="0 0 128 64" aria-hidden="true"><rect x=".5" y=".5" width="127" height="63" rx="8" pathLength="1"/><text x="9" y="13">NFC + QR</text></svg>
+          <b>8×4 cm</b><span>NFC ve QR bir arada</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sss" aria-labelledby="sss-t">
+    <div class="wrap faq rv">
+      <div>
+        <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Sorular</span></div>
+        <h2 class="title r" id="sss-t">Aklınızdakiler.</h2>
+      </div>
+      <div class="r">
+        <details><summary>Müşterimin telefonunda NFC yoksa?</summary><p class="a">Kartlarda QR seçeneği de var. NFC'si olmayan telefon QR'ı okutur.</p></details>
+        <details><summary>Menüm değişince yeni kart mı almam gerekiyor?</summary><p class="a">Hayır. Kart aynı kalır, açılan sayfayı güncelleriz.</p></details>
+        <details><summary>Müşterinin uygulama indirmesi gerekir mi?</summary><p class="a">Hayır. Telefonu yaklaştırması yeter, sayfa tarayıcıda açılır.</p></details>
+        <details><summary>IBAN kartı güvenli mi?</summary><p class="a">Kart sadece IBAN ve hesap sahibi adını gösterir. Şifre ya da kart bilgisi istemez, para çekemez.</p></details>
+        <details><summary>Fiyat ne kadar?</summary><p class="a">Ölçüye ve adede göre değişiyor. Instagram'dan yazın, size net fiyat verelim.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final" id="iletisim" aria-labelledby="iletisim-t">
+    <div class="bg" aria-hidden="true"><img src="assets/hero-3-kart.jpg" alt="" width="1696" height="960" loading="lazy"></div>
+    <div class="wrap rv">
+      <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">İletişim</span></div>
+      <h2 class="title r" id="iletisim-t">Kartınızı birlikte tasarlayalım.</h2>
+      <p class="lede r">Logonuzu ve hangi kartları istediğinizi yazın. Size özel tasarımı hazırlayıp gönderelim.</p>
+      <div class="row r">
+        <a class="btn btn-accent" href="https://ig.me/m/cartemenusistemleri" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".9" fill="currentColor" stroke="none"/></svg>Instagram'dan yaz</a>
+        <a class="btn btn-ghost" href="mailto:cartemenusistemleri@gmail.com?subject=Carte%20kart%20talebi">E-posta gönder</a>
+      </div>
+      <div class="contact-line r">
+        <a href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">@cartemenusistemleri</a>
+        <a href="mailto:cartemenusistemleri@gmail.com">cartemenusistemleri@gmail.com</a>
+      </div>
+    </div>
+  </section>
+</main>
 
 <footer>
-<div class="wrap">
-<span class="logo">Carte</span>
-<span class="fnote">Carte Menü Sistemleri — NFC &amp; QR destekli menü, yorum ve ödeme kartları</span>
-</div>
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Carte Menü Sistemleri, sayfanın başı">Carte <small>Menü Sistemleri</small></a>
+    <p>Carte Menü Sistemleri. NFC &amp; QR destekli menü, yorum ve ödeme kartları.</p>
+    <nav aria-label="Alt menü"><a href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">Instagram</a><a href="mailto:cartemenusistemleri@gmail.com">E-posta</a></nav>
+    <p class="disc">Açılış görselleri yapay zekâ ile üretilmiştir, temsilidir. Kart görselleri Carte tasarımlarıdır.</p>
+  </div>
 </footer>
 
-</body></html>
+<script>
+(function(){
+  'use strict';
+  var nav = document.getElementById('nav');
+  var intro = document.querySelector('.intro');
+  var reduce0 = matchMedia('(prefers-reduced-motion: reduce)');
+  var lastP = -1, lastShow = null, raf = null;
+  function frame(){
+    raf = null;
+    var h = intro.offsetHeight || innerHeight;
+    var p = Math.min(1, Math.max(0, scrollY / h));
+    var pr = Math.round(p * 200) / 200;
+    if (pr !== lastP && !reduce0.matches) { lastP = pr; intro.style.setProperty('--p', pr); }
+    var show = scrollY > h * 0.45;
+    if (show !== lastShow) { lastShow = show; nav.classList.toggle('show', show); nav.classList.toggle('solid', show); }
+  }
+  function onScroll(){ if (raf === null) raf = requestAnimationFrame(frame); }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
+  frame();
+  /* soft parallax on the words, desktop pointers only */
+  var words = document.querySelector('.words'), lastM = 0;
+  if (matchMedia('(pointer: fine)').matches) {
+    intro.addEventListener('pointermove', function(e){
+      var now = performance.now(); if (now - lastM < 60 || reduce0.matches) return; lastM = now;
+      words.style.setProperty('--mx', ((e.clientX / innerWidth) - .5).toFixed(3));
+      words.style.setProperty('--my', ((e.clientY / innerHeight) - .5).toFixed(3));
+    });
+  }
+
+  /* reveal choreography */
+  var rvs = [].slice.call(document.querySelectorAll('.rv, .scale, .steps'));
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if (e.isIntersecting) {
+          e.target.classList.add('in'); io.unobserve(e.target);
+          setTimeout(function(){ e.target.classList.add('done'); }, 1600);
+        }
+      });
+    }, { rootMargin: '0px 0px -12% 0px' });
+    rvs.forEach(function(el){ io.observe(el); });
+  } else rvs.forEach(function(el){ el.classList.add('in','done'); });
+
+  /* card art: no drag, no right-click save */
+  [].slice.call(document.querySelectorAll('.prod .art img, .demo .dcard img')).forEach(function(im){ im.setAttribute('draggable','false'); im.addEventListener('contextmenu', function(e){ e.preventDefault(); }); });
+  /* pause on hidden tab */
+  document.addEventListener('visibilitychange', function(){ document.body.classList.toggle('paused', document.hidden); });
+
+  /* the one interactive moment: press and hold */
+  var demo = document.getElementById('demo'), btn = document.getElementById('holdBtn'), img = document.getElementById('demoImg');
+  var tabs = [].slice.call(document.querySelectorAll('.tab'));
+  var pages = [].slice.call(document.querySelectorAll('.pg'));
+  var h = 0, holding = false, hRaf = null, hLast = 0, opened = false;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  function setH(v){
+    h = v; demo.style.setProperty('--h', v.toFixed(3)); btn.style.setProperty('--h', v.toFixed(3));
+    var o = v >= 1; if (o !== opened) { opened = o; demo.classList.toggle('open', o); }
+  }
+  function hTick(now){
+    var dt = Math.min(64, now - (hLast || now)); hLast = now;
+    if (holding) setH(Math.min(1, h + dt/950));
+    else if (!opened) setH(Math.max(0, h - dt/700));
+    if ((holding && h < 1) || (!holding && h > 0 && !opened)) hRaf = requestAnimationFrame(hTick);
+    else { hRaf = null; hLast = 0; }
+  }
+  function start(e){
+    if (e && e.preventDefault) e.preventDefault();
+    if (reduce.matches) { setH(1); return; }
+    if (opened) return;
+    holding = true; btn.classList.add('pressing');
+    if (hRaf === null) hRaf = requestAnimationFrame(hTick);
+  }
+  function stop(){
+    holding = false; btn.classList.remove('pressing');
+    if (hRaf === null && !opened) hRaf = requestAnimationFrame(hTick);
+  }
+  btn.addEventListener('pointerdown', function(e){ btn.setPointerCapture && btn.setPointerCapture(e.pointerId); start(e); });
+  btn.addEventListener('pointerup', stop);
+  btn.addEventListener('pointercancel', stop);
+  btn.addEventListener('lostpointercapture', stop);
+  btn.addEventListener('keydown', function(e){ if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) start(e); });
+  btn.addEventListener('keyup', function(e){ if (e.key === ' ' || e.key === 'Enter') stop(); });
+  btn.addEventListener('click', function(e){ if (reduce.matches) setH(1); });
+  btn.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  [].slice.call(document.querySelectorAll('.prod img, .dcard img')).forEach(function(im){ im.addEventListener('contextmenu', function(e){ e.preventDefault(); }); });
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
+      img.src = t.dataset.img; img.alt = t.dataset.alt;
+      img.parentNode.classList.toggle('big', t.dataset.t !== 'menu');
+      pages.forEach(function(p){ p.classList.toggle('cur', p.dataset.p === t.dataset.t); });
+      opened = false; demo.classList.remove('open'); holding = false; setH(0);
+    });
+  });
+})();
+</script>
+</body>
+</html>
