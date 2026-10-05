@@ -16,7 +16,7 @@ function renderPage(data) {
   const banka = data.banka || '';
   return `<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Ödeme Bilgileri</title>
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <style>
   :root{
     --ink:#4A1826; --ink-soft:#8B6E76; --ink-faint:#B49CA0;
@@ -36,7 +36,7 @@ function renderPage(data) {
     font-variant-numeric:tabular-nums;
     min-height:100vh;
   }
-  h1{ font-family:'Cormorant', Georgia, serif; font-style:italic; font-weight:600; margin:0; font-size:26px; color:var(--cream); }
+  h1{ font-family:'Jost', -apple-system, 'Segoe UI', sans-serif; font-weight:400; letter-spacing:-0.01em; margin:0; font-size:26px; color:var(--cream); }
   p{ margin:0; }
   .wrap{ max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:22px; align-items:center; }
   .wordmark{ display:flex; align-items:center; gap:10px; }
@@ -52,13 +52,13 @@ function renderPage(data) {
     box-shadow:var(--shadow); padding:22px 20px 20px; display:flex; flex-direction:column; gap:16px;
   }
   .business-name{
-    font-family:'Cormorant', Georgia, serif; font-style:italic; font-weight:600; font-size:19px;
+    font-family:'Jost', -apple-system, 'Segoe UI', sans-serif; font-weight:500; font-size:18px; letter-spacing:-0.005em;
     color:var(--ink); text-align:center; padding-bottom:14px; border-bottom:1px solid var(--line);
   }
-  .box{ background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:13px 14px; display:flex; flex-direction:column; gap:8px; }
+  .box{ position:relative; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:13px 14px; display:flex; flex-direction:column; gap:8px; }
   .box-label{ font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); }
   .box-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; }
-  .box-value{ font-family:'Jost',sans-serif; font-size:16.5px; font-weight:600; color:var(--ink); letter-spacing:0.01em; word-break:break-word; line-height:1.35; }
+  .box-value{ flex:1; min-width:0; font-family:'Jost',sans-serif; font-size:16.5px; font-weight:600; color:var(--ink); letter-spacing:0.01em; word-break:break-word; line-height:1.35; }
   .box-value.iban-value{ font-variant-numeric:tabular-nums; letter-spacing:0.045em; }
   .copy-btn{
     flex:none; width:38px; height:38px; border-radius:9px; border:1px solid var(--line);
@@ -67,7 +67,8 @@ function renderPage(data) {
   }
   .copy-btn:hover{ background:var(--surface-3); color:var(--ink); }
   .copy-btn svg{ width:17px; height:17px; }
-  .copy-note{ font-size:11.5px; font-weight:600; min-height:14px; }
+  .copy-note{ position:absolute; top:13px; right:14px; font-size:11px; font-weight:600; letter-spacing:0.02em; white-space:nowrap; }
+  .copy-note:empty{ display:none; }
   .copy-note.good{ color:var(--good); }
   .site-footer{ margin-top:2px; display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; }
   .site-footer-text{ font-size:12px; color:var(--cream-soft); line-height:1.5; max-width:300px; }
@@ -80,7 +81,7 @@ function renderPage(data) {
   .site-footer-links a:hover{ background:rgba(255,253,246,0.12); }
   @media (max-width:420px){ .card{ padding:18px 15px 16px; } }
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Jost:wght@300;400;500;600;700&display=swap">
 
 <div class="wrap">
   <a class="wordmark" href="https://cartemenusistemleri.com.tr/" style="text-decoration:none;"><span class="logo">Carte</span><span class="tag">IBAN ile Öde</span></a>
@@ -94,36 +95,36 @@ function renderPage(data) {
       <span class="box-label">Banka</span>
       <div class="box-row">
         <span class="box-value" id="bankaDisplay">${esc(banka)}</span>
+        <span class="copy-note" id="copyBankaNote"></span>
         <button type="button" class="copy-btn" id="copyBankaBtn" title="Banka adını kopyala">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>
       </div>
-      <span class="copy-note" id="copyBankaNote"></span>
     </div>` : ''}
     <div class="box">
       <span class="box-label">IBAN</span>
       <div class="box-row">
         <span class="box-value iban-value" id="ibanDisplay">${esc(ibanDisplay)}</span>
+        <span class="copy-note" id="copyIbanNote"></span>
         <button type="button" class="copy-btn" id="copyIbanBtn" title="IBAN'ı kopyala">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>
       </div>
-      <span class="copy-note" id="copyIbanNote"></span>
     </div>
     <div class="box">
       <span class="box-label">Hesap Sahibi</span>
       <div class="box-row">
         <span class="box-value" id="adSoyadDisplay">${esc(isim)}</span>
+        <span class="copy-note" id="copyAdNote"></span>
         <button type="button" class="copy-btn" id="copyAdBtn" title="İsmi kopyala">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>
       </div>
-      <span class="copy-note" id="copyAdNote"></span>
     </div>
   </div>
 
   <div class="site-footer">
-    <p class="site-footer-text">Bu kartı <strong>Carte Menü Sistemleri</strong> hazırladı — siz de işletmeniz için ister misiniz?</p>
+    <p class="site-footer-text">Bu kartı <strong>Carte Menü Sistemleri</strong> hazırladı. Siz de işletmeniz için ister misiniz?</p>
     <div class="site-footer-links">
       <a href="https://cartemenusistemleri.com.tr/">İnternet Sitemiz</a>
       <a href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">Instagram</a>
@@ -169,7 +170,7 @@ function renderPage(data) {
 }
 
 function renderNotFound() {
-  return `<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><title>Bulunamadı</title><link rel="icon" href="data:,"><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#4A1826;color:#FFFDF6;font-family:-apple-system,'Segoe UI',sans-serif;text-align:center;padding:24px}</style></head><body><div><h1 style="font-size:22px;margin:0 0 8px">Bu bağlantı bulunamadı</h1><p style="opacity:.8;margin:0">Link geçersiz veya kaldırılmış olabilir.</p></div></body></html>`;
+  return `<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><title>Bulunamadı</title><link rel="icon" type="image/svg+xml" href="/assets/favicon.svg"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#4A1826;color:#FFFDF6;font-family:-apple-system,'Segoe UI',sans-serif;text-align:center;padding:24px}</style></head><body><div><h1 style="font-size:22px;margin:0 0 8px">Bu bağlantı bulunamadı</h1><p style="opacity:.8;margin:0">Link geçersiz veya kaldırılmış olabilir.</p></div></body></html>`;
 }
 
 export async function onRequestGet(context) {
