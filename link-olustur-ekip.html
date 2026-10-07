@@ -1,0 +1,184 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ödeme Linki Oluşturuluyor</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A1826">
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --ink:#4A1826; --ink-soft:#8B6E76; --ink-faint:#B49CA0;
+    --surface:#FFFDF8; --surface-2:#FAF3E4; --surface-3:#F3E8D0;
+    --line:rgba(74,24,38,0.12);
+    --shadow:0 1px 2px rgba(74,24,38,0.04), 0 10px 26px -14px rgba(74,24,38,0.16);
+    --page-bg:#4A1826; --page-bg-soft:#5A2130;
+    --cream:#FFFDF6; --cream-soft:rgba(255,253,246,0.72);
+    --good:#0ca30c; --bad:#c0392b;
+    color-scheme: light;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    background:linear-gradient(180deg, var(--page-bg) 0%, var(--page-bg-soft) 100%); color:var(--ink);
+    font-family:'Jost', -apple-system, 'Segoe UI', sans-serif;
+    padding-inline:16px; padding-block:36px 60px;
+    min-height:100vh;
+  }
+  h1{ font-family:'Cormorant', Georgia, serif; font-style:italic; font-weight:600; margin:0; font-size:24px; color:var(--cream); }
+  p{ margin:0; }
+  .wrap{ max-width:440px; margin:0 auto; display:flex; flex-direction:column; gap:20px; align-items:center; }
+  .wordmark{ display:flex; align-items:center; gap:10px; }
+  .wordmark .logo{ font-family:'Allura',cursive; font-size:34px; color:var(--cream); line-height:1; }
+  .wordmark .tag{
+    font-size:11px; letter-spacing:0.28em; text-transform:uppercase; color:var(--cream); font-weight:600;
+    background:var(--ink); border:1px solid var(--cream); border-radius:999px; padding:4px 11px; display:inline-block;
+  }
+  .heading{ text-align:center; display:flex; flex-direction:column; gap:6px; }
+  .heading .subtitle{ font-size:13px; color:var(--cream-soft); }
+  .card{
+    width:100%; background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); padding:22px 20px 20px; display:flex; flex-direction:column; gap:14px; align-items:center; text-align:center;
+  }
+  .spinner{
+    width:34px; height:34px; border-radius:50%; border:3px solid var(--surface-3); border-top-color:var(--ink);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .status-text{ font-size:14px; font-weight:600; color:var(--ink); }
+  .status-sub{ font-size:12.5px; color:var(--ink-soft); }
+  .result{ width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .result .box-row{ display:flex; align-items:center; gap:10px; justify-content:space-between; }
+  .result a{ color:var(--ink); font-weight:600; word-break:break-all; font-size:14px; }
+  .copy-btn{
+    flex:none; width:38px; height:38px; border-radius:9px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .copy-btn svg{ width:16px; height:16px; }
+  .msg{ font-size:13px; font-weight:600; min-height:16px; margin:0; }
+  .msg.good{ color:var(--good); }
+  .msg.bad{ color:var(--bad); }
+  .retry-btn{
+    margin-top:2px; padding:10px 18px; border:none; border-radius:10px; cursor:pointer;
+    background:var(--ink); color:var(--cream); font:inherit; font-size:13.5px; font-weight:600;
+  }
+  @media (max-width:420px){ .card{ padding:18px 15px 16px; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap">
+
+<div class="wrap">
+  <div class="wordmark"><span class="logo">Carte</span><span class="tag">Hızlı Link</span></div>
+  <div class="heading">
+    <h1 id="heading">Ödeme Linki Oluşturuluyor</h1>
+    <p class="subtitle" id="subtitle">Bir saniye sürer...</p>
+  </div>
+  <div class="card" id="card">
+    <div class="spinner" id="spinner"></div>
+    <p class="status-text" id="statusText">Hazırlanıyor...</p>
+    <p class="status-sub" id="statusSub"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // Bu sayfa kendi başına çalışmaz: Satış Defteri uygulamasındaki
+  // "Link Oluştur" düğmesinden iban/isim/isletme/banka/token parametreleriyle
+  // açılır. "token" değeri bu dosyada SAKLANMAZ — sadece Satış Defteri
+  // tarafında bilinir ve her açılışta URL üzerinden buraya iletilir;
+  // sunucu tarafında (Cloudflare Functions) ayrı bir ortam değişkenine
+  // karşı doğrulanır.
+
+  var els = {
+    heading: document.getElementById('heading'),
+    subtitle: document.getElementById('subtitle'),
+    card: document.getElementById('card'),
+    spinner: document.getElementById('spinner'),
+    statusText: document.getElementById('statusText'),
+    statusSub: document.getElementById('statusSub')
+  };
+
+  function showError(message){
+    els.heading.textContent = 'Oluşturulamadı';
+    els.subtitle.textContent = '';
+    els.spinner.hidden = true;
+    els.statusText.textContent = message || 'Bir hata oluştu.';
+    els.statusText.style.color = 'var(--bad)';
+  }
+
+  function showResult(url){
+    els.heading.textContent = 'Link Hazır';
+    els.subtitle.textContent = 'Müşteriye gösterebilir veya gönderebilirsin.';
+    els.spinner.hidden = true;
+    els.statusText.textContent = '';
+    els.statusSub.textContent = '';
+
+    var result = document.createElement('div');
+    result.className = 'result';
+    var row = document.createElement('div');
+    row.className = 'box-row';
+    var a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = url;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy-btn'; btn.title = 'Linki kopyala';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+    row.appendChild(a); row.appendChild(btn);
+    var msg = document.createElement('p');
+    msg.className = 'msg';
+    result.appendChild(row); result.appendChild(msg);
+    els.card.appendChild(result);
+
+    function copy(){
+      function done(ok){
+        msg.textContent = ok ? 'Link kopyalandı ✓ — yapıştırabilirsin.' : 'Kopyalanamadı, elle seçip kopyala.';
+        msg.className = 'msg ' + (ok ? 'good' : 'bad');
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(function(){ done(true); }).catch(function(){ done(false); });
+      } else {
+        try{
+          var ta = document.createElement('textarea');
+          ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          var ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          done(ok);
+        }catch(e){ done(false); }
+      }
+    }
+    btn.addEventListener('click', copy);
+    copy(); // sayfa açılır açılmaz otomatik kopyala — müşteri karşısında hız için
+  }
+
+  try{
+    var qs = new URLSearchParams(window.location.search);
+    var iban = (qs.get('iban') || '').trim();
+    var isim = (qs.get('isim') || '').trim();
+    var isletme = (qs.get('isletme') || '').trim();
+    var banka = (qs.get('banka') || '').trim();
+    var token = (qs.get('token') || '').trim();
+
+    if (!iban || !isim || !token){
+      els.heading.textContent = 'Eksik Bilgi';
+      els.subtitle.textContent = '';
+      els.spinner.hidden = true;
+      els.statusText.textContent = 'Bu sayfa Satış Defteri\'ndeki "Link Oluştur" düğmesinden açılmalı.';
+      els.statusText.style.color = 'var(--ink-soft)';
+    } else {
+      fetch('/api/olustur', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-admin-secret': token },
+        body: JSON.stringify({ iban: iban, isim: isim, isletme: isletme, banka: banka })
+      }).then(function(r){ return r.json().then(function(data){ return { status: r.status, data: data }; }); })
+      .then(function(res){
+        if (res.status === 200 && res.data && res.data.ok){
+          showResult(res.data.url);
+        } else {
+          showError((res.data && res.data.error) || 'Bir hata oluştu.');
+        }
+      }).catch(function(){
+        showError('Bağlantı hatası, tekrar dene.');
+      });
+    }
+  }catch(e){
+    showError('Beklenmeyen bir hata oluştu.');
+  }
+})();
+</script>
+</body></html>
