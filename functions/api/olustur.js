@@ -73,3 +73,5 @@ export async function onRequestPost(context) {
 export async function onRequestGet() {
   return jsonResponse({ ok: false, error: 'Method not allowed' }, 405);
 }
+
+// TEAM_SECRET deploy tetikleyici
