@@ -58,6 +58,12 @@
     margin-top:2px; padding:10px 18px; border:none; border-radius:10px; cursor:pointer;
     background:var(--ink); color:var(--cream); font:inherit; font-size:13.5px; font-weight:600;
   }
+  .return-link{
+    margin-top:2px; padding:11px 18px; border:none; border-radius:10px; cursor:pointer;
+    background:var(--ink); color:var(--cream); font:inherit; font-size:13.5px; font-weight:600;
+    text-decoration:none; display:inline-block; text-align:center;
+  }
+  .return-note{ font-size:11.5px; color:var(--ink-faint); }
   @media (max-width:420px){ .card{ padding:18px 15px 16px; } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;0,600;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap">
@@ -79,11 +85,22 @@
 (function(){
   'use strict';
   // Bu sayfa kendi başına çalışmaz: Satış Defteri uygulamasındaki
-  // "Link Oluştur" düğmesinden iban/isim/isletme/banka/token parametreleriyle
-  // açılır. "token" değeri bu dosyada SAKLANMAZ — sadece Satış Defteri
-  // tarafında bilinir ve her açılışta URL üzerinden buraya iletilir;
-  // sunucu tarafında (Cloudflare Functions) ayrı bir ortam değişkenine
-  // karşı doğrulanır.
+  // "Link Oluştur" düğmesinden iban/isim/isletme/banka/token/rid/rrep
+  // parametreleriyle açılır. "token" değeri bu dosyada SAKLANMAZ — sadece
+  // Satış Defteri tarafında bilinir ve her açılışta URL üzerinden buraya
+  // iletilir; sunucu tarafında (Cloudflare Functions) ayrı bir ortam
+  // değişkenine karşı doğrulanır.
+  //
+  // rid/rrep (talep id'si ve temsilci id'si) verilmişse, link oluşunca
+  // Satış Defteri'ne #<base64url(JSON)> şeklinde bir "dön ve kaydet" linki
+  // gösteriyoruz; rep tek dokunuşla elle kopyala/yapıştır yapmadan kaydı
+  // tamamlayabiliyor (Satış Defteri o hash'i okuyup otomatik kaydediyor).
+  var SATIS_DEFTERI_URL = 'https://claude.ai/artifact/Mm9oYWjLCxS2RWNWuszNKw';
+
+  function b64url(str){
+    try{ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+    catch(e){ return ''; }
+  }
 
   var els = {
     heading: document.getElementById('heading'),
@@ -102,7 +119,7 @@
     els.statusText.style.color = 'var(--bad)';
   }
 
-  function showResult(url){
+  function showResult(url, rid, rrep){
     els.heading.textContent = 'Link Hazır';
     els.subtitle.textContent = 'Müşteriye gösterebilir veya gönderebilirsin.';
     els.spinner.hidden = true;
@@ -126,7 +143,7 @@
 
     function copy(){
       function done(ok){
-        msg.textContent = ok ? 'Link kopyalandı ✓ — yapıştırabilirsin.' : 'Kopyalanamadı, elle seçip kopyala.';
+        msg.textContent = ok ? 'Link kopyalandı ✓' : 'Kopyalanamadı, elle seçip kopyala.';
         msg.className = 'msg ' + (ok ? 'good' : 'bad');
       }
       if (navigator.clipboard && navigator.clipboard.writeText){
@@ -144,6 +161,24 @@
     }
     btn.addEventListener('click', copy);
     copy(); // sayfa açılır açılmaz otomatik kopyala — müşteri karşısında hız için
+
+    // Satış Defteri'ndeki kaydı elle kopyala/yapıştır yapmadan, tek dokunuşla
+    // otomatik işaretlemek için "Dön ve Kaydet" linki — rid/rrep varsa gösterilir.
+    if (rid && rrep){
+      var payload = b64url(JSON.stringify({ id: rid, rep: rrep, link: url }));
+      if (payload){
+        var ret = document.createElement('a');
+        ret.href = SATIS_DEFTERI_URL + '#' + payload;
+        ret.target = '_blank'; ret.rel = 'noopener';
+        ret.className = 'return-link';
+        ret.textContent = 'Satış Defterine Dön ve Kaydet ↗';
+        var note = document.createElement('p');
+        note.className = 'return-note';
+        note.textContent = 'Tıklayınca kayıt otomatik işaretlenir, bu sekmeyi açık bırakabilirsin.';
+        els.card.appendChild(ret);
+        els.card.appendChild(note);
+      }
+    }
   }
 
   try{
@@ -153,6 +188,8 @@
     var isletme = (qs.get('isletme') || '').trim();
     var banka = (qs.get('banka') || '').trim();
     var token = (qs.get('token') || '').trim();
+    var rid = (qs.get('rid') || '').trim();
+    var rrep = (qs.get('rrep') || '').trim();
 
     if (!iban || !isim || !token){
       els.heading.textContent = 'Eksik Bilgi';
@@ -168,7 +205,7 @@
       }).then(function(r){ return r.json().then(function(data){ return { status: r.status, data: data }; }); })
       .then(function(res){
         if (res.status === 200 && res.data && res.data.ok){
-          showResult(res.data.url);
+          showResult(res.data.url, rid, rrep);
         } else {
           showError((res.data && res.data.error) || 'Bir hata oluştu.');
         }
