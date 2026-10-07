@@ -23,8 +23,12 @@ function jsonResponse(body, status) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
+  // İki geçerli anahtar kabul edilir: ADMIN_SECRET (yönetici, tam yetki)
+  // ve TEAM_SECRET (ekip, sadece link oluşturma — export/okuma yetkisi yok).
   const auth = request.headers.get('x-admin-secret') || '';
-  if (!env.ADMIN_SECRET || auth !== env.ADMIN_SECRET) {
+  const okAdmin = !!env.ADMIN_SECRET && auth === env.ADMIN_SECRET;
+  const okTeam = !!env.TEAM_SECRET && auth === env.TEAM_SECRET;
+  if (!auth || (!okAdmin && !okTeam)) {
     return jsonResponse({ ok: false, error: 'Yetkisiz' }, 401);
   }
 
