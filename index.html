@@ -67,6 +67,29 @@ h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
 @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
 body.paused *,body.paused *::before,body.paused *::after{animation-play-state:paused!important}
 
+
+/* örnek menü */
+.ornek-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(40px,6vw,90px);align-items:center}
+.ornek-list{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:10px;color:var(--text-secondary);font-size:16px}
+.ornek-list li{display:flex;gap:12px;align-items:baseline}
+.ornek-list li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--text-primary);transform:translateY(-2px)}
+.mbook{position:relative;display:block;width:min(360px,80vw);aspect-ratio:3/4.1;margin-inline:auto;perspective:1600px;text-decoration:none;color:inherit}
+.mpage,.mcover{position:absolute;inset:0;border-radius:6px 14px 14px 6px}
+.mpage{background:#FAF3E4;color:#4A1826;padding:34px 30px;display:flex;flex-direction:column;gap:11px;box-shadow:0 30px 60px -30px rgba(0,0,0,.7);font-size:14px}
+.mp-h{font-family:'Allura',cursive;font-size:40px;line-height:1;margin-bottom:8px}
+.mp-row{display:flex;align-items:baseline;gap:10px}
+.mp-row i{font-style:normal;width:28px;font-size:11px;letter-spacing:.12em;color:#8B6E76}
+.mp-row em{flex:1;border-bottom:1px dotted rgba(74,24,38,.3);transform:translateY(-4px)}
+.mp-algs{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px}
+.mp-algs b{font-weight:500;font-size:11px;border:1px solid rgba(74,24,38,.25);border-radius:999px;padding:3px 9px}
+.mcover{background:radial-gradient(120% 90% at 30% 20%,#5A2130,#3A121D);transform-origin:left center;box-shadow:0 30px 60px -24px rgba(0,0,0,.75),inset 6px 0 14px -6px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.rv.in .mcover.r{transform:rotateY(-28deg)}
+.mbook:hover .mcover{transform:rotateY(-62deg)!important;transition:transform 1s var(--ease-out)!important}
+.mc-frame{position:absolute;inset:14px;border:1px solid rgba(255,253,246,.35);border-radius:4px 9px 9px 4px}
+.mc-logo{font-family:'Allura',cursive;font-size:clamp(54px,7vw,72px);line-height:1;color:#FFFDF6}
+.mc-pill{font-weight:600;font-size:10px;letter-spacing:.34em;text-transform:uppercase;border:1px solid #FFFDF6;border-radius:999px;padding:5px 12px 5px 16px;color:#FFFDF6}
+.mc-cue{position:absolute;bottom:34px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,253,246,.7)}
+@media (max-width:860px){.ornek-grid{grid-template-columns:1fr}.mbook{margin-top:10px}}
 /* nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .5s var(--ease-out),border-color .5s var(--ease-out)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
@@ -352,6 +375,7 @@ footer .disc{flex-basis:100%;font-size:12px;margin-top:6px}
     <ul>
       <li><a href="#kartlar">Kartlar</a></li>
       <li><a href="#dene">Dokunun</a></li>
+      <li><a href="#ornek">Örnek Menü</a></li>
       <li><a href="#olculer">Ölçüler</a></li>
       <li><a href="#sss">Sorular</a></li>
       <li><a class="btn btn-accent btn-sm" href="#iletisim"><span class="long">Kartınızı tasarlayalım</span><span class="short">İletişim</span></a></li>
@@ -414,6 +438,7 @@ footer .disc{flex-basis:100%;font-size:12px;margin-top:6px}
           <h3>Menü Kartı</h3>
           <p>İnternet siteniz olmasa da menünüz bir dokunuşta açılır. Fiyat değişince menüyü siz güncellersiniz, kart aynı kalır.</p>
           <div class="opens"><span class="mono">Açılan</span>Dijital menünüz</div>
+          <a class="demo-link" href="/cafe-carte/" style="margin-top:14px">Örnek menü arayüzümüz <span aria-hidden="true">↗</span></a>
         </article>
         <article class="prod wide r">
           <div class="art"><span class="glow" aria-hidden="true"></span><img src="assets/kart-google.webp" alt="Google yorum kartı, 'Yorumlarınız Bizim için Değerli'" width="300" height="300" draggable="false" loading="lazy"></div>
@@ -487,6 +512,44 @@ footer .disc{flex-basis:100%;font-size:12px;margin-top:6px}
         </div>
         <span class="demo-note">Açıldı. Uygulama yok, kamera yok.</span>
       </div>
+    </div>
+  </section>
+
+  <section id="ornek" class="ornek" aria-labelledby="ornek-t">
+    <div class="wrap ornek-grid">
+      <div class="rv">
+        <div class="kick r"><svg class="arcs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 7a7 7 0 0 1 0 10M12 4a11 11 0 0 1 0 16M16 1.5a14.5 14.5 0 0 1 0 21"/></svg><span class="mono">Örnek menü arayüzümüz</span></div>
+        <h2 class="title r" id="ornek-t">Karta dokunun, menü kapağı açılsın.</h2>
+        <p class="lede r">Cafe Carte bizim örnek işletmemiz. Menü bir kitap kapağıyla açılır, sayfa çevirir gibi kayar. Her ürünün içeriği ve alerjenleri tek dokunuşla görünür. Sizin menünüz de böyle olur.</p>
+        <ul class="ornek-list r">
+          <li>Kategoriler, arama ve alerjen filtresi</li>
+          <li>Her üründe içerik, alerjen ve vejetaryen bilgisi</li>
+          <li>Fiyat değişince menüyü siz güncellersiniz</li>
+        </ul>
+        <div class="r" style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-accent" href="/cafe-carte/">Örnek menüyü aç <span aria-hidden="true">↗</span></a>
+          <a class="btn btn-ghost" href="#iletisim">Benim menüm olsun</a>
+        </div>
+      </div>
+      <a class="mbook rv" href="/cafe-carte/" aria-label="Cafe Carte örnek menüsünü aç">
+        <span class="mpage r" aria-hidden="true">
+          <span class="mp-h">İçindekiler</span>
+          <span class="mp-row"><i>I</i>Sıcak İçecekler<em></em>15</span>
+          <span class="mp-row"><i>II</i>Soğuk İçecekler<em></em>13</span>
+          <span class="mp-row"><i>III</i>Fırın ve Kahvaltı<em></em>8</span>
+          <span class="mp-row"><i>IV</i>Mutfak<em></em>13</span>
+          <span class="mp-row"><i>V</i>Pastalar<em></em>8</span>
+          <span class="mp-row"><i>VI</i>Cheesecake<em></em>4</span>
+          <span class="mp-row"><i>VII</i>Sütlü Tatlılar<em></em>6</span>
+          <span class="mp-algs"><b>Gluten</b><b>Süt</b><b>Yumurta</b><b>Sert kabuklu</b></span>
+        </span>
+        <span class="mcover r" aria-hidden="true">
+          <span class="mc-frame"></span>
+          <span class="mc-logo">Cafe Carte</span>
+          <span class="mc-pill">Menü</span>
+          <span class="mc-cue">Dokunun</span>
+        </span>
+      </a>
     </div>
   </section>
 
