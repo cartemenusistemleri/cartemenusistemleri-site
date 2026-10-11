@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cafe Carte · Menü</title>
+<meta name="description" content="Cafe Carte dijital menüsü: kahveler, soğuk içecekler, fırın ürünleri, mutfak ve tatlılar.">
+<meta name="theme-color" content="#3A121D">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Jost:wght@300;400;500;600&display=swap">
+<style>
+:root{
+  --canvas:#3A121D; --canvas-deep:#2A0D15; --panel:#4A1826;
+  --cream:#FFFDF6; --cream-2:#FAF3E4; --cream-3:#F3E8D0;
+  --ink:#4A1826; --ink-soft:#8B6E76; --ink-faint:#B49CA0;
+  --text:#FFFDF6; --text-2:#E6D6C7; --text-3:#BFA6A0;
+  --line:rgba(255,253,246,.14); --line-ink:rgba(74,24,38,.12);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --sans:'Jost',-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html{overflow-x:hidden;overflow-x:clip;scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:120px}
+body{margin:0;overflow-x:hidden;overflow-x:clip;background:var(--canvas);color:var(--text);font-family:var(--sans);font-weight:300;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--cream);outline-offset:3px;border-radius:6px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{width:min(980px,100% - 32px);margin-inline:auto}
+
+/* backdrop */
+.env{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(120% 70% at 50% 0%,#4B1724 0%,var(--canvas) 55%,var(--canvas-deep) 100%)}
+.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* masthead */
+.mast{text-align:center;padding:56px 0 30px;position:relative}
+.mast .script{font-family:'Allura',cursive;font-weight:400;font-size:clamp(84px,19vw,150px);line-height:.9;color:var(--text);margin:0;letter-spacing:.005em;text-shadow:0 0 50px rgba(255,253,246,.10)}
+.mast .pill{display:inline-block;margin-top:16px;font-weight:600;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--text);border:1px solid var(--text);border-radius:999px;padding:6px 14px 6px 18px;background:rgba(42,13,21,.4)}
+.mast .tag{margin:20px auto 0;max-width:34ch;color:var(--text-2);font-size:15px}
+.mast .orn{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:22px;color:var(--text-3);font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:500}
+.mast .orn::before,.mast .orn::after{content:"";width:44px;height:1px;background:var(--line)}
+
+/* sticky category bar */
+.catbar{position:sticky;top:0;z-index:20;background:rgba(42,13,21,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-block:1px solid var(--line)}
+.catbar .inner{max-width:980px;margin-inline:auto;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:12px 16px;scroll-padding-inline:16px}
+.catbar .inner::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:14px;font-weight:400;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:8px 15px;white-space:nowrap;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+.chip:hover{border-color:rgba(255,253,246,.4);color:var(--text)}
+.chip.on{background:var(--cream);color:var(--ink);border-color:var(--cream);font-weight:500}
+.search{display:flex;align-items:center;gap:10px;padding:0 16px 12px;max-width:980px;margin-inline:auto}
+.search input{flex:1;min-width:0;font-family:inherit;font-size:15px;font-weight:300;color:var(--text);background:rgba(255,253,246,.06);border:1px solid var(--line);border-radius:12px;padding:10px 14px 10px 38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFA6A0' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px 50%;background-size:17px}
+.search input::placeholder{color:var(--text-3)}
+.search input:focus{outline:none;border-color:rgba(255,253,246,.45)}
+
+/* sections */
+main{padding-bottom:40px}
+.sec{padding-top:44px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.sec-head h2{margin:0;font-weight:400;font-size:clamp(26px,5vw,34px);letter-spacing:-.015em;line-height:1.1}
+.sec-head .n{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-3);font-weight:500;white-space:nowrap}
+.sec-note{color:var(--text-3);font-size:14px;margin:-6px 0 18px}
+
+/* drinks list */
+.drinks{display:grid;grid-template-columns:1fr 1fr;gap:0 44px}
+.dr{display:flex;align-items:baseline;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.dr .t{min-width:0}
+.dr b{display:block;font-weight:500;font-size:16.5px;color:var(--text)}
+.dr small{display:block;font-size:13.5px;color:var(--text-3);margin-top:2px;line-height:1.4}
+.dr .lead{flex:1;border-bottom:1px dotted rgba(255,253,246,.22);transform:translateY(-5px);min-width:16px}
+.price{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* product grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;background:var(--cream);color:var(--ink);border-radius:16px;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);box-shadow:0 1px 0 rgba(255,255,255,.04),0 18px 36px -22px rgba(0,0,0,.6)}
+.card:hover{transform:translateY(-3px);box-shadow:0 26px 44px -22px rgba(0,0,0,.7)}
+.card:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+.card .ph{aspect-ratio:3/2;background:var(--cream-3);overflow:hidden}
+.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.card:hover .ph img{transform:scale(1.04)}
+.card .tx{padding:13px 14px 15px;display:flex;flex-direction:column;gap:4px;flex:1}
+.card .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card b{font-weight:500;font-size:16px;line-height:1.25}
+.card .price{color:var(--ink)}
+.card small{font-size:13px;color:var(--ink-soft);line-height:1.4}
+.empty{display:none;text-align:center;color:var(--text-3);padding:60px 0}
+
+/* sheet */
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(20,4,8,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
+.sheet{position:fixed;left:50%;bottom:0;z-index:41;width:min(560px,100%);transform:translate(-50%,105%);background:var(--cream);color:var(--ink);border-radius:22px 22px 0 0;overflow:hidden;transition:transform .5s var(--ease);max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0)}
+.open .sheet-bg{opacity:1;pointer-events:auto}
+.open .sheet{transform:translate(-50%,0)}
+.sheet .ph{aspect-ratio:3/2;background:var(--cream-3)}
+.sheet .ph img{width:100%;height:100%;object-fit:cover}
+.sheet .body{padding:20px 22px 26px}
+.sheet .cat{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.sheet h3{margin:6px 0 0;font-weight:500;font-size:24px;letter-spacing:-.01em;line-height:1.2}
+.sheet p{margin:10px 0 0;color:var(--ink-soft);font-size:15px}
+.sheet .foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--line-ink)}
+.sheet .foot .price{font-size:20px;color:var(--ink)}
+.sheet .close{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,253,246,.92);color:var(--ink);font-size:20px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.sheet .grab{position:absolute;top:8px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(255,253,246,.85);z-index:1}
+
+/* footer */
+footer{border-top:1px solid var(--line);margin-top:30px;padding:34px 0 46px;text-align:center}
+footer .script{font-family:'Allura',cursive;font-size:44px;line-height:1}
+footer p{margin:10px auto 0;color:var(--text-3);font-size:13.5px;max-width:40ch}
+footer a{color:var(--text-2)}
+.made{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:12.5px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.made i{font-style:normal;font-family:'Allura',cursive;font-size:20px;line-height:1}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.rv.in{opacity:1;transform:none}
+
+@media (max-width:820px){.grid{grid-template-columns:1fr 1fr;gap:12px}.drinks{grid-template-columns:1fr}}
+@media (max-width:420px){
+  .card .tx{padding:11px 11px 13px}
+  .card b{font-size:15px}
+  .card small{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .rv{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div class="env" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="mast wrap">
+  <h1 class="script">Cafe Carte</h1>
+  <span class="pill">Menü</span>
+  <p class="tag">Kahve, fırından taze lezzetler ve ev yapımı tatlılar.</p>
+  <div class="orn">Afiyet olsun</div>
+</header>
+
+<nav class="catbar" aria-label="Menü bölümleri">
+  <div class="inner" id="chips"></div>
+  <div class="search"><label class="sr" for="q">Menüde ara</label><input id="q" type="search" placeholder="Menüde ara" autocomplete="off"></div>
+</nav>
+
+<main class="wrap" id="menu"></main>
+<p class="empty wrap" id="empty">Aradığın ürün bulunamadı.</p>
+
+<footer class="wrap">
+  <div class="script">Cafe Carte</div>
+  <p>Fiyatlar güncellenmektedir. Alerjen bilgisi için lütfen ekibimize danışın. Görseller temsilidir.</p>
+  <a class="made" href="https://cartemenusistemleri.com.tr/">Bu menü <i>Carte</i> ile hazırlandı</a>
+</footer>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle" hidden>
+  <span class="grab" aria-hidden="true"></span>
+  <button class="close" id="sClose" type="button" aria-label="Kapat">×</button>
+  <div class="ph"><img id="sImg" src="" alt=""></div>
+  <div class="body">
+    <div class="cat" id="sCat"></div>
+    <h3 id="sTitle"></h3>
+    <p id="sDesc"></p>
+    <div class="foot"><span style="color:var(--ink-soft);font-size:14px">Fiyat</span><span class="price" id="sPrice">-</span></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var P = '-';
+  var MENU = [
+    { id:'sicak', title:'Sıcak İçecekler', drinks:[
+      ['Türk Kahvesi','Közde pişirilir, lokum eşliğinde'],
+      ['Damla Sakızlı Türk Kahvesi','Sakızın ferah kokusuyla'],
+      ['Espresso','Tek shot, yoğun ve dengeli'],
+      ['Double Espresso','Çift shot'],
+      ['Americano','Espresso ve sıcak su'],
+      ['Cappuccino','Espresso, süt ve yoğun köpük'],
+      ['Caffè Latte','Espresso ve kadifemsi süt'],
+      ['Flat White','Çift ristretto, ince süt köpüğü'],
+      ['Cortado','Espresso ve az süt'],
+      ['Mocha','Espresso, çikolata ve süt'],
+      ['Caramel Macchiato','Vanilya, süt, espresso ve karamel'],
+      ['Sıcak Çikolata','Belçika çikolatası ile'],
+      ['Salep','Tarçın serpilerek'],
+      ['Demleme Çay','İnce belli bardakta'],
+      ['Bitki Çayları','Ihlamur, papatya, yeşil çay, adaçayı']
+    ]},
+    { id:'soguk', title:'Soğuk İçecekler', drinks:[
+      ['Iced Americano','Espresso, buz ve soğuk su'],
+      ['Iced Latte','Espresso, soğuk süt ve buz'],
+      ['Iced Mocha','Çikolata, espresso ve soğuk süt'],
+      ['Cold Brew','16 saat soğuk demleme'],
+      ['Frappé','Karamel, çikolata ya da vanilya'],
+      ['Ev Yapımı Limonata','Taze limon ve nane'],
+      ['Çilekli Limonata','Taze çilek püresiyle'],
+      ['Ev Yapımı Ice Tea','Şeftali ya da orman meyveli'],
+      ['Milkshake','Çilek, çikolata ya da vanilya'],
+      ['Smoothie','Orman meyveli ya da muz ve yer fıstığı'],
+      ['Taze Portakal Suyu','Siparişle sıkılır'],
+      ['Soda','Sade ya da limonlu'],
+      ['Su','Cam şişe, 330 ml']
+    ]},
+    { id:'firin', title:'Fırın ve Kahvaltı', items:[
+      ['Sade Kruvasan','Tereyağlı, kat kat','sade-kruvasan'],
+      ['Antep Fıstıklı Kruvasan','Fıstık kreması ve fıstık parçaları','fistikli-kruvasan'],
+      ['Çikolatalı Bademli Kruvasan','Bitter çikolata ve kavrulmuş badem','cikolatali-kruvasan'],
+      ['Çilekli Kruvasan','Taze çilek ve krema','cilekli-kruvasan'],
+      ['Su Böreği','İnce yufka, beyaz peynir','su-boregi'],
+      ['Girit Böreği','Otlu ve peynirli','girit-boregi'],
+      ['Talaş Böreği','Kıymalı, çıtır milföy','talas-boregi'],
+      ['Patlıcanlı Milföy','Közlenmiş patlıcan ile','patlicanli-milfoy']
+    ]},
+    { id:'mutfak', title:'Mutfak', items:[
+      ['Sezar Salata','Izgara tavuk, parmesan, kruton','sezar'],
+      ['Roka Salata','Roka, parmesan, ceviz','roka'],
+      ['Tavuklu Krep','Kremalı tavuk ve sebzeler','tavuklu-krep'],
+      ['Tagliatelle Alfredo','Kremalı mantar ve tavuk','alfredo'],
+      ['Penne Arabiata','Acı domates sosu','arabiata'],
+      ['Spaghetti Bolonez','Ağır ateşte kıymalı sos','bolonez'],
+      ['Kasap Sucuklu Pizza','Kasap sucuk ve mozzarella','sucuklu-pizza'],
+      ['Enginarlı Pizza','Enginar, zeytin, kırmızı soğan','enginarli-pizza'],
+      ['Klasik Burger','Dana köfte, patates kızartması','burger'],
+      ['Cheese Burger','Cheddar ile, patates kızartması','cheeseburger'],
+      ['Köri Soslu Piliç','Köri sos, sebze ve patates','kori-pilic'],
+      ['Schnitzel Milanese','Çıtır dana, limon ve yeşillik','schnitzel'],
+      ['Izgara Dana','Izgara sebze ve patates ile','bonfile']
+    ]},
+    { id:'pasta', title:'Pastalar', items:[
+      ['Antep Fıstıklı Pasta','Fıstık kreması, ince çikolata kaplama','fistik-pasta'],
+      ['Beyaz İnci','Beyaz çikolata ve hafif krema','beyaz-inci'],
+      ['Pavlova','Beze rulo, krema ve taze çilek','pavlova'],
+      ['Çikolatalı Rulo','Çikolata kaplı rulo, taze çilek','cilekli-rulo'],
+      ['Tartolet','Vanilyalı krema, taze çilek','tartolet'],
+      ['Ekler','Çikolata kaplı, kremalı','ekler'],
+      ['Mozaik Pasta','Bisküvi ve kakao','mozaik'],
+      ['Çikolata Krokan','Fındık krokan, çikolata mus','krokan']
+    ]},
+    { id:'cheesecake', title:'Cheesecake', items:[
+      ['San Sebastian','Yanık yüzeyli, akışkan iç','san-sebastian'],
+      ['Frambuazlı Cheesecake','Frambuaz sosu ile','frambuaz-cheesecake'],
+      ['Limonlu Cheesecake','Limon kremalı','limon-cheesecake'],
+      ['Vişneli Cheesecake','Ev yapımı vişne sos','visne-cheesecake']
+    ]},
+    { id:'sutlu', title:'Sütlü Tatlılar', items:[
+      ['Tiramisu','Mascarpone, espresso, kakao','tiramisu'],
+      ['Trileçe','Üç sütlü, karamel','trilece'],
+      ['Profiterol','Kremalı top, çikolata sos','profiterol'],
+      ['Fırın Sütlaç','Fırında kızartılmış','sutlac'],
+      ['Kazandibi','Tavada yakılmış, tarçınlı','kazandibi'],
+      ['Supangle','Yoğun kakaolu puding','supangle']
+    ]},
+    { id:'serbetli', title:'Şerbetli Tatlılar', items:[
+      ['Antep Fıstıklı Baklava','Kırk kat yufka, bol fıstık','fistikli-baklava'],
+      ['Soğuk Baklava','Sütlü şerbet, kakao','soguk-baklava'],
+      ['Şöbiyet','Kaymaklı, fıstıklı','sobiyet'],
+      ['Fıstıklı Yassı Kadayıf','Tel kadayıf, Antep fıstığı','yassi-kadayif']
+    ]},
+    { id:'kek', title:'Kek ve Kurabiye', items:[
+      ['Çikolatalı Islak Kek','Sıcak servis edilir','islak-kek'],
+      ['Cevizli Brownie','Yoğun çikolata, ceviz','browni'],
+      ['Havuçlu Kek','Limon kremalı','havuclu-kek'],
+      ['Makaron','Günün renkleri','makaron']
+    ]},
+    { id:'dondurma', title:'Dondurma', items:[
+      ['Porsiyon Dondurma','Günün çeşitlerinden üç top','dondurma'],
+      ['Çikolata Vanilya','Sekiz top, paylaşmalık','dondurma-2']
+    ]}
+  ];
+
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
+  var menu = document.getElementById('menu'), chips = document.getElementById('chips');
+  var html = '', chipHtml = '';
+  MENU.forEach(function(s){
+    var count = (s.items || s.drinks).length;
+    chipHtml += '<a class="chip" href="#'+s.id+'" data-id="'+s.id+'">'+esc(s.title)+'</a>';
+    html += '<section class="sec rv" id="'+s.id+'" aria-labelledby="h-'+s.id+'"><div class="sec-head"><h2 id="h-'+s.id+'">'+esc(s.title)+'</h2><span class="n">'+count+' çeşit</span></div>';
+    if (s.drinks){
+      html += '<div class="drinks">' + s.drinks.map(function(d){
+        return '<div class="dr" data-q="'+esc((d[0]+' '+d[1]).toLocaleLowerCase('tr'))+'"><span class="t"><b>'+esc(d[0])+'</b><small>'+esc(d[1])+'</small></span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></div>';
+      }).join('') + '</div>';
+    } else {
+      html += '<div class="grid">' + s.items.map(function(it){
+        return '<button type="button" class="card" data-q="'+esc((it[0]+' '+it[1]).toLocaleLowerCase('tr'))+'" data-n="'+esc(it[0])+'" data-d="'+esc(it[1])+'" data-i="'+it[2]+'" data-c="'+esc(s.title)+'">'+
+          '<span class="ph"><img src="img/'+it[2]+'.webp" alt="'+esc(it[0])+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
+          '<span class="tx"><span class="row"><b>'+esc(it[0])+'</b><span class="price">'+P+'</span></span><small>'+esc(it[1])+'</small></span></button>';
+      }).join('') + '</div>';
+    }
+    html += '</section>';
+  });
+  menu.innerHTML = html; chips.innerHTML = chipHtml;
+
+  /* reveal */
+  var rvs = [].slice.call(document.querySelectorAll('.rv'));
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin:'0px 0px -8% 0px' });
+    rvs.forEach(function(el){ io.observe(el); });
+  } else rvs.forEach(function(el){ el.classList.add('in'); });
+
+  /* scroll spy on chips */
+  var chipEls = [].slice.call(chips.querySelectorAll('.chip')), current = null;
+  function setChip(id){
+    if (id === current) return; current = id;
+    chipEls.forEach(function(c){
+      var on = c.dataset.id === id; c.classList.toggle('on', on);
+      if (on){ var r = c.getBoundingClientRect(), pr = chips.getBoundingClientRect(); if (r.left < pr.left || r.right > pr.right) chips.scrollTo({ left: c.offsetLeft - 16, behavior: 'smooth' }); }
+    });
+  }
+  var secs = [].slice.call(document.querySelectorAll('.sec')), raf = null;
+  function spy(){
+    raf = null; var y = 150, id = secs[0] && secs[0].id;
+    secs.forEach(function(s){ if (s.style.display !== 'none' && s.getBoundingClientRect().top <= y) id = s.id; });
+    setChip(id);
+  }
+  addEventListener('scroll', function(){ if (raf === null) raf = requestAnimationFrame(spy); }, { passive:true });
+  spy();
+
+  /* search */
+  var q = document.getElementById('q'), empty = document.getElementById('empty');
+  q.addEventListener('input', function(){
+    var v = q.value.trim().toLocaleLowerCase('tr'), any = false;
+    secs.forEach(function(s){
+      var vis = 0;
+      [].slice.call(s.querySelectorAll('[data-q]')).forEach(function(el){
+        var ok = !v || el.dataset.q.indexOf(v) !== -1; el.style.display = ok ? '' : 'none'; if (ok) vis++;
+      });
+      s.style.display = vis ? '' : 'none'; if (vis) { any = true; s.classList.add('in'); }
+    });
+    empty.style.display = any ? 'none' : 'block';
+  });
+
+  /* detail sheet */
+  var sheet = document.getElementById('sheet'), bg = document.getElementById('sheetBg'), lastFocus = null;
+  function openSheet(c){
+    lastFocus = c;
+    document.getElementById('sImg').src = 'img/' + c.dataset.i + '.webp';
+    document.getElementById('sImg').alt = c.dataset.n;
+    document.getElementById('sCat').textContent = c.dataset.c;
+    document.getElementById('sTitle').textContent = c.dataset.n;
+    document.getElementById('sDesc').textContent = c.dataset.d;
+    sheet.hidden = false; requestAnimationFrame(function(){ document.body.classList.add('open'); });
+    document.getElementById('sClose').focus({ preventScroll:true });
+  }
+  function closeSheet(){
+    document.body.classList.remove('open');
+    setTimeout(function(){ sheet.hidden = true; }, 450);
+    if (lastFocus) lastFocus.focus({ preventScroll:true });
+  }
+  menu.addEventListener('click', function(e){ var c = e.target.closest('.card'); if (c) openSheet(c); });
+  bg.addEventListener('click', closeSheet);
+  document.getElementById('sClose').addEventListener('click', closeSheet);
+  addEventListener('keydown', function(e){ if (e.key === 'Escape' && document.body.classList.contains('open')) closeSheet(); });
+})();
+</script>
+</body>
+</html>
