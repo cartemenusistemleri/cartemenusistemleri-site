@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cafe Carte · Menü</title>
-<meta name="description" content="Cafe Carte dijital menüsü: kahveler, soğuk içecekler, fırın ürünleri, mutfak ve tatlılar.">
+<meta name="description" content="Cafe Carte dijital menüsü: kahveler, soğuk içecekler, fırın ürünleri, mutfak ve tatlılar. Her ürün için içerik ve alerjen bilgisi.">
 <meta name="theme-color" content="#3A121D">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -20,110 +20,182 @@
   --line:rgba(255,253,246,.14); --line-ink:rgba(74,24,38,.12);
   --ease:cubic-bezier(.22,1,.36,1);
   --sans:'Jost',-apple-system,'Segoe UI',sans-serif;
+  --bar:58px;
 }
 *{box-sizing:border-box}
-html{overflow-x:hidden;overflow-x:clip;scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:120px}
+html{overflow-x:hidden;overflow-x:clip;-webkit-text-size-adjust:100%;scroll-padding-top:120px}
 body{margin:0;overflow-x:hidden;overflow-x:clip;background:var(--canvas);color:var(--text);font-family:var(--sans);font-weight:300;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--cream);outline-offset:3px;border-radius:6px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .wrap{width:min(980px,100% - 32px);margin-inline:auto}
-
-/* backdrop */
 .env{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(120% 70% at 50% 0%,#4B1724 0%,var(--canvas) 55%,var(--canvas-deep) 100%)}
 .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-/* masthead */
-.mast{text-align:center;padding:56px 0 30px;position:relative}
-.mast .script{font-family:'Allura',cursive;font-weight:400;font-size:clamp(84px,19vw,150px);line-height:.9;color:var(--text);margin:0;letter-spacing:.005em;text-shadow:0 0 50px rgba(255,253,246,.10)}
-.mast .pill{display:inline-block;margin-top:16px;font-weight:600;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--text);border:1px solid var(--text);border-radius:999px;padding:6px 14px 6px 18px;background:rgba(42,13,21,.4)}
-.mast .tag{margin:20px auto 0;max-width:34ch;color:var(--text-2);font-size:15px}
-.mast .orn{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:22px;color:var(--text-3);font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:500}
-.mast .orn::before,.mast .orn::after{content:"";width:44px;height:1px;background:var(--line)}
+/* ---------- cover (book) ---------- */
+.book{position:fixed;inset:0;z-index:30;perspective:2200px;perspective-origin:0% 50%;pointer-events:none}
+.cover{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;will-change:transform;pointer-events:auto;cursor:pointer}
+.cover .face,.cover .back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.cover .face{background:radial-gradient(120% 80% at 50% 35%,#5A2130 0%,#45161F 45%,#2A0D15 100%);overflow:hidden}
+.cover .face::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.35) 0,rgba(0,0,0,0) 3.5%,rgba(255,255,255,.04) 4.2%,rgba(0,0,0,0) 6%);pointer-events:none}
+.cover .back{transform:rotateY(180deg);background:linear-gradient(90deg,#E9DCC2,#F3E8D0 60%,#EADFC8)}
+.cover .shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.frame{position:absolute;inset:clamp(14px,3vw,28px);border:1px solid rgba(255,253,246,.32);border-radius:4px}
+.frame::before{content:"";position:absolute;inset:7px;border:1px solid rgba(255,253,246,.14);border-radius:2px}
+.corner{position:absolute;width:26px;height:26px;color:rgba(255,253,246,.55)}
+.corner.tl{top:-1px;left:-1px}.corner.tr{top:-1px;right:-1px;transform:scaleX(-1)}
+.corner.bl{bottom:-1px;left:-1px;transform:scaleY(-1)}.corner.br{bottom:-1px;right:-1px;transform:scale(-1)}
+.cover .top,.cover .bottom{position:absolute;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:rgba(255,253,246,.62);font-weight:500}
+.cover .top{top:calc(clamp(14px,3vw,28px) + 34px)}
+.cover .bottom{bottom:calc(clamp(14px,3vw,28px) + 30px);display:flex;flex-direction:column;align-items:center;gap:12px}
+.cover .bottom svg{width:18px;height:18px;animation:nudge 2.2s var(--ease) infinite}
+@keyframes nudge{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(6px);opacity:1}}
+.cover .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px}
+.logo-start{font-family:'Allura',cursive;font-size:clamp(78px,17vw,150px);line-height:1;visibility:hidden;white-space:nowrap;padding:0 .08em}
+.cover .pill{margin-top:14px;font-weight:600;font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--text);border:1px solid var(--text);border-radius:999px;padding:6px 14px 6px 18px}
+.cover .tag{margin-top:22px;max-width:30ch;color:var(--text-2);font-size:15px}
+.cover .rule{display:flex;align-items:center;gap:12px;margin-top:20px;color:var(--text-3);font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+.cover .rule::before,.cover .rule::after{content:"";width:40px;height:1px;background:var(--line)}
 
-/* sticky category bar */
-.catbar{position:sticky;top:0;z-index:20;background:rgba(42,13,21,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-block:1px solid var(--line)}
-.catbar .inner{max-width:980px;margin-inline:auto;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:12px 16px;scroll-padding-inline:16px}
-.catbar .inner::-webkit-scrollbar{display:none}
-.chip{flex:none;font-size:14px;font-weight:400;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:8px 15px;white-space:nowrap;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+/* flying logo + top bar */
+.flylogo{position:fixed;left:0;top:0;z-index:35;margin:0;font-family:'Allura',cursive;font-weight:400;font-size:clamp(78px,17vw,150px);line-height:1;color:var(--text);white-space:nowrap;padding:0 .08em;transform-origin:0 0;will-change:transform;pointer-events:none;text-shadow:0 0 50px rgba(255,253,246,.12)}
+.flylogo a{color:inherit;text-decoration:none;pointer-events:auto}
+.topbar{position:fixed;left:0;right:0;top:0;z-index:34;background:rgba(42,13,21,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transform:translateY(-100%);transition:transform .5s var(--ease)}
+.topbar.on{transform:none}
+.topbar .row{max-width:980px;margin-inline:auto;height:var(--bar);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px}
+.logo-end{font-family:'Allura',cursive;font-size:34px;line-height:1;visibility:hidden;white-space:nowrap;padding:0 .08em}
+.tb-btns{display:flex;gap:8px}
+.ibtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--text);display:grid;place-items:center;cursor:pointer;transition:background .3s var(--ease),border-color .3s var(--ease)}
+.ibtn:hover,.ibtn[aria-expanded="true"]{background:rgba(255,253,246,.1);border-color:rgba(255,253,246,.4)}
+.ibtn svg{width:18px;height:18px}
+.ibtn .dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--cream);transform:translate(11px,-11px);display:none}
+.ibtn.has .dot{display:block}
+.chips{max-width:980px;margin-inline:auto;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 16px 11px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:13.5px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;white-space:nowrap;transition:background .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
 .chip:hover{border-color:rgba(255,253,246,.4);color:var(--text)}
 .chip.on{background:var(--cream);color:var(--ink);border-color:var(--cream);font-weight:500}
-.search{display:flex;align-items:center;gap:10px;padding:0 16px 12px;max-width:980px;margin-inline:auto}
-.search input{flex:1;min-width:0;font-family:inherit;font-size:15px;font-weight:300;color:var(--text);background:rgba(255,253,246,.06);border:1px solid var(--line);border-radius:12px;padding:10px 14px 10px 38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFA6A0' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px 50%;background-size:17px}
+.panel{max-width:980px;margin-inline:auto;padding:0 16px;display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--ease)}
+.panel>div{overflow:hidden}
+.panel.open{grid-template-rows:1fr}
+.panel .in{padding-bottom:14px}
+.search input{width:100%;font-family:inherit;font-size:15px;font-weight:300;color:var(--text);background:rgba(255,253,246,.06);border:1px solid var(--line);border-radius:12px;padding:10px 14px 10px 38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23BFA6A0' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px 50%;background-size:17px}
 .search input::placeholder{color:var(--text-3)}
 .search input:focus{outline:none;border-color:rgba(255,253,246,.45)}
+.flt-h{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);font-weight:500;margin:14px 0 8px}
+.flt{display:flex;flex-wrap:wrap;gap:6px}
+.flt button{font-size:13px;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+.flt button[aria-pressed="true"]{background:var(--cream);color:var(--ink);border-color:var(--cream);font-weight:500;text-decoration:line-through;text-decoration-thickness:1px}
+.flt button.diet[aria-pressed="true"]{text-decoration:none}
 
-/* sections */
-main{padding-bottom:40px}
-.sec{padding-top:44px}
+/* ---------- opening spread (sticky contents page) ---------- */
+.opening{position:relative;height:200vh;height:200svh}
+.toc{position:sticky;top:0;height:100vh;height:100svh;display:flex;align-items:center;justify-content:center;padding:calc(var(--bar) + 54px) 16px 28px}
+.paper{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:linear-gradient(180deg,var(--cream-2),#F6EBD6);color:var(--ink);border-radius:4px 14px 14px 4px;padding:clamp(26px,5vw,44px) clamp(22px,5vw,46px);box-shadow:0 40px 80px -40px rgba(0,0,0,.8),inset 10px 0 18px -12px rgba(74,24,38,.35);scrollbar-width:none}
+.paper::-webkit-scrollbar{display:none}
+.paper .eb{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.paper h2{margin:6px 0 18px;font-family:'Allura',cursive;font-weight:400;font-size:clamp(46px,9vw,60px);line-height:1}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li a{display:flex;align-items:baseline;gap:12px;padding:9px 0;color:var(--ink);text-decoration:none;font-size:16.5px;border-bottom:1px solid var(--line-ink)}
+.toc li a:hover b{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.toc li i{font-style:normal;width:34px;flex:none;font-size:11.5px;letter-spacing:.14em;color:var(--ink-soft)}
+.toc li b{font-weight:400}
+.toc li em{flex:1;border-bottom:1px dotted rgba(74,24,38,.28);transform:translateY(-5px);min-width:12px}
+.toc li span{font-size:13px;color:var(--ink-soft);white-space:nowrap}
+.legend{margin-top:20px;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.legend b{font-weight:500;color:var(--ink)}
+
+/* ---------- sections ---------- */
+main{padding-bottom:30px}
+.sec{padding-top:56px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-.sec-head h2{margin:0;font-weight:400;font-size:clamp(26px,5vw,34px);letter-spacing:-.015em;line-height:1.1}
+.sec-head h2{margin:0;font-weight:400;font-size:clamp(26px,5vw,34px);letter-spacing:-.015em;line-height:1.1;display:flex;align-items:baseline;gap:14px}
+.sec-head h2 i{font-style:normal;font-size:12px;letter-spacing:.2em;color:var(--text-3);font-weight:500}
 .sec-head .n{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-3);font-weight:500;white-space:nowrap}
-.sec-note{color:var(--text-3);font-size:14px;margin:-6px 0 18px}
 
-/* drinks list */
+/* page-turn entrance */
+.flip{transform-origin:0% 0%;opacity:0;transform:perspective(1400px) rotateY(24deg) translateY(24px);transition:opacity .9s var(--ease),transform 1.1s var(--ease)}
+.flip.in{opacity:1;transform:none}
+
+/* drinks */
 .drinks{display:grid;grid-template-columns:1fr 1fr;gap:0 44px}
-.dr{display:flex;align-items:baseline;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.dr{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}
+.dr:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
 .dr .t{min-width:0}
 .dr b{display:block;font-weight:500;font-size:16.5px;color:var(--text)}
 .dr small{display:block;font-size:13.5px;color:var(--text-3);margin-top:2px;line-height:1.4}
 .dr .lead{flex:1;border-bottom:1px dotted rgba(255,253,246,.22);transform:translateY(-5px);min-width:16px}
+.dr:hover b{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
 .price{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.al{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.al s{text-decoration:none;font-size:11px;line-height:1;border:1px solid var(--line);color:var(--text-2);border-radius:999px;padding:3px 7px}
+.al s.ok{border-color:rgba(255,253,246,.28);color:var(--text)}
 
 /* product grid */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;background:var(--cream);color:var(--ink);border-radius:16px;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);box-shadow:0 1px 0 rgba(255,255,255,.04),0 18px 36px -22px rgba(0,0,0,.6)}
+.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;background:var(--cream);color:var(--ink);border-radius:16px;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);box-shadow:0 18px 36px -22px rgba(0,0,0,.6)}
 .card:hover{transform:translateY(-3px);box-shadow:0 26px 44px -22px rgba(0,0,0,.7)}
 .card:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
 .card .ph{aspect-ratio:3/2;background:var(--cream-3);overflow:hidden}
 .card .ph img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
 .card:hover .ph img{transform:scale(1.04)}
-.card .tx{padding:13px 14px 15px;display:flex;flex-direction:column;gap:4px;flex:1}
+.card .tx{padding:13px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
 .card .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .card b{font-weight:500;font-size:16px;line-height:1.25}
 .card .price{color:var(--ink)}
 .card small{font-size:13px;color:var(--ink-soft);line-height:1.4}
+.card .al{margin-top:auto;padding-top:6px}
+.card .al s{border-color:var(--line-ink);color:var(--ink-soft)}
+.card .al s.ok{border-color:rgba(74,24,38,.3);color:var(--ink)}
 .empty{display:none;text-align:center;color:var(--text-3);padding:60px 0}
 
 /* sheet */
 .sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(20,4,8,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
-.sheet{position:fixed;left:50%;bottom:0;z-index:41;width:min(560px,100%);transform:translate(-50%,105%);background:var(--cream);color:var(--ink);border-radius:22px 22px 0 0;overflow:hidden;transition:transform .5s var(--ease);max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0)}
+.sheet{position:fixed;left:50%;bottom:0;z-index:41;width:min(560px,100%);transform:translate(-50%,105%);background:var(--cream);color:var(--ink);border-radius:22px 22px 0 0;transition:transform .5s var(--ease);max-height:92vh;overflow-y:auto;overscroll-behavior:contain;padding-bottom:env(safe-area-inset-bottom,0)}
 .open .sheet-bg{opacity:1;pointer-events:auto}
 .open .sheet{transform:translate(-50%,0)}
 .sheet .ph{aspect-ratio:3/2;background:var(--cream-3)}
 .sheet .ph img{width:100%;height:100%;object-fit:cover}
+.sheet.noimg .ph{display:none}
+.sheet.noimg .body{padding-top:30px}
 .sheet .body{padding:20px 22px 26px}
 .sheet .cat{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
-.sheet h3{margin:6px 0 0;font-weight:500;font-size:24px;letter-spacing:-.01em;line-height:1.2}
-.sheet p{margin:10px 0 0;color:var(--ink-soft);font-size:15px}
-.sheet .foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--line-ink)}
+.sheet h3{margin:6px 44px 0 0;font-weight:500;font-size:24px;letter-spacing:-.01em;line-height:1.2}
+.sheet .desc{margin:8px 0 0;color:var(--ink-soft);font-size:15px}
+.sheet .diet{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.sheet .diet span{font-size:12px;font-weight:500;background:var(--cream-3);border-radius:999px;padding:4px 10px}
+.sheet h4{margin:20px 0 8px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.sheet .ing{margin:0;font-size:15px;line-height:1.6}
+.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.ag div{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:7px 10px;border-radius:10px;border:1px solid var(--line-ink)}
+.ag div svg{width:14px;height:14px;flex:none}
+.ag .yes{background:var(--ink);color:var(--cream);border-color:var(--ink);font-weight:500}
+.ag .no{color:var(--ink-soft)}
+.sheet .note{margin:12px 0 0;font-size:12px;color:var(--ink-faint);line-height:1.5}
+.sheet .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--line-ink)}
 .sheet .foot .price{font-size:20px;color:var(--ink)}
-.sheet .close{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,253,246,.92);color:var(--ink);font-size:20px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
-.sheet .grab{position:absolute;top:8px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(255,253,246,.85);z-index:1}
+.sheet .close{position:absolute;top:12px;right:12px;z-index:2;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,253,246,.92);color:var(--ink);font-size:20px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.sheet .closewrap{position:sticky;top:0;height:0;z-index:2}
 
 /* footer */
-footer{border-top:1px solid var(--line);margin-top:30px;padding:34px 0 46px;text-align:center}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:34px 0 46px;text-align:center}
 footer .script{font-family:'Allura',cursive;font-size:44px;line-height:1}
-footer p{margin:10px auto 0;color:var(--text-3);font-size:13.5px;max-width:40ch}
-footer a{color:var(--text-2)}
+footer p{margin:10px auto 0;color:var(--text-3);font-size:13.5px;max-width:46ch}
 .made{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:12.5px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
 .made i{font-style:normal;font-family:'Allura',cursive;font-size:20px;line-height:1}
 
-/* reveal */
-.rv{opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
-.rv.in{opacity:1;transform:none}
-
 @media (max-width:820px){.grid{grid-template-columns:1fr 1fr;gap:12px}.drinks{grid-template-columns:1fr}}
 @media (max-width:420px){
-  .card .tx{padding:11px 11px 13px}
+  .card .tx{padding:11px 11px 12px}
   .card b{font-size:15px}
   .card small{display:none}
+  .logo-end{font-size:30px}
 }
+@media (max-height:640px){.toc li a{padding:6px 0;font-size:15px}.paper h2{margin-bottom:10px}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none!important;animation:none!important}
-  .rv{opacity:1;transform:none}
-  html{scroll-behavior:auto}
+  .flip{opacity:1;transform:none}
 }
 </style>
 </head>
@@ -131,37 +203,86 @@ footer a{color:var(--text-2)}
 <div class="env" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
-<header class="mast wrap">
-  <h1 class="script">Cafe Carte</h1>
-  <span class="pill">Menü</span>
-  <p class="tag">Kahve, fırından taze lezzetler ve ev yapımı tatlılar.</p>
-  <div class="orn">Afiyet olsun</div>
+<!-- cover -->
+<div class="book" id="book">
+  <div class="cover" id="cover" role="button" tabindex="0" aria-label="Menü kapağı. Açmak için dokunun ya da kaydırın.">
+    <div class="face">
+      <div class="frame">
+        <svg class="corner tl" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 18V1h17M5 12V5h7"/></svg>
+        <svg class="corner tr" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 18V1h17M5 12V5h7"/></svg>
+        <svg class="corner bl" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 18V1h17M5 12V5h7"/></svg>
+        <svg class="corner br" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 18V1h17M5 12V5h7"/></svg>
+      </div>
+      <div class="top">Kahve · Mutfak · Tatlı</div>
+      <div class="mid">
+        <span class="logo-start" id="logoStart" aria-hidden="true">Cafe Carte</span>
+        <span class="pill">Menü</span>
+        <p class="tag">Kahve, fırından taze lezzetler ve ev yapımı tatlılar.</p>
+        <div class="rule">Afiyet olsun</div>
+      </div>
+      <div class="bottom"><span>Sayfayı çevirmek için kaydırın</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></div>
+      <div class="shade" id="shade"></div>
+    </div>
+    <div class="back"></div>
+  </div>
+</div>
+
+<h1 class="flylogo" id="fly"><a href="#top" id="flyLink" tabindex="-1">Cafe Carte</a></h1>
+
+<header class="topbar" id="topbar">
+  <div class="row">
+    <span class="logo-end" id="logoEnd" aria-hidden="true">Cafe Carte</span>
+    <div class="tb-btns">
+      <button class="ibtn" id="fBtn" type="button" aria-expanded="false" aria-controls="panel" aria-label="Ara ve alerjen filtrele">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="dot"></span>
+      </button>
+    </div>
+  </div>
+  <div class="panel" id="panel"><div><div class="in">
+    <div class="search"><label class="sr" for="q">Menüde ara</label><input id="q" type="search" placeholder="Ürün ya da içerik ara (ör. fıstık, mantar)" autocomplete="off"></div>
+    <div class="flt-h">Bu alerjenleri içermesin</div>
+    <div class="flt" id="fltA"></div>
+    <div class="flt-h">Tercih</div>
+    <div class="flt" id="fltD"></div>
+  </div></div></div>
+  <nav class="chips" id="chips" aria-label="Menü bölümleri"></nav>
 </header>
 
-<nav class="catbar" aria-label="Menü bölümleri">
-  <div class="inner" id="chips"></div>
-  <div class="search"><label class="sr" for="q">Menüde ara</label><input id="q" type="search" placeholder="Menüde ara" autocomplete="off"></div>
-</nav>
+<div class="opening" id="top">
+  <div class="toc">
+    <div class="paper">
+      <div class="eb">Cafe Carte · Menü</div>
+      <h2>İçindekiler</h2>
+      <ol id="tocList"></ol>
+      <p class="legend">Her ürüne dokunarak <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. Üstteki arama düğmesinden istemediğiniz alerjenleri gizleyin.</p>
+    </div>
+  </div>
+</div>
 
 <main class="wrap" id="menu"></main>
-<p class="empty wrap" id="empty">Aradığın ürün bulunamadı.</p>
+<p class="empty wrap" id="empty">Bu seçimlere uyan ürün bulunamadı.</p>
 
 <footer class="wrap">
   <div class="script">Cafe Carte</div>
-  <p>Fiyatlar güncellenmektedir. Alerjen bilgisi için lütfen ekibimize danışın. Görseller temsilidir.</p>
+  <p>Fiyatlar güncellenmektedir. Alerjen ve içerik bilgileri temsilidir; mutfağımızda tüm alerjenler işlendiğinden eser miktarda bulaşma olabilir. Alerjiniz varsa lütfen sipariş öncesi ekibimize bildirin. Görseller temsilidir.</p>
   <a class="made" href="https://cartemenusistemleri.com.tr/">Bu menü <i>Carte</i> ile hazırlandı</a>
 </footer>
 
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle" hidden>
-  <span class="grab" aria-hidden="true"></span>
-  <button class="close" id="sClose" type="button" aria-label="Kapat">×</button>
-  <div class="ph"><img id="sImg" src="" alt=""></div>
+  <div class="closewrap"><button class="close" id="sClose" type="button" aria-label="Kapat">×</button></div>
+  <div class="ph"><img id="sImg" src="data:," alt=""></div>
   <div class="body">
     <div class="cat" id="sCat"></div>
     <h3 id="sTitle"></h3>
-    <p id="sDesc"></p>
-    <div class="foot"><span style="color:var(--ink-soft);font-size:14px">Fiyat</span><span class="price" id="sPrice">-</span></div>
+    <p class="desc" id="sDesc"></p>
+    <div class="diet" id="sDiet"></div>
+    <h4>İçindekiler</h4>
+    <p class="ing" id="sIng"></p>
+    <h4>Alerjenler</h4>
+    <div class="ag" id="sAg"></div>
+    <p class="note">Bilgiler temsilidir. Ortak mutfakta eser miktarda bulaşma olabilir.</p>
+    <div class="foot"><span style="color:var(--ink-soft);font-size:14px">Fiyat</span><span class="price">-</span></div>
   </div>
 </div>
 
@@ -169,137 +290,217 @@ footer a{color:var(--text-2)}
 (function(){
   'use strict';
   var P = '-';
+  var AL = { g:'Gluten', s:'Süt', y:'Yumurta', k:'Sert kabuklu', yf:'Yer fıstığı', su:'Susam', so:'Soya', ke:'Kereviz', h:'Hardal', sl:'Sülfit', b:'Balık' };
+  var AL_KEYS = ['g','s','y','k','yf','su','so','ke','h','sl','b'];
+  var DIET = { v:'Vejetaryen', vg:'Vegan', gf:'Glutensiz' };
+  /* drinks: [ad, açıklama, içindekiler, alerjenler, diyet]  items: [ad, açıklama, görsel, içindekiler, alerjenler, diyet] */
   var MENU = [
     { id:'sicak', title:'Sıcak İçecekler', drinks:[
-      ['Türk Kahvesi','Közde pişirilir, lokum eşliğinde'],
-      ['Damla Sakızlı Türk Kahvesi','Sakızın ferah kokusuyla'],
-      ['Espresso','Tek shot, yoğun ve dengeli'],
-      ['Double Espresso','Çift shot'],
-      ['Americano','Espresso ve sıcak su'],
-      ['Cappuccino','Espresso, süt ve yoğun köpük'],
-      ['Caffè Latte','Espresso ve kadifemsi süt'],
-      ['Flat White','Çift ristretto, ince süt köpüğü'],
-      ['Cortado','Espresso ve az süt'],
-      ['Mocha','Espresso, çikolata ve süt'],
-      ['Caramel Macchiato','Vanilya, süt, espresso ve karamel'],
-      ['Sıcak Çikolata','Belçika çikolatası ile'],
-      ['Salep','Tarçın serpilerek'],
-      ['Demleme Çay','İnce belli bardakta'],
-      ['Bitki Çayları','Ihlamur, papatya, yeşil çay, adaçayı']
+      ['Türk Kahvesi','Közde pişirilir, lokum eşliğinde','Çekilmiş Türk kahvesi, su. Yanında lokum (şeker, nişasta, gül aroması).','','vg'],
+      ['Damla Sakızlı Türk Kahvesi','Sakızın ferah kokusuyla','Türk kahvesi, damla sakızı, su. Yanında lokum.','','vg'],
+      ['Espresso','Tek shot, yoğun ve dengeli','%100 Arabica espresso harmanı, su.','','vg'],
+      ['Double Espresso','Çift shot','%100 Arabica espresso harmanı, su.','','vg'],
+      ['Americano','Espresso ve sıcak su','Espresso, sıcak su.','','vg'],
+      ['Cappuccino','Espresso, süt ve yoğun köpük','Espresso, tam yağlı süt, süt köpüğü.','s','v'],
+      ['Caffè Latte','Espresso ve kadifemsi süt','Espresso, tam yağlı süt.','s','v'],
+      ['Flat White','Çift ristretto, ince süt köpüğü','Çift ristretto, tam yağlı süt.','s','v'],
+      ['Cortado','Espresso ve az süt','Espresso, az miktarda ılık süt.','s','v'],
+      ['Mocha','Espresso, çikolata ve süt','Espresso, bitter çikolata sosu (kakao, şeker, soya lesitini), süt, krem şanti.','s,so','v'],
+      ['Caramel Macchiato','Vanilya, süt, espresso ve karamel','Vanilya şurubu, süt, espresso, karamel sos (şeker, krema, tereyağı).','s','v'],
+      ['Sıcak Çikolata','Belçika çikolatası ile','Belçika çikolatası (kakao, şeker, soya lesitini), süt, krema.','s,so','v'],
+      ['Salep','Tarçın serpilerek','Salep tozu, süt, şeker, tarçın.','s','v'],
+      ['Demleme Çay','İnce belli bardakta','Rize çayı, su.','','vg'],
+      ['Bitki Çayları','Ihlamur, papatya, yeşil çay, adaçayı','Kurutulmuş bitkiler (ıhlamur, papatya, yeşil çay ya da adaçayı), su.','','vg']
     ]},
     { id:'soguk', title:'Soğuk İçecekler', drinks:[
-      ['Iced Americano','Espresso, buz ve soğuk su'],
-      ['Iced Latte','Espresso, soğuk süt ve buz'],
-      ['Iced Mocha','Çikolata, espresso ve soğuk süt'],
-      ['Cold Brew','16 saat soğuk demleme'],
-      ['Frappé','Karamel, çikolata ya da vanilya'],
-      ['Ev Yapımı Limonata','Taze limon ve nane'],
-      ['Çilekli Limonata','Taze çilek püresiyle'],
-      ['Ev Yapımı Ice Tea','Şeftali ya da orman meyveli'],
-      ['Milkshake','Çilek, çikolata ya da vanilya'],
-      ['Smoothie','Orman meyveli ya da muz ve yer fıstığı'],
-      ['Taze Portakal Suyu','Siparişle sıkılır'],
-      ['Soda','Sade ya da limonlu'],
-      ['Su','Cam şişe, 330 ml']
+      ['Iced Americano','Espresso, buz ve soğuk su','Espresso, soğuk su, buz.','','vg'],
+      ['Iced Latte','Espresso, soğuk süt ve buz','Espresso, soğuk süt, buz.','s','v'],
+      ['Iced Mocha','Çikolata, espresso ve soğuk süt','Espresso, çikolata sosu (kakao, şeker, soya lesitini), soğuk süt, buz.','s,so','v'],
+      ['Cold Brew','16 saat soğuk demleme','16 saat soğuk demlenmiş kahve, buz.','','vg'],
+      ['Frappé','Karamel, çikolata ya da vanilya','Kahve, süt, buz, aromalı şurup, krem şanti.','s','v'],
+      ['Ev Yapımı Limonata','Taze limon ve nane','Taze sıkılmış limon, şeker, taze nane, su.','','vg'],
+      ['Çilekli Limonata','Taze çilek püresiyle','Taze limon, çilek püresi, şeker, nane, su.','','vg'],
+      ['Ev Yapımı Ice Tea','Şeftali ya da orman meyveli','Demlenmiş siyah çay, şeftali ya da orman meyvesi, şeker, limon.','','vg'],
+      ['Milkshake','Çilek, çikolata ya da vanilya','Dondurma (süt, krema, yumurta sarısı, şeker), süt, meyve ya da çikolata sos, krem şanti.','s,y','v'],
+      ['Smoothie','Orman meyveli ya da muz ve yer fıstığı','Orman meyveleri ya da muz, yoğurt, bal. Muzlu çeşitte yer fıstığı ezmesi.','s,yf','v'],
+      ['Taze Portakal Suyu','Siparişle sıkılır','Taze sıkılmış portakal.','','vg'],
+      ['Soda','Sade ya da limonlu','Doğal mineralli su, isteğe bağlı limon.','','vg'],
+      ['Su','Cam şişe, 330 ml','Doğal kaynak suyu.','','vg']
     ]},
     { id:'firin', title:'Fırın ve Kahvaltı', items:[
-      ['Sade Kruvasan','Tereyağlı, kat kat','sade-kruvasan'],
-      ['Antep Fıstıklı Kruvasan','Fıstık kreması ve fıstık parçaları','fistikli-kruvasan'],
-      ['Çikolatalı Bademli Kruvasan','Bitter çikolata ve kavrulmuş badem','cikolatali-kruvasan'],
-      ['Çilekli Kruvasan','Taze çilek ve krema','cilekli-kruvasan'],
-      ['Su Böreği','İnce yufka, beyaz peynir','su-boregi'],
-      ['Girit Böreği','Otlu ve peynirli','girit-boregi'],
-      ['Talaş Böreği','Kıymalı, çıtır milföy','talas-boregi'],
-      ['Patlıcanlı Milföy','Közlenmiş patlıcan ile','patlicanli-milfoy']
+      ['Sade Kruvasan','Tereyağlı, kat kat','sade-kruvasan','Buğday unu, tereyağı, süt, yumurta, maya, şeker, tuz.','g,s,y','v'],
+      ['Antep Fıstıklı Kruvasan','Fıstık kreması ve fıstık parçaları','fistikli-kruvasan','Kruvasan hamuru (buğday unu, tereyağı, süt, yumurta), Antep fıstığı kreması, Antep fıstığı.','g,s,y,k','v'],
+      ['Çikolatalı Bademli Kruvasan','Bitter çikolata ve kavrulmuş badem','cikolatali-kruvasan','Kruvasan hamuru, bitter çikolata (soya lesitini), kavrulmuş badem, pudra şekeri.','g,s,y,k,so','v'],
+      ['Çilekli Kruvasan','Taze çilek ve krema','cilekli-kruvasan','Kruvasan hamuru, taze çilek, krem şanti.','g,s,y','v'],
+      ['Su Böreği','İnce yufka, beyaz peynir','su-boregi','Haşlanmış yufka (buğday unu, yumurta), beyaz peynir, maydanoz, tereyağı.','g,s,y','v'],
+      ['Girit Böreği','Otlu ve peynirli','girit-boregi','Yufka, lor peyniri, ıspanak, dereotu, taze soğan, tereyağı, yumurta.','g,s,y','v'],
+      ['Talaş Böreği','Kıymalı, çıtır milföy','talas-boregi','Milföy hamuru (un, tereyağı), dana kıyma, soğan, bezelye, havuç, yumurta sarısı.','g,s,y',''],
+      ['Patlıcanlı Milföy','Közlenmiş patlıcan ile','patlicanli-milfoy','Milföy hamuru, közlenmiş patlıcan, kaşar peyniri, domates, yumurta sarısı.','g,s,y','v']
     ]},
     { id:'mutfak', title:'Mutfak', items:[
-      ['Sezar Salata','Izgara tavuk, parmesan, kruton','sezar'],
-      ['Roka Salata','Roka, parmesan, ceviz','roka'],
-      ['Tavuklu Krep','Kremalı tavuk ve sebzeler','tavuklu-krep'],
-      ['Tagliatelle Alfredo','Kremalı mantar ve tavuk','alfredo'],
-      ['Penne Arabiata','Acı domates sosu','arabiata'],
-      ['Spaghetti Bolonez','Ağır ateşte kıymalı sos','bolonez'],
-      ['Kasap Sucuklu Pizza','Kasap sucuk ve mozzarella','sucuklu-pizza'],
-      ['Enginarlı Pizza','Enginar, zeytin, kırmızı soğan','enginarli-pizza'],
-      ['Klasik Burger','Dana köfte, patates kızartması','burger'],
-      ['Cheese Burger','Cheddar ile, patates kızartması','cheeseburger'],
-      ['Köri Soslu Piliç','Köri sos, sebze ve patates','kori-pilic'],
-      ['Schnitzel Milanese','Çıtır dana, limon ve yeşillik','schnitzel'],
-      ['Izgara Dana','Izgara sebze ve patates ile','bonfile']
+      ['Sezar Salata','Izgara tavuk, parmesan, kruton','sezar','Göbek marul, ızgara tavuk, parmesan, kruton, sezar sos (yumurta, hardal, ançüez, sarımsak, zeytinyağı).','g,s,y,h,b',''],
+      ['Roka Salata','Roka, parmesan, ceviz','roka','Roka, parmesan, ceviz, cherry domates, nar ekşili zeytinyağı sos.','s,k','v,gf'],
+      ['Tavuklu Krep','Kremalı tavuk ve sebzeler','tavuklu-krep','Krep (buğday unu, süt, yumurta), tavuk, mantar, biber, krema, kaşar peyniri.','g,s,y',''],
+      ['Tagliatelle Alfredo','Kremalı mantar ve tavuk','alfredo','Yumurtalı tagliatelle (durum buğdayı), tavuk, mantar, krema, parmesan, sarımsak.','g,s,y',''],
+      ['Penne Arabiata','Acı domates sosu','arabiata','Penne (durum buğdayı), domates sos, sarımsak, kırmızı pul biber, zeytinyağı, fesleğen.','g','vg'],
+      ['Spaghetti Bolonez','Ağır ateşte kıymalı sos','bolonez','Spaghetti, dana kıyma, domates, havuç, kereviz sapı, soğan, parmesan.','g,s,ke',''],
+      ['Kasap Sucuklu Pizza','Kasap sucuk ve mozzarella','sucuklu-pizza','Pizza hamuru (buğday unu, maya, zeytinyağı), domates sos, mozzarella, kasap sucuk.','g,s',''],
+      ['Enginarlı Pizza','Enginar, zeytin, kırmızı soğan','enginarli-pizza','Pizza hamuru, domates sos, mozzarella, enginar, siyah zeytin, kırmızı soğan.','g,s','v'],
+      ['Klasik Burger','Dana köfte, patates kızartması','burger','Susamlı brioche ekmek (un, yumurta, süt), dana köfte, marul, domates, turşu, burger sos (hardal, mayonez). Yanında patates kızartması.','g,s,y,su,h',''],
+      ['Cheese Burger','Cheddar ile, patates kızartması','cheeseburger','Susamlı brioche ekmek, dana köfte, cheddar, karamelize soğan, turşu, burger sos (hardal, mayonez). Yanında patates kızartması.','g,s,y,su,h',''],
+      ['Köri Soslu Piliç','Köri sos, sebze ve patates','kori-pilic','Tavuk göğsü, köri sos (krema, köri baharatı, kereviz), mevsim sebzeleri, patates.','s,ke','gf'],
+      ['Schnitzel Milanese','Çıtır dana, limon ve yeşillik','schnitzel','Dana eti, buğday unu, yumurta, galeta unu, limon, roka, patates.','g,y',''],
+      ['Izgara Dana','Izgara sebze ve patates ile','bonfile','Dana bonfile, ızgara sebze, fırın patates, tereyağı, kekik.','s','gf']
     ]},
     { id:'pasta', title:'Pastalar', items:[
-      ['Antep Fıstıklı Pasta','Fıstık kreması, ince çikolata kaplama','fistik-pasta'],
-      ['Beyaz İnci','Beyaz çikolata ve hafif krema','beyaz-inci'],
-      ['Pavlova','Beze rulo, krema ve taze çilek','pavlova'],
-      ['Çikolatalı Rulo','Çikolata kaplı rulo, taze çilek','cilekli-rulo'],
-      ['Tartolet','Vanilyalı krema, taze çilek','tartolet'],
-      ['Ekler','Çikolata kaplı, kremalı','ekler'],
-      ['Mozaik Pasta','Bisküvi ve kakao','mozaik'],
-      ['Çikolata Krokan','Fındık krokan, çikolata mus','krokan']
+      ['Antep Fıstıklı Pasta','Fıstık kreması, ince çikolata kaplama','fistik-pasta','Pandispanya (un, yumurta, şeker), Antep fıstığı kreması, krema, beyaz çikolata.','g,s,y,k,so','v'],
+      ['Beyaz İnci','Beyaz çikolata ve hafif krema','beyaz-inci','Pandispanya, beyaz çikolata ganaj (soya lesitini), krem şanti.','g,s,y,so','v'],
+      ['Pavlova','Beze rulo, krema ve taze çilek','pavlova','Beze (yumurta akı, şeker), krem şanti, taze çilek.','s,y','v,gf'],
+      ['Çikolatalı Rulo','Çikolata kaplı rulo, taze çilek','cilekli-rulo','Kakaolu pandispanya, krema, bitter çikolata, taze çilek.','g,s,y,so','v'],
+      ['Tartolet','Vanilyalı krema, taze çilek','tartolet','Tart hamuru (un, tereyağı, yumurta), vanilyalı pastacı kreması, taze çilek.','g,s,y','v'],
+      ['Ekler','Çikolata kaplı, kremalı','ekler','Ekler hamuru (un, tereyağı, yumurta), pastacı kreması, bitter çikolata.','g,s,y,so','v'],
+      ['Mozaik Pasta','Bisküvi ve kakao','mozaik','Petibör bisküvi, kakao, tereyağı, süt, şeker.','g,s,so','v'],
+      ['Çikolata Krokan','Fındık krokan, çikolata mus','krokan','Çikolatalı mus, fındık krokan, kakaolu pandispanya.','g,s,y,k,so','v']
     ]},
     { id:'cheesecake', title:'Cheesecake', items:[
-      ['San Sebastian','Yanık yüzeyli, akışkan iç','san-sebastian'],
-      ['Frambuazlı Cheesecake','Frambuaz sosu ile','frambuaz-cheesecake'],
-      ['Limonlu Cheesecake','Limon kremalı','limon-cheesecake'],
-      ['Vişneli Cheesecake','Ev yapımı vişne sos','visne-cheesecake']
+      ['San Sebastian','Yanık yüzeyli, akışkan iç','san-sebastian','Krem peynir, krema, yumurta, şeker, az miktar un.','g,s,y','v'],
+      ['Frambuazlı Cheesecake','Frambuaz sosu ile','frambuaz-cheesecake','Bisküvi tabanı, tereyağı, krem peynir, krema, yumurta, frambuaz sosu.','g,s,y','v'],
+      ['Limonlu Cheesecake','Limon kremalı','limon-cheesecake','Bisküvi tabanı, krem peynir, yumurta, limon kreması.','g,s,y','v'],
+      ['Vişneli Cheesecake','Ev yapımı vişne sos','visne-cheesecake','Bisküvi tabanı, krem peynir, krema, yumurta, ev yapımı vişne sos.','g,s,y','v']
     ]},
     { id:'sutlu', title:'Sütlü Tatlılar', items:[
-      ['Tiramisu','Mascarpone, espresso, kakao','tiramisu'],
-      ['Trileçe','Üç sütlü, karamel','trilece'],
-      ['Profiterol','Kremalı top, çikolata sos','profiterol'],
-      ['Fırın Sütlaç','Fırında kızartılmış','sutlac'],
-      ['Kazandibi','Tavada yakılmış, tarçınlı','kazandibi'],
-      ['Supangle','Yoğun kakaolu puding','supangle']
+      ['Tiramisu','Mascarpone, espresso, kakao','tiramisu','Kedi dili bisküvi, mascarpone, yumurta, espresso, kakao.','g,s,y','v'],
+      ['Trileçe','Üç sütlü, karamel','trilece','Pandispanya, süt, krema, kondanse süt, karamel.','g,s,y','v'],
+      ['Profiterol','Kremalı top, çikolata sos','profiterol','Choux hamuru (un, tereyağı, yumurta), pastacı kreması, çikolata sos.','g,s,y,so','v'],
+      ['Fırın Sütlaç','Fırında kızartılmış','sutlac','Süt, pirinç, şeker, pirinç unu, vanilya.','s','v,gf'],
+      ['Kazandibi','Tavada yakılmış, tarçınlı','kazandibi','Süt, şeker, pirinç unu, mısır nişastası, tereyağı, tarçın.','s','v,gf'],
+      ['Supangle','Yoğun kakaolu puding','supangle','Süt, kakao, bitter çikolata, nişasta, şeker. Üzerinde kek kırıntısı.','g,s,y,so','v']
     ]},
     { id:'serbetli', title:'Şerbetli Tatlılar', items:[
-      ['Antep Fıstıklı Baklava','Kırk kat yufka, bol fıstık','fistikli-baklava'],
-      ['Soğuk Baklava','Sütlü şerbet, kakao','soguk-baklava'],
-      ['Şöbiyet','Kaymaklı, fıstıklı','sobiyet'],
-      ['Fıstıklı Yassı Kadayıf','Tel kadayıf, Antep fıstığı','yassi-kadayif']
+      ['Antep Fıstıklı Baklava','Kırk kat yufka, bol fıstık','fistikli-baklava','Baklava yufkası (un, yumurta, nişasta), tereyağı, Antep fıstığı, şerbet.','g,s,y,k','v'],
+      ['Soğuk Baklava','Sütlü şerbet, kakao','soguk-baklava','Yufka, ceviz, sütlü şerbet, kakao.','g,s,y,k','v'],
+      ['Şöbiyet','Kaymaklı, fıstıklı','sobiyet','Yufka, kaymak, Antep fıstığı, tereyağı, şerbet.','g,s,y,k','v'],
+      ['Fıstıklı Yassı Kadayıf','Tel kadayıf, Antep fıstığı','yassi-kadayif','Tel kadayıf (un, su), tereyağı, Antep fıstığı, şerbet.','g,s,k','v']
     ]},
     { id:'kek', title:'Kek ve Kurabiye', items:[
-      ['Çikolatalı Islak Kek','Sıcak servis edilir','islak-kek'],
-      ['Cevizli Brownie','Yoğun çikolata, ceviz','browni'],
-      ['Havuçlu Kek','Limon kremalı','havuclu-kek'],
-      ['Makaron','Günün renkleri','makaron']
+      ['Çikolatalı Islak Kek','Sıcak servis edilir','islak-kek','Un, kakao, yumurta, süt, şeker, ayçiçek yağı, çikolata sos.','g,s,y,so','v'],
+      ['Cevizli Brownie','Yoğun çikolata, ceviz','browni','Bitter çikolata, tereyağı, yumurta, un, şeker, ceviz.','g,s,y,k,so','v'],
+      ['Havuçlu Kek','Limon kremalı','havuclu-kek','Havuç, un, yumurta, tarçın, ceviz, krem peynirli limon kreması.','g,s,y,k','v'],
+      ['Makaron','Günün renkleri','makaron','Badem unu, yumurta akı, şeker, ganaj ya da krema dolgu.','s,y,k','v,gf']
     ]},
     { id:'dondurma', title:'Dondurma', items:[
-      ['Porsiyon Dondurma','Günün çeşitlerinden üç top','dondurma'],
-      ['Çikolata Vanilya','Sekiz top, paylaşmalık','dondurma-2']
+      ['Porsiyon Dondurma','Günün çeşitlerinden üç top','dondurma','Maraş usulü dondurma: süt, şeker, salep. Meyveli çeşitler.','s','v,gf'],
+      ['Çikolata Vanilya','Sekiz top, paylaşmalık','dondurma-2','Süt, krema, şeker, kakao, vanilya.','s','v,gf']
     ]}
   ];
+  var ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
 
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
-  var menu = document.getElementById('menu'), chips = document.getElementById('chips');
-  var html = '', chipHtml = '';
-  MENU.forEach(function(s){
-    var count = (s.items || s.drinks).length;
+  function codes(str){ return str ? str.split(',') : []; }
+  function alHtml(a){
+    if (!a.length) return '<span class="al"><s class="ok">Alerjen içermez</s></span>';
+    return '<span class="al">' + a.map(function(k){ return '<s>'+AL[k]+'</s>'; }).join('') + '</span>';
+  }
+
+  var DATA = []; /* flat list for sheet */
+  var menu = document.getElementById('menu'), chips = document.getElementById('chips'), toc = document.getElementById('tocList');
+  var html = '', chipHtml = '', tocHtml = '';
+  MENU.forEach(function(s, si){
+    var list = s.items || s.drinks, count = list.length;
     chipHtml += '<a class="chip" href="#'+s.id+'" data-id="'+s.id+'">'+esc(s.title)+'</a>';
-    html += '<section class="sec rv" id="'+s.id+'" aria-labelledby="h-'+s.id+'"><div class="sec-head"><h2 id="h-'+s.id+'">'+esc(s.title)+'</h2><span class="n">'+count+' çeşit</span></div>';
-    if (s.drinks){
-      html += '<div class="drinks">' + s.drinks.map(function(d){
-        return '<div class="dr" data-q="'+esc((d[0]+' '+d[1]).toLocaleLowerCase('tr'))+'"><span class="t"><b>'+esc(d[0])+'</b><small>'+esc(d[1])+'</small></span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></div>';
-      }).join('') + '</div>';
-    } else {
-      html += '<div class="grid">' + s.items.map(function(it){
-        return '<button type="button" class="card" data-q="'+esc((it[0]+' '+it[1]).toLocaleLowerCase('tr'))+'" data-n="'+esc(it[0])+'" data-d="'+esc(it[1])+'" data-i="'+it[2]+'" data-c="'+esc(s.title)+'">'+
-          '<span class="ph"><img src="img/'+it[2]+'.webp" alt="'+esc(it[0])+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
-          '<span class="tx"><span class="row"><b>'+esc(it[0])+'</b><span class="price">'+P+'</span></span><small>'+esc(it[1])+'</small></span></button>';
-      }).join('') + '</div>';
-    }
-    html += '</section>';
+    tocHtml += '<li><a href="#'+s.id+'"><i>'+ROMAN[si]+'</i><b>'+esc(s.title)+'</b><em></em><span>'+count+' çeşit</span></a></li>';
+    html += '<section class="sec flip" id="'+s.id+'" aria-labelledby="h-'+s.id+'"><div class="sec-head"><h2 id="h-'+s.id+'"><i>'+ROMAN[si]+'</i>'+esc(s.title)+'</h2><span class="n">'+count+' çeşit</span></div>';
+    html += s.drinks ? '<div class="drinks">' : '<div class="grid">';
+    list.forEach(function(d){
+      var isDrink = !!s.drinks;
+      var o = isDrink ? { n:d[0], d:d[1], img:'', ing:d[2], a:codes(d[3]), diet:codes(d[4]) }
+                      : { n:d[0], d:d[1], img:d[2], ing:d[3], a:codes(d[4]), diet:codes(d[5]) };
+      o.c = s.title;
+      if (o.a.indexOf('g') === -1 && o.diet.indexOf('gf') === -1) o.diet.push('gf');
+      if (o.diet.indexOf('vg') !== -1 && o.diet.indexOf('v') === -1) o.diet.unshift('v');
+      var i = DATA.push(o) - 1;
+      var q = esc((o.n+' '+o.d+' '+o.ing).toLocaleLowerCase('tr'));
+      if (isDrink){
+        html += '<button type="button" class="dr" data-k="'+i+'" data-q="'+q+'"><span class="t"><b>'+esc(o.n)+'</b><small>'+esc(o.d)+'</small>'+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></button>';
+      } else {
+        html += '<button type="button" class="card" data-k="'+i+'" data-q="'+q+'">'+
+          '<span class="ph"><img src="img/'+o.img+'.webp" alt="'+esc(o.n)+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
+          '<span class="tx"><span class="row"><b>'+esc(o.n)+'</b><span class="price">'+P+'</span></span><small>'+esc(o.d)+'</small>'+alHtml(o.a)+'</span></button>';
+      }
+    });
+    html += '</div></section>';
   });
-  menu.innerHTML = html; chips.innerHTML = chipHtml;
+  menu.innerHTML = html; chips.innerHTML = chipHtml; toc.innerHTML = tocHtml;
 
-  /* reveal */
-  var rvs = [].slice.call(document.querySelectorAll('.rv'));
+  /* ---------- cover turn + flying logo ---------- */
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var book = document.getElementById('book'), cover = document.getElementById('cover'), shade = document.getElementById('shade');
+  var fly = document.getElementById('fly'), flyLink = document.getElementById('flyLink'), topbar = document.getElementById('topbar');
+  var ls = document.getElementById('logoStart'), le = document.getElementById('logoEnd');
+  var A = null, B = null, H = innerHeight, lastP = -1;
+  function measure(){
+    H = innerHeight;
+    var prevC = cover.style.transform, prevT = topbar.style.transition, prevTb = topbar.style.transform;
+    cover.style.transform = 'none'; topbar.style.transition = 'none'; topbar.style.transform = 'none';
+    var a = ls.getBoundingClientRect(), b = le.getBoundingClientRect();
+    cover.style.transform = prevC; topbar.style.transform = prevTb; topbar.offsetHeight; topbar.style.transition = prevT;
+    A = { x:a.left, y:a.top, h:a.height }; B = { x:b.left, y:b.top, h:b.height };
+    fly.style.fontSize = getComputedStyle(ls).fontSize;
+    lastP = -1; frame();
+  }
+  function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+  function frame(){
+    raf = null;
+    var y = scrollY, p = Math.min(1, Math.max(0, y / (H*0.9)));
+    if (p !== lastP){
+      lastP = p;
+      var r = reduce ? (p > .02 ? 1 : 0) : p;
+      var ang = -ease(r) * 180;
+      cover.style.transform = 'rotateY(' + ang + 'deg)';
+      shade.style.opacity = Math.min(.55, r*.9);
+      var done = r >= .999;
+      book.style.visibility = done ? 'hidden' : '';
+      cover.style.pointerEvents = r > .3 ? 'none' : '';
+      /* logo flies during first 70% of the turn */
+      var t = reduce ? r : ease(Math.min(1, r/0.7));
+      var s = 1 + (B.h/A.h - 1)*t;
+      fly.style.transform = 'translate(' + (A.x + (B.x-A.x)*t) + 'px,' + (A.y + (B.y-A.y)*t) + 'px) scale(' + s + ')';
+      fly.style.textShadow = t > .5 ? 'none' : '';
+      var barOn = t > .55;
+      topbar.classList.toggle('on', barOn);
+      flyLink.tabIndex = barOn ? 0 : -1;
+    }
+    spy();
+  }
+  var raf = null;
+  addEventListener('scroll', function(){ if (raf === null) raf = requestAnimationFrame(frame); }, { passive:true });
+  addEventListener('resize', function(){ measure(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  addEventListener('load', measure);
+  function turnPage(){ scrollTo({ top: Math.round(H*0.92), behavior: reduce ? 'auto' : 'smooth' }); }
+  cover.addEventListener('click', turnPage);
+  cover.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); turnPage(); } });
+  flyLink.addEventListener('click', function(e){ e.preventDefault(); scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' }); });
+
+  /* smooth in-page links (chips + toc) */
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a[href^="#"]'); if (!a || a === flyLink) return;
+    var el = document.getElementById(a.getAttribute('href').slice(1)); if (!el) return;
+    e.preventDefault();
+    var off = topbar.offsetHeight + 8;
+    scrollTo({ top: el.getBoundingClientRect().top + scrollY - off, behavior: reduce ? 'auto' : 'smooth' });
+  });
+
+  /* page-turn reveal for sections */
+  var flips = [].slice.call(document.querySelectorAll('.flip'));
   if ('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin:'0px 0px -8% 0px' });
-    rvs.forEach(function(el){ io.observe(el); });
-  } else rvs.forEach(function(el){ el.classList.add('in'); });
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin:'0px 0px -10% 0px' });
+    flips.forEach(function(el){ io.observe(el); });
+  } else flips.forEach(function(el){ el.classList.add('in'); });
 
-  /* scroll spy on chips */
+  /* scroll spy */
   var chipEls = [].slice.call(chips.querySelectorAll('.chip')), current = null;
+  var secs = [].slice.call(document.querySelectorAll('.sec'));
   function setChip(id){
     if (id === current) return; current = id;
     chipEls.forEach(function(c){
@@ -307,39 +508,69 @@ footer a{color:var(--text-2)}
       if (on){ var r = c.getBoundingClientRect(), pr = chips.getBoundingClientRect(); if (r.left < pr.left || r.right > pr.right) chips.scrollTo({ left: c.offsetLeft - 16, behavior: 'smooth' }); }
     });
   }
-  var secs = [].slice.call(document.querySelectorAll('.sec')), raf = null;
   function spy(){
-    raf = null; var y = 150, id = secs[0] && secs[0].id;
+    var y = topbar.offsetHeight + 40, id = null;
     secs.forEach(function(s){ if (s.style.display !== 'none' && s.getBoundingClientRect().top <= y) id = s.id; });
     setChip(id);
   }
-  addEventListener('scroll', function(){ if (raf === null) raf = requestAnimationFrame(spy); }, { passive:true });
-  spy();
 
-  /* search */
-  var q = document.getElementById('q'), empty = document.getElementById('empty');
-  q.addEventListener('input', function(){
+  /* search + allergen filter */
+  var q = document.getElementById('q'), empty = document.getElementById('empty'), fBtn = document.getElementById('fBtn'), panel = document.getElementById('panel');
+  var fltA = document.getElementById('fltA'), fltD = document.getElementById('fltD');
+  fltA.innerHTML = AL_KEYS.map(function(k){ return '<button type="button" aria-pressed="false" data-a="'+k+'">'+AL[k]+'</button>'; }).join('');
+  fltD.innerHTML = ['v','vg','gf'].map(function(k){ return '<button type="button" class="diet" aria-pressed="false" data-d="'+k+'">'+DIET[k]+'</button>'; }).join('');
+  var exA = {}, needD = {};
+  function toggleBtn(b, map, key){ var on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); if (on) map[key] = 1; else delete map[key]; apply(); }
+  fltA.addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) toggleBtn(b, exA, b.dataset.a); });
+  fltD.addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) toggleBtn(b, needD, b.dataset.d); });
+  fBtn.addEventListener('click', function(){
+    var open = !panel.classList.contains('open');
+    panel.classList.toggle('open', open); fBtn.setAttribute('aria-expanded', open);
+    if (open) setTimeout(function(){ q.focus({ preventScroll:true }); }, 250);
+  });
+  function apply(){
     var v = q.value.trim().toLocaleLowerCase('tr'), any = false;
+    var ex = Object.keys(exA), nd = Object.keys(needD);
+    fBtn.classList.toggle('has', !!(v || ex.length || nd.length));
     secs.forEach(function(s){
       var vis = 0;
       [].slice.call(s.querySelectorAll('[data-q]')).forEach(function(el){
-        var ok = !v || el.dataset.q.indexOf(v) !== -1; el.style.display = ok ? '' : 'none'; if (ok) vis++;
+        var o = DATA[+el.dataset.k];
+        var ok = (!v || el.dataset.q.indexOf(v) !== -1)
+          && ex.every(function(k){ return o.a.indexOf(k) === -1; })
+          && nd.every(function(k){ return o.diet.indexOf(k) !== -1; });
+        el.style.display = ok ? '' : 'none'; if (ok) vis++;
       });
-      s.style.display = vis ? '' : 'none'; if (vis) { any = true; s.classList.add('in'); }
+      s.style.display = vis ? '' : 'none'; if (vis){ any = true; s.classList.add('in'); }
+      var n = s.querySelector('.sec-head .n'); if (n) n.textContent = vis + ' çeşit';
     });
     empty.style.display = any ? 'none' : 'block';
-  });
+    var menuTop = menu.getBoundingClientRect().top + scrollY - topbar.offsetHeight - 8;
+    if (scrollY < menuTop && (v || ex.length || nd.length)) scrollTo({ top: menuTop });
+    current = null; requestAnimationFrame(spy);
+  }
+  q.addEventListener('input', apply);
 
   /* detail sheet */
   var sheet = document.getElementById('sheet'), bg = document.getElementById('sheetBg'), lastFocus = null;
-  function openSheet(c){
-    lastFocus = c;
-    document.getElementById('sImg').src = 'img/' + c.dataset.i + '.webp';
-    document.getElementById('sImg').alt = c.dataset.n;
-    document.getElementById('sCat').textContent = c.dataset.c;
-    document.getElementById('sTitle').textContent = c.dataset.n;
-    document.getElementById('sDesc').textContent = c.dataset.d;
-    sheet.hidden = false; requestAnimationFrame(function(){ document.body.classList.add('open'); });
+  var ICON_YES = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.8v3.6M8 11h.01"/></svg>';
+  var ICON_NO = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+  function openSheet(el){
+    var o = DATA[+el.dataset.k]; lastFocus = el;
+    sheet.classList.toggle('noimg', !o.img);
+    var img = document.getElementById('sImg');
+    if (o.img){ img.src = 'img/' + o.img + '.webp'; img.alt = o.n; } else { img.removeAttribute('src'); img.alt = ''; }
+    document.getElementById('sCat').textContent = o.c;
+    document.getElementById('sTitle').textContent = o.n;
+    document.getElementById('sDesc').textContent = o.d;
+    document.getElementById('sIng').textContent = o.ing;
+    document.getElementById('sDiet').innerHTML = o.diet.map(function(k){ return '<span>'+DIET[k]+'</span>'; }).join('');
+    var yes = AL_KEYS.filter(function(k){ return o.a.indexOf(k) !== -1; }), no = AL_KEYS.filter(function(k){ return o.a.indexOf(k) === -1; });
+    document.getElementById('sAg').innerHTML =
+      yes.map(function(k){ return '<div class="yes">'+ICON_YES+'İçerir: '+AL[k]+'</div>'; }).join('') +
+      no.map(function(k){ return '<div class="no">'+ICON_NO+AL[k]+' yok</div>'; }).join('');
+    sheet.hidden = false; sheet.scrollTop = 0;
+    requestAnimationFrame(function(){ document.body.classList.add('open'); });
     document.getElementById('sClose').focus({ preventScroll:true });
   }
   function closeSheet(){
@@ -347,10 +578,12 @@ footer a{color:var(--text-2)}
     setTimeout(function(){ sheet.hidden = true; }, 450);
     if (lastFocus) lastFocus.focus({ preventScroll:true });
   }
-  menu.addEventListener('click', function(e){ var c = e.target.closest('.card'); if (c) openSheet(c); });
+  menu.addEventListener('click', function(e){ var c = e.target.closest('[data-k]'); if (c) openSheet(c); });
   bg.addEventListener('click', closeSheet);
   document.getElementById('sClose').addEventListener('click', closeSheet);
   addEventListener('keydown', function(e){ if (e.key === 'Escape' && document.body.classList.contains('open')) closeSheet(); });
+
+  measure();
 })();
 </script>
 </body>
