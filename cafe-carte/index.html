@@ -451,7 +451,7 @@ html.big footer p{font-size:16px}
   <div class="body" id="aBody"></div>
 </div>
 
-<script src="i18n.js"></script>
+<script src="i18n.js?v=20261012b"></script>
 <script>
 (function(){
   'use strict';
@@ -916,6 +916,7 @@ html.big footer p{font-size:16px}
   bBtn.addEventListener('click', function(){ setBig(!document.documentElement.classList.contains('big')); });
 
   /* boot */
+  LANGS.forEach(function(k){ if (k !== 'tr') I18N[k] = Object.assign({}, I18N.tr, I18N[k]); });
   L = pick(); T = I18N[L];
   if (store('cc-big') === '1'){ document.documentElement.classList.add('big'); bBtn.setAttribute('aria-pressed','true'); }
   applyStatic(); render(true); observe(); apply(true); syncCart();
