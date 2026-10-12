@@ -265,6 +265,67 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
 .abtn{display:inline-flex;margin-top:16px;background:var(--ink);color:var(--cream);text-decoration:none;font-weight:500;font-size:15px;border-radius:999px;padding:12px 20px}
 @media (max-width:820px){.act-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:420px){.act{padding:16px 14px}.act b{font-size:15.5px}}
+
+/* Seçtiklerim */
+.dw{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+.dw .dr{flex:1;min-width:0;border-bottom:0}
+.cw{position:relative;display:flex}
+.cw .card{flex:1}
+.add{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;border:1px solid rgba(255,253,246,.35);background:transparent;color:var(--text);transition:background .25s var(--ease),transform .25s var(--ease)}
+.add svg{width:18px;height:18px}
+.add.on{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+.cw .add{position:absolute;top:10px;inset-inline-end:10px;background:rgba(255,253,246,.94);color:var(--ink);border-color:transparent;box-shadow:0 6px 16px -6px rgba(0,0,0,.45)}
+.cw .add.on{background:var(--ink);color:var(--cream)}
+.add.pop{animation:pop .35s var(--ease)}
+@keyframes pop{40%{transform:scale(1.18)}}
+.cartbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:36;transform:translate(-50%,0);display:flex;align-items:center;gap:12px;font-family:inherit;cursor:pointer;background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:12px 16px 12px 20px;box-shadow:0 18px 40px -12px rgba(0,0,0,.6);white-space:nowrap;transition:opacity .3s var(--ease),transform .4s var(--ease)}
+.cartbar[hidden]{display:none}
+body:not(.turned) .cartbar{opacity:0;pointer-events:none;transform:translate(-50%,20px)}
+.cartbar .cb-t{font-weight:600;font-size:15px}
+.cartbar .cb-n{font-size:14px;background:var(--ink);color:var(--cream);border-radius:999px;padding:2px 9px;font-weight:500}
+.cartbar .cb-k{font-size:13.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.cartbar svg{width:16px;height:16px}
+html[dir="rtl"] .cartbar svg{transform:scaleX(-1)}
+.sheet .foot .fp{display:flex;flex-direction:column;gap:2px}
+.sadd{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;background:var(--ink);color:var(--cream);border:0;border-radius:999px;padding:11px 18px}
+.sadd svg{width:16px;height:16px}
+.sadd.on{background:var(--cream-3);color:var(--ink)}
+.sadd b{font-weight:600}
+.lst{list-style:none;margin:14px 0 0;padding:0}
+.lst li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line-ink)}
+.lst .ln{min-width:0}
+.lst .ln b{display:block;font-weight:500;font-size:16.5px}
+.lst .ln small{display:block;font-size:13px;color:var(--ink-soft)}
+.step{display:flex;align-items:center;gap:10px;flex:none}
+.step button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-ink);background:var(--cream);color:var(--ink);font-size:18px;line-height:1;cursor:pointer;font-family:inherit}
+.step b{min-width:18px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.ltot{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font-size:15px;color:var(--ink-soft)}
+.ltot b{font-size:20px;color:var(--ink);font-weight:500}
+.lfoot{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.lfoot .price-n{font-size:14px;color:var(--ink-soft)}
+.clr{font-family:inherit;font-size:14px;background:transparent;border:1px solid var(--line-ink);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+footer{padding-bottom:110px}
+#bBtn{display:flex;align-items:baseline;justify-content:center;gap:1px;line-height:1}
+#bBtn[aria-pressed="true"]{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+
+/* büyük yazı */
+html.big .card b{font-size:19px}
+html.big .card small{display:block!important;font-size:15.5px}
+html.big .kc{font-size:15px}
+html.big .al s{font-size:13.5px;padding:4px 9px}
+html.big .dr b{font-size:20px}
+html.big .dr small{font-size:16px}
+html.big .sec-head h2{font-size:clamp(30px,6vw,38px)}
+html.big .toc li a{font-size:19px}
+html.big .chip{font-size:15.5px}
+html.big .sheet h3{font-size:28px}
+html.big .sheet .desc,html.big .sheet .ing{font-size:18px}
+html.big .ag div{font-size:16px}
+html.big .act b{font-size:19px}
+html.big .act small{font-size:16px}
+html.big .lst .ln b{font-size:19px}
+html.big footer p{font-size:16px}
+@media (max-width:600px){html.big .grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -302,6 +363,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
   <div class="row">
     <span class="logo-end" id="logoEnd" aria-hidden="true">Cafe Carte</span>
     <div class="tb-btns">
+      <button class="ibtn ltxt" id="bBtn" type="button" aria-pressed="false" data-i-aria="bigText" aria-label="Büyük yazı"><span style="font-size:15px">A</span><span style="font-size:11px">a</span></button>
       <div class="lwrap">
         <button class="ibtn ltxt" id="lBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lMenu"><span id="lCode">TR</span></button>
         <div class="lmenu" id="lMenu" hidden></div>
@@ -364,6 +426,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
   <a class="made" href="https://cartemenusistemleri.com.tr/" data-i-html="made">Bu menü <i>Carte</i> ile hazırlandı</a>
 </footer>
 
+<button type="button" class="cartbar" id="cartbar" hidden><span class="cb-t" data-i="listTitle">Seçtiklerim</span><span class="cb-n" id="cbN"></span><span class="cb-k" id="cbK"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle" hidden>
   <div class="closewrap"><button class="close" type="button" data-close data-i-aria="close" aria-label="Kapat">×</button></div>
@@ -380,7 +443,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
     <div class="ag" id="sAg"></div>
     <p class="note" data-i="note"></p>
     <p class="note" data-i="kcalNote" style="margin-top:4px"></p>
-    <div class="foot"><span style="color:var(--ink-soft);font-size:14px" data-i="price">Fiyat</span><span class="price">-</span></div>
+    <div class="foot"><span class="fp"><span style="color:var(--ink-soft);font-size:14px" data-i="price">Fiyat</span><span class="price">-</span></span><button type="button" class="sadd" id="sAdd"></button></div>
   </div>
 </div>
 <div class="sheet noimg" id="asheet" role="dialog" aria-modal="true" aria-labelledby="aTitle" hidden>
@@ -518,6 +581,8 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
     });
   });
 
+  var LIST = {};
+  try { var raw = localStorage.getItem('cc-list'); if (raw){ var pl = JSON.parse(raw); Object.keys(pl).forEach(function(k){ if (DATA[+k] && pl[k] > 0) LIST[k] = Math.min(+pl[k], 99); }); } } catch(e){}
   /* ---------- language ---------- */
   var L = 'tr', T = I18N.tr;
   function txt(o){ return (L !== 'tr' && ITEMS[L] && ITEMS[L][o.tr[0]]) || o.tr; }
@@ -550,6 +615,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
   /* ---------- render ---------- */
   var menu = document.getElementById('menu'), chips = document.getElementById('chips'), toc = document.getElementById('tocList');
   function kcHtml(o){ return o.kc ? '<span class="kc"><b>'+o.kc[0]+'</b> kcal · '+esc(o.kc[1])+'</span>' : ''; }
+  function addBtn(i, name){ var n = LIST[i] || 0; return '<button type="button" class="add'+(n?' on':'')+'" data-add="'+i+'" aria-label="'+esc(fmt(T.addAria,{n:name}))+'">'+(n ? '<span>'+n+'</span>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>')+'</button>'; }
   function alHtml(a){
     if (!a.length) return '<span class="al"><s class="ok">'+esc(T.noAl)+'</s></span>';
     return '<span class="al">' + a.map(function(k){ return '<s>'+esc(T.al[k])+'</s>'; }).join('') + '</span>';
@@ -567,11 +633,11 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
         var o = DATA[i], t = txt(o);
         var q = esc((t[0]+' '+t[1]+' '+t[2]+' '+o.tr[0]+' '+o.tr[2]).toLocaleLowerCase(L === 'tr' ? 'tr' : undefined));
         if (o.drink){
-          html += '<button type="button" class="dr" data-k="'+i+'" data-q="'+q+'"><span class="t"><b>'+esc(t[0])+'</b><small>'+esc(t[1])+'</small>'+kcHtml(o)+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></button>';
+          html += '<div class="dw" data-k="'+i+'" data-q="'+q+'"><button type="button" class="dr" data-k="'+i+'"><span class="t"><b>'+esc(t[0])+'</b><small>'+esc(t[1])+'</small>'+kcHtml(o)+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></button>'+addBtn(i,t[0])+'</div>';
         } else {
-          html += '<button type="button" class="card" data-k="'+i+'" data-q="'+q+'">'+
+          html += '<div class="cw" data-k="'+i+'" data-q="'+q+'"><button type="button" class="card" data-k="'+i+'">'+
             '<span class="ph"><img src="img/'+o.img+'.webp" alt="'+esc(t[0])+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
-            '<span class="tx"><span class="row"><b>'+esc(t[0])+'</b><span class="price">'+P+'</span></span><small>'+esc(t[1])+'</small>'+kcHtml(o)+alHtml(o.a)+'</span></button>';
+            '<span class="tx"><span class="row"><b>'+esc(t[0])+'</b><span class="price">'+P+'</span></span><small>'+esc(t[1])+'</small>'+kcHtml(o)+alHtml(o.a)+'</span></button>'+addBtn(i,t[0])+'</div>';
         }
       });
       html += '</div></section>';
@@ -588,7 +654,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
     if (LANGS.indexOf(l) === -1) return;
     L = l; T = I18N[l];
     if (save) store('cc-lang', l);
-    applyStatic(); render(false); apply(true); measure();
+    applyStatic(); render(false); apply(true); syncCart(); syncSAdd(); if (listOpen) renderList(); measure();
     closeLangMenu();
   }
 
@@ -625,6 +691,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
       fly.style.textShadow = t > .5 ? 'none' : '';
       var barOn = t > .55;
       topbar.classList.toggle('on', barOn);
+      document.body.classList.toggle('turned', barOn);
       flyLink.tabIndex = barOn ? 0 : -1;
       if (!barOn) closeLangMenu();
     }
@@ -743,6 +810,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
     document.getElementById('sAg').innerHTML =
       yes.map(function(k){ return '<div class="yes">'+ICON_YES+esc(fmt(T.yes,{a:T.al[k]}))+'</div>'; }).join('') +
       no.map(function(k){ return '<div class="no">'+ICON_NO+esc(fmt(T.no,{a:T.al[k]}))+'</div>'; }).join('');
+    curK = +el.dataset.k; syncSAdd();
     show(sheet, el);
   }
   function row(label, value, copy){
@@ -781,20 +849,76 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
   });
   function closeSheet(){
     if (!openEl) return;
-    var el = openEl; openEl = null;
+    var el = openEl; openEl = null; listOpen = false;
     document.body.classList.remove('open'); el.classList.remove('up');
     setTimeout(function(){ el.hidden = true; }, 450);
     if (lastFocus) lastFocus.focus({ preventScroll:true });
   }
-  menu.addEventListener('click', function(e){ var c = e.target.closest('[data-k]'); if (c) openProduct(c); });
+  menu.addEventListener('click', function(e){
+    var a = e.target.closest('[data-add]'); if (a){ addItem(+a.dataset.add, 1); a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); return; }
+    var c = e.target.closest('.card,.dr'); if (c) openProduct(c);
+  });
   document.getElementById('masadan').addEventListener('click', function(e){ var c = e.target.closest('[data-act]'); if (c) openAct(c.dataset.act, c); });
   bg.addEventListener('click', closeSheet);
   [].forEach.call(document.querySelectorAll('[data-close]'), function(b){ b.addEventListener('click', closeSheet); });
   addEventListener('keydown', function(e){ if (e.key === 'Escape'){ if (openEl) closeSheet(); else closeLangMenu(); } });
 
+  /* ---------- Seçtiklerim (list) ---------- */
+  var cartbar = document.getElementById('cartbar'), curK = -1, listOpen = false;
+  function saveList(){ store('cc-list', JSON.stringify(LIST)); }
+  function addItem(k, d){
+    var n = (LIST[k] || 0) + d; if (n <= 0) delete LIST[k]; else LIST[k] = Math.min(n, 99);
+    saveList(); syncAdds(); syncCart(); syncSAdd(); if (listOpen) renderList();
+  }
+  function syncAdds(){
+    [].forEach.call(menu.querySelectorAll('[data-add]'), function(b){
+      var n = LIST[+b.dataset.add] || 0; b.classList.toggle('on', !!n);
+      b.innerHTML = n ? '<span>'+n+'</span>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+    });
+  }
+  function totals(){ var c = 0, kc = 0; Object.keys(LIST).forEach(function(k){ c += LIST[k]; var o = DATA[+k]; if (o && o.kc) kc += o.kc[0]*LIST[k]; }); return { c:c, kc:kc }; }
+  function syncCart(){
+    var t = totals();
+    cartbar.hidden = !t.c;
+    document.getElementById('cbN').textContent = fmt(T.items, { n:t.c });
+    document.getElementById('cbK').textContent = t.kc + ' kcal';
+  }
+  function syncSAdd(){
+    var b = document.getElementById('sAdd'); if (curK < 0) return;
+    var n = LIST[curK] || 0;
+    b.innerHTML = n ? '<b>'+esc(T.inList)+': '+n+'</b> · + ' + esc(T.addShort) : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>'+esc(T.add)+'</span>';
+    b.classList.toggle('on', !!n);
+  }
+  document.getElementById('sAdd').addEventListener('click', function(){ if (curK >= 0) addItem(curK, 1); });
+  function renderList(){
+    var keys = Object.keys(LIST), t = totals();
+    var h = '<h3 id="aTitle">'+esc(T.listTitle)+'</h3>';
+    if (!keys.length){ h += '<p class="desc">'+esc(T.listEmpty)+'</p>'; aBody.innerHTML = h; return; }
+    h += '<p class="desc">'+esc(T.listNote)+'</p><ul class="lst">';
+    keys.forEach(function(k){
+      var o = DATA[+k], tx = txt(o), n = LIST[k];
+      h += '<li><span class="ln"><b>'+esc(tx[0])+'</b><small>'+esc(T.cats[o.sec])+(o.kc ? ' · '+(o.kc[0]*n)+' kcal' : '')+'</small></span>'+
+        '<span class="step"><button type="button" data-step="'+k+'" data-d="-1" aria-label="−">−</button><b>'+n+'</b><button type="button" data-step="'+k+'" data-d="1" aria-label="+">+</button></span></li>';
+    });
+    h += '</ul><div class="ltot"><span>'+esc(T.totalKcal)+'</span><b>'+t.kc+' kcal</b></div>';
+    h += '<div class="lfoot"><span class="price-n">'+esc(T.price)+': -</span><button type="button" class="clr" data-clear>'+esc(T.clear)+'</button></div>';
+    aBody.innerHTML = h;
+  }
+  cartbar.addEventListener('click', function(){ listOpen = true; renderList(); show(asheet, cartbar); });
+  aBody.addEventListener('click', function(e){
+    var st = e.target.closest('[data-step]'); if (st){ addItem(+st.dataset.step, +st.dataset.d); return; }
+    if (e.target.closest('[data-clear]')){ LIST = {}; saveList(); syncAdds(); syncCart(); renderList(); }
+  });
+
+  /* ---------- büyük yazı ---------- */
+  var bBtn = document.getElementById('bBtn');
+  function setBig(on){ document.documentElement.classList.toggle('big', on); bBtn.setAttribute('aria-pressed', on); store('cc-big', on ? '1' : '0'); }
+  bBtn.addEventListener('click', function(){ setBig(!document.documentElement.classList.contains('big')); });
+
   /* boot */
   L = pick(); T = I18N[L];
-  applyStatic(); render(true); observe(); apply(true);
+  if (store('cc-big') === '1'){ document.documentElement.classList.add('big'); bBtn.setAttribute('aria-pressed','true'); }
+  applyStatic(); render(true); observe(); apply(true); syncCart();
   measure();
 })();
 </script>
