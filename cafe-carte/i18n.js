@@ -2,13 +2,14 @@
    Ürün çevirileri Türkçe ürün adına göre eşleşir: 'Türkçe Ad': [ad, kısa açıklama, içindekiler] */
 window.CC_I18N = {
   tr: {
+    energy:'Enerji', portion:'1 porsiyon', kcalNote:'Kalori değerleri porsiyon başına yaklaşıktır.',
     name:'Türkçe', top:'Kahve · Mutfak · Tatlı', pill:'Menü', tag:'Kahve, fırından taze lezzetler ve ev yapımı tatlılar.', rule:'Afiyet olsun',
     cue:'Sayfayı çevirmek için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
     tocEb:'Cafe Carte · Menü', tocH:'İçindekiler', tocActs:'Masanızdan: yorum, Instagram, ödeme, Wi-Fi',
     legend:'Her ürüne dokunarak <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. Üstteki arama düğmesinden istemediğiniz alerjenleri gizleyin.',
     search:'Ürün ya da içerik ara (ör. fıstık, mantar)', searchAria:'Ara ve alerjen filtrele', fltA:'Bu alerjenleri içermesin', fltD:'Tercih',
     empty:'Bu seçimlere uyan ürün bulunamadı.',
-    foot:'Fiyatlar güncellenmektedir. Alerjen ve içerik bilgileri temsilidir; mutfağımızda tüm alerjenler işlendiğinden eser miktarda bulaşma olabilir. Alerjiniz varsa lütfen sipariş öncesi ekibimize bildirin. Görseller temsilidir.',
+    foot:'Fiyatlar güncellenmektedir. Kalori değerleri porsiyon başına yaklaşık değerlerdir. Alerjen ve içerik bilgileri temsilidir; mutfağımızda tüm alerjenler işlendiğinden eser miktarda bulaşma olabilir. Alerjiniz varsa lütfen sipariş öncesi ekibimize bildirin. Görseller temsilidir.',
     made:'Bu menü <i>Carte</i> ile hazırlandı',
     ing:'İçindekiler', alg:'Alerjenler', yes:'İçerir: {a}', no:'{a} yok', noAl:'Alerjen içermez',
     note:'Bilgiler temsilidir. Ortak mutfakta eser miktarda bulaşma olabilir.', price:'Fiyat', close:'Kapat', count:'{n} çeşit', lang:'Dil',
@@ -25,13 +26,14 @@ window.CC_I18N = {
     more:'Bu kartların hepsi Carte’ta'
   },
   en: {
+    energy:'Energy', portion:'1 portion', kcalNote:'Calorie values are approximate, per portion.',
     name:'English', top:'Coffee · Kitchen · Desserts', pill:'Menu', tag:'Coffee, fresh bakery and homemade desserts.', rule:'Bon appétit',
     cue:'Scroll to turn the page', coverAria:'Menu cover. Tap or scroll to open.',
     tocEb:'Cafe Carte · Menu', tocH:'Contents', tocActs:'From your table: review, Instagram, payment, Wi-Fi',
     legend:'Tap any item to see its <b>ingredients</b> and <b>allergens</b>. Use the search button above to hide allergens you avoid.',
     search:'Search dishes or ingredients (e.g. pistachio)', searchAria:'Search and filter allergens', fltA:'Exclude these allergens', fltD:'Preference',
     empty:'No items match your selection.',
-    foot:'Prices are being updated. Allergen and ingredient information is indicative; all allergens are handled in our kitchen, so traces may be present. If you have an allergy, please tell our team before ordering. Images are for illustration.',
+    foot:'Prices are being updated. Calorie values are approximate, per portion. Allergen and ingredient information is indicative; all allergens are handled in our kitchen, so traces may be present. If you have an allergy, please tell our team before ordering. Images are for illustration.',
     made:'This menu was made with <i>Carte</i>',
     ing:'Ingredients', alg:'Allergens', yes:'Contains: {a}', no:'No {a}', noAl:'No allergens',
     note:'Information is indicative. Traces may be present in a shared kitchen.', price:'Price', close:'Close', count:'{n} items', lang:'Language',
@@ -48,13 +50,14 @@ window.CC_I18N = {
     more:'All of these cards are made by Carte'
   },
   ru: {
+    energy:'Энергия', portion:'1 порция', kcalNote:'Калорийность указана примерно, на порцию.',
     name:'Русский', top:'Кофе · Кухня · Десерты', pill:'Меню', tag:'Кофе, свежая выпечка и домашние десерты.', rule:'Приятного аппетита',
     cue:'Прокрутите, чтобы перевернуть страницу', coverAria:'Обложка меню. Нажмите или прокрутите, чтобы открыть.',
     tocEb:'Cafe Carte · Меню', tocH:'Содержание', tocActs:'С вашего столика: отзыв, Instagram, оплата, Wi-Fi',
     legend:'Нажмите на любое блюдо, чтобы увидеть <b>состав</b> и <b>аллергены</b>. Кнопка поиска вверху скрывает нежелательные аллергены.',
     search:'Поиск блюда или ингредиента (напр. фисташка)', searchAria:'Поиск и фильтр аллергенов', fltA:'Исключить аллергены', fltD:'Предпочтение',
     empty:'Нет блюд, подходящих под выбор.',
-    foot:'Цены обновляются. Информация о составе и аллергенах ориентировочная; на нашей кухне используются все аллергены, возможны следовые количества. Если у вас аллергия, сообщите нам до заказа. Фото носят иллюстративный характер.',
+    foot:'Цены обновляются. Калорийность указана примерно, на порцию. Информация о составе и аллергенах ориентировочная; на нашей кухне используются все аллергены, возможны следовые количества. Если у вас аллергия, сообщите нам до заказа. Фото носят иллюстративный характер.',
     made:'Меню создано с <i>Carte</i>',
     ing:'Состав', alg:'Аллергены', yes:'Содержит: {a}', no:'Без: {a}', noAl:'Без аллергенов',
     note:'Информация ориентировочная. На общей кухне возможны следы аллергенов.', price:'Цена', close:'Закрыть', count:'{n} поз.', lang:'Язык',
@@ -71,13 +74,14 @@ window.CC_I18N = {
     more:'Все эти карты делает Carte'
   },
   ar: {
+    energy:'الطاقة', portion:'حصة واحدة', kcalNote:'قيم السعرات تقريبية لكل حصة.',
     name:'العربية', top:'قهوة · مطبخ · حلويات', pill:'القائمة', tag:'قهوة، مخبوزات طازجة وحلويات منزلية.', rule:'بالهناء والشفاء',
     cue:'مرّر لقلب الصفحة', coverAria:'غلاف القائمة. اضغط أو مرّر للفتح.',
     tocEb:'Cafe Carte · القائمة', tocH:'المحتويات', tocActs:'من طاولتك: تقييم، إنستغرام، دفع، واي فاي',
     legend:'اضغط على أي صنف لترى <b>مكوناته</b> و<b>مسببات الحساسية</b>. استخدم زر البحث في الأعلى لإخفاء ما تتجنبه.',
     search:'ابحث عن صنف أو مكوّن (مثل: فستق)', searchAria:'بحث وتصفية مسببات الحساسية', fltA:'استبعد مسببات الحساسية', fltD:'التفضيل',
     empty:'لا توجد أصناف مطابقة لاختيارك.',
-    foot:'الأسعار قيد التحديث. معلومات المكونات والحساسية تقريبية؛ تُستخدم جميع مسببات الحساسية في مطبخنا وقد توجد آثار منها. إن كانت لديك حساسية فأخبر فريقنا قبل الطلب. الصور للتوضيح.',
+    foot:'الأسعار قيد التحديث. قيم السعرات الحرارية تقريبية لكل حصة. معلومات المكونات والحساسية تقريبية؛ تُستخدم جميع مسببات الحساسية في مطبخنا وقد توجد آثار منها. إن كانت لديك حساسية فأخبر فريقنا قبل الطلب. الصور للتوضيح.',
     made:'صُممت هذه القائمة بواسطة <i>Carte</i>',
     ing:'المكونات', alg:'مسببات الحساسية', yes:'يحتوي: {a}', no:'بدون {a}', noAl:'خالٍ من مسببات الحساسية',
     note:'المعلومات تقريبية. قد توجد آثار في المطبخ المشترك.', price:'السعر', close:'إغلاق', count:'{n} أصناف', lang:'اللغة',

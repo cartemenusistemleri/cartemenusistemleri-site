@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cafe Carte · Menü</title>
-<meta name="description" content="Cafe Carte dijital menüsü: kahveler, soğuk içecekler, fırın ürünleri, mutfak ve tatlılar. Her ürün için içerik ve alerjen bilgisi.">
+<meta name="description" content="Cafe Carte dijital menüsü: kahveler, soğuk içecekler, fırın ürünleri, mutfak ve tatlılar. Her ürün için kalori, içerik ve alerjen bilgisi.">
 <meta name="theme-color" content="#3A121D">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Cafe Carte · Örnek Dijital Menü">
-<meta property="og:description" content="Carte Menü Sistemleri örnek menü arayüzü: menü kapağı, içerik ve alerjen bilgisi, dört dil.">
+<meta property="og:description" content="Carte Menü Sistemleri örnek menü arayüzü: menü kapağı, kalori, içerik ve alerjen bilgisi, dört dil.">
 <meta property="og:url" content="https://cartemenusistemleri.com.tr/cafe-carte/">
 <meta property="og:image" content="https://cartemenusistemleri.com.tr/cafe-carte/og-cafe-carte.jpg">
 <meta property="og:image:width" content="1200">
@@ -141,6 +141,15 @@ main{padding-bottom:30px}
 .al s{text-decoration:none;font-size:11px;line-height:1;border:1px solid var(--line);color:var(--text-2);border-radius:999px;padding:3px 7px}
 .al s.ok{border-color:rgba(255,253,246,.28);color:var(--text)}
 
+.kc{display:block;margin-top:5px;font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.kc b,.dr .kc b{display:inline;font-size:inherit;font-weight:600;color:var(--text)}
+.card .kc{color:var(--ink-soft)}
+.card .kc b{color:var(--ink)}
+.sheet .kcal{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--cream-2);border:1px solid var(--line-ink)}
+.sheet .kcal[hidden]{display:none}
+.sheet .kcal .big{font-size:15px;color:var(--ink-soft)}
+.sheet .kcal .big b{font-size:26px;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.sheet .kcal .por{font-size:13.5px;color:var(--ink-soft)}
 /* product grid */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;background:var(--cream);color:var(--ink);border-radius:16px;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease);box-shadow:0 18px 36px -22px rgba(0,0,0,.6)}
@@ -364,11 +373,13 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
     <h3 id="sTitle"></h3>
     <p class="desc" id="sDesc"></p>
     <div class="diet" id="sDiet"></div>
+    <div class="kcal" id="sKcal"><span class="big"><b id="sKv"></b> kcal</span><span class="por"><span data-i="energy">Enerji</span> · <span data-i="portion">1 porsiyon</span> <span id="sPor"></span></span></div>
     <h4 data-i="ing">İçindekiler</h4>
     <p class="ing" id="sIng"></p>
     <h4 data-i="alg">Alerjenler</h4>
     <div class="ag" id="sAg"></div>
     <p class="note" data-i="note"></p>
+    <p class="note" data-i="kcalNote" style="margin-top:4px"></p>
     <div class="foot"><span style="color:var(--ink-soft);font-size:14px" data-i="price">Fiyat</span><span class="price">-</span></div>
   </div>
 </div>
@@ -485,6 +496,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
       ['Çikolata Vanilya','Sekiz top, paylaşmalık','dondurma-2','Süt, krema, şeker, kakao, vanilya.','s','v,gf']
     ]}
   ];
+  var KCAL = {"Türk Kahvesi": [35, "70 ml"], "Damla Sakızlı Türk Kahvesi": [35, "70 ml"], "Espresso": [2, "30 ml"], "Double Espresso": [4, "60 ml"], "Americano": [5, "250 ml"], "Cappuccino": [110, "250 ml"], "Caffè Latte": [150, "300 ml"], "Flat White": [110, "200 ml"], "Cortado": [50, "120 ml"], "Mocha": [290, "300 ml"], "Caramel Macchiato": [240, "300 ml"], "Sıcak Çikolata": [320, "250 ml"], "Salep": [230, "250 ml"], "Demleme Çay": [2, "100 ml"], "Bitki Çayları": [3, "250 ml"], "Iced Americano": [10, "350 ml"], "Iced Latte": [130, "350 ml"], "Iced Mocha": [260, "350 ml"], "Cold Brew": [5, "350 ml"], "Frappé": [380, "400 ml"], "Ev Yapımı Limonata": [160, "400 ml"], "Çilekli Limonata": [180, "400 ml"], "Ev Yapımı Ice Tea": [140, "400 ml"], "Milkshake": [520, "400 ml"], "Smoothie": [280, "400 ml"], "Taze Portakal Suyu": [135, "300 ml"], "Soda": [0, "200 ml"], "Su": [0, "330 ml"], "Sade Kruvasan": [280, "70 g"], "Antep Fıstıklı Kruvasan": [460, "110 g"], "Çikolatalı Bademli Kruvasan": [480, "110 g"], "Çilekli Kruvasan": [390, "120 g"], "Su Böreği": [380, "150 g"], "Girit Böreği": [390, "150 g"], "Talaş Böreği": [450, "140 g"], "Patlıcanlı Milföy": [400, "140 g"], "Sezar Salata": [480, "350 g"], "Roka Salata": [310, "250 g"], "Tavuklu Krep": [620, "350 g"], "Tagliatelle Alfredo": [820, "400 g"], "Penne Arabiata": [520, "350 g"], "Spaghetti Bolonez": [680, "400 g"], "Kasap Sucuklu Pizza": [1150, "450 g"], "Enginarlı Pizza": [920, "450 g"], "Klasik Burger": [980, "450 g"], "Cheese Burger": [1080, "480 g"], "Köri Soslu Piliç": [690, "450 g"], "Schnitzel Milanese": [820, "400 g"], "Izgara Dana": [640, "400 g"], "Antep Fıstıklı Pasta": [520, "140 g"], "Beyaz İnci": [460, "130 g"], "Pavlova": [380, "150 g"], "Çikolatalı Rulo": [450, "130 g"], "Tartolet": [330, "110 g"], "Ekler": [290, "90 g"], "Mozaik Pasta": [470, "120 g"], "Çikolata Krokan": [540, "130 g"], "San Sebastian": [470, "150 g"], "Frambuazlı Cheesecake": [450, "150 g"], "Limonlu Cheesecake": [440, "150 g"], "Vişneli Cheesecake": [450, "150 g"], "Tiramisu": [420, "150 g"], "Trileçe": [380, "180 g"], "Profiterol": [470, "180 g"], "Fırın Sütlaç": [300, "220 g"], "Kazandibi": [290, "180 g"], "Supangle": [360, "200 g"], "Antep Fıstıklı Baklava": [520, "120 g · 4"], "Soğuk Baklava": [480, "150 g"], "Şöbiyet": [500, "120 g"], "Fıstıklı Yassı Kadayıf": [520, "130 g"], "Çikolatalı Islak Kek": [520, "150 g"], "Cevizli Brownie": [400, "90 g"], "Havuçlu Kek": [470, "140 g"], "Makaron": [250, "60 g · 3"], "Porsiyon Dondurma": [320, "150 g · 3"], "Çikolata Vanilya": [860, "400 g · 8"]};
   var ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
 
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
@@ -499,7 +511,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
       var isDrink = !!s.drinks;
       var o = isDrink ? { tr:[d[0],d[1],d[2]], img:'', a:codes(d[3]), diet:codes(d[4]) }
                       : { tr:[d[0],d[1],d[3]], img:d[2], a:codes(d[4]), diet:codes(d[5]) };
-      o.sec = si; o.drink = isDrink;
+      o.sec = si; o.drink = isDrink; o.kc = KCAL[d[0]] || null;
       if (o.a.indexOf('g') === -1 && o.diet.indexOf('gf') === -1) o.diet.push('gf');
       if (o.diet.indexOf('vg') !== -1 && o.diet.indexOf('v') === -1) o.diet.unshift('v');
       s.idx = s.idx || []; s.idx.push(DATA.push(o) - 1);
@@ -537,6 +549,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
 
   /* ---------- render ---------- */
   var menu = document.getElementById('menu'), chips = document.getElementById('chips'), toc = document.getElementById('tocList');
+  function kcHtml(o){ return o.kc ? '<span class="kc"><b>'+o.kc[0]+'</b> kcal · '+esc(o.kc[1])+'</span>' : ''; }
   function alHtml(a){
     if (!a.length) return '<span class="al"><s class="ok">'+esc(T.noAl)+'</s></span>';
     return '<span class="al">' + a.map(function(k){ return '<s>'+esc(T.al[k])+'</s>'; }).join('') + '</span>';
@@ -554,11 +567,11 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
         var o = DATA[i], t = txt(o);
         var q = esc((t[0]+' '+t[1]+' '+t[2]+' '+o.tr[0]+' '+o.tr[2]).toLocaleLowerCase(L === 'tr' ? 'tr' : undefined));
         if (o.drink){
-          html += '<button type="button" class="dr" data-k="'+i+'" data-q="'+q+'"><span class="t"><b>'+esc(t[0])+'</b><small>'+esc(t[1])+'</small>'+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></button>';
+          html += '<button type="button" class="dr" data-k="'+i+'" data-q="'+q+'"><span class="t"><b>'+esc(t[0])+'</b><small>'+esc(t[1])+'</small>'+kcHtml(o)+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+P+'</span></button>';
         } else {
           html += '<button type="button" class="card" data-k="'+i+'" data-q="'+q+'">'+
             '<span class="ph"><img src="img/'+o.img+'.webp" alt="'+esc(t[0])+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
-            '<span class="tx"><span class="row"><b>'+esc(t[0])+'</b><span class="price">'+P+'</span></span><small>'+esc(t[1])+'</small>'+alHtml(o.a)+'</span></button>';
+            '<span class="tx"><span class="row"><b>'+esc(t[0])+'</b><span class="price">'+P+'</span></span><small>'+esc(t[1])+'</small>'+kcHtml(o)+alHtml(o.a)+'</span></button>';
         }
       });
       html += '</div></section>';
@@ -724,6 +737,7 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
     document.getElementById('sTitle').textContent = t[0];
     document.getElementById('sDesc').textContent = t[1];
     document.getElementById('sIng').textContent = t[2];
+    document.getElementById('sKcal').hidden = !o.kc; if (o.kc){ document.getElementById('sKv').textContent = o.kc[0]; document.getElementById('sPor').textContent = '(' + o.kc[1] + ')'; }
     document.getElementById('sDiet').innerHTML = o.diet.map(function(k){ return '<span>'+esc(T.diet[k])+'</span>'; }).join('');
     var yes = AL_KEYS.filter(function(k){ return o.a.indexOf(k) !== -1; }), no = AL_KEYS.filter(function(k){ return o.a.indexOf(k) === -1; });
     document.getElementById('sAg').innerHTML =
