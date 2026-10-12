@@ -305,7 +305,8 @@ html[dir="rtl"] .cartbar svg{transform:scaleX(-1)}
 .lfoot .price-n{font-size:14px;color:var(--ink-soft)}
 .clr{font-family:inherit;font-size:14px;background:transparent;border:1px solid var(--line-ink);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
 footer{padding-bottom:110px}
-#bBtn{display:flex;align-items:baseline;justify-content:center;gap:1px;line-height:1}
+#bBtn .aa{display:block;font-size:15px;font-weight:500;line-height:1;letter-spacing:0;transform:translateY(1px)}
+#bBtn .aa small{font-size:11px;font-weight:500;margin-inline-start:1px}
 #bBtn[aria-pressed="true"]{background:var(--cream);color:var(--ink);border-color:var(--cream)}
 
 /* büyük yazı */
@@ -363,7 +364,7 @@ html.big footer p{font-size:16px}
   <div class="row">
     <span class="logo-end" id="logoEnd" aria-hidden="true">Cafe Carte</span>
     <div class="tb-btns">
-      <button class="ibtn ltxt" id="bBtn" type="button" aria-pressed="false" data-i-aria="bigText" aria-label="Büyük yazı"><span style="font-size:15px">A</span><span style="font-size:11px">a</span></button>
+      <button class="ibtn" id="bBtn" type="button" aria-pressed="false" data-i-aria="bigText" aria-label="Büyük yazı"><span class="aa" aria-hidden="true">A<small>a</small></span></button>
       <div class="lwrap">
         <button class="ibtn ltxt" id="lBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lMenu"><span id="lCode">TR</span></button>
         <div class="lmenu" id="lMenu" hidden></div>
