@@ -2,10 +2,11 @@
    Ürün çevirileri Türkçe ürün adına göre eşleşir: 'Türkçe Ad': [ad, kısa açıklama, içindekiler] */
 window.CC_I18N = {
   tr: {
+    webText:'Gerçek menüde işletmenin kendi internet sitesi açılır. Örnek olarak Carte sitesini açabilirsiniz.', webBtn:'Siteyi aç',
     energy:'Enerji', portion:'1 porsiyon', kcalNote:'Kalori değerleri porsiyon başına yaklaşıktır.',
     name:'Türkçe', top:'Kahve · Mutfak · Tatlı', pill:'Menü', tag:'Kahve, fırından taze lezzetler ve ev yapımı tatlılar.', rule:'Afiyet olsun',
     cue:'Sayfayı çevirmek için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
-    tocEb:'Cafe Carte · Menü', tocH:'İçindekiler', tocActs:'Masanızdan: yorum, Instagram, ödeme, Wi-Fi',
+    tocEb:'Cafe Carte · Menü', tocH:'İçindekiler', tocActs:'Masanızdan: yorum, Instagram, internet sitesi, Wi-Fi',
     legend:'Her ürüne dokunarak <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. Üstteki arama düğmesinden istemediğiniz alerjenleri gizleyin.',
     search:'Ürün ya da içerik ara (ör. fıstık, mantar)', searchAria:'Ara ve alerjen filtrele', fltA:'Bu alerjenleri içermesin', fltD:'Tercih',
     empty:'Bu seçimlere uyan ürün bulunamadı.',
@@ -17,7 +18,7 @@ window.CC_I18N = {
     al:{ g:'Gluten', s:'Süt', y:'Yumurta', k:'Sert kabuklu', yf:'Yer fıstığı', su:'Susam', so:'Soya', ke:'Kereviz', h:'Hardal', sl:'Sülfit', b:'Balık' },
     diet:{ v:'Vejetaryen', vg:'Vegan', gf:'Glutensiz' },
     actsEb:'Masanızdan', actsH:'Bir dokunuşla',
-    acts:{ google:['Bizi değerlendirin','Google’da yorum bırakın'], insta:['Instagram','Bizi takip edin'], iban:['IBAN ile öde','Hesabı havaleyle ödeyin'], wifi:['Wi-Fi','Ağ adı ve şifre'] },
+    acts:{ google:['Bizi değerlendirin','Google’da yorum bırakın'], insta:['Instagram','Bizi takip edin'], web:['İnternet sitemiz','Web sitemizi ziyaret edin'], wifi:['Wi-Fi','Ağ adı ve şifre'] },
     demo:'Örnek', demoNote:'Bu bir örnek menüdür. Gerçek menüde bu düğme işletmenin kendi sayfasını açar.',
     gText:'Deneyiminizi puanlayın. Gerçek menüde yıldıza dokunan misafir doğrudan işletmenin Google yorum sayfasına gider.', gThanks:'Teşekkürler! Gerçek menüde şimdi Google yorum sayfası açılırdı.',
     iText:'Gerçek menüde işletmenin Instagram hesabı açılır. Örnek olarak Carte hesabımızı açabilirsiniz.', iBtn:'Instagram’da aç',
@@ -26,10 +27,11 @@ window.CC_I18N = {
     more:'Bu kartların hepsi Carte’ta'
   },
   en: {
+    webText:'On a real menu this opens the venue’s own website. As an example you can open the Carte website.', webBtn:'Open website',
     energy:'Energy', portion:'1 portion', kcalNote:'Calorie values are approximate, per portion.',
     name:'English', top:'Coffee · Kitchen · Desserts', pill:'Menu', tag:'Coffee, fresh bakery and homemade desserts.', rule:'Bon appétit',
     cue:'Scroll to turn the page', coverAria:'Menu cover. Tap or scroll to open.',
-    tocEb:'Cafe Carte · Menu', tocH:'Contents', tocActs:'From your table: review, Instagram, payment, Wi-Fi',
+    tocEb:'Cafe Carte · Menu', tocH:'Contents', tocActs:'From your table: review, Instagram, website, Wi-Fi',
     legend:'Tap any item to see its <b>ingredients</b> and <b>allergens</b>. Use the search button above to hide allergens you avoid.',
     search:'Search dishes or ingredients (e.g. pistachio)', searchAria:'Search and filter allergens', fltA:'Exclude these allergens', fltD:'Preference',
     empty:'No items match your selection.',
@@ -41,7 +43,7 @@ window.CC_I18N = {
     al:{ g:'Gluten', s:'Milk', y:'Egg', k:'Tree nuts', yf:'Peanut', su:'Sesame', so:'Soy', ke:'Celery', h:'Mustard', sl:'Sulphites', b:'Fish' },
     diet:{ v:'Vegetarian', vg:'Vegan', gf:'Gluten-free' },
     actsEb:'From your table', actsH:'One tap away',
-    acts:{ google:['Rate us','Leave a Google review'], insta:['Instagram','Follow us'], iban:['Pay by IBAN','Settle by bank transfer'], wifi:['Wi-Fi','Network and password'] },
+    acts:{ google:['Rate us','Leave a Google review'], insta:['Instagram','Follow us'], web:['Our website','Visit our website'], wifi:['Wi-Fi','Network and password'] },
     demo:'Demo', demoNote:'This is a sample menu. On a real menu this button opens the venue’s own page.',
     gText:'Rate your visit. On a real menu, a guest who taps a star goes straight to the venue’s Google review page.', gThanks:'Thank you! A real menu would now open the Google review page.',
     iText:'On a real menu this opens the venue’s Instagram. As an example you can open our Carte account.', iBtn:'Open Instagram',
@@ -50,10 +52,11 @@ window.CC_I18N = {
     more:'All of these cards are made by Carte'
   },
   ru: {
+    webText:'В настоящем меню открывается сайт заведения. Для примера можно открыть сайт Carte.', webBtn:'Открыть сайт',
     energy:'Энергия', portion:'1 порция', kcalNote:'Калорийность указана примерно, на порцию.',
     name:'Русский', top:'Кофе · Кухня · Десерты', pill:'Меню', tag:'Кофе, свежая выпечка и домашние десерты.', rule:'Приятного аппетита',
     cue:'Прокрутите, чтобы перевернуть страницу', coverAria:'Обложка меню. Нажмите или прокрутите, чтобы открыть.',
-    tocEb:'Cafe Carte · Меню', tocH:'Содержание', tocActs:'С вашего столика: отзыв, Instagram, оплата, Wi-Fi',
+    tocEb:'Cafe Carte · Меню', tocH:'Содержание', tocActs:'С вашего столика: отзыв, Instagram, сайт, Wi-Fi',
     legend:'Нажмите на любое блюдо, чтобы увидеть <b>состав</b> и <b>аллергены</b>. Кнопка поиска вверху скрывает нежелательные аллергены.',
     search:'Поиск блюда или ингредиента (напр. фисташка)', searchAria:'Поиск и фильтр аллергенов', fltA:'Исключить аллергены', fltD:'Предпочтение',
     empty:'Нет блюд, подходящих под выбор.',
@@ -65,7 +68,7 @@ window.CC_I18N = {
     al:{ g:'Глютен', s:'Молоко', y:'Яйцо', k:'Орехи', yf:'Арахис', su:'Кунжут', so:'Соя', ke:'Сельдерей', h:'Горчица', sl:'Сульфиты', b:'Рыба' },
     diet:{ v:'Вегетарианское', vg:'Веганское', gf:'Без глютена' },
     actsEb:'С вашего столика', actsH:'В одно касание',
-    acts:{ google:['Оцените нас','Оставьте отзыв в Google'], insta:['Instagram','Подписывайтесь'], iban:['Оплата по IBAN','Банковский перевод'], wifi:['Wi-Fi','Сеть и пароль'] },
+    acts:{ google:['Оцените нас','Оставьте отзыв в Google'], insta:['Instagram','Подписывайтесь'], web:['Наш сайт','Посетите наш сайт'], wifi:['Wi-Fi','Сеть и пароль'] },
     demo:'Пример', demoNote:'Это пример меню. В настоящем меню кнопка открывает страницу заведения.',
     gText:'Оцените визит. В настоящем меню гость после нажатия на звезду сразу попадает на страницу отзывов Google.', gThanks:'Спасибо! В настоящем меню сейчас открылась бы страница отзывов Google.',
     iText:'В настоящем меню открывается Instagram заведения. Для примера можно открыть наш аккаунт Carte.', iBtn:'Открыть Instagram',
@@ -74,10 +77,11 @@ window.CC_I18N = {
     more:'Все эти карты делает Carte'
   },
   ar: {
+    webText:'في القائمة الحقيقية يُفتح موقع المكان الإلكتروني. كمثال يمكنك فتح موقع Carte.', webBtn:'افتح الموقع',
     energy:'الطاقة', portion:'حصة واحدة', kcalNote:'قيم السعرات تقريبية لكل حصة.',
     name:'العربية', top:'قهوة · مطبخ · حلويات', pill:'القائمة', tag:'قهوة، مخبوزات طازجة وحلويات منزلية.', rule:'بالهناء والشفاء',
     cue:'مرّر لقلب الصفحة', coverAria:'غلاف القائمة. اضغط أو مرّر للفتح.',
-    tocEb:'Cafe Carte · القائمة', tocH:'المحتويات', tocActs:'من طاولتك: تقييم، إنستغرام، دفع، واي فاي',
+    tocEb:'Cafe Carte · القائمة', tocH:'المحتويات', tocActs:'من طاولتك: تقييم، إنستغرام، الموقع، واي فاي',
     legend:'اضغط على أي صنف لترى <b>مكوناته</b> و<b>مسببات الحساسية</b>. استخدم زر البحث في الأعلى لإخفاء ما تتجنبه.',
     search:'ابحث عن صنف أو مكوّن (مثل: فستق)', searchAria:'بحث وتصفية مسببات الحساسية', fltA:'استبعد مسببات الحساسية', fltD:'التفضيل',
     empty:'لا توجد أصناف مطابقة لاختيارك.',
@@ -89,7 +93,7 @@ window.CC_I18N = {
     al:{ g:'الغلوتين', s:'الحليب', y:'البيض', k:'المكسرات', yf:'الفول السوداني', su:'السمسم', so:'الصويا', ke:'الكرفس', h:'الخردل', sl:'الكبريتات', b:'السمك' },
     diet:{ v:'نباتي', vg:'نباتي صرف', gf:'خالٍ من الغلوتين' },
     actsEb:'من طاولتك', actsH:'بلمسة واحدة',
-    acts:{ google:['قيّمنا','اترك تقييمًا على Google'], insta:['إنستغرام','تابعنا'], iban:['الدفع عبر IBAN','حوالة بنكية'], wifi:['واي فاي','الشبكة وكلمة المرور'] },
+    acts:{ google:['قيّمنا','اترك تقييمًا على Google'], insta:['إنستغرام','تابعنا'], web:['موقعنا','زوروا موقعنا الإلكتروني'], wifi:['واي فاي','الشبكة وكلمة المرور'] },
     demo:'مثال', demoNote:'هذه قائمة تجريبية. في القائمة الحقيقية يفتح هذا الزر صفحة المكان.',
     gText:'قيّم زيارتك. في القائمة الحقيقية ينتقل الضيف بعد لمس النجمة مباشرة إلى صفحة تقييمات Google.', gThanks:'شكرًا! في القائمة الحقيقية ستُفتح الآن صفحة تقييمات Google.',
     iText:'في القائمة الحقيقية يُفتح حساب المكان على إنستغرام. كمثال يمكنك فتح حساب Carte.', iBtn:'افتح إنستغرام',

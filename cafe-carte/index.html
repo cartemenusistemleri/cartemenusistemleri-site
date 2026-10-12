@@ -346,9 +346,9 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none"/></svg>
       <b data-i="acts.insta.0">Instagram</b><small data-i="acts.insta.1">Bizi takip edin</small>
     </button>
-    <button type="button" class="act" data-act="iban">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>
-      <b data-i="acts.iban.0">IBAN ile öde</b><small data-i="acts.iban.1">Hesabı havaleyle ödeyin</small>
+    <button type="button" class="act" data-act="web">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5S9.6 5.9 12 3.5z"/></svg>
+      <b data-i="acts.web.0">İnternet sitemiz</b><small data-i="acts.web.1">Web sitemizi ziyaret edin</small>
     </button>
     <button type="button" class="act" data-act="wifi">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/></svg>
@@ -745,7 +745,6 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
       no.map(function(k){ return '<div class="no">'+ICON_NO+esc(fmt(T.no,{a:T.al[k]}))+'</div>'; }).join('');
     show(sheet, el);
   }
-  var DEMO_IBAN = 'TR00 0000 0000 0000 0000 0000 00';
   function row(label, value, copy){
     return '<div class="kv"><span class="k">'+esc(label)+'</span><div class="vrow"><span class="v" dir="ltr">'+esc(value)+'</span>'+
       (copy ? '<button type="button" class="cp" data-copy="'+esc(value.replace(/\s/g,''))+'">'+esc(T.bCopy)+'</button>' : '')+'</div></div>';
@@ -758,8 +757,8 @@ html[dir="rtl"] .more span[aria-hidden]{display:inline-block;transform:scaleX(-1
         '</div><p class="thanks" id="gThanks" hidden>'+esc(T.gThanks)+'</p>';
     } else if (kind === 'insta'){
       h += '<p class="desc">'+esc(T.iText)+'</p><a class="abtn" href="https://instagram.com/cartemenusistemleri" target="_blank" rel="noopener">'+esc(T.iBtn)+' ↗</a>';
-    } else if (kind === 'iban'){
-      h += '<p class="desc">'+esc(T.bText)+'</p>' + row(T.bName, 'Cafe Carte İşletmeciliği', true) + row(T.bIban, DEMO_IBAN, true) + row(T.bBank, 'Örnek Bank', false) + '<p class="warn">'+esc(T.bWarn)+'</p>';
+    } else if (kind === 'web'){
+      h += '<p class="desc">'+esc(T.webText)+'</p><a class="abtn" href="https://cartemenusistemleri.com.tr/">'+esc(T.webBtn)+' ↗</a>';
     } else {
       h += '<p class="desc">'+esc(T.wText)+'</p>' + row(T.wNet, 'CafeCarte_Misafir', true) + row(T.wPass, 'afiyetolsun', true);
     }
