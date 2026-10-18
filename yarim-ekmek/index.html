@@ -49,15 +49,11 @@ button{font-family:inherit}
 .wm .hat{width:.9em;height:auto;align-self:center;flex:none;margin-inline-end:.06em;transform:translateY(-.04em)}
 
 /* ---------- cover ---------- */
-.book{position:fixed;inset:0;z-index:30;perspective:2200px;perspective-origin:0% 50%;pointer-events:none}
-.cover{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;will-change:transform;pointer-events:auto;cursor:pointer}
-.cover .face,.cover .back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.cover .face{background:#0B0A09;overflow:hidden}
-.cover .photo{position:absolute;inset:-4%;background:url(img/c-tam-ekmek.webp) center/cover;filter:saturate(.85) blur(5px);opacity:.34;transform:scale(1.06)}
+.cover{position:relative;height:100vh;height:100svh;cursor:pointer}
+.cover .face{position:absolute;inset:0;background:#0B0A09;overflow:hidden}
+.cover .photo{position:absolute;inset:-6%;background:url(img/c-tam-ekmek.webp) center/cover;filter:saturate(.85) blur(5px);opacity:.34;transform:scale(1.06);will-change:transform}
 .cover .face::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 55% at 50% 48%,rgba(11,10,9,.35) 0%,rgba(11,10,9,.82) 70%,#0B0A09 100%)}
-.cover .face::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.45) 0,rgba(0,0,0,0) 3.5%,rgba(255,255,255,.04) 4.2%,rgba(0,0,0,0) 6%);pointer-events:none}
-.cover .back{transform:rotateY(180deg);background:linear-gradient(90deg,#E9DFCC,#F5EBDA 60%,#EBE1CE)}
-.cover .shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.cover .face::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(180deg,rgba(18,16,16,0),var(--canvas));pointer-events:none}
 .frame{position:absolute;inset:clamp(14px,3vw,28px);border:1px solid rgba(245,178,27,.45);border-radius:4px}
 .frame::before{content:"";position:absolute;inset:7px;border:1px solid rgba(251,246,238,.12);border-radius:2px}
 .corner{position:absolute;width:26px;height:26px;color:var(--yel)}
@@ -119,23 +115,28 @@ button{font-family:inherit}
 .clangs button{font-family:inherit;cursor:pointer;font-size:11.5px;font-weight:500;letter-spacing:.12em;color:var(--text-2);background:rgba(11,10,9,.4);border:1px solid var(--line);border-radius:999px;padding:6px 11px;min-width:42px}
 .clangs button[aria-pressed="true"]{background:var(--yel);color:var(--on-yel);border-color:var(--yel)}
 
-/* ---------- contents page ---------- */
-.opening{position:relative;height:200vh;height:200svh}
-.toc{position:sticky;top:0;height:100vh;height:100svh;display:flex;align-items:center;justify-content:center;padding:calc(var(--bar) + 54px) 16px 28px}
-.paper{position:relative;width:min(560px,100%);max-height:100%;overflow:auto;background:linear-gradient(180deg,var(--cream-2),#F5EAD6);color:var(--ink);border-radius:4px 14px 14px 4px;padding:clamp(26px,5vw,44px) clamp(22px,5vw,46px);box-shadow:0 40px 80px -40px rgba(0,0,0,.9),inset 10px 0 18px -12px rgba(22,18,15,.3);scrollbar-width:none}
-.paper::-webkit-scrollbar{display:none}
-.paper .eb{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-faint);font-weight:500}
-.paper .ph1{margin:8px 0 16px;font-weight:500;font-size:clamp(30px,6vw,38px);letter-spacing:-.015em;line-height:1.05}
-.paper .ph1 span{display:inline-block;width:34px;height:4px;background:var(--yel);border-radius:2px;vertical-align:middle;margin-inline-start:12px;transform:translateY(-3px)}
-.toc ol{list-style:none;margin:0;padding:0}
-.toc li a{display:flex;align-items:baseline;gap:12px;padding:8px 0;color:var(--ink);text-decoration:none;font-size:16.5px;border-bottom:1px solid var(--line-ink)}
-.toc li a:hover b{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
-.toc li i{font-style:normal;width:30px;flex:none;font-size:11.5px;letter-spacing:.14em;color:var(--ink-soft)}
-.toc li b{font-weight:400}
-.toc li em{flex:1;border-bottom:1px dotted rgba(22,18,15,.28);transform:translateY(-5px);min-width:12px}
-.toc li span{font-size:13px;color:var(--ink-soft);white-space:nowrap}
-.legend{margin-top:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
-.legend b{font-weight:500;color:var(--ink)}
+/* ---------- category tiles ---------- */
+.cats{padding-top:28px}
+.cats .eb{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--text-3);font-weight:500}
+.cats .ph1{margin:8px 0 18px;font-weight:500;font-size:clamp(30px,6vw,42px);letter-spacing:-.02em;line-height:1.05;display:flex;align-items:center;gap:14px}
+.cats .ph1 span{display:inline-block;width:34px;height:4px;background:var(--yel);border-radius:2px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;list-style:none;margin:0;padding:0}
+.tile{position:relative;display:block;aspect-ratio:4/3;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--panel);color:var(--text);text-decoration:none;transition:border-color .4s var(--ease),transform .4s var(--ease)}
+.tile:hover{border-color:rgba(245,178,27,.5);transform:translateY(-2px)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}
+.tile:hover img{transform:scale(1.05)}
+.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,11,10,0) 30%,rgba(12,11,10,.88) 100%)}
+.tile .tt{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;display:flex;flex-direction:column;gap:1px}
+.tile .tt i{font-style:normal;font-size:11px;letter-spacing:.2em;color:var(--yel);font-weight:600}
+.tile .tt b{font-weight:500;font-size:19px;line-height:1.15}
+.tile .tt small{font-size:12.5px;color:var(--text-2)}
+.tile.alt{display:flex;align-items:flex-end;background:linear-gradient(160deg,#2A2219,#16120F)}
+.tile.alt::after{display:none}
+.tile.alt .ic{position:absolute;top:16px;left:14px;display:flex;gap:10px;color:var(--yel)}
+.tile.alt .ic svg{width:26px;height:26px}
+.legend{margin:16px 0 0;font-size:13px;color:var(--text-3);line-height:1.6}
+.legend b{font-weight:500;color:var(--text-2)}
+@media (min-width:900px){.cat-grid{grid-template-columns:repeat(5,1fr)}.tile{aspect-ratio:3/4}}
 
 /* ---------- sections ---------- */
 main{padding-bottom:30px}
@@ -148,7 +149,7 @@ main{padding-bottom:30px}
 .ban img{width:100%;height:100%;object-fit:cover}
 .ban::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,16,16,0) 40%,rgba(18,16,16,.75) 100%)}
 .ban figcaption{position:absolute;left:18px;bottom:14px;z-index:1;font-size:13.5px;color:var(--text-2)}
-.flip{transform-origin:0% 0%;opacity:0;transform:perspective(1400px) rotateY(24deg) translateY(24px);transition:opacity .9s var(--ease),transform 1.1s var(--ease)}
+.flip{opacity:0;transform:translateY(22px);transition:opacity .8s var(--ease),transform .9s var(--ease)}
 .flip.in{opacity:1;transform:none}
 
 /* rows */
@@ -269,7 +270,6 @@ footer p{margin:14px auto 0;color:var(--text-3);font-size:13.5px;max-width:52ch}
   .card small{display:none}
   .logo-end{font-size:25px}
 }
-@media (max-height:640px){.toc li a{padding:5px 0;font-size:15px}.paper .ph1{margin-bottom:8px}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none!important;animation:none!important}
   .flip{opacity:1;transform:none}
@@ -282,7 +282,7 @@ html.big .al s{font-size:13.5px;padding:4px 9px}
 html.big .dr b{font-size:20px}
 html.big .dr small{font-size:16px}
 html.big .price{font-size:18px}
-html.big .toc li a{font-size:19px}
+html.big .tile .tt b{font-size:22px}
 html.big .chip{font-size:15.5px}
 html.big .sheet h3{font-size:28px}
 html.big .sheet .desc,html.big .sheet .ing{font-size:18px}
@@ -310,8 +310,7 @@ html.big .act small{font-size:16px}
 <div class="env" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
-<div class="book" id="book">
-  <div class="cover" id="cover" role="button" tabindex="0" data-i-aria="coverAria" aria-label="Menü kapağı">
+<div class="cover" id="cover" role="button" tabindex="0" data-i-aria="coverAria" aria-label="Menü kapağı">
     <div class="face">
       <div class="photo" aria-hidden="true"></div>
       <div class="frame">
@@ -328,11 +327,8 @@ html.big .act small{font-size:16px}
         <div class="rule" data-i="rule">Şef Enes'in ızgarasından</div>
         <div class="clangs" id="coverLangs" role="group" aria-label="Dil"></div>
       </div>
-      <div class="bottom"><span data-i="cue">Sayfayı çevirmek için kaydırın</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></div>
-      <div class="shade" id="shade"></div>
+      <div class="bottom"><span data-i="cue">Menü için kaydırın</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></div>
     </div>
-    <div class="back"></div>
-  </div>
 </div>
 
 <div class="flylogo" id="fly"><a href="#top" id="flyLink" tabindex="-1" aria-label="Yarım Ekmek"><span class="wm"><svg class="hat" viewBox="0 0 100 118" aria-hidden="true"><use href="#ea"/></svg><b>yarım</b><i>ekmek</i></span></a></div>
@@ -361,16 +357,12 @@ html.big .act small{font-size:16px}
   <nav class="chips" id="chips" aria-label="Menü"></nav>
 </header>
 
-<div class="opening" id="top">
-  <div class="toc">
-    <div class="paper">
-      <div class="eb" data-i="tocEb">Yarım Ekmek · Menü</div>
-      <h1 class="ph1"><b style="font-weight:inherit" data-i="tocH">İçindekiler</b><span aria-hidden="true"></span></h1>
-      <ol id="tocList"></ol>
-      <p class="legend" data-i-html="legend"></p>
-    </div>
-  </div>
-</div>
+<section class="wrap cats" id="top" aria-labelledby="catsH">
+  <div class="eb" data-i="tocEb">Yarım Ekmek · Menü</div>
+  <h1 class="ph1" id="catsH"><b style="font-weight:inherit" data-i="tocH">Kategoriler</b><span aria-hidden="true"></span></h1>
+  <ul class="cat-grid" id="tocList"></ul>
+  <p class="legend" data-i-html="legend"></p>
+</section>
 
 <main class="wrap" id="menu"></main>
 <p class="empty wrap" id="empty" data-i="empty"></p>
@@ -428,8 +420,8 @@ html.big .act small{font-size:16px}
   var LANGS = ['tr','en'];
   var I18N = {
     tr: { name:'Türkçe', top:'Izgara · Dürüm · Porsiyon', pill:'Menü', tag:'Ekmek yarım, lezzet tam!', rule:'Şef Enes’in ızgarasından',
-      cue:'Sayfayı çevirmek için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
-      tocEb:'Yarım Ekmek · Menü', tocH:'İçindekiler',
+      cue:'Menü için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
+      tocEb:'Yarım Ekmek · Menü', tocH:'Kategoriler',
       legend:'Her ürüne dokunarak <b>kalorisini</b>, <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. + ile ürünleri listenize ekleyin, siparişte garsonumuza gösterin.',
       search:'Ürün ya da içerik ara (ör. köfte, cheddar)', searchAria:'Ara ve alerjen filtrele', fltA:'Bu alerjenleri içermesin', fltD:'Tercih',
       empty:'Bu seçimlere uyan ürün bulunamadı.',
@@ -445,8 +437,8 @@ html.big .act small{font-size:16px}
       total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
       actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', tocActs:'Bizi değerlendirin · Instagram' },
     en: { name:'English', top:'Grill · Wraps · Plates', pill:'Menu', tag:'Half the loaf, all the flavour!', rule:'From Chef Enes’s grill',
-      cue:'Scroll to turn the page', coverAria:'Menu cover. Tap or scroll to open.',
-      tocEb:'Yarım Ekmek · Menu', tocH:'Contents',
+      cue:'Scroll for the menu', coverAria:'Menu cover. Tap or scroll to open.',
+      tocEb:'Yarım Ekmek · Menu', tocH:'Categories',
       legend:'Tap any item to see its <b>calories</b>, <b>ingredients</b> and <b>allergens</b>. Add items with + and show the list to your waiter.',
       search:'Search dishes or ingredients (e.g. meatballs)', searchAria:'Search and filter allergens', fltA:'Exclude these allergens', fltD:'Preference',
       empty:'No items match your selection.',
@@ -520,7 +512,7 @@ html.big .act small{font-size:16px}
     MENU.forEach(function(s, si){
       var title = secTitle(s), count = s.idx.length;
       chipHtml += '<a class="chip" href="#'+s.id+'" data-id="'+s.id+'">'+esc(title)+'</a>';
-      tocHtml += '<li><a href="#'+s.id+'"><i>'+ROMAN[si]+'</i><b>'+esc(title)+'</b><em></em><span>'+esc(fmt(T.count,{n:count}))+'</span></a></li>';
+      tocHtml += '<li><a class="tile" href="#'+s.id+'"><img src="img/'+s.ban+'.webp" alt="" width="960" height="640" loading="lazy" decoding="async"><span class="tt"><i>'+ROMAN[si]+'</i><b>'+esc(title)+'</b><small>'+esc(fmt(T.count,{n:count}))+'</small></span></a></li>';
       html += '<section class="sec flip'+(first?'':' in')+'" id="'+s.id+'" aria-labelledby="h-'+s.id+'"><div class="sec-head"><h2 id="h-'+s.id+'"><i>'+ROMAN[si]+'</i>'+esc(title)+'</h2><span class="n">'+esc(fmt(T.count,{n:count}))+'</span></div>';
       if (s.ban) html += '<figure class="ban"><img src="img/'+s.ban+'.webp" alt="" width="960" height="640" loading="lazy" decoding="async"></figure>';
       var cards = '', rows = '';
@@ -540,7 +532,7 @@ html.big .act small{font-size:16px}
       if (s.note) html += '<p class="snote">'+esc(L === 'en' ? s.note[1] : s.note[0])+'</p>';
       html += '</section>';
     });
-    tocHtml += '<li><a href="#bizden"><i>★</i><b>'+esc(T.tocActs)+'</b><em></em><span>↗</span></a></li>';
+    tocHtml += '<li><a class="tile alt" href="#bizden"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/></svg></span><span class="tt"><i>★</i><b>'+esc(T.tocActs)+'</b></span></a></li>';
     menu.innerHTML = html; chips.innerHTML = chipHtml; toc.innerHTML = tocHtml;
     secs = [].slice.call(menu.querySelectorAll('.sec'));
     chipEls = [].slice.call(chips.querySelectorAll('.chip'));
@@ -558,35 +550,32 @@ html.big .act small{font-size:16px}
 
   /* cover + flying logo */
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var book = document.getElementById('book'), cover = document.getElementById('cover'), shade = document.getElementById('shade');
+  var cover = document.getElementById('cover'), photo = cover.querySelector('.photo');
   var fly = document.getElementById('fly'), flyLink = document.getElementById('flyLink'), topbar = document.getElementById('topbar');
   var ls = document.getElementById('logoStart'), le = document.getElementById('logoEnd');
   var A = null, B = null, H = innerHeight, lastP = -1, raf = null;
   function measure(){
     H = innerHeight;
-    var prevC = cover.style.transform, prevT = topbar.style.transition, prevTb = topbar.style.transform;
-    cover.style.transform = 'none'; topbar.style.transition = 'none'; topbar.style.transform = 'none';
+    var prevT = topbar.style.transition, prevTb = topbar.style.transform;
+    topbar.style.transition = 'none'; topbar.style.transform = 'none';
     var a = ls.getBoundingClientRect(), b = le.getBoundingClientRect();
-    cover.style.transform = prevC; topbar.style.transform = prevTb; topbar.offsetHeight; topbar.style.transition = prevT;
-    A = { x:a.left, y:a.top, h:a.height }; B = { x:b.left, y:b.top, h:b.height };
+    topbar.style.transform = prevTb; topbar.offsetHeight; topbar.style.transition = prevT;
+    A = { x:a.left, y:a.top + scrollY, h:a.height }; B = { x:b.left, y:b.top, h:b.height };
     fly.style.fontSize = getComputedStyle(ls).fontSize;
     lastP = -1; frame();
   }
   function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
   function frame(){
     raf = null;
-    var p = Math.min(1, Math.max(0, scrollY / (H*0.9)));
-    if (p !== lastP && A){
+    var y = scrollY, p = Math.min(1, Math.max(0, y / (H*0.6)));
+    if (y < H*1.2) photo.style.transform = 'translateY(' + (y*0.35) + 'px) scale(1.06)';
+    if ((p !== lastP || p < 1) && A){
       lastP = p;
-      var r = reduce ? (p > .02 ? 1 : 0) : p;
-      cover.style.transform = 'rotateY(' + (-ease(r) * 180) + 'deg)';
-      shade.style.opacity = Math.min(.55, r*.9);
-      book.style.visibility = r >= .999 ? 'hidden' : '';
-      cover.style.pointerEvents = r > .3 ? 'none' : '';
-      var t = reduce ? r : ease(Math.min(1, r/0.7));
+      var t = reduce ? (p > .5 ? 1 : 0) : ease(p);
+      var sy = A.y - y;
       var s = 1 + (B.h/A.h - 1)*t;
-      fly.style.transform = 'translate(' + (A.x + (B.x-A.x)*t) + 'px,' + (A.y + (B.y-A.y)*t) + 'px) scale(' + s + ')';
-      var barOn = t > .55;
+      fly.style.transform = 'translate(' + (A.x + (B.x-A.x)*t) + 'px,' + (sy + (B.y-sy)*t) + 'px) scale(' + s + ')';
+      var barOn = t > .6;
       topbar.classList.toggle('on', barOn);
       document.body.classList.toggle('turned', barOn);
       flyLink.tabIndex = barOn ? 0 : -1;
@@ -598,7 +587,7 @@ html.big .act small{font-size:16px}
   addEventListener('resize', function(){ measure(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
   addEventListener('load', measure);
-  function turnPage(){ scrollTo({ top: Math.round(H*0.92), behavior: reduce ? 'auto' : 'smooth' }); }
+  function turnPage(){ var c = document.getElementById('top'); scrollTo({ top: c.getBoundingClientRect().top + scrollY - (topbar.offsetHeight || 104) - 8, behavior: reduce ? 'auto' : 'smooth' }); }
   cover.addEventListener('click', function(e){
     var lb = e.target.closest('[data-lang]');
     if (lb){ e.stopPropagation(); setLang(lb.dataset.lang, true); return; }
