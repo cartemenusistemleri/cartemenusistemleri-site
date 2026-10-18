@@ -303,6 +303,10 @@ html.big footer p{font-size:16px}
 .act .go{position:absolute;top:18px;inset-inline-end:20px;color:var(--text-3);font-size:16px}
 html.big .act b{font-size:19px}
 html.big .act small{font-size:16px}
+
+.cover .by{position:absolute;z-index:2;left:calc(clamp(14px,3vw,28px) + 18px);bottom:calc(clamp(14px,3vw,28px) + 12px);font-family:'Allura',cursive;font-size:24px;line-height:1;color:rgba(251,246,238,.6);text-decoration:none;letter-spacing:0;transition:color .3s}
+.cover .by:hover{color:var(--text)}
+html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 </style>
 </head>
 <body>
@@ -327,6 +331,7 @@ html.big .act small{font-size:16px}
         <div class="rule" data-i="rule">Şef Enes'in ızgarasından</div>
         <div class="clangs" id="coverLangs" role="group" aria-label="Dil"></div>
       </div>
+      <a class="by" href="https://cartemenusistemleri.com.tr/" target="_blank" rel="noopener" aria-label="Carte Menü Sistemleri">Carte</a>
       <div class="bottom"><span data-i="cue">Menü için kaydırın</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></div>
     </div>
 </div>
@@ -589,6 +594,7 @@ html.big .act small{font-size:16px}
   addEventListener('load', measure);
   function turnPage(){ var c = document.getElementById('top'); scrollTo({ top: c.getBoundingClientRect().top + scrollY - (topbar.offsetHeight || 104) - 8, behavior: reduce ? 'auto' : 'smooth' }); }
   cover.addEventListener('click', function(e){
+    if (e.target.closest('.by')) return;
     var lb = e.target.closest('[data-lang]');
     if (lb){ e.stopPropagation(); setLang(lb.dataset.lang, true); return; }
     turnPage();
