@@ -289,6 +289,19 @@ html.big .ag div{font-size:16px}
 html.big .lst .ln b{font-size:19px}
 html.big footer p{font-size:16px}
 @media (max-width:600px){html.big .grid{grid-template-columns:1fr}}
+
+/* bir dokunuşla */
+.acts{padding-top:64px}
+.acts .sec-head{border-bottom:0}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.act{position:relative;display:flex;flex-direction:column;gap:4px;padding:22px 20px;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);text-decoration:none;transition:border-color .35s var(--ease),transform .35s var(--ease)}
+.act:hover{border-color:rgba(245,178,27,.45);transform:translateY(-2px)}
+.act svg{width:28px;height:28px;margin-bottom:10px;color:var(--yel)}
+.act b{font-weight:500;font-size:17px}
+.act small{font-size:13.5px;color:var(--text-3)}
+.act .go{position:absolute;top:18px;inset-inline-end:20px;color:var(--text-3);font-size:16px}
+html.big .act b{font-size:19px}
+html.big .act small{font-size:16px}
 </style>
 </head>
 <body>
@@ -360,6 +373,20 @@ html.big footer p{font-size:16px}
 <main class="wrap" id="menu"></main>
 <p class="empty wrap" id="empty" data-i="empty"></p>
 
+<section class="wrap acts flip" id="bizden" aria-labelledby="actsH">
+  <div class="sec-head"><h2 id="actsH"><i>★</i><span data-i="actsH">Bir dokunuşla</span></h2><span class="n" data-i="actsEb">Masanızdan</span></div>
+  <div class="act-grid">
+    <a class="act" href="https://search.google.com/local/writereview?placeid=ChIJQymeFyB9uRQR1bAfIcLjHkg" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+      <b data-i="gT">Bizi değerlendirin</b><small data-i="gS">Google’da yorum bırakın</small><span class="go" aria-hidden="true">↗</span>
+    </a>
+    <a class="act" href="https://www.instagram.com/yarimekmek_ea/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none"/></svg>
+      <b>Instagram</b><small>@yarimekmek_ea</small><span class="go" aria-hidden="true">↗</span>
+    </a>
+  </div>
+</section>
+
 <footer class="wrap">
   <span class="wm"><b>yarım</b><i>ekmek</i></span>
   <p data-i="foot"></p>
@@ -413,7 +440,8 @@ html.big footer p{font-size:16px}
       diet:{ v:'Vejetaryen', vg:'Vegan', gf:'Glutensiz' },
       listTitle:'Seçtiklerim', add:'Listeme ekle', addShort:'ekle', inList:'Listede', addAria:'Listeme ekle: {n}', items:'{n} ürün',
       listNote:'Bu liste sipariş değildir. Siparişinizi verirken garsonumuza gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.',
-      total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle' },
+      total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
+      actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', tocActs:'Bizi değerlendirin · Instagram' },
     en: { name:'English', top:'Grill · Wraps · Plates', pill:'Menu', tag:'Half the loaf, all the flavour!', rule:'From Chef Enes’s grill',
       cue:'Scroll to turn the page', coverAria:'Menu cover. Tap or scroll to open.',
       tocEb:'Yarım Ekmek · Menu', tocH:'Contents',
@@ -429,7 +457,8 @@ html.big footer p{font-size:16px}
       diet:{ v:'Vegetarian', vg:'Vegan', gf:'Gluten-free' },
       listTitle:'My picks', add:'Add to my list', addShort:'add', inList:'In list', addAria:'Add to my list: {n}', items:'{n} items',
       listNote:'This list is not an order. Show it to your waiter when ordering.', listEmpty:'Your list is empty. Use + on any item to add it.',
-      total:'Total', totalKcal:'Total energy', clear:'Clear list' }
+      total:'Total', totalKcal:'Total energy', clear:'Clear list',
+      actsH:'One tap away', actsEb:'From your table', gT:'Rate us', gS:'Leave a Google review', tocActs:'Rate us · Instagram' }
   };
   var ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
   var PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
@@ -509,6 +538,7 @@ html.big footer p{font-size:16px}
       if (s.note) html += '<p class="snote">'+esc(L === 'en' ? s.note[1] : s.note[0])+'</p>';
       html += '</section>';
     });
+    tocHtml += '<li><a href="#bizden"><i>★</i><b>'+esc(T.tocActs)+'</b><em></em><span>↗</span></a></li>';
     menu.innerHTML = html; chips.innerHTML = chipHtml; toc.innerHTML = tocHtml;
     secs = [].slice.call(menu.querySelectorAll('.sec'));
     chipEls = [].slice.call(chips.querySelectorAll('.chip'));
