@@ -670,6 +670,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   var cover = document.getElementById('cover');
   var fly = document.getElementById('fly'), flyLink = document.getElementById('flyLink'), topbar = document.getElementById('topbar');
   var ls = document.getElementById('logoStart'), le = document.getElementById('logoEnd');
+  var fades = document.querySelectorAll('.cover .mid > :not(.logo-start), .cover .top, .cover .bottom');
   var A = null, B = null, H = innerHeight, lastP = -1, raf = null;
   function measure(){
     H = innerHeight;
@@ -684,15 +685,16 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
   function frame(){
     raf = null;
-    var y = scrollY, p = Math.min(1, Math.max(0, y / (H*0.6)));
+    var y = scrollY, p = Math.min(1, Math.max(0, y / (H*0.45)));
     if ((p !== lastP || p < 1) && A){
       lastP = p;
       var t = reduce ? (p > .5 ? 1 : 0) : ease(p);
-      var sy = A.y - y;
+      var sy = A.y - y*(1-t)*0.5;
+      var op = Math.max(0, 1 - p*2.2); for (var fi = 0; fi < fades.length; fi++) fades[fi].style.opacity = op;
       var s = 1 + (B.h/A.h - 1)*t;
       fly.style.transform = 'translate(' + (A.x + (B.x-A.x)*t) + 'px,' + (sy + (B.y-sy)*t) + 'px) scale(' + s + ')';
       fly.style.textShadow = t > .5 ? 'none' : '';
-      var barOn = t > .6;
+      var barOn = t > .8;
       topbar.classList.toggle('on', barOn);
       document.body.classList.toggle('turned', barOn);
       flyLink.tabIndex = barOn ? 0 : -1;
