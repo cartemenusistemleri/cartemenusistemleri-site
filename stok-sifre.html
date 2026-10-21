@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carte · Stok Şifreleri</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,600&family=Jost:wght@300;400;500&display=swap">
+<style>
+:root{--bg:#4A1826;--bg2:#5A2130;--cream:#FFFDF6;--card:#FFFDF8;--soft:#FAF3E4;--ink:#2A0F17;--muted:#7C5E66;--line:rgba(74,24,38,.14)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg));font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:300;color:var(--ink);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px}
+.box{width:min(460px,100%)}
+.wm{display:flex;align-items:baseline;gap:12px;justify-content:center;margin-bottom:22px;color:var(--cream)}
+.wm b{font-family:'Allura',cursive;font-weight:400;font-size:44px;line-height:1}
+.wm span{font-size:11px;letter-spacing:.3em;text-transform:uppercase;opacity:.75}
+.card{background:var(--card);border-radius:20px;padding:24px 22px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+h1{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:600;font-size:26px;margin:0 0 6px}
+p{margin:0 0 16px;color:var(--muted);font-size:14.5px;line-height:1.5}
+label{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.btn{width:100%;margin-top:16px;font:inherit;font-size:16px;font-weight:500;border:0;border-radius:12px;padding:13px;background:var(--bg);color:var(--cream);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--bg);border:1px solid var(--line);margin-top:10px}
+.err{color:#A3242F;font-size:14px;min-height:20px;margin-top:10px}
+.res{margin-top:18px;padding:16px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
+.res .k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.pw{font-size:26px;font-weight:500;letter-spacing:.14em;font-variant-numeric:tabular-nums}
+.cp{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;cursor:pointer}
+.links{margin-top:14px;font-size:14px;line-height:1.8}
+.links a{color:var(--bg);font-weight:500}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="wm"><b>Carte</b><span>Stok Şifreleri</span></div>
+  <div class="card">
+    <h1>Personel stok şifresi</h1>
+    <p>Menüdeki ürünleri “Var / Tükendi” yapan personel şifresini burada görür veya yenilersiniz. Yenilerseniz eski şifre hemen geçersiz olur.</p>
+    <form id="f" autocomplete="off">
+      <label for="sec">Yönetici şifresi</label>
+      <input id="sec" type="password" required>
+      <label for="k">Menü</label>
+      <select id="k"><option value="cafe-solen">Cafe Şölen</option></select>
+      <button class="btn" type="submit">Şifreyi göster</button>
+      <div class="err" id="err" role="alert"></div>
+    </form>
+    <div class="res" id="res" hidden>
+      <div class="k">Personel şifresi</div>
+      <div class="row"><span class="pw" id="pw"></span><button class="cp" id="cp" type="button">Kopyala</button></div>
+      <div class="links">Personel paneli: <a id="pl" target="_blank" rel="noopener"></a><br>Menü: <a id="ml" target="_blank" rel="noopener"></a></div>
+      <button class="btn ghost" id="yen" type="button">Şifreyi yenile</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  try { var s = sessionStorage.getItem('carte_admin_secret'); if (s) $('sec').value = s; } catch(e){}
+  function go(yenile){
+    $('err').textContent = '';
+    var secret = $('sec').value, k = $('k').value;
+    fetch('/api/stok-sifre', { method:'POST', headers:{ 'content-type':'application/json', 'x-admin-secret': secret }, body: JSON.stringify({ k:k, yenile:!!yenile }) })
+      .then(function(r){ return r.json(); }).then(function(j){
+        if (!j.ok){ $('err').textContent = j.error || 'Hata'; $('res').hidden = true; return; }
+        try { sessionStorage.setItem('carte_admin_secret', secret); } catch(e){}
+        $('pw').textContent = j.sifre;
+        var base = location.origin + '/' + k + '/';
+        $('pl').href = $('pl').textContent = base + 'personel/';
+        $('ml').href = $('ml').textContent = base;
+        $('res').hidden = false;
+      }).catch(function(){ $('err').textContent = 'Bağlantı hatası'; });
+  }
+  $('f').addEventListener('submit', function(e){ e.preventDefault(); go(false); });
+  $('yen').addEventListener('click', function(){ if (confirm('Şifre yenilensin mi? Personelin yeni şifreyle tekrar giriş yapması gerekir.')) go(true); });
+  $('cp').addEventListener('click', function(){
+    var t = $('pw').textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ $('cp').textContent = 'Kopyalandı'; setTimeout(function(){ $('cp').textContent = 'Kopyala'; }, 1500); }).catch(function(){});
+  });
+})();
+</script>
+</body>
+</html>
