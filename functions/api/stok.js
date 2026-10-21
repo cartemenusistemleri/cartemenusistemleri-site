@@ -1,6 +1,7 @@
 // Anlık stok (var / tükendi) — Carte Menü Sistemleri
 // GET  /api/stok?k=cafe-solen           -> { ok, out: { urunId: 1, ... }, t }
-// POST /api/stok  (x-stok-pass başlığı) -> { k, check } | { k, id, out } | { k, all: 'var' }
+// POST /api/stok  (x-stok-pass başlığı) -> { k, check } | { k, id, out } | { k, id, alan:'fav'|'yeni', val } | { k, all: 'var' }
+// fav = "Öneriyoruz", yeni = "Yeni" etiketi
 // Veri: ODEME_LINKS KV içinde "stok:<k>" anahtarı (tek JSON). Miktar tutulmaz, sadece var/yok.
 
 // İzinli menüler. İleride şubeye göre: 'cafe-solen:evka-3' gibi eklenir.
@@ -28,15 +29,16 @@ export async function stokSifresi(env, k) {
 
 async function oku(env, k) {
   const raw = await env.ODEME_LINKS.get('stok:' + k);
-  if (!raw) return { out: {}, t: null };
-  try { const d = JSON.parse(raw); return { out: d.out || {}, t: d.t || null }; } catch (e) { return { out: {}, t: null }; }
+  const bos = { out: {}, fav: {}, yeni: {}, t: null };
+  if (!raw) return bos;
+  try { const d = JSON.parse(raw); return { out: d.out || {}, fav: d.fav || {}, yeni: d.yeni || {}, t: d.t || null }; } catch (e) { return bos; }
 }
 
 export async function onRequestGet({ request, env }) {
   const k = new URL(request.url).searchParams.get('k');
   if (!gecerliMenu(k)) return json({ ok: false, error: 'Menü bulunamadı' }, 404);
   const d = await oku(env, k);
-  return json({ ok: true, out: d.out, t: d.t });
+  return json({ ok: true, out: d.out, fav: d.fav, yeni: d.yeni, t: d.t });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -58,10 +60,12 @@ export async function onRequestPost({ request, env }) {
   } else {
     const id = String(body.id || '');
     if (!/^[a-z0-9-]{1,64}$/.test(id)) return json({ ok: false, error: 'Geçersiz ürün' }, 400);
-    if (body.out) d.out[id] = 1; else delete d.out[id];
+    const alan = body.alan === 'fav' || body.alan === 'yeni' ? body.alan : 'out';
+    const val = alan === 'out' ? !!body.out : !!body.val;
+    if (val) d[alan][id] = 1; else delete d[alan][id];
   }
-  if (Object.keys(d.out).length > 600) return json({ ok: false, error: 'Çok fazla kayıt' }, 400);
+  if (Object.keys(d.out).length + Object.keys(d.fav).length + Object.keys(d.yeni).length > 900) return json({ ok: false, error: 'Çok fazla kayıt' }, 400);
   d.t = new Date().toISOString();
   await env.ODEME_LINKS.put('stok:' + k, JSON.stringify(d));
-  return json({ ok: true, out: d.out, t: d.t });
+  return json({ ok: true, out: d.out, fav: d.fav, yeni: d.yeni, t: d.t });
 }
