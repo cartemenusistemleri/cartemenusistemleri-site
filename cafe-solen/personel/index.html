@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Bodoni+Moda:wght@400;500&family=Jost:wght@300;400;500;600&display=swap">
 <style>
-:root{--canvas:#17110D;--panel:#211913;--panel-2:#2A2019;--gold:#C9A46A;--on-gold:#1A120D;--text:#FBF6EE;--text-2:#D9D0C4;--text-3:#9C9287;--line:rgba(251,246,238,.12);--red:#B5463F;--green:#5E9B62;--ease:cubic-bezier(.22,1,.36,1)}
+:root{--canvas:#17110D;--panel:#211913;--panel-2:#2A2019;--gold:#C9A46A;--on-gold:#1A120D;--text:#FBF6EE;--text-2:#D9D0C4;--text-3:#9C9287;--line:rgba(251,246,238,.12);--red:#6E6862;--green:#5E9B62;--ease:cubic-bezier(.22,1,.36,1)}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--canvas);color:var(--text);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:300;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
@@ -37,7 +37,7 @@ header{position:sticky;top:0;z-index:5;background:rgba(23,17,13,.94);backdrop-fi
 .sbtn{font-size:13px;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;white-space:nowrap}
 .sum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:2px 0 10px;font-size:13.5px;color:var(--text-3)}
 .sum b{color:var(--text);font-weight:500}
-.sum .pill{border-radius:999px;padding:3px 10px;background:rgba(181,70,63,.18);color:#F0A49C}
+.sum .pill{border-radius:999px;padding:3px 10px;background:rgba(160,152,144,.18);color:#D2CBC3}
 .sum .pill.ok{background:rgba(94,155,98,.18);color:#A9D8AC}
 .search input{width:100%;font-size:16px;color:var(--text);background:rgba(251,246,238,.06);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
 .search input:focus{outline:none;border-color:var(--gold)}
@@ -63,7 +63,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 .note{margin:26px 0 90px;font-size:13px;color:var(--text-3);line-height:1.6}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--text);color:var(--canvas);font-weight:500;font-size:14.5px;border-radius:999px;padding:11px 18px;transition:.35s var(--ease);pointer-events:none;z-index:9;white-space:nowrap}
 .toast.on{transform:translate(-50%,0);opacity:1}
-.toast.bad{background:var(--red);color:#fff}
+.toast.bad{background:#B5463F;color:#fff}
 [hidden]{display:none!important}
 </style>
 </head>
