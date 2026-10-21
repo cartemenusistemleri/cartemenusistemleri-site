@@ -346,6 +346,21 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 .demo-note b{color:var(--yel);font-weight:500}
 @media (max-width:820px){.act-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:380px){.act{padding:18px 15px}.act b{font-size:15.5px}.tile.ico .big{width:22%;top:9%;left:auto;right:12px;transform:none}.logo-end{font-size:14px}}
+
+/* stok: tükendi */
+.so{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);background:#7A2E2A;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.cw.out .card .ph{position:relative}
+.cw.out .card .ph .so{position:absolute;left:10px;bottom:10px}
+.cw.out .card .ph img{filter:grayscale(1);opacity:.5}
+.out .card b,.out .dr b{color:var(--text-3)}
+.out .price{color:var(--text-3);text-decoration:line-through;text-decoration-thickness:1px}
+.dw.out .so{margin-top:6px}
+.out .add{opacity:.3;pointer-events:none}
+.sheet .sso{display:none;margin-top:10px}
+.sheet.isout .sso{display:inline-flex}
+.sheet.isout .ph img{filter:grayscale(1);opacity:.6}
+.sadd:disabled{opacity:.4;cursor:not-allowed}
+.lst .so{margin-inline-start:6px;padding:2px 7px;font-size:9.5px}
 </style>
 </head>
 <body>
@@ -451,6 +466,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   <div class="body">
     <div class="cat" id="sCat"></div>
     <h3 id="sTitle"></h3>
+    <span class="so sso" data-i="soldOut">Tükendi</span>
     <p class="desc" id="sDesc"></p>
     <div class="diet" id="sDiet"></div>
     <div class="kcal"><span class="big"><b id="sKv"></b> kcal</span><span class="por"><span data-i="energy">Enerji</span> · <span id="sPor"></span></span></div>
@@ -467,7 +483,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   <div class="body" id="aBody"></div>
 </div>
 
-<script src="data.js?v=1"></script>
+<script src="data.js?v=2"></script>
 <script>
 (function(){
   'use strict';
@@ -475,7 +491,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   var AL_KEYS = ['g','s','y','k','yf','su','so','ke','h','sl','b'];
   var LANGS = ['tr','en'];
   var I18N = {
-    tr: { name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
+    tr: { soldOut:'Tükendi', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
       cue:'Menü için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
       tocEb:'Cafe Şölen · Menü', tocH:'Kafe & Pastane',
       evH:'Yemek Menüsü', evBadge:'Evka 3 şubesine özel', evSub:'Pizza, makarna, burger ve ana yemeklerimiz yalnızca Evka 3 şubemizde servis edilir.',
@@ -495,7 +511,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       listNote:'Bu liste sipariş değildir. Siparişinizi verirken ekibimize gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.',
       total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
       actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', webT:'İnternet sitemiz', telT:'Bizi arayın', tocActs:'Instagram · İnternet sitemiz' },
-    en: { name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
+    en: { soldOut:'Sold out', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
       cue:'Scroll for the menu', coverAria:'Menu cover. Tap or scroll to open.',
       tocEb:'Cafe Şölen · Menu', tocH:'Café & Patisserie',
       evH:'Food Menu', evBadge:'Evka 3 branch only', evSub:'Our pizzas, pasta, burgers and main courses are served only at our Evka 3 branch.',
@@ -534,7 +550,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   MENU.forEach(function(s, si){
     s.idx = [];
     s.items.forEach(function(it){
-      var o = { tr:[it.n, it.d || '', it.i], en:it.en || null, img:it.img || '', p:it.p, a:codes(it.a), diet:codes(it.v), kc:it.k || null, sec:si };
+      var o = { id:it.id, tr:[it.n, it.d || '', it.i], en:it.en || null, img:it.img || '', p:it.p, a:codes(it.a), diet:codes(it.v), kc:it.k || null, sec:si };
       if (o.a.indexOf('g') === -1 && o.diet.indexOf('gf') === -1) o.diet.push('gf');
       if (o.diet.indexOf('vg') !== -1 && o.diet.indexOf('v') === -1) o.diet.unshift('v');
       s.idx.push(DATA.push(o) - 1);
@@ -620,7 +636,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     if (LANGS.indexOf(l) === -1) return;
     L = l; T = I18N[l];
     if (save) store('cs-lang', l);
-    applyStatic(); render(false); apply(true); syncCart(); syncSAdd(); if (listOpen) renderList(); measure();
+    applyStatic(); render(false); markOut(); apply(true); syncCart(); syncSAdd(); if (listOpen) renderList(); measure();
     closeLangMenu();
   }
 
@@ -771,7 +787,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     document.getElementById('sAg').innerHTML =
       yes.map(function(k){ return '<div class="yes">'+ICON_YES+esc(fmt(T.yes,{a:T.al[k]}))+'</div>'; }).join('') +
       no.map(function(k){ return '<div class="no">'+ICON_NO+esc(fmt(T.no,{a:T.al[k]}))+'</div>'; }).join('');
-    curK = +el.dataset.k; syncSAdd();
+    curK = +el.dataset.k; sheet.classList.toggle('isout', isOut(curK)); syncSAdd();
     show(sheet, el);
   }
   function closeSheet(){
@@ -793,6 +809,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   var cartbar = document.getElementById('cartbar'), curK = -1, listOpen = false;
   function saveList(){ store('cs-list', JSON.stringify(LIST)); }
   function addItem(k, d){
+    if (d > 0 && isOut(k)) return;
     var n = (LIST[k] || 0) + d; if (n <= 0) delete LIST[k]; else LIST[k] = Math.min(n, 99);
     saveList(); syncAdds(); syncCart(); syncSAdd(); if (listOpen) renderList();
   }
@@ -811,7 +828,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   }
   function syncSAdd(){
     var b = document.getElementById('sAdd'); if (curK < 0) return;
-    var n = LIST[curK] || 0;
+    var n = LIST[curK] || 0; b.disabled = isOut(curK);
+    if (b.disabled){ b.innerHTML = '<span>'+esc(T.soldOut)+'</span>'; b.classList.remove('on'); return; }
     b.innerHTML = n ? '<b>'+esc(T.inList)+': '+n+'</b> · + ' + esc(T.addShort) : PLUS + '<span>'+esc(T.add)+'</span>';
     b.classList.toggle('on', !!n);
   }
@@ -823,7 +841,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     h += '<p class="desc">'+esc(T.listNote)+'</p><ul class="lst">';
     keys.forEach(function(k){
       var o = DATA[+k], tx = txt(o), n = LIST[k];
-      h += '<li><span class="ln"><b>'+esc(tx[0])+'</b><small>'+esc(secTitle(MENU[o.sec]))+' · '+money(o.p*n)+(o.kc ? ' · '+(o.kc[0]*n)+' kcal' : '')+'</small></span>'+
+      h += '<li><span class="ln"><b>'+esc(tx[0])+(isOut(+k) ? '<span class="so">'+esc(T.soldOut)+'</span>' : '')+'</b><small>'+esc(secTitle(MENU[o.sec]))+' · '+money(o.p*n)+(o.kc ? ' · '+(o.kc[0]*n)+' kcal' : '')+'</small></span>'+
         '<span class="step"><button type="button" data-step="'+k+'" data-d="-1" aria-label="−">−</button><b>'+n+'</b><button type="button" data-step="'+k+'" data-d="1" aria-label="+">+</button></span></li>';
     });
     h += '</ul><div class="ltot main"><span>'+esc(T.total)+'</span><b>'+money(t.p)+'</b></div>';
@@ -842,10 +860,34 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   function setBig(on){ document.documentElement.classList.toggle('big', on); bBtn.setAttribute('aria-pressed', on); store('cs-big', on ? '1' : '0'); }
   bBtn.addEventListener('click', function(){ setBig(!document.documentElement.classList.contains('big')); });
 
+  /* anlık stok (var / tükendi) */
+  var STOK_K = 'cafe-solen', OUT = {};
+  function isOut(k){ var o = DATA[k]; return !!(o && OUT[o.id]); }
+  function markOut(){
+    [].forEach.call(menu.querySelectorAll('.cw[data-k],.dw[data-k]'), function(el){
+      var out = isOut(+el.dataset.k), so = el.querySelector('.so');
+      el.classList.toggle('out', out);
+      if (out && !so){
+        so = document.createElement('span'); so.className = 'so'; so.textContent = T.soldOut;
+        (el.querySelector('.card .ph') || el.querySelector('.dr .t')).appendChild(so);
+      } else if (!out && so) so.remove();
+      var ab = el.querySelector('[data-add]'); if (ab){ ab.disabled = out; ab.tabIndex = out ? -1 : 0; }
+    });
+    if (openEl === sheet && curK >= 0){ sheet.classList.toggle('isout', isOut(curK)); syncSAdd(); }
+    if (listOpen) renderList();
+  }
+  function loadStock(){
+    fetch('/api/stok?k=' + STOK_K + '&_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
+      if (j && j.ok){ OUT = j.out || {}; markOut(); }
+    }).catch(function(){});
+  }
+  setInterval(function(){ if (!document.hidden) loadStock(); }, 45000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) loadStock(); });
+
   /* boot */
   L = pick(); T = I18N[L];
   if (store('cs-big') === '1'){ document.documentElement.classList.add('big'); bBtn.setAttribute('aria-pressed','true'); }
-  applyStatic(); render(true); observe(); apply(true); syncCart();
+  applyStatic(); render(true); observe(); apply(true); syncCart(); loadStock();
   measure();
 })();
 </script>
