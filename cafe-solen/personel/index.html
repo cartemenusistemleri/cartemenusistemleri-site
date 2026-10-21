@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Cafe Şölen · Stok Paneli</title>
+<title>Cafe Şölen · İşletme Paneli</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#17110D">
 <link rel="icon" type="image/png" href="../favicon.png"><link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -64,6 +64,30 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--text);color:var(--canvas);font-weight:500;font-size:14.5px;border-radius:999px;padding:11px 18px;transition:.35s var(--ease);pointer-events:none;z-index:9;white-space:nowrap}
 .toast.on{transform:translate(-50%,0);opacity:1}
 .toast.bad{background:#B5463F;color:#fff}
+.fl{display:flex;gap:6px;margin-top:6px}
+.fl button{font-size:12px;font-weight:500;color:var(--text-3);background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+.fl button[aria-pressed="true"]{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.fl button.yn[aria-pressed="true"]{background:var(--text);color:var(--canvas);border-color:var(--text)}
+.tabs{display:flex;gap:6px;padding:0 0 10px}
+.tabs button{flex:1;font-size:14px;font-weight:500;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:12px;padding:9px;cursor:pointer}
+.tabs button.on{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.ist{padding:18px 0 90px}
+.per{display:flex;gap:6px;margin-bottom:16px}
+.per button{font-size:13.5px;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer}
+.per button.on{background:var(--text);color:var(--canvas);border-color:var(--text)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi small{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
+.kpi b{display:block;font-family:'Gilda Display',serif;font-weight:400;font-size:32px;margin-top:4px}
+.ist h3{margin:26px 0 8px;font-family:'Gilda Display',serif;font-weight:400;font-size:21px}
+.bar{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.bar i{font-style:normal;color:var(--text-3);font-size:13px}
+.bar .nm{min-width:0}
+.bar .nm span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .tr{display:block;height:5px;border-radius:3px;background:var(--panel-2);margin-top:5px;overflow:hidden}
+.bar .tr em{display:block;height:100%;background:var(--gold);border-radius:3px}
+.bar b{font-weight:500;font-variant-numeric:tabular-nums}
+.ist .hint{font-size:13px;color:var(--text-3);line-height:1.6;margin-top:22px}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -72,8 +96,8 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 
 <section class="login wrap" id="login">
   <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#cs"/></svg>CAFE ŞÖLEN</div>
-  <h1>Stok Paneli</h1>
-  <p>Biten ürünleri “Tükendi” olarak işaretleyin; menüde müşterilere anında gösterilir.</p>
+  <h1>İşletme Paneli</h1>
+  <p>Biten ürünleri “Tükendi”, öne çıkarmak istediklerinizi “★ Öner” olarak işaretleyin; menüde anında görünür.</p>
   <form id="lf" autocomplete="off">
     <input id="pw" type="password" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Personel şifresi" aria-label="Personel şifresi" required>
     <button class="btn" type="submit">Giriş</button>
@@ -86,16 +110,23 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
   <header>
     <div class="wrap">
       <div class="hrow">
-        <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#cs"/></svg>STOK</div>
+        <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#cs"/></svg>PANEL</div>
         <div class="hbtns"><a class="sbtn" href="../" target="_blank" rel="noopener" style="text-decoration:none">Menüyü aç ↗</a><button class="sbtn" id="out" type="button">Çıkış</button></div>
       </div>
+      <div class="tabs" role="tablist"><button type="button" class="on" data-tab="stok">Ürünler</button><button type="button" data-tab="ist">İstatistik</button></div>
+      <div id="stokHead">
       <div class="sum" id="sum"></div>
       <div class="search"><input id="q" type="search" placeholder="Ürün ara (ör. latte, baklava)" aria-label="Ürün ara" autocomplete="off"></div>
       <nav class="chips" id="chips" aria-label="Kategoriler"></nav>
+      </div>
     </div>
   </header>
   <main class="wrap" id="list"></main>
-  <div class="wrap"><p class="note">Değişiklikler anında kaydedilir; müşterinin açık menüsüne en geç 1 dakika içinde yansır. Miktar tutulmaz, sadece var / tükendi. Gün sonunda “Tümünü var yap” ile sıfırlayabilirsiniz. <button class="sbtn" id="allv" type="button" style="margin-top:10px">Tümünü var yap</button></p></div>
+  <section class="wrap ist" id="ist" hidden>
+    <div class="per"><button type="button" class="on" data-g="7">Son 7 gün</button><button type="button" data-g="30">Son 30 gün</button><button type="button" data-g="1">Bugün</button></div>
+    <div id="istBody"></div>
+  </section>
+  <div class="wrap" id="noteWrap"><p class="note">Değişiklikler anında kaydedilir; müşterinin açık menüsüne en geç 1 dakika içinde yansır. Miktar tutulmaz, sadece var / tükendi. Gün sonunda “Tümünü var yap” ile sıfırlayabilirsiniz. <button class="sbtn" id="allv" type="button" style="margin-top:10px">Tümünü var yap</button></p></div>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -105,7 +136,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
   'use strict';
   var K = 'cafe-solen', LS = 'cs-stok-pass';
   var MENU = window.CS_MENU || [];
-  var PASS = null, OUT = {}, cur = 'all';
+  var PASS = null, OUT = {}, FAV = {}, YENI = {}, cur = 'all';
   var $ = function(id){ return document.getElementById(id); };
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
   function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch(e){ return null; } }
@@ -116,7 +147,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
       .then(function(r){ return r.json().then(function(j){ j.status = r.status; return j; }); });
   }
   function load(){
-    return fetch('/api/stok?k=' + K + '&_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){ if (j.ok){ OUT = j.out || {}; draw(); } });
+    return fetch('/api/stok?k=' + K + '&_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){ if (j.ok){ OUT = j.out || {}; FAV = j.fav || {}; YENI = j.yeni || {}; draw(); } });
   }
 
   /* giriş */
@@ -132,7 +163,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 
   /* liste */
   function chips(){
-    $('chips').innerHTML = '<button class="chip on" data-c="all" type="button">Tümü</button><button class="chip" data-c="out" type="button">Tükenenler</button>' +
+    $('chips').innerHTML = '<button class="chip on" data-c="all" type="button">Tümü</button><button class="chip" data-c="out" type="button">Tükenenler</button><button class="chip" data-c="fav" type="button">★ Önerilenler</button><button class="chip" data-c="yeni" type="button">Yeni</button>' +
       MENU.map(function(s){ return '<button class="chip" data-c="'+s.id+'" type="button">'+esc(s.tr)+(s.grp === 'evka' ? ' · Evka 3' : '')+'</button>'; }).join('');
   }
   $('chips').addEventListener('click', function(e){
@@ -144,9 +175,11 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
   function draw(){
     var q = norm($('q').value.trim()), html = '', total = 0, nOut = Object.keys(OUT).length;
     MENU.forEach(function(s){
-      if (cur !== 'all' && cur !== 'out' && cur !== s.id) return;
+      if (cur !== 'all' && cur !== 'out' && cur !== 'fav' && cur !== 'yeni' && cur !== s.id) return;
       var rows = s.items.filter(function(it){
         if (cur === 'out' && !OUT[it.id]) return false;
+        if (cur === 'fav' && !FAV[it.id]) return false;
+        if (cur === 'yeni' && !YENI[it.id]) return false;
         return !q || norm(it.n + ' ' + s.tr).indexOf(q) !== -1;
       });
       if (!rows.length) return;
@@ -155,14 +188,29 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
       rows.forEach(function(it){
         var o = !!OUT[it.id];
         html += '<div class="it'+(o?' out':'')+'" data-id="'+it.id+'">'+(it.img ? '<img src="../img/'+it.img+'.webp" alt="" loading="lazy" width="52" height="52">' : '<span class="noimg"></span>')+
-          '<span class="n"><b>'+esc(it.n)+'</b><small>'+(o ? 'Tükendi' : 'Var')+'</small></span>'+
+          '<span class="n"><b>'+esc(it.n)+'</b><small>'+(o ? 'Tükendi' : 'Var')+'</small><span class="fl"><button type="button" data-f="fav" aria-pressed="'+!!FAV[it.id]+'">★ Öner</button><button type="button" class="yn" data-f="yeni" aria-pressed="'+!!YENI[it.id]+'">Yeni</button></span></span>'+
           '<span class="tg" role="group" aria-label="'+esc(it.n)+'"><button type="button" class="v" data-set="0" aria-pressed="'+!o+'">Var</button><button type="button" class="y" data-set="1" aria-pressed="'+o+'">Tükendi</button></span></div>';
       });
     });
-    $('list').innerHTML = html || '<p class="empty">'+(cur === 'out' ? 'Tükenen ürün yok. 🎉' : 'Ürün bulunamadı.')+'</p>';
-    $('sum').innerHTML = nOut ? '<span class="pill"><b>'+nOut+'</b> ürün tükendi</span>' : '<span class="pill ok">Tüm ürünler var</span>';
+    $('list').innerHTML = html || '<p class="empty">'+(cur === 'out' ? 'Tükenen ürün yok. 🎉' : cur === 'fav' ? 'Önerilen ürün yok. Ürünlerdeki “★ Öner” ile ekleyin.' : cur === 'yeni' ? '“Yeni” işaretli ürün yok.' : 'Ürün bulunamadı.')+'</p>';
+    var nFav = Object.keys(FAV).length;
+    $('sum').innerHTML = (nOut ? '<span class="pill"><b>'+nOut+'</b> ürün tükendi</span>' : '<span class="pill ok">Tüm ürünler var</span>') + (nFav ? '<span><b>'+nFav+'</b> ürün öneriliyor</span>' : '');
   }
   $('list').addEventListener('click', function(e){
+    var f = e.target.closest('[data-f]');
+    if (f){
+      var r = f.closest('.it'), fid = r.dataset.id, alan = f.dataset.f, map = alan === 'fav' ? FAV : YENI, val = !map[fid];
+      if (r.classList.contains('busy')) return;
+      r.classList.add('busy');
+      api({ id:fid, alan:alan, val:val }).then(function(j){
+        r.classList.remove('busy');
+        if (j.status === 401){ toast('Oturum geçersiz, tekrar giriş yapın', true); $('out').click(); return; }
+        if (!j.ok){ toast(j.error || 'Kaydedilemedi', true); return; }
+        OUT = j.out || {}; FAV = j.fav || {}; YENI = j.yeni || {}; draw();
+        toast(alan === 'fav' ? (val ? 'Menüde öne çıkarıldı' : 'Öneriden kaldırıldı') : (val ? '“Yeni” etiketi eklendi' : '“Yeni” etiketi kaldırıldı'));
+      }).catch(function(){ r.classList.remove('busy'); toast('Bağlantı hatası', true); });
+      return;
+    }
     var b = e.target.closest('[data-set]'); if (!b) return;
     var row = b.closest('.it'), id = row.dataset.id, out = b.dataset.set === '1';
     if (!!OUT[id] === out || row.classList.contains('busy')) return;
@@ -171,7 +219,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
       row.classList.remove('busy');
       if (j.status === 401){ toast('Oturum geçersiz, tekrar giriş yapın', true); $('out').click(); return; }
       if (!j.ok){ toast(j.error || 'Kaydedilemedi', true); return; }
-      OUT = j.out || {}; draw(); toast(out ? 'Tükendi olarak işaretlendi' : 'Tekrar satışta');
+      OUT = j.out || {}; FAV = j.fav || FAV; YENI = j.yeni || YENI; draw(); toast(out ? 'Tükendi olarak işaretlendi' : 'Tekrar satışta');
     }).catch(function(){ row.classList.remove('busy'); toast('Bağlantı hatası', true); });
   });
   $('allv').addEventListener('click', function(){
@@ -179,7 +227,45 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
     if (!confirm('Tüm ürünler "Var" olarak işaretlensin mi?')) return;
     api({ all:'var' }).then(function(j){ if (j.ok){ OUT = {}; draw(); toast('Tüm ürünler satışta'); } else toast(j.error || 'Kaydedilemedi', true); });
   });
-  setInterval(function(){ if (PASS && !document.hidden) load(); }, 30000);
+  setInterval(function(){ if (PASS && !document.hidden && $('ist').hidden) load(); }, 30000);
+
+  /* sekmeler + istatistik */
+  var NAMES = {}; MENU.forEach(function(s){ s.items.forEach(function(it){ NAMES[it.id] = it.n; }); });
+  var gun = 7;
+  [].forEach.call(document.querySelectorAll('.tabs button'), function(b){
+    b.addEventListener('click', function(){
+      var ist = b.dataset.tab === 'ist';
+      [].forEach.call(document.querySelectorAll('.tabs button'), function(x){ x.classList.toggle('on', x === b); });
+      $('stokHead').hidden = ist; $('list').hidden = ist; $('noteWrap').hidden = ist; $('ist').hidden = !ist;
+      if (ist) loadIst(); else load();
+      scrollTo(0,0);
+    });
+  });
+  document.querySelector('.per').addEventListener('click', function(e){
+    var b = e.target.closest('[data-g]'); if (!b) return;
+    gun = +b.dataset.g; [].forEach.call(this.children, function(x){ x.classList.toggle('on', x === b); }); loadIst();
+  });
+  function bars(rows, key){
+    rows = rows.filter(function(r){ return r[key] > 0 && NAMES[r.id]; }).sort(function(a, b){ return b[key] - a[key]; }).slice(0, 10);
+    if (!rows.length) return '<p class="hint">Henüz veri yok.</p>';
+    var max = rows[0][key];
+    return rows.map(function(r, i){ return '<div class="bar"><i>'+(i+1)+'</i><span class="nm"><span>'+esc(NAMES[r.id])+'</span><span class="tr"><em style="width:'+Math.max(4, Math.round(r[key]/max*100))+'%"></em></span></span><b>'+r[key]+'</b></div>'; }).join('');
+  }
+  function loadIst(){
+    $('istBody').innerHTML = '<p class="hint">Yükleniyor…</p>';
+    fetch('/api/istatistik', { method:'POST', headers:{ 'content-type':'application/json', 'x-stok-pass': PASS }, body: JSON.stringify({ k:K, gun:gun }) })
+      .then(function(r){ return r.json(); }).then(function(j){
+        if (!j.ok){ $('istBody').innerHTML = '<p class="hint">'+esc(j.error || 'İstatistik alınamadı')+'</p>'; return; }
+        var oturum = 0, bakis = 0, ekle = 0;
+        j.gunluk.forEach(function(g){ oturum += g.s || 0; });
+        j.urunler.forEach(function(u){ bakis += u.v || 0; ekle += u.a || 0; });
+        $('istBody').innerHTML =
+          '<div class="kpis"><div class="kpi"><small>Menü ziyareti</small><b>'+oturum.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Ürün incelemesi</small><b>'+bakis.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Listeye ekleme</small><b>'+ekle.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Ziyaret başına inceleme</small><b>'+(oturum ? (bakis/oturum).toFixed(1).replace('.', ',') : '–')+'</b></div></div>' +
+          '<h3>En çok incelenen ürünler</h3>' + bars(j.urunler, 'v') +
+          '<h3>En çok listeye eklenenler</h3>' + bars(j.urunler, 'a') +
+          '<p class="hint">Menüde bir ürüne dokunup detayına bakılması “inceleme”, + ile Seçtiklerim listesine eklenmesi “listeye ekleme” sayılır. Kimlik, konum gibi kişisel bilgi tutulmaz; sadece ürün bazında günlük sayılar.</p>';
+      }).catch(function(){ $('istBody').innerHTML = '<p class="hint">Bağlantı hatası.</p>'; });
+  }
 
   var saved = store(LS); if (saved) enter(saved, true);
 })();
