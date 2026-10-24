@@ -247,6 +247,34 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}
 footer nav a{text-decoration:none}
 footer nav a:hover{color:var(--gold-3)}
 footer .by{font-family:'Allura',cursive;font-size:24px;color:#F3EADC;text-decoration:none}
+
+/* pasta kurulumu */
+.build{position:relative;height:520vh;padding:0;background:radial-gradient(70% 60% at 70% 45%,#FFFCF6 0%,var(--cream) 60%,var(--cream-2) 100%)}
+.build-in{position:sticky;top:0;height:100vh;height:100svh;width:min(1180px,100% - 40px);margin:0 auto;display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center}
+.b-steps{position:relative;margin-top:22px;min-height:230px}
+.b-step{position:absolute;inset:0 0 auto 0;opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .8s var(--ease);pointer-events:none}
+.b-step.on{opacity:1;transform:none;pointer-events:auto}
+.b-step i{font-style:normal;font-family:var(--serif);font-size:20px;color:var(--gold)}
+.b-step h3{margin-top:10px;font-size:clamp(34px,4.6vw,58px);line-height:1.05}
+.b-step p{margin:18px 0 0;font-size:clamp(16px,1.6vw,19px);color:var(--ink-2);max-width:36ch}
+.b-step a{color:var(--gold);font-weight:500}
+.b-bar{margin-top:20px;width:220px;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.b-bar span{display:block;height:100%;width:0;background:var(--gold)}
+.b-art{display:flex;justify-content:center;align-items:center;height:100%}
+#cake{width:min(640px,100%);height:auto;max-height:82vh;overflow:visible}
+#cake .fl{transform-box:fill-box;transform-origin:50% 90%;animation:flick 1.3s ease-in-out infinite alternate}
+#cake .fl:nth-child(2){animation-delay:-.6s}
+@keyframes flick{0%{transform:scale(1,1) rotate(-2deg)}50%{transform:scale(.92,1.08) rotate(1.5deg)}100%{transform:scale(1.04,.95) rotate(-1deg)}}
+@media (max-width:860px){
+  .build{height:560vh}
+  .build-in{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:0;align-items:start;padding-top:96px}
+  .b-art{order:-1;height:auto}
+  #cake{max-height:46vh;width:auto}
+  .b-steps{min-height:190px;margin-top:10px}
+  .b-txt .eb{display:none}
+  .b-step h3{font-size:30px}
+}
+@media (prefers-reduced-motion:reduce){.build{height:auto}.build-in{position:relative;height:auto;padding:80px 0}}
 </style>
 </head>
 <body>
@@ -304,6 +332,68 @@ footer .by{font-family:'Allura',cursive;font-size:24px;color:#F3EADC;text-decora
   </div>
 </section>
 
+<section class="build" id="tarif" aria-label="Bir Şölen pastası nasıl yapılır">
+  <div class="build-in">
+    <div class="b-txt">
+      <span class="eb">Bir Şölen pastası</span>
+      <div class="b-steps" aria-live="polite">
+        <div class="b-step on"><i>01</i><h3>Yarım asırlık tarif</h3><p>1976'dan beri aynı özen, aynı lezzet. Her pasta önce tabakta hayal edilir.</p></div>
+        <div class="b-step"><i>02</i><h3>Her sabah taze pandispanya</h3><p>Fırından yeni çıkmış, yumuşacık ve hafif katlar.</p></div>
+        <div class="b-step"><i>03</i><h3>Katların arasında krema</h3><p>İpeksi, gerçek kremayla; ne fazla tatlı ne ağır.</p></div>
+        <div class="b-step"><i>04</i><h3>Ustalıkla kaplanır</h3><p>Pürüzsüz bir krema katmanı, el ile düzeltilir.</p></div>
+        <div class="b-step"><i>05</i><h3>Üstten sıcak ganaj</h3><p>Bitter çikolata süzülür, kenarlardan yavaşça akar.</p></div>
+        <div class="b-step"><i>06</i><h3>Mevsimin meyveleri</h3><p>Taze çilek, frambuaz ve bol Antep fıstığıyla süslenir.</p></div>
+        <div class="b-step"><i>07</i><h3>Nice 50 yıllara</h3><p>Doğum gününüz, nişanınız, kutlamanız için. <a href="#siparis">Özel gün pastası sipariş edin →</a></p></div>
+      </div>
+      <div class="b-bar" aria-hidden="true"><span id="bBar"></span></div>
+    </div>
+    <div class="b-art">
+      <svg id="cake" viewBox="0 0 400 460" role="img" aria-label="Kat kat hazırlanan çikolatalı, çilekli pasta çizimi">
+        <defs>
+          <linearGradient id="gSponge" x1="0" x2="1"><stop offset="0" stop-color="#C99A55"/><stop offset=".35" stop-color="#EBC98A"/><stop offset=".7" stop-color="#E2BB78"/><stop offset="1" stop-color="#B8853F"/></linearGradient>
+          <linearGradient id="gCream" x1="0" x2="1"><stop offset="0" stop-color="#E9DCC6"/><stop offset=".4" stop-color="#FFF9EE"/><stop offset=".75" stop-color="#F7EEDF"/><stop offset="1" stop-color="#DCCBB0"/></linearGradient>
+          <linearGradient id="gGan" x1="0" x2="1"><stop offset="0" stop-color="#2E180F"/><stop offset=".4" stop-color="#5A3220"/><stop offset=".7" stop-color="#4A2818"/><stop offset="1" stop-color="#261309"/></linearGradient>
+          <linearGradient id="gPlate" x1="0" x2="1"><stop offset="0" stop-color="#E6DDD0"/><stop offset=".5" stop-color="#FFFDF8"/><stop offset="1" stop-color="#DDD2C2"/></linearGradient>
+          <linearGradient id="gGold" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#F1DCA8"/><stop offset=".5" stop-color="#C9A46A"/><stop offset="1" stop-color="#8C6A3F"/></linearGradient>
+          <radialGradient id="gFlame" cx=".5" cy=".7" r=".6"><stop offset="0" stop-color="#FFF6C8"/><stop offset=".5" stop-color="#FFC24A"/><stop offset="1" stop-color="#FF8A1A" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFD98A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></radialGradient>
+          <pattern id="pCrumb" width="14" height="10" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.1" fill="#B5823F" opacity=".45"/><circle cx="10" cy="7" r=".9" fill="#FFF3D6" opacity=".5"/></pattern>
+          <clipPath id="cCoat"><rect id="coatClip" x="60" y="372" width="280" height="0"/></clipPath>
+          <clipPath id="cGan"><rect id="ganClip" x="60" y="200" width="280" height="0"/></clipPath>
+        </defs>
+        <ellipse id="glow" cx="200" cy="150" rx="150" ry="120" fill="url(#gGlow)" opacity="0"/>
+        <g id="plate">
+          <ellipse cx="200" cy="392" rx="172" ry="34" fill="#C9A46A" opacity=".25"/>
+          <ellipse cx="200" cy="384" rx="168" ry="30" fill="url(#gPlate)" stroke="#C9A46A" stroke-width="2"/>
+          <ellipse cx="200" cy="380" rx="138" ry="22" fill="none" stroke="#C9A46A" stroke-opacity=".5"/>
+        </g>
+        <g id="sp1"><path d="M80 312v58a120 22 0 0 0 240 0v-58z" fill="url(#gSponge)"/><path d="M80 312v58a120 22 0 0 0 240 0v-58z" fill="url(#pCrumb)"/><ellipse cx="200" cy="312" rx="120" ry="22" fill="#F0D399"/></g>
+        <g id="cr1"><path d="M80 298v16a120 22 0 0 0 240 0v-16z" fill="url(#gCream)"/><ellipse cx="200" cy="298" rx="120" ry="22" fill="#FFFBF2"/></g>
+        <g id="sp2"><path d="M80 240v58a120 22 0 0 0 240 0v-58z" fill="url(#gSponge)"/><path d="M80 240v58a120 22 0 0 0 240 0v-58z" fill="url(#pCrumb)"/><ellipse cx="200" cy="240" rx="120" ry="22" fill="#F0D399"/></g>
+        <g id="coat" clip-path="url(#cCoat)"><path d="M76 226v146a124 23 0 0 0 248 0v-146z" fill="url(#gCream)"/><ellipse cx="200" cy="226" rx="124" ry="23" fill="#FFFBF2"/><path d="M90 300c40 6 180 6 220 0" stroke="#E6D7BF" stroke-width="1.2" fill="none" opacity=".7"/></g>
+        <g id="gan" clip-path="url(#cGan)">
+          <path d="M76 226c0 9 2 16 2 26c0 10 8 10 8 0v-6c0-6 8-6 8 2v22c0 10 10 10 10 0v-18c0-6 8-6 8 0v8c0 9 9 9 9 0v-4c0-7 9-7 9 0v26c0 11 11 11 11 0v-22c0-6 8-6 8 0v10c0 9 9 9 9 0v-14c0-6 8-6 8 0v30c0 11 11 11 11 0v-26c0-6 8-6 8 0v6c0 9 9 9 9 0v-10c0-6 8-6 8 0v20c0 10 10 10 10 0v-18c0-6 8-6 8 0v4c0 9 9 9 9 0v-8c0-6 8-6 8 0v24c0 11 11 11 11 0v-20c0-6 8-6 8 0v8c0 9 9 9 9 0v-14c0-7 9-7 9 0v6c0 8 8 8 8 0c0-10 2-17 2-26z" fill="url(#gGan)"/>
+          <ellipse cx="200" cy="226" rx="124" ry="23" fill="#3A1F14"/>
+          <ellipse cx="180" cy="222" rx="70" ry="9" fill="#7A4A30" opacity=".35"/>
+        </g>
+        <g id="tops">
+          <g class="tp"><path d="M128 206c-9-2-14 8-9 15c4 6 13 8 17 6c5-3 4-13-1-18c-2-2-5-3-7-3z" fill="#C8323C"/><path d="M124 205c3-4 8-4 11-1" stroke="#6E8B3D" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+          <g class="tp"><path d="M168 196c-9-2-14 8-9 15c4 6 13 8 17 6c5-3 4-13-1-18c-2-2-5-3-7-3z" fill="#D23A43"/><path d="M164 195c3-4 8-4 11-1" stroke="#6E8B3D" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+          <g class="tp"><circle cx="216" cy="208" r="9" fill="#A5263A"/><circle cx="213" cy="205" r="2" fill="#E0596A"/></g>
+          <g class="tp"><path d="M252 198c-9-2-14 8-9 15c4 6 13 8 17 6c5-3 4-13-1-18c-2-2-5-3-7-3z" fill="#C8323C"/><path d="M248 197c3-4 8-4 11-1" stroke="#6E8B3D" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+          <g class="tp"><circle cx="285" cy="212" r="8" fill="#A5263A"/><circle cx="282" cy="209" r="2" fill="#E0596A"/></g>
+          <g class="tp"><circle cx="148" cy="222" r="3" fill="#8DA34F"/><circle cx="196" cy="226" r="3.2" fill="#9BB25A"/><circle cx="236" cy="224" r="2.6" fill="#8DA34F"/><circle cx="268" cy="228" r="3" fill="#7F9845"/><circle cx="176" cy="232" r="2.4" fill="#9BB25A"/><circle cx="110" cy="226" r="2.6" fill="#8DA34F"/><circle cx="300" cy="224" r="2.4" fill="#9BB25A"/></g>
+        </g>
+        <g id="candles">
+          <g id="c5"><text x="176" y="222" text-anchor="middle" font-family="'Bodoni Moda','Didot',serif" font-weight="500" font-size="78" fill="url(#gGold)" stroke="#8C6A3F" stroke-width=".8">5</text><rect x="174.5" y="152" width="3" height="14" fill="#5C4B3F"/></g>
+          <g id="c0"><text x="226" y="222" text-anchor="middle" font-family="'Bodoni Moda','Didot',serif" font-weight="500" font-size="78" fill="url(#gGold)" stroke="#8C6A3F" stroke-width=".8">0</text><rect x="224.5" y="152" width="3" height="14" fill="#5C4B3F"/></g>
+          <g id="flames"><ellipse class="fl" cx="176" cy="140" rx="7" ry="15" fill="url(#gFlame)"/><ellipse class="fl" cx="226" cy="140" rx="7" ry="15" fill="url(#gFlame)"/></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
 <section class="sign" aria-labelledby="sH">
   <div class="wrap">
     <div class="shead rv"><div><span class="eb">İmza lezzetler</span><h2 id="sH">Şölen'e özel</h2></div><p class="lead" style="max-width:40ch">Misafirlerimizin en çok sorduğu, vitrinimizin yıldızları.</p></div>
@@ -347,7 +437,7 @@ footer .by{font-family:'Allura',cursive;font-size:24px;color:#F3EADC;text-decora
   </div>
 </section>
 
-<section class="order" aria-labelledby="oH">
+<section class="order" id="siparis" aria-labelledby="oH">
   <div class="wrap">
     <div class="obox rv">
       <div class="im" role="img" aria-label="Çikolata frambuazlı yaş pasta"></div>
@@ -486,6 +576,49 @@ footer .by{font-family:'Allura',cursive;font-size:24px;color:#F3EADC;text-decora
     var ad = document.getElementById('ad').value.trim(), tel = document.getElementById('tel').value.trim(), msg = document.getElementById('msg').value.trim();
     location.href = 'mailto:info@cafesolen.com?subject=' + encodeURIComponent('Web sitesinden mesaj: ' + ad) + '&body=' + encodeURIComponent(msg + '\n\n' + ad + (tel ? '\n' + tel : ''));
   });
+
+
+  /* pasta kurulumu: kaydırmaya bağlı */
+  (function(){
+    var sec = document.getElementById('tarif'); if (!sec) return;
+    var $ = function(id){ return document.getElementById(id); };
+    var steps = [].slice.call(sec.querySelectorAll('.b-step')), bar = $('bBar');
+    var plate = $('plate'), sp1 = $('sp1'), cr1 = $('cr1'), sp2 = $('sp2'), coatClip = $('coatClip'), ganClip = $('ganClip'), glow = $('glow');
+    var tops = [].slice.call(sec.querySelectorAll('.tp')), c5 = $('c5'), c0 = $('c0'), flames = $('flames');
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function cl(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
+    function seg(p, a, b){ return cl((p - a) / (b - a)); }
+    function oBack(t){ var c = 1.4; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }
+    function oCub(t){ return 1 - Math.pow(1 - t, 3); }
+    function drop(el, t, from){ var e = oBack(t); el.setAttribute('transform', 'translate(0 ' + ((1 - e) * from).toFixed(1) + ')'); el.style.opacity = t > 0 ? Math.min(1, t * 4) : 0; }
+    var B = [0, .09, .19, .41, .56, .70, .85, 1.01];
+    var cur = -1, lastP = -1;
+    function render(p){
+      var t;
+      t = oCub(seg(p, .0, .08)); plate.setAttribute('transform', 'translate(0 ' + ((1 - t) * 40).toFixed(1) + ')'); plate.style.opacity = t;
+      drop(sp1, seg(p, .10, .18), -340);
+      t = oCub(seg(p, .21, .28)); cr1.setAttribute('transform', 'translate(200 0) scale(' + Math.max(t, .001).toFixed(3) + ' 1) translate(-200 0)'); cr1.style.opacity = t > 0 ? 1 : 0;
+      drop(sp2, seg(p, .30, .38), -360);
+      t = oCub(seg(p, .44, .54)); coatClip.setAttribute('y', (374 - 152 * t).toFixed(1)); coatClip.setAttribute('height', (152 * t + 4).toFixed(1));
+      t = oCub(seg(p, .59, .68)); ganClip.setAttribute('height', (100 * t).toFixed(1));
+      tops.forEach(function(g, i){ drop(g, seg(p, .72 + i * .018, .78 + i * .018), -300); });
+      t = oBack(seg(p, .86, .92)); [c5, c0].forEach(function(c, i){ var tt = oBack(seg(p, .86 + i * .02, .92 + i * .02)); c.setAttribute('transform', 'translate(0 ' + ((1 - tt) * -220).toFixed(1) + ')'); c.style.opacity = tt > 0 ? 1 : 0; });
+      t = seg(p, .93, .97); flames.style.opacity = t; glow.style.opacity = t * .9;
+      var k = 0; for (var i = 0; i < B.length - 1; i++){ if (p >= B[i]) k = i; }
+      if (k !== cur){ cur = k; steps.forEach(function(s, i){ s.classList.toggle('on', i === k); }); }
+      bar.style.width = (p * 100).toFixed(1) + '%';
+    }
+    function frame(){
+      raf = null;
+      var r = sec.getBoundingClientRect(), total = r.height - innerHeight;
+      var p = reduce ? 1 : cl(-r.top / total);
+      if (p !== lastP){ lastP = p; render(p); }
+    }
+    var raf = null;
+    addEventListener('scroll', function(){ if (raf === null) raf = requestAnimationFrame(frame); }, { passive:true });
+    addEventListener('resize', frame);
+    frame();
+  })();
 
   /* reveal */
   var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(es){ es.forEach(function(x){ if (x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); } }); }, { rootMargin:'0px 0px -8% 0px' }) : null;
