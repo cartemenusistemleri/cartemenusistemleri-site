@@ -353,9 +353,9 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 .cw.out .card .ph .so{position:absolute;left:10px;bottom:10px}
 .cw.out .card .ph img{filter:grayscale(1);opacity:.5}
 .out .card b,.out .dr b{color:var(--text-3)}
-.out .price{color:var(--text-3);text-decoration:line-through;text-decoration-thickness:1px}
+.out .price{color:var(--text-3)}
 .dw.out .so{margin-top:6px}
-.out .add{opacity:.3;pointer-events:none}
+.out .add{opacity:.45}
 .sheet .sso{display:none;margin-top:10px}
 .sheet.isout .sso{display:inline-flex}
 .sheet.isout .ph img{filter:grayscale(1);opacity:.6}
@@ -846,7 +846,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     if (lastFocus) lastFocus.focus({ preventScroll:true });
   }
   menu.addEventListener('click', function(e){
-    var a = e.target.closest('[data-add]'); if (a){ addItem(+a.dataset.add, 1); a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); return; }
+    var a = e.target.closest('[data-add]'); if (a && isOut(+a.dataset.add)){ openProduct(a.closest('.cw,.dw').querySelector('.card,.dr')); return; }
+    if (a){ addItem(+a.dataset.add, 1); a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); return; }
     var c = e.target.closest('.card,.dr'); if (c) openProduct(c);
   });
   bg.addEventListener('click', closeSheet);
@@ -914,13 +915,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   function isOut(k){ var o = DATA[k]; return !!(o && OUT[o.id]); }
   function markOut(){
     [].forEach.call(menu.querySelectorAll('.cw[data-k],.dw[data-k]'), function(el){
-      var out = isOut(+el.dataset.k), so = el.querySelector('.so');
+      var out = isOut(+el.dataset.k);
       el.classList.toggle('out', out);
-      if (out && !so){
-        so = document.createElement('span'); so.className = 'so'; so.textContent = T.soldOut;
-        (el.querySelector('.card .ph') || el.querySelector('.dr .t')).appendChild(so);
-      } else if (!out && so) so.remove();
-      var ab = el.querySelector('[data-add]'); if (ab){ ab.disabled = out; ab.tabIndex = out ? -1 : 0; }
       var id = DATA[+el.dataset.k].id, bh = (FAV[id] && !out ? '<span class="bdg f">★ '+esc(T.bFav)+'</span>' : '') + (NEW[id] ? '<span class="bdg n">'+esc(T.bNew)+'</span>' : '');
       var bd = el.querySelector('.bdgs');
       if (bh){ if (!bd){ bd = document.createElement('span'); bd.className = 'bdgs'; (el.querySelector('.card .ph') || el.querySelector('.dr .t')).appendChild(bd); } bd.innerHTML = bh; }
