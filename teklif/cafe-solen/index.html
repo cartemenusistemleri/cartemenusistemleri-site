@@ -358,7 +358,7 @@ footer .by{font-family:'Allura',cursive;font-size:24px;color:#F3EADC;text-decora
           <radialGradient id="gFlame" cx=".5" cy=".7" r=".6"><stop offset="0" stop-color="#FFF6C8"/><stop offset=".5" stop-color="#FFC24A"/><stop offset="1" stop-color="#FF8A1A" stop-opacity="0"/></radialGradient>
           <radialGradient id="gGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFD98A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></radialGradient>
           <pattern id="pCrumb" width="14" height="10" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.1" fill="#B5823F" opacity=".45"/><circle cx="10" cy="7" r=".9" fill="#FFF3D6" opacity=".5"/></pattern>
-          <clipPath id="cCoat"><rect id="coatClip" x="60" y="372" width="280" height="0"/></clipPath>
+          <clipPath id="cCoat"><rect id="coatClip" x="60" y="402" width="280" height="0"/></clipPath>
           <clipPath id="cGan"><rect id="ganClip" x="60" y="200" width="280" height="0"/></clipPath>
         </defs>
         <ellipse id="glow" cx="200" cy="150" rx="150" ry="120" fill="url(#gGlow)" opacity="0"/>
@@ -599,7 +599,7 @@ footer .by{font-family:'Allura',cursive;font-size:24px;color:#F3EADC;text-decora
       drop(sp1, seg(p, .10, .18), -340);
       t = oCub(seg(p, .21, .28)); cr1.setAttribute('transform', 'translate(200 0) scale(' + Math.max(t, .001).toFixed(3) + ' 1) translate(-200 0)'); cr1.style.opacity = t > 0 ? 1 : 0;
       drop(sp2, seg(p, .30, .38), -360);
-      t = oCub(seg(p, .44, .54)); coatClip.setAttribute('y', (374 - 152 * t).toFixed(1)); coatClip.setAttribute('height', (152 * t + 4).toFixed(1));
+      t = oCub(seg(p, .44, .54)); coatClip.setAttribute('y', (402 - 182 * t).toFixed(1)); coatClip.setAttribute('height', (182 * t).toFixed(1));
       t = oCub(seg(p, .59, .68)); ganClip.setAttribute('height', (100 * t).toFixed(1));
       tops.forEach(function(g, i){ drop(g, seg(p, .72 + i * .018, .78 + i * .018), -300); });
       t = oBack(seg(p, .86, .92)); [c5, c0].forEach(function(c, i){ var tt = oBack(seg(p, .86 + i * .02, .92 + i * .02)); c.setAttribute('transform', 'translate(0 ' + ((1 - tt) * -220).toFixed(1) + ')'); c.style.opacity = tt > 0 ? 1 : 0; });
