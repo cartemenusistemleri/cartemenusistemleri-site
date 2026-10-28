@@ -63,5 +63,7 @@ export async function onRequestGet({ request, env }) {
   catch (e) { return js('/* temel veri okunamadı */', 'no-store'); }
   const f = await fiyatlariOku(env, k), u = await urunOku(env, k);
   menu = uygula(menu, f.p, u.o);
-  return js('window.CS_MENU=' + JSON.stringify(menu) + ';window.CS_FIYAT_T=' + JSON.stringify(f.t) + ';');
+  let foto = {};
+  try { foto = JSON.parse((await env.ODEME_LINKS.get('subefoto:' + k)) || '{}'); } catch (e) { foto = {}; }
+  return js('window.CS_MENU=' + JSON.stringify(menu) + ';window.CS_FIYAT_T=' + JSON.stringify(f.t) + ';window.CS_SUBE_FOTO=' + JSON.stringify(foto) + ';');
 }
