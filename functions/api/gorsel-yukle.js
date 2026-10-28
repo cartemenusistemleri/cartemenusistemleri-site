@@ -3,6 +3,7 @@
 //   -> { ok, url: '/api/gorsel/<hash>.webp' }
 // Görseller D1 (ISTATISTIK bağlaması) içinde "gorsel" tablosunda tutulur; aynı dosya iki kez yüklenirse tek kayıt olur.
 
+import { kimlik, izinli } from './oturum.js';
 const MENULER = ['cafe-solen'];
 const TIPLER = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png' };
 const MAX = 1500000;
@@ -19,11 +20,11 @@ export async function tabloHazirla(db) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const auth = request.headers.get('x-admin-secret') || '';
-  if (!env.ADMIN_SECRET || auth !== env.ADMIN_SECRET) return json({ ok: false, error: 'Yönetici şifresi hatalı' }, 401);
   if (!env.ISTATISTIK) return json({ ok: false, error: 'Görsel deposu bağlı değil' }, 500);
   const k = new URL(request.url).searchParams.get('k') || '';
   if (MENULER.indexOf(k) === -1) return json({ ok: false, error: 'Menü bulunamadı' }, 404);
+  const kim = await kimlik(request, env);
+  if (!izinli(kim, k, 'fiyat', null)) return json({ ok: false, error: kim ? 'Ürün güncelleme yetkiniz yok' : 'Şifre hatalı veya oturum süresi doldu' }, kim ? 403 : 401);
   const tip = (request.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
   if (!TIPLER[tip]) return json({ ok: false, error: 'Sadece WebP, JPEG veya PNG yüklenebilir' }, 400);
   const buf = new Uint8Array(await request.arrayBuffer());

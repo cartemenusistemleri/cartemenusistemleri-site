@@ -8,6 +8,7 @@
 // Veri: ODEME_LINKS KV -> "urun:<k>" = { o, t }; geçmiş "fiyatlog:<k>" içine tur:'urun' olarak yazılır.
 
 import { temelMenu } from './menu-data.js';
+import { kimlik, izinli } from './oturum.js';
 
 const MENULER = ['cafe-solen'];
 const ALERJEN = ['g', 's', 'y', 'k', 'yf', 'su', 'so', 'ke', 'h', 'sl', 'b'];
@@ -96,12 +97,14 @@ async function logOku(env, k) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const auth = request.headers.get('x-admin-secret') || '';
-  if (!env.ADMIN_SECRET || auth !== env.ADMIN_SECRET) return json({ ok: false, error: 'Yönetici şifresi hatalı' }, 401);
   let body;
   try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'Geçersiz istek' }, 400); }
   const k = String(body.k || '');
   if (MENULER.indexOf(k) === -1) return json({ ok: false, error: 'Menü bulunamadı' }, 404);
+  // Carte yöneticisi ya da "ürün güncelleme" (fiyat) yetkisi olan panel kullanıcısı
+  const kim = await kimlik(request, env);
+  if (!izinli(kim, k, 'fiyat', null)) return json({ ok: false, error: kim ? 'Ürün güncelleme yetkiniz yok' : 'Şifre hatalı veya oturum süresi doldu' }, kim ? 403 : 401);
+  const kimAdi = kim.admin ? 'Carte' : kim.ad;
 
   const u = await urunleriOku(env, k);
   if (body.get) return json({ ok: true, o: u.o, t: u.t });
@@ -139,7 +142,7 @@ export async function onRequestPost({ request, env }) {
   await env.ODEME_LINKS.put('urun:' + k, raw);
 
   const log = await logOku(env, k);
-  log.unshift({ t: u.t, tur: 'urun', id: id, alanlar: degisen, once: once, sonra: yeni, n: 1, kaynak: String(body.kaynak || 'Ürün düzenleme').slice(0, 60) });
+  log.unshift({ t: u.t, tur: 'urun', id: id, alanlar: degisen, once: once, sonra: yeni, n: 1, kaynak: String(body.kaynak || 'Ürün düzenleme').slice(0, 60), kim: kimAdi });
   await env.ODEME_LINKS.put('fiyatlog:' + k, JSON.stringify(log.slice(0, 30)));
   return json({ ok: true, o: u.o, t: u.t, n: degisen.length, log: log.slice(0, 30) });
 }
