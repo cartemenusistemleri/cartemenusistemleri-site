@@ -239,7 +239,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
   <header class="top">
     <div class="top-in">
       <div class="wm admin-only"><b>Carte</b><span>Yönetim</span></div>
-      <div class="cs-wm"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#7A6346"/><rect x="4" y="4" width="92" height="92" fill="none" stroke="#EADCC4" stroke-width="1"/><text x="50" y="64" text-anchor="middle" font-family="Gilda Display,serif" font-size="44" fill="#FFFDF8">CŞ</text></svg>CAFE ŞÖLEN<small>Fiyatlar</small></div>
+      <div class="cs-wm"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#7A6346"/><rect x="4" y="4" width="92" height="92" fill="none" stroke="#EADCC4" stroke-width="1"/><text x="50" y="64" text-anchor="middle" font-family="Gilda Display,serif" font-size="44" fill="#FFFDF8">CŞ</text></svg>CAFE ŞÖLEN<small>Ürünler</small></div>
       <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option></select>
       <a class="lnk isl-only" href="/cafe-solen/panel/">‹ Panele dön</a>
       <a class="lnk" id="openMenu" href="/cafe-solen/" target="_blank" rel="noopener">Menüyü aç ↗</a>
@@ -351,14 +351,14 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
           <button type="button" data-p="personel">Personel (var/tükendi + öneri)</button>
           <button type="button" data-p="mudur">Şube müdürü (+ istatistik)</button>
           <button type="button" data-p="patron">Patron (tüm şubeler, her şey)</button>
-          <button type="button" data-p="satin">Satın alma (fiyat güncelleme)</button>
+          <button type="button" data-p="satin">Satın alma (ürün güncelleme)</button>
         </div>
         <label class="l">Yetkiler</label>
         <div class="chk" id="uYet">
           <label><input type="checkbox" value="stok">Var / tükendi</label>
           <label><input type="checkbox" value="oneri">★ Öner / Yeni</label>
           <label><input type="checkbox" value="istatistik">İstatistik</label>
-          <label><input type="checkbox" value="fiyat">Fiyat güncelleme</label>
+          <label><input type="checkbox" value="fiyat">Ürün güncelleme (fiyat, Excel, fotoğraf, alerjen, kalori)</label>
         </div>
         <label class="l">Şubeler</label>
         <div class="chk" id="uSub"></div>
@@ -495,14 +495,13 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
   });
   if (ISL){
     // Cafe Şölen Panel'den gelen oturum (fiyat yetkisi gerekir)
-    document.title = 'Cafe Şölen · Fiyatlar';
-    $('q').placeholder = 'Ürün ara…';
+    document.title = 'Cafe Şölen · Ürün güncellemeleri';
     $('login').hidden = true;
     try { TOKEN = localStorage.getItem('cs-oturum'); } catch(e){}
     if (!TOKEN) location.replace('/cafe-solen/panel/');
     else fetch('/api/oturum', { headers:{ 'x-oturum': TOKEN }, cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
       if (!j.ok){ location.replace('/cafe-solen/panel/'); return; }
-      if (!j.yetkiler || !j.yetkiler.fiyat){ document.body.innerHTML = '<p style="padding:40px;text-align:center;font-family:Jost,sans-serif">Fiyat güncelleme yetkiniz yok. <a href="/cafe-solen/panel/">Panele dön</a></p>'; return; }
+      if (!j.yetkiler || !j.yetkiler.fiyat){ document.body.innerHTML = '<p style="padding:40px;text-align:center;font-family:Jost,sans-serif">Ürün güncelleme yetkiniz yok. <a href="/cafe-solen/panel/">Panele dön</a></p>'; return; }
       $('app').hidden = false; load();
     }).catch(function(){ toast('Bağlantı hatası', true); });
   } else if ($('sec').value) setTimeout(function(){ $('lf').requestSubmit ? $('lf').requestSubmit() : $('lf').dispatchEvent(new Event('submit')); }, 0);
@@ -516,7 +515,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     Promise.all([
       fetch('/' + K + '/data.js?_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.text(); }),
       api({ get:true }),
-      ISL ? Promise.resolve({ ok:true, o:{} }) : apiTo('/api/urun', { get:true })
+      apiTo('/api/urun', { get:true })
     ]).then(function(res){
       var js = res[0], i = js.indexOf('['), j = js.lastIndexOf(']');
       MENU = JSON.parse(js.slice(i, j + 1));
@@ -554,8 +553,8 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
         if (ch) info.push('Şu an: ' + money(live(o.id)));
         else if (ov) info.push('<span class="o">İlk fiyat: ' + money(BASE[o.id]) + '</span>');
         var e = eff(o.id), src = imgUrl(e.img), tags = (U[o.id] ? '<span class="tg">Düzenlendi</span>' : '') + (e.gizli ? '<span class="tg h">Gizli</span>' : '');
-        if (!info.length && !ISL) info.push('<span class="ed-l">Düzenle</span>');
-        rows += '<div class="row' + (ch ? ' ch' : '') + (ov ? ' ovr' : '') + (e.gizli ? ' hid' : '') + '" data-id="' + o.id + '"><button type="button" class="th" data-ed="' + o.id + '" aria-label="' + esc(o.n) + ' düzenle">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : (ISL ? '' : '＋')) + '</button><button type="button" class="nm" data-ed="' + o.id + '"><b>' + esc(o.n) + tags + '</b>' + '<small>' + info.join(' · ') + '</small></button>' +
+        if (!info.length) info.push('<span class="ed-l">Düzenle</span>');
+        rows += '<div class="row' + (ch ? ' ch' : '') + (ov ? ' ovr' : '') + (e.gizli ? ' hid' : '') + '" data-id="' + o.id + '"><button type="button" class="th" data-ed="' + o.id + '" aria-label="' + esc(o.n) + ' düzenle">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : '＋') + '</button><button type="button" class="nm" data-ed="' + o.id + '"><b>' + esc(o.n) + tags + '</b>' + '<small>' + info.join(' · ') + '</small></button>' +
           '<label class="pin"><input type="text" inputmode="decimal" data-id="' + o.id + '" value="' + esc(v == null ? '' : String(v).replace('.', ',')) + '" aria-label="' + esc(o.n) + ' fiyatı"><span>₺</span></label></div>';
         n++;
       });
@@ -583,7 +582,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     var row = inp.closest('.row'), ch = Object.prototype.hasOwnProperty.call(DRAFT, id);
     row.classList.toggle('ch', ch);
     var sm = row.querySelector('small'), nm = row.querySelector('.nm');
-    var txt = ch ? 'Şu an: ' + money(live(id)) : (Object.prototype.hasOwnProperty.call(OVR, id) ? '<span class="o">İlk fiyat: ' + money(BASE[id]) + '</span>' : (ISL ? '' : '<span class="ed-l">Düzenle</span>'));
+    var txt = ch ? 'Şu an: ' + money(live(id)) : (Object.prototype.hasOwnProperty.call(OVR, id) ? '<span class="o">İlk fiyat: ' + money(BASE[id]) + '</span>' : '<span class="ed-l">Düzenle</span>');
     if (txt){ if (!sm){ sm = document.createElement('small'); nm.appendChild(sm); } sm.innerHTML = txt; } else if (sm) sm.remove();
     inp.value = String(v).replace('.', ',');
     drawBar();
@@ -810,7 +809,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     if (!LOG.length){ $('logs').innerHTML = '<div class="empty">Henüz kayıt yok.</div>'; return; }
     $('logs').innerHTML = LOG.map(function(g, gi){
       if (g.tur === 'urun'){
-        return '<div class="log"><div class="h"><b>' + esc(nameOf(g.id)) + '</b><span class="meta">' + fmtT(g.t) + ' · ' + esc((g.alanlar || []).map(function(a){ return ALAN[a] || a; }).join(', ')) + '</span>' + (ISL ? '' : '<button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button>') + '</div>' +
+        return '<div class="log"><div class="h"><b>' + esc(nameOf(g.id)) + '</b><span class="meta">' + fmtT(g.t) + ' · ' + esc((g.alanlar || []).map(function(a){ return ALAN[a] || a; }).join(', ')) + '</span><button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button></div>' +
           '<ul>' + (g.alanlar || []).map(function(a){ return '<li><span>' + esc(ALAN[a] || a) + '</span><span>' + esc(showVal(a, g.once, g.id)) + ' → ' + esc(showVal(a, g.sonra, g.id)) + '</span></li>'; }).join('') + '</ul></div>';
       }
       return '<div class="log"><div class="h"><b>' + g.n + ' fiyat</b><span class="meta">' + fmtT(g.t) + (g.kaynak ? ' · ' + esc(g.kaynak) : '') + (g.kim ? ' · ' + esc(g.kim) : '') + '</span><button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button></div>' +
@@ -895,7 +894,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     $('ed').querySelector('.ed-body').scrollTop = 0;
   }
   function closeEd(){ $('ed').hidden = true; document.body.classList.remove('lock'); ED = null; }
-  $('list').addEventListener('click', function(e){ if (ISL) return; var b = e.target.closest('[data-ed]'); if (b) openEd(b.dataset.ed); });
+  $('list').addEventListener('click', function(e){ var b = e.target.closest('[data-ed]'); if (b) openEd(b.dataset.ed); });
   $('ed').addEventListener('click', function(e){ if (e.target.closest('[data-close]')) closeEd(); });
   addEventListener('keydown', function(e){ if (e.key === 'Escape'){ if (!$('cr').hidden) $('crNo').click(); else if (!$('ed').hidden) closeEd(); } });
   $('edNoImg').addEventListener('click', function(){ ED.img = ''; drawPh(); });
@@ -1054,7 +1053,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
 
   /* ---------- kullanıcılar ---------- */
   var USERS = [], SUBS = [], UEDIT = null;
-  var YAD = { stok:'Var / tükendi', oneri:'Öneri', istatistik:'İstatistik', fiyat:'Fiyat' };
+  var YAD = { stok:'Var / tükendi', oneri:'Öneri', istatistik:'İstatistik', fiyat:'Ürün güncelleme' };
   function uApi(body){ return apiTo('/api/kullanici', body); }
   function loadUsers(){
     $('uList').innerHTML = '<div class="empty">Yükleniyor…</div>';
