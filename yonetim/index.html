@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carte · Yönetim</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#4A1826">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,600&family=Jost:wght@300;400;500;600&display=swap">
+<style>
+:root{--bg:#4A1826;--bg2:#5A2130;--cream:#FFFDF6;--card:#FFFDF8;--soft:#FAF3E4;--soft2:#F3E8D0;--ink:#2A0F17;--muted:#7C5E66;--line:rgba(74,24,38,.14);--ok:#2F6B3A;--okbg:#E6F0E2;--warn:#8A5A00;--warnbg:#FBEFD2;--bad:#A3242F;--badbg:#F8E1E1}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--soft);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:400;color:var(--ink);font-size:15px}
+button,input,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.top{background:radial-gradient(120% 140% at 50% 0%,var(--bg2),var(--bg));color:var(--cream);position:sticky;top:0;z-index:20}
+.top-in{max-width:980px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.wm{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.wm b{font-family:'Allura',cursive;font-weight:400;font-size:34px;line-height:1}
+.wm span{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;opacity:.75}
+.top select{background:rgba(255,253,246,.12);border:1px solid rgba(255,253,246,.25);border-radius:999px;padding:7px 12px;color:var(--cream);font-size:14px}
+.top select option{color:var(--ink)}
+.top a.lnk{color:var(--cream);font-size:13.5px;opacity:.85;text-decoration:none;border:1px solid rgba(255,253,246,.25);border-radius:999px;padding:7px 12px}
+.top button.out{background:transparent;border:0;color:var(--cream);opacity:.7;font-size:13.5px;cursor:pointer;padding:7px 4px}
+.tabs{max-width:980px;margin:0 auto;padding:10px 16px 0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;background:transparent;border:0;color:var(--cream);opacity:.7;font-size:14.5px;font-weight:500;padding:10px 14px 12px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button.on{opacity:1;border-bottom-color:var(--cream)}
+main{max-width:980px;margin:0 auto;padding:18px 16px 120px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.card+.card{margin-top:14px}
+h2{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:600;font-size:24px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 14px}
+.meta{color:var(--muted);font-size:13px}
+/* login */
+.login{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:56px 16px;background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg))}
+.login .box{width:min(420px,100%)}
+.login .wm{justify-content:center;margin:0 0 22px;color:var(--cream)}
+.login .wm b{font-size:46px}
+.login .card{padding:24px 22px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.inp{width:100%;font-size:16px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.inp:focus{outline:2px solid rgba(74,24,38,.35);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:500;border:0;border-radius:12px;padding:12px 18px;background:var(--bg);color:var(--cream);cursor:pointer;text-decoration:none}
+.btn.full{width:100%;margin-top:16px}
+.btn.ghost{background:transparent;color:var(--bg);border:1px solid var(--line)}
+.btn.sm{padding:8px 13px;font-size:13.5px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid rgba(163,36,47,.3)}
+.err{color:var(--bad);font-size:14px;min-height:20px;margin-top:10px}
+/* fiyat listesi */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tools .inp{flex:1 1 220px;padding:10px 14px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--bg);color:var(--cream);border-color:var(--bg)}
+.sec{margin-top:8px}
+.sec h3{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:18px 0 6px;display:flex;justify-content:space-between;gap:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:6px}
+.row .nm{min-width:0}
+.row .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .nm small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
+.row.ch{background:var(--warnbg);border-color:rgba(138,90,0,.3)}
+.row.ovr .nm small .o{color:var(--warn)}
+.pin{display:flex;align-items:center;gap:6px}
+.pin input{width:104px;text-align:right;font-size:16px;font-variant-numeric:tabular-nums;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pin span{color:var(--muted);font-size:14px}
+.empty{padding:30px 10px;text-align:center;color:var(--muted)}
+/* toplu */
+.bulk{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+.bulk .inp{padding:10px 12px}
+.bulkp{margin-top:12px;font-size:14px;color:var(--muted)}
+/* alt bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--ink);color:var(--cream);padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px -10px rgba(0,0,0,.4)}
+.bar-in{max-width:980px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.bar-in .t{margin-right:auto;font-size:14.5px}
+.bar .btn{background:var(--cream);color:var(--ink)}
+.bar .btn.ghost{background:transparent;color:var(--cream);border-color:rgba(255,253,246,.3)}
+/* excel */
+.drop{display:block;border:1.5px dashed rgba(74,24,38,.35);border-radius:16px;padding:28px 16px;text-align:center;background:var(--soft);cursor:pointer}
+.drop.over{background:var(--soft2)}
+.drop b{display:block;font-weight:500;font-size:16px}
+.drop small{color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.pill{border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:500;border:1px solid transparent;cursor:pointer;background:var(--card);border-color:var(--line)}
+.pill.on{outline:2px solid var(--ink);outline-offset:1px}
+.pill.c{background:var(--warnbg);color:var(--warn)}
+.pill.s{background:var(--okbg);color:var(--ok)}
+.pill.u{background:var(--badbg);color:var(--bad)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:8px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl select{min-width:150px;max-width:100%;width:100%;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:13.5px}
+.st{display:inline-block;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:500;white-space:nowrap}
+.st.c{background:var(--warnbg);color:var(--warn)}.st.s{background:var(--okbg);color:var(--ok)}.st.u{background:var(--badbg);color:var(--bad)}.st.q{background:var(--soft2);color:var(--ink)}
+.up{color:var(--bad)}.dn{color:var(--ok)}
+.scroll{overflow-x:auto;margin:0 -6px;padding:0 6px}
+.miss{margin-top:12px;font-size:13.5px;color:var(--muted)}
+.miss summary{cursor:pointer;color:var(--ink)}
+/* geçmiş */
+.log{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;background:var(--card)}
+.log .h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.log .h b{font-weight:500}
+.log .h .meta{margin-right:auto}
+.log ul{margin:10px 0 0;padding:0;list-style:none;font-size:13.5px;max-height:260px;overflow:auto}
+.log li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--line)}
+.log li span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);opacity:0;transition:.25s;background:var(--ink);color:var(--cream);padding:11px 18px;border-radius:12px;font-size:14.5px;z-index:50;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.bad{background:var(--bad)}
+@media (max-width:560px){
+  .row{padding:9px 10px}
+  .pin input{width:92px}
+  .tbl .hm{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Giriş -->
+<section class="login" id="login">
+  <div class="box">
+    <div class="wm"><b>Carte</b><span>Yönetim</span></div>
+    <div class="card">
+      <h2>Yönetim paneli</h2>
+      <p class="sub">Menü fiyatlarını düzenlemek, Excel'den toplu güncellemek ve geçmişi görmek için yönetici şifrenizle girin.</p>
+      <form id="lf" autocomplete="off">
+        <label class="l" for="sec">Yönetici şifresi</label>
+        <input class="inp" id="sec" type="password" required autocomplete="current-password">
+        <button class="btn full" type="submit">Giriş yap</button>
+        <div class="err" id="lerr" role="alert"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Panel -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="top-in">
+      <div class="wm"><b>Carte</b><span>Yönetim</span></div>
+      <select id="menuSel" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option></select>
+      <a class="lnk" id="openMenu" href="/cafe-solen/" target="_blank" rel="noopener">Menüyü aç ↗</a>
+      <button class="out" id="logout" type="button">Çıkış</button>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button type="button" class="on" data-tab="fiyat">Fiyatlar</button>
+      <button type="button" data-tab="excel">Excel'den yükle</button>
+      <button type="button" data-tab="toplu">Toplu zam</button>
+      <button type="button" data-tab="gecmis">Geçmiş</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Fiyatlar -->
+    <section id="t-fiyat">
+      <div class="tools">
+        <input class="inp" id="q" type="search" placeholder="Ürün ara…" autocomplete="off">
+        <button class="btn ghost sm" id="dlTpl" type="button">Fiyat listesini Excel indir</button>
+      </div>
+      <div class="meta" id="lastT" style="margin:-4px 0 8px"></div>
+      <nav class="chips" id="chips"></nav>
+      <div id="list"></div>
+    </section>
+
+    <!-- Excel -->
+    <section id="t-excel" hidden>
+      <div class="card">
+        <h2>Excel'den fiyat yükle</h2>
+        <p class="sub">İşletmenin gönderdiği Excel'i (.xlsx, .xls veya .csv) buraya bırakın. Ürünler isimden otomatik eşleşir; uygulamadan önce eski → yeni fiyatları kontrol edersiniz. En kesin sonuç için “Fiyat listesini Excel indir” ile aldığınız şablonu işletmeye gönderin: ID sütunu sayesinde birebir eşleşir.</p>
+        <label class="drop" id="drop" for="file">
+          <b>Dosyayı buraya bırakın ya da seçin</b>
+          <small>.xlsx · .xls · .csv</small>
+          <input id="file" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden>
+        </label>
+        <div id="xl" hidden>
+          <div class="cols">
+            <div><label class="l" for="xSheet">Sayfa</label><select class="inp" id="xSheet"></select></div>
+            <div><label class="l" for="xName">Ürün adı sütunu</label><select class="inp" id="xName"></select></div>
+            <div><label class="l" for="xPrice">Fiyat sütunu</label><select class="inp" id="xPrice"></select></div>
+            <div><label class="l" for="xId">ID sütunu (varsa)</label><select class="inp" id="xId"></select></div>
+          </div>
+          <div class="sum" id="xSum"></div>
+          <div class="scroll"><table class="tbl" id="xTbl"></table></div>
+          <details class="miss" id="xMiss"></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toplu zam -->
+    <section id="t-toplu" hidden>
+      <div class="card">
+        <h2>Toplu zam / indirim</h2>
+        <p class="sub">Seçtiğiniz bölümdeki tüm fiyatları yüzdeyle değiştirin. Sonuç önce “Fiyatlar” sekmesinde değişmiş olarak işaretlenir; kaydetmeden önce kontrol edebilirsiniz.</p>
+        <div class="bulk">
+          <div><label class="l" for="bPct">Yüzde (%)</label><input class="inp" id="bPct" type="number" inputmode="decimal" step="0.5" value="10"></div>
+          <div><label class="l" for="bRound">Yuvarlama</label>
+            <select class="inp" id="bRound"><option value="1">1 ₺</option><option value="5" selected>5 ₺</option><option value="10">10 ₺</option><option value="0">Yuvarlama yok</option></select></div>
+          <div><label class="l" for="bScope">Kapsam</label><select class="inp" id="bScope"><option value="">Tüm menü</option></select></div>
+          <div><button class="btn full" id="bGo" type="button" style="margin-top:0">Önizle</button></div>
+        </div>
+        <div class="bulkp" id="bInfo">Zam için pozitif (10), indirim için negatif (−10) yazın. Yuvarlama yukarı doğru yapılır.</div>
+      </div>
+    </section>
+
+    <!-- Geçmiş -->
+    <section id="t-gecmis" hidden>
+      <div class="card">
+        <h2>Değişiklik geçmişi</h2>
+        <p class="sub">Son 30 kayıt. Hatalı bir güncellemeyi “Geri al” ile önceki fiyatlara döndürebilirsiniz.</p>
+        <div id="logs"></div>
+      </div>
+      <div class="card">
+        <h2>Fiyatları sıfırla</h2>
+        <p class="sub">Panelden yapılan tüm fiyat değişikliklerini siler; menü ilk kurulumdaki fiyatlara döner.</p>
+        <button class="btn danger sm" id="reset" type="button">Tüm değişiklikleri sıfırla</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="bar" id="bar" hidden>
+    <div class="bar-in">
+      <span class="t" id="barT"></span>
+      <button class="btn ghost sm" id="discard" type="button">Vazgeç</button>
+      <button class="btn sm" id="save" type="button">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var SECRET = '', K = 'cafe-solen';
+  var MENU = [], ITEMS = [], BYID = {}, BASE = {}, OVR = {}, DRAFT = {}, LOG = [], T = null, SEC = 'all';
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function money(v){ if (v == null || v === '') return '–'; var n = Number(v); return (Math.round(n) === n ? n.toLocaleString('tr-TR') : n.toLocaleString('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 })) + ' ₺'; }
+  function cur(id){ return Object.prototype.hasOwnProperty.call(DRAFT, id) ? DRAFT[id] : (Object.prototype.hasOwnProperty.call(OVR, id) ? OVR[id] : BASE[id]); }
+  function live(id){ return Object.prototype.hasOwnProperty.call(OVR, id) ? OVR[id] : BASE[id]; }
+  function fmtT(t){ if (!t) return ''; var d = new Date(t); return d.toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) + ' ' + d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }); }
+  var tt;
+  function toast(m, bad){ var e = $('toast'); e.textContent = m; e.className = 'toast on' + (bad ? ' bad' : ''); clearTimeout(tt); tt = setTimeout(function(){ e.className = 'toast'; }, 2600); }
+
+  function api(body){
+    body.k = K;
+    return fetch('/api/fiyat', { method:'POST', headers:{ 'content-type':'application/json', 'x-admin-secret': SECRET }, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ j.status = r.status; return j; }); });
+  }
+
+  /* ---------- giriş ---------- */
+  try { var s0 = sessionStorage.getItem('carte_admin_secret'); if (s0) $('sec').value = s0; } catch(e){}
+  $('lf').addEventListener('submit', function(e){
+    e.preventDefault(); $('lerr').textContent = '';
+    SECRET = $('sec').value.trim();
+    api({ check:true }).then(function(j){
+      if (!j.ok){ $('lerr').textContent = j.error || 'Giriş yapılamadı'; return; }
+      try { sessionStorage.setItem('carte_admin_secret', SECRET); } catch(e){}
+      $('login').hidden = true; $('app').hidden = false; load();
+    }).catch(function(){ $('lerr').textContent = 'Bağlantı hatası'; });
+  });
+  if ($('sec').value) setTimeout(function(){ $('lf').requestSubmit ? $('lf').requestSubmit() : $('lf').dispatchEvent(new Event('submit')); }, 0);
+  $('logout').addEventListener('click', function(){ try { sessionStorage.removeItem('carte_admin_secret'); } catch(e){} location.reload(); });
+
+  /* ---------- veri ---------- */
+  function load(){
+    Promise.all([
+      fetch('/' + K + '/data.js?_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.text(); }),
+      api({ get:true })
+    ]).then(function(res){
+      var js = res[0], i = js.indexOf('['), j = js.lastIndexOf(']');
+      MENU = JSON.parse(js.slice(i, j + 1));
+      if (!res[1].ok){ toast(res[1].error || 'Veri alınamadı', true); if (res[1].status === 401) $('logout').click(); return; }
+      OVR = res[1].p || {}; LOG = res[1].log || []; T = res[1].t;
+      ITEMS = []; BYID = {}; BASE = {};
+      MENU.forEach(function(s, si){ (s.items || []).forEach(function(it){ if (!it.id) return; var o = { id:it.id, n:it.n, en:(it.en && it.en[0]) || '', sec:si, secT:s.tr }; ITEMS.push(o); BYID[it.id] = o; BASE[it.id] = it.p; }); });
+      DRAFT = {};
+      drawChips(); drawList(); drawLog(); drawBar(); drawScope();
+      $('lastT').textContent = T ? 'Son fiyat güncellemesi: ' + fmtT(T) : 'Panelden henüz fiyat değiştirilmedi.';
+    }).catch(function(){ toast('Menü verisi okunamadı', true); });
+  }
+
+  /* ---------- fiyat listesi ---------- */
+  function drawChips(){
+    var h = '<button type="button" class="chip' + (SEC === 'all' ? ' on' : '') + '" data-s="all">Tümü</button><button type="button" class="chip' + (SEC === 'ch' ? ' on' : '') + '" data-s="ch">Değişenler</button>';
+    MENU.forEach(function(s, si){ h += '<button type="button" class="chip' + (SEC === String(si) ? ' on' : '') + '" data-s="' + si + '">' + esc(s.tr) + '</button>'; });
+    $('chips').innerHTML = h;
+  }
+  $('chips').addEventListener('click', function(e){ var b = e.target.closest('[data-s]'); if (!b) return; SEC = b.dataset.s; drawChips(); drawList(); });
+  function norm(s){ return String(s || '').toLocaleLowerCase('tr').replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[âàá]/g,'a').replace(/[îíì]/g,'i').replace(/[ûúù]/g,'u').replace(/[éèê]/g,'e').replace(/[^a-z0-9]+/g,' ').trim(); }
+  $('q').addEventListener('input', drawList);
+  function drawList(){
+    var q = norm($('q').value), h = '', n = 0;
+    MENU.forEach(function(s, si){
+      if (SEC !== 'all' && SEC !== 'ch' && SEC !== String(si)) return;
+      var rows = '';
+      (s.items || []).forEach(function(it){
+        var o = BYID[it.id]; if (!o) return;
+        var ch = Object.prototype.hasOwnProperty.call(DRAFT, o.id);
+        if (SEC === 'ch' && !ch && !Object.prototype.hasOwnProperty.call(OVR, o.id)) return;
+        if (q && norm(o.n + ' ' + o.en).indexOf(q) === -1) return;
+        var ov = Object.prototype.hasOwnProperty.call(OVR, o.id), v = cur(o.id), info = [];
+        if (ch) info.push('Şu an: ' + money(live(o.id)));
+        else if (ov) info.push('<span class="o">İlk fiyat: ' + money(BASE[o.id]) + '</span>');
+        rows += '<div class="row' + (ch ? ' ch' : '') + (ov ? ' ovr' : '') + '" data-id="' + o.id + '"><span class="nm"><b>' + esc(o.n) + '</b>' + (info.length ? '<small>' + info.join(' · ') + '</small>' : '') + '</span>' +
+          '<label class="pin"><input type="text" inputmode="decimal" data-id="' + o.id + '" value="' + esc(v == null ? '' : String(v).replace('.', ',')) + '" aria-label="' + esc(o.n) + ' fiyatı"><span>₺</span></label></div>';
+        n++;
+      });
+      if (rows) h += '<div class="sec"><h3><span>' + esc(s.tr) + '</span></h3>' + rows + '</div>';
+    });
+    $('list').innerHTML = h || '<div class="empty">' + (SEC === 'ch' ? 'Değişen fiyat yok.' : 'Ürün bulunamadı.') + '</div>';
+  }
+  function parsePrice(v){
+    if (typeof v === 'number') return isFinite(v) ? v : null;
+    var s = String(v == null ? '' : v).replace(/[^\d.,\-]/g, '');
+    if (!s) return null;
+    if (s.indexOf(',') !== -1 && s.indexOf('.') !== -1){ if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.'); else s = s.replace(/,/g, ''); }
+    else if (s.indexOf(',') !== -1) s = /,\d{3}$/.test(s) && s.split(',').length === 2 && s.split(',')[0].length <= 3 ? s.replace(',', '') : s.replace(',', '.');
+    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    var n = parseFloat(s); return isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : null;
+  }
+  function setDraft(id, v){
+    if (v == null || v === live(id)) delete DRAFT[id]; else DRAFT[id] = v;
+  }
+  $('list').addEventListener('change', function(e){
+    var inp = e.target.closest('input[data-id]'); if (!inp) return;
+    var id = inp.dataset.id, v = parsePrice(inp.value);
+    if (v == null){ toast('Geçerli bir fiyat girin', true); inp.value = String(cur(id)).replace('.', ','); return; }
+    setDraft(id, v);
+    var row = inp.closest('.row'), ch = Object.prototype.hasOwnProperty.call(DRAFT, id);
+    row.classList.toggle('ch', ch);
+    var sm = row.querySelector('small'), nm = row.querySelector('.nm');
+    var txt = ch ? 'Şu an: ' + money(live(id)) : (Object.prototype.hasOwnProperty.call(OVR, id) ? '<span class="o">İlk fiyat: ' + money(BASE[id]) + '</span>' : '');
+    if (txt){ if (!sm){ sm = document.createElement('small'); nm.appendChild(sm); } sm.innerHTML = txt; } else if (sm) sm.remove();
+    inp.value = String(v).replace('.', ',');
+    drawBar();
+  });
+  $('list').addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return; var inp = e.target.closest('input[data-id]'); if (!inp) return;
+    e.preventDefault(); inp.blur();
+    var all = [].slice.call($('list').querySelectorAll('input[data-id]')), i = all.indexOf(inp);
+    if (all[i + 1]) all[i + 1].focus();
+  });
+
+  function drawBar(){
+    var n = Object.keys(DRAFT).length;
+    $('bar').hidden = !n;
+    if (n){
+      var up = 0, dn = 0; Object.keys(DRAFT).forEach(function(id){ if (DRAFT[id] > live(id)) up++; else dn++; });
+      $('barT').innerHTML = '<b>' + n + '</b> fiyat değişecek' + (up && dn ? ' (' + up + ' artış, ' + dn + ' düşüş)' : '');
+    }
+  }
+  $('discard').addEventListener('click', function(){ DRAFT = {}; drawList(); drawBar(); });
+  var KAYNAK = '';
+  $('save').addEventListener('click', function(){
+    var n = Object.keys(DRAFT).length; if (!n) return;
+    var b = $('save'); b.disabled = true;
+    api({ set: DRAFT, kaynak: KAYNAK || 'Panel' }).then(function(j){
+      b.disabled = false;
+      if (!j.ok){ toast(j.error || 'Kaydedilemedi', true); if (j.status === 401) $('logout').click(); return; }
+      OVR = j.p || {}; LOG = j.log || LOG; T = j.t; DRAFT = {}; KAYNAK = '';
+      $('lastT').textContent = 'Son fiyat güncellemesi: ' + fmtT(T);
+      drawList(); drawLog(); drawBar();
+      toast(j.n + ' fiyat kaydedildi, menüde yayında');
+    }).catch(function(){ b.disabled = false; toast('Bağlantı hatası', true); });
+  });
+  addEventListener('beforeunload', function(e){ if (Object.keys(DRAFT).length){ e.preventDefault(); e.returnValue = ''; } });
+
+  /* ---------- sekmeler ---------- */
+  [].forEach.call(document.querySelectorAll('.tabs button'), function(b){
+    b.addEventListener('click', function(){
+      [].forEach.call(document.querySelectorAll('.tabs button'), function(x){ x.classList.toggle('on', x === b); });
+      ['fiyat','excel','toplu','gecmis'].forEach(function(t){ $('t-' + t).hidden = t !== b.dataset.tab; });
+      scrollTo(0, 0);
+    });
+  });
+  function goTab(t){ document.querySelector('.tabs [data-tab="' + t + '"]').click(); }
+
+  /* ---------- Excel şablonu indir ---------- */
+  $('dlTpl').addEventListener('click', function(){
+    if (!window.XLSX){ toast('Excel aracı yükleniyor, tekrar deneyin', true); return; }
+    var rows = [['Bölüm', 'Ürün', 'Fiyat (₺)', 'ID']];
+    MENU.forEach(function(s){ (s.items || []).forEach(function(it){ if (it.id) rows.push([s.tr, it.n, live(it.id), it.id]); }); });
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{ wch:24 }, { wch:38 }, { wch:12 }, { wch:30 }];
+    var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Fiyatlar');
+    var d = new Date(), tag = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    XLSX.writeFile(wb, K + '-fiyat-listesi-' + tag + '.xlsx');
+  });
+
+  /* ---------- Excel içe aktarma ---------- */
+  var WB = null, ROWS = [], FNAME = '', MATCH = [], XF = 'all';
+  var drop = $('drop');
+  ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); }); });
+  drop.addEventListener('drop', function(e){ var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) readFile(f); });
+  $('file').addEventListener('change', function(){ var f = this.files && this.files[0]; if (f) readFile(f); this.value = ''; });
+  function readFile(f){
+    if (!window.XLSX){ toast('Excel aracı yükleniyor, birkaç saniye sonra tekrar deneyin', true); return; }
+    FNAME = f.name;
+    var r = new FileReader();
+    r.onload = function(){
+      try { WB = XLSX.read(new Uint8Array(r.result), { type:'array', cellDates:false }); }
+      catch(e){ toast('Dosya okunamadı', true); return; }
+      $('xSheet').innerHTML = WB.SheetNames.map(function(n, i){ return '<option value="' + i + '">' + esc(n) + '</option>'; }).join('');
+      loadSheet(0);
+    };
+    r.readAsArrayBuffer(f);
+  }
+  $('xSheet').addEventListener('change', function(){ loadSheet(+this.value); });
+  function loadSheet(i){
+    var ws = WB.Sheets[WB.SheetNames[i]];
+    var aoa = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:'' }).filter(function(r){ return r.some(function(c){ return String(c).trim() !== ''; }); });
+    if (!aoa.length){ toast('Sayfa boş', true); return; }
+    // başlık satırını bul: ilk 10 satırda "ürün/fiyat" geçen satır
+    var hi = -1;
+    for (var r = 0; r < Math.min(10, aoa.length); r++){ var t = norm(aoa[r].join(' ')); if (/(urun|ad|isim|cesit|product|name)/.test(t) && /(fiyat|tutar|price|tl|satis)/.test(t)){ hi = r; break; } }
+    var head = hi >= 0 ? aoa[hi].map(function(c, ci){ return String(c).trim() || ('Sütun ' + (ci + 1)); }) : null;
+    ROWS = aoa.slice(hi + 1);
+    var w = Math.max.apply(null, aoa.map(function(r){ return r.length; }));
+    if (!head){ head = []; for (var c = 0; c < w; c++) head.push('Sütun ' + String.fromCharCode(65 + c)); }
+    while (head.length < w) head.push('Sütun ' + (head.length + 1));
+    // sütun tahmini
+    var nc = -1, pc = -1, ic = -1;
+    head.forEach(function(h, ci){ var n = norm(h);
+      if (ic < 0 && /^(id|kod|urun kodu|code)$/.test(n)) ic = ci;
+      else if (pc < 0 && /(fiyat|tutar|price|satis|tl)/.test(n) && !/(eski|onceki|old)/.test(n)) pc = ci;
+      else if (nc < 0 && /(urun|ad|isim|cesit|product|name)/.test(n) && !/(bolum|kategori|grup)/.test(n)) nc = ci;
+    });
+    var score = head.map(function(_, ci){ var num = 0, txt = 0; ROWS.slice(0, 60).forEach(function(r){ var v = r[ci]; if (v === '' || v == null) return; if (parsePrice(v) != null && /^[\s\d.,₺tlTL\-]+$/.test(String(v))) num++; else txt++; }); return { num:num, txt:txt }; });
+    if (pc < 0){ var bp = -1; score.forEach(function(s, ci){ if (ci !== nc && s.num > bp){ bp = s.num; pc = ci; } }); }
+    if (nc < 0){ var bt = -1; score.forEach(function(s, ci){ if (ci !== pc && ci !== ic && s.txt > bt){ bt = s.txt; nc = ci; } }); }
+    var opts = head.map(function(h, ci){ return '<option value="' + ci + '">' + esc(h) + '</option>'; }).join('');
+    $('xName').innerHTML = opts; $('xPrice').innerHTML = opts; $('xId').innerHTML = '<option value="-1">— yok —</option>' + opts;
+    $('xName').value = nc; $('xPrice').value = pc; $('xId').value = ic;
+    $('xl').hidden = false; XF = 'all';
+    match();
+  }
+  ['xName','xPrice','xId'].forEach(function(id){ $(id).addEventListener('change', match); });
+
+  function bigrams(s){ s = s.replace(/ /g, ''); var a = []; for (var i = 0; i < s.length - 1; i++) a.push(s.substr(i, 2)); return a; }
+  function dice(a, b){ if (a === b) return 1; var A = bigrams(a), B = bigrams(b); if (!A.length || !B.length) return 0; var m = {}, hit = 0; A.forEach(function(x){ m[x] = (m[x] || 0) + 1; }); B.forEach(function(x){ if (m[x] > 0){ m[x]--; hit++; } }); return 2 * hit / (A.length + B.length); }
+  function tok(a, b){ var A = a.split(' ').filter(Boolean), B = b.split(' ').filter(Boolean); if (!A.length || !B.length) return 0; var s = {}, hit = 0; B.forEach(function(x){ s[x] = 1; }); A.forEach(function(x){ if (s[x]) hit++; }); return hit / Math.max(A.length, B.length); }
+  var NIDX = null;
+  function nameIndex(){ NIDX = ITEMS.map(function(o){ return { id:o.id, a:norm(o.n), b:norm(o.en) }; }); }
+  function best(name){
+    var n = norm(name); if (!n) return null;
+    var ex = NIDX.filter(function(x){ return x.a === n || x.b === n; });
+    if (ex.length) return { id:ex[0].id, s:1, amb:ex.length > 1 };
+    var sc = NIDX.map(function(x){ return { id:x.id, s:Math.max(dice(n, x.a), x.b ? dice(n, x.b) : 0, tok(n, x.a) * .95) }; }).sort(function(p, q){ return q.s - p.s; });
+    if (!sc.length || sc[0].s < .55) return null;
+    return { id:sc[0].id, s:sc[0].s, amb:sc[1] && sc[0].s - sc[1].s < .04 };
+  }
+  function match(){
+    if (!NIDX) nameIndex();
+    var nc = +$('xName').value, pc = +$('xPrice').value, ic = +$('xId').value;
+    MATCH = [];
+    ROWS.forEach(function(r, ri){
+      var name = String(r[nc] == null ? '' : r[nc]).trim(), price = parsePrice(r[pc]), id = ic >= 0 ? String(r[ic] || '').trim() : '';
+      if (!name && !id) return;
+      if (price == null && !name) return;
+      var m = null, how = '';
+      if (id && BYID[id]){ m = { id:id, s:1 }; how = 'id'; }
+      else { m = best(name); how = m ? (m.s === 1 && !m.amb ? 'tam' : 'benzer') : ''; }
+      MATCH.push({ ri:ri, name:name || id, price:price, id:m ? m.id : '', how:how, s:m ? m.s : 0, amb:m ? !!m.amb : false, use:true });
+    });
+    // aynı ürüne birden fazla satır eşleşirse işaretle
+    var cnt = {}; MATCH.forEach(function(x){ if (x.id) cnt[x.id] = (cnt[x.id] || 0) + 1; });
+    MATCH.forEach(function(x){ x.dup = x.id && cnt[x.id] > 1; });
+    drawMatch();
+  }
+  function status(x){
+    if (x.price == null) return 'q';
+    if (!x.id) return 'u';
+    if (x.how === 'benzer' || x.amb || x.dup) return 'k';
+    return x.price === live(x.id) ? 's' : 'c';
+  }
+  var OPTS = null;
+  function prodOptions(sel){
+    if (!OPTS){ OPTS = ''; MENU.forEach(function(s){ OPTS += '<optgroup label="' + esc(s.tr) + '">'; (s.items || []).forEach(function(it){ if (it.id) OPTS += '<option value="' + it.id + '">' + esc(it.n) + '</option>'; }); OPTS += '</optgroup>'; }); }
+    return '<option value="">— eşleştirme yok (atla) —</option>' + OPTS.replace('value="' + sel + '"', 'value="' + sel + '" selected');
+  }
+  function drawMatch(){
+    var c = { c:0, s:0, k:0, u:0, q:0 };
+    MATCH.forEach(function(x){ c[status(x)]++; });
+    var willN = MATCH.filter(function(x){ var st = status(x); return x.use && x.id && x.price != null && (st === 'c' || (st === 'k' && x.price !== live(x.id))); }).length;
+    $('xSum').innerHTML =
+      '<button type="button" class="pill' + (XF === 'all' ? ' on' : '') + '" data-f="all">Tümü · ' + MATCH.length + '</button>' +
+      '<button type="button" class="pill c' + (XF === 'c' ? ' on' : '') + '" data-f="c">Değişecek · ' + c.c + '</button>' +
+      (c.k ? '<button type="button" class="pill c' + (XF === 'k' ? ' on' : '') + '" data-f="k">Kontrol et · ' + c.k + '</button>' : '') +
+      '<button type="button" class="pill s' + (XF === 's' ? ' on' : '') + '" data-f="s">Aynı · ' + c.s + '</button>' +
+      (c.u ? '<button type="button" class="pill u' + (XF === 'u' ? ' on' : '') + '" data-f="u">Eşleşmedi · ' + c.u + '</button>' : '') +
+      (c.q ? '<button type="button" class="pill' + (XF === 'q' ? ' on' : '') + '" data-f="q">Fiyatsız · ' + c.q + '</button>' : '') +
+      '<span style="flex:1"></span><button type="button" class="btn sm" id="xApply"' + (willN ? '' : ' disabled') + '>' + (willN ? willN + ' fiyatı aktar' : 'Aktarılacak değişiklik yok') + '</button>';
+    var h = '<thead><tr><th>Excel\'deki ürün</th><th>Menüdeki ürün</th><th class="n hm">Şu an</th><th class="n">Yeni</th><th>Durum</th><th></th></tr></thead><tbody>';
+    var any = false;
+    MATCH.forEach(function(x, i){
+      var st = status(x); if (XF !== 'all' && XF !== st) return; any = true;
+      var lab = { c:'Değişecek', s:'Aynı', k:x.dup ? 'Tekrar eden' : (x.amb ? 'Belirsiz' : 'Kontrol et'), u:'Eşleşmedi', q:'Fiyat okunamadı' }[st];
+      var nowP = x.id ? live(x.id) : null, d = x.id && x.price != null ? x.price - nowP : 0;
+      h += '<tr data-i="' + i + '"><td>' + esc(x.name) + '</td><td><select data-i="' + i + '">' + prodOptions(x.id) + '</select></td>' +
+        '<td class="n hm">' + (x.id ? money(nowP) : '–') + '</td><td class="n ' + (d > 0 ? 'up' : d < 0 ? 'dn' : '') + '">' + (x.price != null ? money(x.price) : '–') + '</td>' +
+        '<td><span class="st ' + (st === 'k' ? 'c' : st) + '">' + lab + '</span></td>' +
+        '<td><input type="checkbox" data-u="' + i + '"' + (x.use ? ' checked' : '') + (x.id && x.price != null ? '' : ' disabled') + ' aria-label="Uygula"></td></tr>';
+    });
+    if (!any) h += '<tr><td colspan="6" class="empty">Bu filtrede satır yok.</td></tr>';
+    $('xTbl').innerHTML = h + '</tbody>';
+    // Excel'de olmayan menü ürünleri
+    var got = {}; MATCH.forEach(function(x){ if (x.id) got[x.id] = 1; });
+    var miss = ITEMS.filter(function(o){ return !got[o.id]; });
+    $('xMiss').hidden = !miss.length;
+    $('xMiss').innerHTML = '<summary>Excel\'de bulunmayan ' + miss.length + ' menü ürünü (fiyatları değişmeyecek)</summary><p>' + miss.map(function(o){ return esc(o.n); }).join(' · ') + '</p>';
+  }
+  $('xSum').addEventListener('click', function(e){
+    var p = e.target.closest('[data-f]'); if (p){ XF = p.dataset.f; drawMatch(); return; }
+    if (e.target.id === 'xApply') applyExcel();
+  });
+  $('xTbl').addEventListener('change', function(e){
+    var s = e.target.closest('select[data-i]');
+    if (s){ var x = MATCH[+s.dataset.i]; x.id = s.value; x.how = s.value ? 'elle' : ''; x.amb = false; var cnt = {}; MATCH.forEach(function(y){ if (y.id) cnt[y.id] = (cnt[y.id] || 0) + 1; }); MATCH.forEach(function(y){ y.dup = y.id && cnt[y.id] > 1; }); drawMatch(); return; }
+    var u = e.target.closest('input[data-u]'); if (u){ MATCH[+u.dataset.u].use = u.checked; drawMatch(); }
+  });
+  function applyExcel(){
+    var n = 0;
+    MATCH.forEach(function(x){ if (x.use && x.id && x.price != null && x.price !== live(x.id)){ setDraft(x.id, x.price); n++; } });
+    if (!n) return;
+    KAYNAK = 'Excel: ' + FNAME;
+    SEC = 'ch'; drawChips(); drawList(); drawBar(); goTab('fiyat');
+    toast(n + ' fiyat hazır — kontrol edip “Kaydet”e basın');
+  }
+
+  /* ---------- toplu zam ---------- */
+  function drawScope(){ $('bScope').innerHTML = '<option value="">Tüm menü</option>' + MENU.map(function(s, si){ return '<option value="' + si + '">' + esc(s.tr) + '</option>'; }).join(''); }
+  $('bGo').addEventListener('click', function(){
+    var pct = parsePrice(String($('bPct').value).replace('-', '')), neg = String($('bPct').value).trim().charAt(0) === '-' || String($('bPct').value).trim().charAt(0) === '−';
+    if (pct == null || pct === 0){ toast('Yüzde girin', true); return; }
+    if (neg) pct = -pct;
+    var rnd = +$('bRound').value, sc = $('bScope').value, n = 0;
+    ITEMS.forEach(function(o){
+      if (sc !== '' && String(o.sec) !== sc) return;
+      var b = live(o.id); if (b == null || b === 0) return;
+      var v = b * (1 + pct / 100);
+      v = rnd ? Math.ceil(v / rnd - 1e-9) * rnd : Math.round(v * 100) / 100;
+      if (v < 0) v = 0;
+      setDraft(o.id, v); if (v !== b) n++;
+    });
+    KAYNAK = 'Toplu ' + (pct > 0 ? '+' : '') + pct + '%' + (sc !== '' ? ' · ' + MENU[+sc].tr : '');
+    SEC = 'ch'; drawChips(); drawList(); drawBar(); goTab('fiyat');
+    toast(n + ' fiyat hazır — kontrol edip “Kaydet”e basın');
+  });
+
+  /* ---------- geçmiş ---------- */
+  function nameOf(id){ return BYID[id] ? BYID[id].n : id; }
+  function drawLog(){
+    if (!LOG.length){ $('logs').innerHTML = '<div class="empty">Henüz kayıt yok.</div>'; return; }
+    $('logs').innerHTML = LOG.map(function(g, gi){
+      return '<div class="log"><div class="h"><b>' + g.n + ' fiyat</b><span class="meta">' + fmtT(g.t) + (g.kaynak ? ' · ' + esc(g.kaynak) : '') + '</span><button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button></div>' +
+        '<ul>' + (g.d || []).map(function(d){ return '<li><span>' + esc(nameOf(d[0])) + '</span><span>' + money(d[1]) + ' → ' + money(d[2]) + '</span></li>'; }).join('') + '</ul></div>';
+    }).join('');
+  }
+  $('logs').addEventListener('click', function(e){
+    var b = e.target.closest('[data-undo]'); if (!b) return;
+    var g = LOG[+b.dataset.undo], set = {};
+    (g.d || []).forEach(function(d){ if (BYID[d[0]] && d[1] != null) set[d[0]] = d[1]; });
+    if (!Object.keys(set).length) return;
+    if (!confirm(Object.keys(set).length + ' ürünün fiyatı bu değişiklikten önceki haline dönsün mü?')) return;
+    api({ set:set, kaynak:'Geri alma · ' + fmtT(g.t) }).then(function(j){
+      if (!j.ok){ toast(j.error || 'Geri alınamadı', true); return; }
+      OVR = j.p || {}; LOG = j.log || LOG; T = j.t; DRAFT = {}; drawList(); drawLog(); drawBar();
+      toast(j.n ? j.n + ' fiyat geri alındı' : 'Fiyatlar zaten o haliyle');
+    });
+  });
+  $('reset').addEventListener('click', function(){
+    if (!confirm('Panelden yapılan TÜM fiyat değişiklikleri silinsin mi? Menü ilk fiyatlara döner.')) return;
+    api({ reset:true, kaynak:'Sıfırlama' }).then(function(j){
+      if (!j.ok){ toast(j.error || 'Sıfırlanamadı', true); return; }
+      OVR = j.p || {}; LOG = j.log || LOG; T = j.t; DRAFT = {}; drawList(); drawLog(); drawBar();
+      toast('Fiyatlar sıfırlandı');
+    });
+  });
+
+  $('menuSel').addEventListener('change', function(){ K = this.value; $('openMenu').href = '/' + K + '/'; NIDX = null; OPTS = null; load(); });
+})();
+</script>
+</body>
+</html>
