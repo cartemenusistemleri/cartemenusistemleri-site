@@ -344,7 +344,7 @@ html.pick .logo-start{visibility:visible}
 .stile::before{content:"";position:absolute;inset:0 0 auto;height:40%;z-index:0;background:linear-gradient(180deg,rgba(20,14,11,.35),rgba(20,14,11,0));pointer-events:none}
 .stile .lb{position:absolute;bottom:58px;left:14px;z-index:1;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:rgba(251,246,238,.92);color:#2B1E16;border-radius:999px;padding:4px 9px}
 .stile:focus-visible{outline:2px solid var(--yel);outline-offset:3px}
-@media (min-width:760px){.sgrid{grid-template-columns:repeat(5,1fr);gap:14px}.stile,.stile:last-child:nth-child(odd){grid-column:auto;aspect-ratio:3/4}}
+@media (min-width:760px){.sgrid{grid-template-columns:repeat(var(--n,5),1fr);gap:14px;max-width:calc(var(--n,5) * 210px);margin-inline:auto}.stile,.stile:last-child:nth-child(odd){grid-column:auto;aspect-ratio:3/4}}
 html.pick #fly{display:none}
 html.pick .cover{cursor:default;height:auto;min-height:100vh;min-height:100svh}
 html.pick .cover .face{position:relative;min-height:100vh;min-height:100svh}
@@ -581,7 +581,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   'use strict';
   var MENU = window.CS_MENU;
   /* şubeler: /cafe-solen/<şube>/ ; yemek menüsü yalnızca Evka 3'te */
-  var SUBELER = [{ id:'merkez', ad:'Merkez' }, { id:'bayrakli', ad:'Bayraklı' }, { id:'evka-3', ad:'Evka 3' }, { id:'folkart', ad:'Folkart' }, { id:'bostanli', ad:'Bostanlı' }];
+  var SUBELER = [{ id:'merkez', ad:'Bornova Merkez' }, { id:'bayrakli', ad:'Bayraklı' }, { id:'evka-3', ad:'Evka 3' }, { id:'folkart', ad:'Folkart' }, { id:'bostanli', ad:'Bostanlı', acik:false }];
   var SUBE = (function(){ var m = /^\/cafe-solen\/([a-z0-9-]+)\/?$/.exec(location.pathname), id = window.CS_SUBE || (m && m[1]) || ''; return SUBELER.some(function(x){ return x.id === id; }) ? id : ''; })();
   var SUBE_AD = SUBE ? SUBELER.filter(function(x){ return x.id === SUBE; })[0].ad : '';
   if (SUBE !== 'evka-3') MENU = MENU.filter(function(s){ return s.grp !== 'evka'; });
@@ -682,7 +682,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     var last = store('cs-sube');
     document.getElementById('spick').innerHTML = SUBE
       ? '<a class="chg" href="/cafe-solen/">' + esc(T.pickChg) + '</a>'
-      : '<p class="sp-h">' + esc(T.pickH) + '</p><div class="sgrid">' + SUBELER.map(function(x){ return '<a class="stile" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '"><img src="' + esc(subeFoto(x.id)) + '" alt="" width="600" height="750" decoding="async"' + (x.id === last ? '' : ' loading="lazy"') + '>' + '<span class="tags"><span>' + esc(T.pickCafe) + '</span>' + (x.id === 'evka-3' ? '<span class="f">' + esc(T.pickFood) + '</span>' : '') + '</span>' + (x.id === last ? '<span class="lb">' + esc(T.pickLast) + '</span>' : '') + '<span class="st"><b>' + esc(x.ad) + '</b><small>' + esc(T.pickGo) + ' →</small></span></a>'; }).join('') + '</div>';
+      : '<p class="sp-h">' + esc(T.pickH) + '</p><div class="sgrid" style="--n:' + SUBELER.filter(function(x){ return x.acik !== false; }).length + '">' + SUBELER.filter(function(x){ return x.acik !== false; }).map(function(x){ return '<a class="stile" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '"><img src="' + esc(subeFoto(x.id)) + '" alt="" width="600" height="750" decoding="async"' + (x.id === last ? '' : ' loading="lazy"') + '>' + '<span class="tags"><span>' + esc(T.pickCafe) + '</span>' + (x.id === 'evka-3' ? '<span class="f">' + esc(T.pickFood) + '</span>' : '') + '</span>' + (x.id === last ? '<span class="lb">' + esc(T.pickLast) + '</span>' : '') + '<span class="st"><b>' + esc(x.ad) + '</b><small>' + esc(T.pickGo) + ' →</small></span></a>'; }).join('') + '</div>';
     document.title = 'Cafe Şölen' + (SUBE ? ' · ' + SUBE_AD : '') + ' · ' + (L === 'tr' ? 'Menü' : 'Menu');
     document.getElementById('lBtn').setAttribute('aria-label', T.lang + ': ' + T.name);
     document.getElementById('lMenu').innerHTML = LANGS.map(function(k){ return '<button type="button" data-lang="'+k+'" lang="'+k+'" aria-pressed="'+(k===L)+'">'+I18N[k].name+'</button>'; }).join('');
