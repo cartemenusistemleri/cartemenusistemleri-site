@@ -7,13 +7,14 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#4A1826">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,600&family=Jost:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,600&family=Gilda+Display&family=Jost:wght@300;400;500;600&display=swap">
+<script>if (/^\/cafe-solen\/panel\//.test(location.pathname)) document.documentElement.className = 'isletme';</script>
 <style>
 :root{--bg:#4A1826;--bg2:#5A2130;--cream:#FFFDF6;--card:#FFFDF8;--soft:#FAF3E4;--soft2:#F3E8D0;--ink:#2A0F17;--muted:#7C5E66;--line:rgba(74,24,38,.14);--ok:#2F6B3A;--okbg:#E6F0E2;--warn:#8A5A00;--warnbg:#FBEFD2;--bad:#A3242F;--badbg:#F8E1E1}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100vh;background:var(--soft);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:400;color:var(--ink);font-size:15px}
-button,input,select{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
 .top{background:radial-gradient(120% 140% at 50% 0%,var(--bg2),var(--bg));color:var(--cream);position:sticky;top:0;z-index:20}
 .top-in{max-width:980px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -59,8 +60,16 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
 .chip.on{background:var(--bg);color:var(--cream);border-color:var(--bg)}
 .sec{margin-top:8px}
 .sec h3{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:18px 0 6px;display:flex;justify-content:space-between;gap:8px}
-.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:6px}
-.row .nm{min-width:0}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:8px 12px 8px 8px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:6px}
+.row .nm{min-width:0;all:unset;cursor:pointer;display:block;min-width:0}
+.row .nm:focus-visible{outline:2px solid var(--bg);outline-offset:2px;border-radius:6px}
+.th{all:unset;cursor:pointer;width:60px;height:40px;border-radius:9px;overflow:hidden;background:var(--soft2);display:grid;place-items:center;color:var(--muted);font-size:18px;flex:none}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th:focus-visible{outline:2px solid var(--bg);outline-offset:2px}
+.tg{display:inline-block;font-size:10.5px;font-weight:500;letter-spacing:.06em;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px;background:var(--soft2);color:var(--ink)}
+.tg.h{background:var(--ink);color:var(--cream)}
+.row.hid .th,.row.hid .nm b{opacity:.45}
+.row .ed-l{font-size:12px;color:var(--bg);text-decoration:underline;text-underline-offset:2px}
 .row .nm b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .nm small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
 .row.ch{background:var(--warnbg);border-color:rgba(138,90,0,.3)}
@@ -113,6 +122,85 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);opacity:0;transition:.25s;background:var(--ink);color:var(--cream);padding:11px 18px;border-radius:12px;font-size:14.5px;z-index:50;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.bad{background:var(--bad)}
+/* ürün düzenleme */
+body.lock{overflow:hidden}
+.ed,.cr{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.ed-bg{position:absolute;inset:0;background:rgba(42,15,23,.55)}
+.ed-box{position:relative;background:var(--card);width:min(680px,100%);max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;box-shadow:0 -20px 60px -20px rgba(0,0,0,.5)}
+@media (min-width:720px){.ed,.cr{align-items:center}.ed-box{border-radius:22px;max-height:90vh}}
+.ed-h{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+.ed-h>div{flex:1;min-width:0}
+.ed-h small{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ed-h h2{margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x{all:unset;cursor:pointer;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:var(--soft)}
+.ed-body{overflow-y:auto;padding:16px 20px 22px;-webkit-overflow-scrolling:touch}
+.ed-f{display:flex;gap:8px;align-items:center;padding:12px 20px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.ph-box .ph{aspect-ratio:3/2;border-radius:14px;overflow:hidden;background:var(--soft2);display:grid;place-items:center;color:var(--muted);font-size:14px;position:relative}
+.ph-box .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-box .ph .tg{position:absolute;top:10px;left:10px;margin:0}
+.ph-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ph-acts label.btn{cursor:pointer}
+.hint{display:block;color:var(--muted);font-size:12.5px;margin-top:8px;line-height:1.5}
+fieldset{border:0;padding:0;margin:22px 0 0}
+legend{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:600;font-size:20px;padding:0;margin-bottom:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:480px){.g3{grid-template-columns:1fr 1fr}.g3>:first-child{grid-column:1/-1}}
+textarea.inp{resize:vertical;min-height:70px;line-height:1.45}
+.inp.sm{padding:10px 12px;font-size:15.5px}
+.ach{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ach button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:13.5px;cursor:pointer}
+.ach button[aria-pressed="true"]{background:var(--bg);color:var(--cream);border-color:var(--bg)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:8px;cursor:pointer}
+.sw input{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:rgba(74,24,38,.25);position:relative;cursor:pointer;flex:none;transition:.2s}
+.sw input::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw input:checked{background:var(--ok)}
+.sw input:checked::after{left:21px}
+.sw b{font-weight:500;display:block}
+.sw small{color:var(--muted);font-size:12.5px}
+.chg{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);margin-left:6px;vertical-align:1px}
+/* kırpma */
+.cr{z-index:70}
+.cr .ed-box{padding:18px 20px 0}
+.cr-frame{position:relative;aspect-ratio:3/2;border-radius:14px;overflow:hidden;background:#222;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.cr-frame:active{cursor:grabbing}
+.cr-frame img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none;-webkit-user-drag:none}
+.cr-frame::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:33.333% 33.333%;opacity:.6}
+.cr input[type=range]{width:100%;margin:14px 0 4px;accent-color:var(--bg)}
+.cr .ed-f{padding-left:0;padding-right:0;border:0}
+.busy{opacity:.6;pointer-events:none}
+/* kullanıcılar */
+.ulist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.urow{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);flex-wrap:wrap}
+.urow .tx{flex:1;min-width:200px}
+.urow .tx b{font-weight:500}
+.urow .tx small{color:var(--muted);margin-left:6px}
+.urow .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.urow .tags span{font-size:12px;border-radius:999px;padding:3px 9px;background:var(--soft2)}
+.urow .tags span.y{background:var(--okbg);color:var(--ok)}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.presets button{border:1px dashed rgba(74,24,38,.35);background:transparent;border-radius:999px;padding:7px 12px;font-size:13.5px;cursor:pointer}
+.presets button:hover{background:var(--soft)}
+.chk{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chk label{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13.5px;cursor:pointer;background:var(--card)}
+.chk input{accent-color:var(--bg);width:16px;height:16px;margin:0}
+.chk label:has(input:checked){background:var(--soft2);border-color:rgba(74,24,38,.35)}
+.pwrow{display:flex;gap:8px}
+.pwrow .inp{flex:1}
+.share{margin-top:14px;padding:14px;border-radius:14px;background:var(--okbg);border:1px solid rgba(47,107,58,.25);font-size:14.5px;line-height:1.7}
+.share code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:rgba(255,255,255,.6);border-radius:6px;padding:1px 6px}
+/* Cafe Şölen kipi (patron / satın alma) */
+html.isletme{--bg:#2B1E16;--bg2:#3A2A1F;--cream:#FBF6EE;--card:#FFFDF8;--soft:#F6EFE4;--soft2:#EDE3D2;--ink:#2B1E16;--muted:#7A6A5C;--line:rgba(43,30,22,.14)}
+html.isletme body{background:#F6EFE4}
+html.isletme .top{background:#17110D}
+html.isletme h2,html.isletme legend{font-family:'Gilda Display',Georgia,serif;font-style:normal;font-weight:400}
+.cs-wm{display:none;align-items:center;gap:10px;margin-right:auto;font-family:'Gilda Display',serif;letter-spacing:.16em;font-size:16px}
+.cs-wm svg{width:30px;height:30px}
+.cs-wm small{font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:#C9A46A;margin-left:4px}
+html.isletme .cs-wm{display:flex}
+html.isletme .admin-only{display:none!important}
+html:not(.isletme) .isl-only{display:none!important}
+html.isletme .tabs button.on{border-bottom-color:#C9A46A}
 @media (max-width:560px){
   .row{padding:9px 10px}
   .pin input{width:92px}
@@ -143,16 +231,19 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
 <div id="app" hidden>
   <header class="top">
     <div class="top-in">
-      <div class="wm"><b>Carte</b><span>Yönetim</span></div>
-      <select id="menuSel" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option></select>
+      <div class="wm admin-only"><b>Carte</b><span>Yönetim</span></div>
+      <div class="cs-wm"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#7A6346"/><rect x="4" y="4" width="92" height="92" fill="none" stroke="#EADCC4" stroke-width="1"/><text x="50" y="64" text-anchor="middle" font-family="Gilda Display,serif" font-size="44" fill="#FFFDF8">CŞ</text></svg>CAFE ŞÖLEN<small>Fiyatlar</small></div>
+      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option></select>
+      <a class="lnk isl-only" href="/cafe-solen/panel/">‹ Panele dön</a>
       <a class="lnk" id="openMenu" href="/cafe-solen/" target="_blank" rel="noopener">Menüyü aç ↗</a>
       <button class="out" id="logout" type="button">Çıkış</button>
     </div>
     <nav class="tabs" role="tablist">
-      <button type="button" class="on" data-tab="fiyat">Fiyatlar</button>
+      <button type="button" class="on" data-tab="fiyat">Ürünler</button>
       <button type="button" data-tab="excel">Excel'den yükle</button>
       <button type="button" data-tab="toplu">Toplu zam</button>
       <button type="button" data-tab="gecmis">Geçmiş</button>
+      <button type="button" class="admin-only" data-tab="kullanici">Kullanıcılar</button>
     </nav>
   </header>
 
@@ -160,7 +251,7 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
     <!-- Fiyatlar -->
     <section id="t-fiyat">
       <div class="tools">
-        <input class="inp" id="q" type="search" placeholder="Ürün ara…" autocomplete="off">
+        <input class="inp" id="q" type="search" placeholder="Ürün ara… (fotoğraf, alerjen, kalori için ürüne dokunun)" autocomplete="off">
         <button class="btn ghost sm" id="dlTpl" type="button">Fiyat listesini Excel indir</button>
       </div>
       <div class="meta" id="lastT" style="margin:-4px 0 8px"></div>
@@ -215,10 +306,51 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
         <p class="sub">Son 30 kayıt. Hatalı bir güncellemeyi “Geri al” ile önceki fiyatlara döndürebilirsiniz.</p>
         <div id="logs"></div>
       </div>
-      <div class="card">
+      <div class="card admin-only">
         <h2>Fiyatları sıfırla</h2>
         <p class="sub">Panelden yapılan tüm fiyat değişikliklerini siler; menü ilk kurulumdaki fiyatlara döner.</p>
         <button class="btn danger sm" id="reset" type="button">Tüm değişiklikleri sıfırla</button>
+      </div>
+    </section>
+    <!-- Kullanıcılar (yalnızca Carte yöneticisi) -->
+    <section id="t-kullanici" hidden>
+      <div class="card">
+        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px"><h2>Panel kullanıcıları</h2><p class="sub" style="margin:0">Herkes <b>cartemenusistemleri.com.tr/cafe-solen/panel</b> adresinden kendi kullanıcı adı ve şifresiyle girer; sadece burada verdiğiniz şube ve yetkileri görür.</p></div>
+          <button class="btn sm" id="uNew" type="button">+ Yeni kullanıcı</button>
+        </div>
+        <div class="ulist" id="uList"></div>
+      </div>
+      <div class="card" id="uForm" hidden>
+        <h2 id="uFT">Yeni kullanıcı</h2>
+        <div class="g2">
+          <div><label class="l" for="uAd">Ad soyad / görev</label><input class="inp sm" id="uAd" maxlength="60" placeholder="Okan Şahin · Bayraklı müdürü"></div>
+          <div><label class="l" for="uKu">Kullanıcı adı</label><input class="inp sm" id="uKu" maxlength="40" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="okansahin"></div>
+        </div>
+        <label class="l" for="uPw" id="uPwL">Şifre</label>
+        <div class="pwrow"><input class="inp sm" id="uPw" type="text" maxlength="64" autocomplete="new-password" spellcheck="false"><button class="btn ghost sm" id="uGen" type="button">Şifre üret</button></div>
+        <label class="l">Hazır roller</label>
+        <div class="presets" id="uPre">
+          <button type="button" data-p="personel">Personel (var/tükendi + öneri)</button>
+          <button type="button" data-p="mudur">Şube müdürü (+ istatistik)</button>
+          <button type="button" data-p="patron">Patron (tüm şubeler, her şey)</button>
+          <button type="button" data-p="satin">Satın alma (fiyat güncelleme)</button>
+        </div>
+        <label class="l">Yetkiler</label>
+        <div class="chk" id="uYet">
+          <label><input type="checkbox" value="stok">Var / tükendi</label>
+          <label><input type="checkbox" value="oneri">★ Öner / Yeni</label>
+          <label><input type="checkbox" value="istatistik">İstatistik</label>
+          <label><input type="checkbox" value="fiyat">Fiyat güncelleme</label>
+        </div>
+        <label class="l">Şubeler</label>
+        <div class="chk" id="uSub"></div>
+        <div class="err" id="uErr" role="alert"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px">
+          <button class="btn ghost sm" id="uCancel" type="button">Vazgeç</button>
+          <button class="btn sm" id="uSave" type="button">Kaydet</button>
+        </div>
+        <div class="share" id="uShare" hidden></div>
       </div>
     </section>
   </main>
@@ -232,6 +364,77 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
   </div>
 </div>
 
+<!-- Ürün düzenleme -->
+<div class="ed" id="ed" hidden role="dialog" aria-modal="true" aria-labelledby="edT">
+  <div class="ed-bg" data-close></div>
+  <div class="ed-box">
+    <header class="ed-h"><div><small id="edSec"></small><h2 id="edT"></h2></div><button type="button" class="x" data-close aria-label="Kapat">×</button></header>
+    <div class="ed-body">
+      <div class="ph-box">
+        <div class="ph" id="edPh"></div>
+        <div class="ph-acts">
+          <label class="btn sm">Fotoğraf yükle<input type="file" id="edFile" accept="image/*" hidden></label>
+          <button type="button" class="btn ghost sm" id="edNoImg">Fotoğrafı kaldır</button>
+          <button type="button" class="btn ghost sm" id="edOrigImg">İlk fotoğrafa dön</button>
+        </div>
+        <small class="hint">Fotoğraf menüdeki gibi 3:2 oranında kırpılır; yükledikten sonra sürükleyip yakınlaştırarak konumunu ayarlarsınız.</small>
+      </div>
+      <fieldset>
+        <legend>Temel bilgiler</legend>
+        <div class="g2">
+          <div><label class="l" for="fN">Ürün adı</label><input class="inp sm" id="fN" maxlength="80"></div>
+          <div><label class="l" for="fP">Fiyat (₺)</label><input class="inp sm" id="fP" inputmode="decimal"></div>
+        </div>
+        <label class="l" for="fD">Açıklama</label><textarea class="inp sm" id="fD" maxlength="400" rows="2"></textarea>
+        <label class="l" for="fI">İçindekiler</label><textarea class="inp sm" id="fI" maxlength="400" rows="2"></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Kalori ve porsiyon</legend>
+        <div class="g3">
+          <div><label class="l" for="fK">Kalori (kcal)</label><input class="inp sm" id="fK" inputmode="numeric" placeholder="Boş = gösterme"></div>
+          <div><label class="l" for="fPT">Porsiyon</label><input class="inp sm" id="fPT" maxlength="40" placeholder="1 dilim"></div>
+          <div><label class="l" for="fPE">Porsiyon (EN)</label><input class="inp sm" id="fPE" maxlength="40" placeholder="1 slice"></div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Alerjenler</legend>
+        <div class="ach" id="fA"></div>
+        <small class="hint">Seçtikleriniz menüde “İçerir” olarak görünür; müşteri alerjen filtresi de bunlara göre çalışır.</small>
+        <label class="l" style="margin-top:16px">Diyet etiketleri</label>
+        <div class="ach" id="fV"></div>
+      </fieldset>
+      <fieldset>
+        <legend>İngilizce</legend>
+        <label class="l" for="fEN">Ürün adı (EN)</label><input class="inp sm" id="fEN" maxlength="80">
+        <label class="l" for="fED">Açıklama (EN)</label><textarea class="inp sm" id="fED" maxlength="400" rows="2"></textarea>
+        <label class="l" for="fEI">İçindekiler (EN)</label><textarea class="inp sm" id="fEI" maxlength="400" rows="2"></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Görünürlük</legend>
+        <label class="sw"><span><b>Menüde göster</b><small>Kapatırsanız ürün menüden gizlenir; silinmez, istediğiniz zaman geri açarsınız.</small></span><input type="checkbox" id="fG"></label>
+      </fieldset>
+    </div>
+    <footer class="ed-f">
+      <button type="button" class="btn danger sm" id="edReset">İlk haline döndür</button>
+      <span style="flex:1"></span>
+      <button type="button" class="btn ghost sm" data-close>Vazgeç</button>
+      <button type="button" class="btn sm" id="edSave">Kaydet</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Fotoğraf kırpma -->
+<div class="cr" id="cr" hidden role="dialog" aria-modal="true" aria-labelledby="crT">
+  <div class="ed-bg"></div>
+  <div class="ed-box">
+    <h2 id="crT">Fotoğrafı konumlandırın</h2>
+    <p class="sub">Sürükleyerek kaydırın, alttaki çubukla yakınlaştırın. Çerçevenin içi menüde görünecek alandır.</p>
+    <div class="cr-frame" id="crF"><img id="crI" alt=""></div>
+    <input type="range" id="crZ" min="1" max="3" step="0.01" value="1" aria-label="Yakınlaştır">
+    <div class="ed-f"><button type="button" class="btn ghost sm" id="crNo">Vazgeç</button><span style="flex:1"></span><button type="button" class="btn sm" id="crOk">Kırp ve kullan</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
@@ -240,6 +443,10 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
   var $ = function(id){ return document.getElementById(id); };
   var SECRET = '', K = 'cafe-solen';
   var MENU = [], ITEMS = [], BYID = {}, BASE = {}, OVR = {}, DRAFT = {}, LOG = [], T = null, SEC = 'all';
+  var RAW = {}, U = {};
+  var AL = { g:'Gluten', s:'Süt', y:'Yumurta', k:'Sert kabuklu', yf:'Yer fıstığı', su:'Susam', so:'Soya', ke:'Kereviz', h:'Hardal', sl:'Sülfit', b:'Balık' };
+  var DI = { v:'Vejetaryen', vg:'Vegan', gf:'Glutensiz' };
+  var ALAN = { n:'Ad', d:'Açıklama', i:'İçindekiler', en:'İngilizce', a:'Alerjenler', v:'Diyet', k:'Kalori', img:'Fotoğraf', gizli:'Görünürlük' };
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function money(v){ if (v == null || v === '') return '–'; var n = Number(v); return (Math.round(n) === n ? n.toLocaleString('tr-TR') : n.toLocaleString('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 })) + ' ₺'; }
@@ -249,9 +456,12 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
   var tt;
   function toast(m, bad){ var e = $('toast'); e.textContent = m; e.className = 'toast on' + (bad ? ' bad' : ''); clearTimeout(tt); tt = setTimeout(function(){ e.className = 'toast'; }, 2600); }
 
-  function api(body){
+  var ISL = document.documentElement.classList.contains('isletme'), TOKEN = null;
+  function authH(h){ if (ISL) h['x-oturum'] = TOKEN || ''; else h['x-admin-secret'] = SECRET; return h; }
+  function api(body){ return apiTo('/api/fiyat', body); }
+  function apiTo(url, body){
     body.k = K;
-    return fetch('/api/fiyat', { method:'POST', headers:{ 'content-type':'application/json', 'x-admin-secret': SECRET }, body: JSON.stringify(body) })
+    return fetch(url, { method:'POST', headers:authH({ 'content-type':'application/json' }), body: JSON.stringify(body) })
       .then(function(r){ return r.json().then(function(j){ j.status = r.status; return j; }); });
   }
 
@@ -266,21 +476,38 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
       $('login').hidden = true; $('app').hidden = false; load();
     }).catch(function(){ $('lerr').textContent = 'Bağlantı hatası'; });
   });
-  if ($('sec').value) setTimeout(function(){ $('lf').requestSubmit ? $('lf').requestSubmit() : $('lf').dispatchEvent(new Event('submit')); }, 0);
-  $('logout').addEventListener('click', function(){ try { sessionStorage.removeItem('carte_admin_secret'); } catch(e){} location.reload(); });
+  if (ISL){
+    // Cafe Şölen Panel'den gelen oturum (fiyat yetkisi gerekir)
+    document.title = 'Cafe Şölen · Fiyatlar';
+    $('q').placeholder = 'Ürün ara…';
+    $('login').hidden = true;
+    try { TOKEN = localStorage.getItem('cs-oturum'); } catch(e){}
+    if (!TOKEN) location.replace('/cafe-solen/panel/');
+    else fetch('/api/oturum', { headers:{ 'x-oturum': TOKEN }, cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
+      if (!j.ok){ location.replace('/cafe-solen/panel/'); return; }
+      if (!j.yetkiler || !j.yetkiler.fiyat){ document.body.innerHTML = '<p style="padding:40px;text-align:center;font-family:Jost,sans-serif">Fiyat güncelleme yetkiniz yok. <a href="/cafe-solen/panel/">Panele dön</a></p>'; return; }
+      $('app').hidden = false; load();
+    }).catch(function(){ toast('Bağlantı hatası', true); });
+  } else if ($('sec').value) setTimeout(function(){ $('lf').requestSubmit ? $('lf').requestSubmit() : $('lf').dispatchEvent(new Event('submit')); }, 0);
+  $('logout').addEventListener('click', function(){
+    if (ISL){ try { localStorage.removeItem('cs-oturum'); } catch(e){} location.href = '/cafe-solen/panel/'; return; }
+    try { sessionStorage.removeItem('carte_admin_secret'); } catch(e){} location.reload();
+  });
 
   /* ---------- veri ---------- */
   function load(){
     Promise.all([
       fetch('/' + K + '/data.js?_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.text(); }),
-      api({ get:true })
+      api({ get:true }),
+      ISL ? Promise.resolve({ ok:true, o:{} }) : apiTo('/api/urun', { get:true })
     ]).then(function(res){
       var js = res[0], i = js.indexOf('['), j = js.lastIndexOf(']');
       MENU = JSON.parse(js.slice(i, j + 1));
       if (!res[1].ok){ toast(res[1].error || 'Veri alınamadı', true); if (res[1].status === 401) $('logout').click(); return; }
-      OVR = res[1].p || {}; LOG = res[1].log || []; T = res[1].t;
-      ITEMS = []; BYID = {}; BASE = {};
-      MENU.forEach(function(s, si){ (s.items || []).forEach(function(it){ if (!it.id) return; var o = { id:it.id, n:it.n, en:(it.en && it.en[0]) || '', sec:si, secT:s.tr }; ITEMS.push(o); BYID[it.id] = o; BASE[it.id] = it.p; }); });
+      OVR = res[1].p || {}; LOG = res[1].log || []; T = res[1].t; U = (res[2] && res[2].o) || {};
+      ITEMS = []; BYID = {}; BASE = {}; RAW = {};
+      MENU.forEach(function(s, si){ (s.items || []).forEach(function(it){ if (!it.id) return; RAW[it.id] = it; var o = { id:it.id, n:it.n, en:(it.en && it.en[0]) || '', sec:si, secT:s.tr }; ITEMS.push(o); BYID[it.id] = o; BASE[it.id] = it.p; }); });
+      syncNames();
       DRAFT = {};
       drawChips(); drawList(); drawLog(); drawBar(); drawScope();
       $('lastT').textContent = T ? 'Son fiyat güncellemesi: ' + fmtT(T) : 'Panelden henüz fiyat değiştirilmedi.';
@@ -304,12 +531,14 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
       (s.items || []).forEach(function(it){
         var o = BYID[it.id]; if (!o) return;
         var ch = Object.prototype.hasOwnProperty.call(DRAFT, o.id);
-        if (SEC === 'ch' && !ch && !Object.prototype.hasOwnProperty.call(OVR, o.id)) return;
+        if (SEC === 'ch' && !ch && !Object.prototype.hasOwnProperty.call(OVR, o.id) && !U[o.id]) return;
         if (q && norm(o.n + ' ' + o.en).indexOf(q) === -1) return;
         var ov = Object.prototype.hasOwnProperty.call(OVR, o.id), v = cur(o.id), info = [];
         if (ch) info.push('Şu an: ' + money(live(o.id)));
         else if (ov) info.push('<span class="o">İlk fiyat: ' + money(BASE[o.id]) + '</span>');
-        rows += '<div class="row' + (ch ? ' ch' : '') + (ov ? ' ovr' : '') + '" data-id="' + o.id + '"><span class="nm"><b>' + esc(o.n) + '</b>' + (info.length ? '<small>' + info.join(' · ') + '</small>' : '') + '</span>' +
+        var e = eff(o.id), src = imgUrl(e.img), tags = (U[o.id] ? '<span class="tg">Düzenlendi</span>' : '') + (e.gizli ? '<span class="tg h">Gizli</span>' : '');
+        if (!info.length && !ISL) info.push('<span class="ed-l">Düzenle</span>');
+        rows += '<div class="row' + (ch ? ' ch' : '') + (ov ? ' ovr' : '') + (e.gizli ? ' hid' : '') + '" data-id="' + o.id + '"><button type="button" class="th" data-ed="' + o.id + '" aria-label="' + esc(o.n) + ' düzenle">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : (ISL ? '' : '＋')) + '</button><button type="button" class="nm" data-ed="' + o.id + '"><b>' + esc(o.n) + tags + '</b>' + '<small>' + info.join(' · ') + '</small></button>' +
           '<label class="pin"><input type="text" inputmode="decimal" data-id="' + o.id + '" value="' + esc(v == null ? '' : String(v).replace('.', ',')) + '" aria-label="' + esc(o.n) + ' fiyatı"><span>₺</span></label></div>';
         n++;
       });
@@ -337,7 +566,7 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
     var row = inp.closest('.row'), ch = Object.prototype.hasOwnProperty.call(DRAFT, id);
     row.classList.toggle('ch', ch);
     var sm = row.querySelector('small'), nm = row.querySelector('.nm');
-    var txt = ch ? 'Şu an: ' + money(live(id)) : (Object.prototype.hasOwnProperty.call(OVR, id) ? '<span class="o">İlk fiyat: ' + money(BASE[id]) + '</span>' : '');
+    var txt = ch ? 'Şu an: ' + money(live(id)) : (Object.prototype.hasOwnProperty.call(OVR, id) ? '<span class="o">İlk fiyat: ' + money(BASE[id]) + '</span>' : (ISL ? '' : '<span class="ed-l">Düzenle</span>'));
     if (txt){ if (!sm){ sm = document.createElement('small'); nm.appendChild(sm); } sm.innerHTML = txt; } else if (sm) sm.remove();
     inp.value = String(v).replace('.', ',');
     drawBar();
@@ -377,7 +606,8 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
   [].forEach.call(document.querySelectorAll('.tabs button'), function(b){
     b.addEventListener('click', function(){
       [].forEach.call(document.querySelectorAll('.tabs button'), function(x){ x.classList.toggle('on', x === b); });
-      ['fiyat','excel','toplu','gecmis'].forEach(function(t){ $('t-' + t).hidden = t !== b.dataset.tab; });
+      ['fiyat','excel','toplu','gecmis','kullanici'].forEach(function(t){ $('t-' + t).hidden = t !== b.dataset.tab; });
+      if (b.dataset.tab === 'kullanici') loadUsers();
       scrollTo(0, 0);
     });
   });
@@ -561,13 +791,27 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
   function drawLog(){
     if (!LOG.length){ $('logs').innerHTML = '<div class="empty">Henüz kayıt yok.</div>'; return; }
     $('logs').innerHTML = LOG.map(function(g, gi){
-      return '<div class="log"><div class="h"><b>' + g.n + ' fiyat</b><span class="meta">' + fmtT(g.t) + (g.kaynak ? ' · ' + esc(g.kaynak) : '') + '</span><button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button></div>' +
+      if (g.tur === 'urun'){
+        return '<div class="log"><div class="h"><b>' + esc(nameOf(g.id)) + '</b><span class="meta">' + fmtT(g.t) + ' · ' + esc((g.alanlar || []).map(function(a){ return ALAN[a] || a; }).join(', ')) + '</span>' + (ISL ? '' : '<button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button>') + '</div>' +
+          '<ul>' + (g.alanlar || []).map(function(a){ return '<li><span>' + esc(ALAN[a] || a) + '</span><span>' + esc(showVal(a, g.once, g.id)) + ' → ' + esc(showVal(a, g.sonra, g.id)) + '</span></li>'; }).join('') + '</ul></div>';
+      }
+      return '<div class="log"><div class="h"><b>' + g.n + ' fiyat</b><span class="meta">' + fmtT(g.t) + (g.kaynak ? ' · ' + esc(g.kaynak) : '') + (g.kim ? ' · ' + esc(g.kim) : '') + '</span><button type="button" class="btn ghost sm" data-undo="' + gi + '">Geri al</button></div>' +
         '<ul>' + (g.d || []).map(function(d){ return '<li><span>' + esc(nameOf(d[0])) + '</span><span>' + money(d[1]) + ' → ' + money(d[2]) + '</span></li>'; }).join('') + '</ul></div>';
     }).join('');
   }
   $('logs').addEventListener('click', function(e){
     var b = e.target.closest('[data-undo]'); if (!b) return;
     var g = LOG[+b.dataset.undo], set = {};
+    if (g.tur === 'urun'){
+      if (!RAW[g.id]) return;
+      (g.alanlar || []).forEach(function(a){ set[a] = toSet(a, Object.prototype.hasOwnProperty.call(g.once || {}, a) ? g.once[a] : baseVal(g.id, a)); });
+      if (!confirm('“' + nameOf(g.id) + '” bu değişiklikten önceki haline dönsün mü?')) return;
+      apiTo('/api/urun', { id:g.id, set:set, kaynak:'Geri alma' }).then(function(j){
+        if (!j.ok){ toast(j.error || 'Geri alınamadı', true); return; }
+        U = j.o || {}; LOG = j.log || LOG; syncNames(); drawList(); drawLog(); toast('Geri alındı');
+      });
+      return;
+    }
     (g.d || []).forEach(function(d){ if (BYID[d[0]] && d[1] != null) set[d[0]] = d[1]; });
     if (!Object.keys(set).length) return;
     if (!confirm(Object.keys(set).length + ' ürünün fiyatı bu değişiklikten önceki haline dönsün mü?')) return;
@@ -584,6 +828,257 @@ label.l{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:upper
       OVR = j.p || {}; LOG = j.log || LOG; T = j.t; DRAFT = {}; drawList(); drawLog(); drawBar();
       toast('Fiyatlar sıfırlandı');
     });
+  });
+
+  /* ---------- ürün düzenleme ---------- */
+  function eff(id){ var r = RAW[id] || {}, o = {}, d = U[id] || {}; ['n','d','i','en','a','v','k','img'].forEach(function(a){ o[a] = r[a]; }); o.gizli = false; Object.keys(d).forEach(function(a){ o[a] = d[a]; }); return o; }
+  function imgUrl(n){ if (!n) return ''; return n.charAt(0) === '/' ? n : '/' + K + '/img/' + n + '.webp'; }
+  function syncNames(){ ITEMS.forEach(function(o){ var e = eff(o.id); o.n = e.n; o.en = (e.en && e.en[0]) || ''; }); NIDX = null; OPTS = null; }
+  function baseVal(id, a){ var r = RAW[id] || {}; if (a === 'gizli') return false; if (a === 'en') return r.en || null; if (a === 'k') return r.k || null; return r[a] == null ? '' : r[a]; }
+  function toSet(a, v){
+    if (a === 'a' || a === 'v') return v ? String(v).split(',').filter(Boolean) : [];
+    if (a === 'gizli') return !!v;
+    if (a === 'en' || a === 'k') return v || null;
+    return v == null ? '' : v;
+  }
+  function showVal(a, obj, id){
+    var has = obj && Object.prototype.hasOwnProperty.call(obj, a), v = has ? obj[a] : baseVal(id, a);
+    if (a === 'img') return v ? (has ? 'yeni fotoğraf' : 'ilk fotoğraf') : 'fotoğraf yok';
+    if (a === 'gizli') return v ? 'gizli' : 'menüde';
+    if (a === 'a'){ var x = v ? String(v).split(',').filter(Boolean).map(function(k){ return AL[k] || k; }) : []; return x.length ? x.join(', ') : 'yok'; }
+    if (a === 'v'){ var y = v ? String(v).split(',').filter(Boolean).map(function(k){ return DI[k] || k; }) : []; return y.length ? y.join(', ') : 'yok'; }
+    if (a === 'k') return v && v[0] != null ? v[0] + ' kcal' + (v[1] ? ' · ' + v[1] : '') : 'yok';
+    if (a === 'en') return v && v[0] ? v[0] : 'yok';
+    var t = String(v || ''); return t ? (t.length > 40 ? t.slice(0, 38) + '…' : t) : 'boş';
+  }
+  var ED = null;
+  function chips(box, map, sel){ $(box).innerHTML = Object.keys(map).map(function(k){ return '<button type="button" data-k="' + k + '" aria-pressed="' + (sel.indexOf(k) !== -1) + '">' + esc(map[k]) + '</button>'; }).join(''); }
+  function picked(box){ return [].slice.call($(box).querySelectorAll('[aria-pressed="true"]')).map(function(b){ return b.dataset.k; }); }
+  ['fA','fV'].forEach(function(b){ $(b).addEventListener('click', function(e){ var x = e.target.closest('button'); if (x) x.setAttribute('aria-pressed', x.getAttribute('aria-pressed') !== 'true'); }); });
+  function drawPh(){
+    var src = imgUrl(ED.img), r = RAW[ED.id] || {};
+    $('edPh').innerHTML = src ? '<img src="' + esc(src) + '" alt="">' + (ED.img !== eff(ED.id).img ? '<span class="tg">Kaydedilmedi</span>' : '') : 'Fotoğraf yok';
+    $('edNoImg').hidden = !ED.img;
+    $('edOrigImg').hidden = !r.img || ED.img === r.img;
+  }
+  function openEd(id){
+    var e = eff(id), r = RAW[id]; if (!r) return;
+    ED = { id:id, img:e.img || '' };
+    $('edSec').textContent = BYID[id].secT; $('edT').textContent = e.n;
+    $('fN').value = e.n || ''; $('fP').value = String(cur(id) == null ? '' : cur(id)).replace('.', ',');
+    $('fD').value = e.d || ''; $('fI').value = e.i || '';
+    $('fK').value = e.k && e.k[0] != null ? e.k[0] : ''; $('fPT').value = (e.k && e.k[1]) || ''; $('fPE').value = (e.k && e.k[2]) || '';
+    chips('fA', AL, (e.a || '').split(',')); chips('fV', DI, (e.v || '').split(','));
+    $('fEN').value = (e.en && e.en[0]) || ''; $('fED').value = (e.en && e.en[1]) || ''; $('fEI').value = (e.en && e.en[2]) || '';
+    $('fG').checked = !e.gizli;
+    $('edReset').hidden = !U[id] && !Object.prototype.hasOwnProperty.call(OVR, id);
+    drawPh();
+    $('ed').hidden = false; document.body.classList.add('lock');
+    $('ed').querySelector('.ed-body').scrollTop = 0;
+  }
+  function closeEd(){ $('ed').hidden = true; document.body.classList.remove('lock'); ED = null; }
+  $('list').addEventListener('click', function(e){ if (ISL) return; var b = e.target.closest('[data-ed]'); if (b) openEd(b.dataset.ed); });
+  $('ed').addEventListener('click', function(e){ if (e.target.closest('[data-close]')) closeEd(); });
+  addEventListener('keydown', function(e){ if (e.key === 'Escape'){ if (!$('cr').hidden) $('crNo').click(); else if (!$('ed').hidden) closeEd(); } });
+  $('edNoImg').addEventListener('click', function(){ ED.img = ''; drawPh(); });
+  $('edOrigImg').addEventListener('click', function(){ ED.img = (RAW[ED.id] && RAW[ED.id].img) || ''; drawPh(); });
+  function same(a, b){ return JSON.stringify(a == null ? null : a) === JSON.stringify(b == null ? null : b); }
+  function changes(){
+    var e = eff(ED.id), set = {};
+    var n = $('fN').value.replace(/\s+/g, ' ').trim(); if (n !== (e.n || '')) set.n = n;
+    var d = $('fD').value.replace(/\s+/g, ' ').trim(); if (d !== (e.d || '')) set.d = d;
+    var i = $('fI').value.replace(/\s+/g, ' ').trim(); if (i !== (e.i || '')) set.i = i;
+    var en = [$('fEN').value.trim(), $('fED').value.trim(), $('fEI').value.trim()];
+    var enN = en[0] || en[1] || en[2] ? en : null, enO = e.en && (e.en[0] || e.en[1] || e.en[2]) ? [e.en[0] || '', e.en[1] || '', e.en[2] || ''] : null;
+    if (!same(enN, enO)) set.en = enN;
+    var a = picked('fA'), aO = (e.a || '').split(',').filter(Boolean);
+    if (a.slice().sort().join() !== aO.slice().sort().join()) set.a = a;
+    var v = picked('fV'), vO = (e.v || '').split(',').filter(Boolean);
+    if (v.slice().sort().join() !== vO.slice().sort().join()) set.v = v;
+    var kc = $('fK').value.trim(), pt = $('fPT').value.trim(), pe = $('fPE').value.trim();
+    var kN = kc === '' ? null : [Math.round(Number(kc.replace(',', '.'))), pt, pe || pt], kO = e.k && e.k[0] != null ? [e.k[0], e.k[1] || '', e.k[2] || e.k[1] || ''] : null;
+    if (kN && !isFinite(kN[0])) throw new Error('Kalori sayı olmalı');
+    if (!same(kN, kO)) set.k = kN;
+    if ((ED.img || '') !== (e.img || '')) set.img = ED.img || '';
+    var g = !$('fG').checked; if (g !== !!e.gizli) set.gizli = g;
+    return set;
+  }
+  $('edSave').addEventListener('click', function(){
+    var set, price;
+    try { set = changes(); } catch(err){ toast(err.message, true); return; }
+    if (set.n === '') { toast('Ürün adı boş olamaz', true); return; }
+    price = parsePrice($('fP').value);
+    if (price == null){ toast('Geçerli bir fiyat girin', true); return; }
+    var pCh = price !== live(ED.id), id = ED.id;
+    if (!Object.keys(set).length && !pCh){ closeEd(); toast('Değişiklik yok'); return; }
+    var box = $('ed').querySelector('.ed-box'); box.classList.add('busy');
+    var p1 = Object.keys(set).length ? apiTo('/api/urun', { id:id, set:set }) : Promise.resolve(null);
+    p1.then(function(j){
+      if (j && !j.ok) throw new Error(j.error || 'Kaydedilemedi');
+      if (j){ U = j.o || {}; LOG = j.log || LOG; }
+      if (!pCh) return null;
+      var o = {}; o[id] = price;
+      return api({ set:o, kaynak:'Ürün düzenleme' });
+    }).then(function(j){
+      if (j && !j.ok) throw new Error(j.error || 'Fiyat kaydedilemedi');
+      if (j){ OVR = j.p || {}; LOG = j.log || LOG; T = j.t; delete DRAFT[id]; }
+      box.classList.remove('busy'); closeEd(); syncNames(); drawList(); drawLog(); drawBar();
+      toast('Kaydedildi, menüde yayında');
+    }).catch(function(err){ box.classList.remove('busy'); toast(err.message || 'Bağlantı hatası', true); });
+  });
+  $('edReset').addEventListener('click', function(){
+    var id = ED.id;
+    if (!confirm('“' + eff(id).n + '” ilk kurulumdaki haline (fotoğraf, bilgiler ve fiyat) dönsün mü?')) return;
+    var box = $('ed').querySelector('.ed-box'); box.classList.add('busy');
+    apiTo('/api/urun', { id:id, reset:true }).then(function(j){
+      if (!j.ok) throw new Error(j.error || 'Döndürülemedi');
+      U = j.o || {}; LOG = j.log || LOG;
+      if (!Object.prototype.hasOwnProperty.call(OVR, id)) return null;
+      var o = {}; o[id] = BASE[id]; return api({ set:o, kaynak:'İlk haline döndürme' });
+    }).then(function(j){
+      if (j && j.ok){ OVR = j.p || {}; LOG = j.log || LOG; T = j.t; }
+      delete DRAFT[id]; box.classList.remove('busy'); closeEd(); syncNames(); drawList(); drawLog(); drawBar(); toast('Ürün ilk haline döndü');
+    }).catch(function(err){ box.classList.remove('busy'); toast(err.message, true); });
+  });
+
+  /* ---------- fotoğraf kırpma ---------- */
+  var CR = null;
+  $('edFile').addEventListener('change', function(){
+    var f = this.files && this.files[0]; this.value = '';
+    if (!f) return;
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)){ toast('Bir fotoğraf dosyası seçin', true); return; }
+    var url = URL.createObjectURL(f), im = $('crI');
+    im.onload = function(){ $('cr').hidden = false; requestAnimationFrame(function(){ crInit(im, url); }); };
+    im.onerror = function(){ URL.revokeObjectURL(url); toast('Bu fotoğraf açılamadı (HEIC ise telefonda “En Uyumlu” formatta paylaşın)', true); };
+    im.src = url;
+  });
+  function crInit(im, url){
+    var F = $('crF'), W = F.clientWidth, H = F.clientHeight;
+    var s0 = Math.max(W / im.naturalWidth, H / im.naturalHeight);
+    CR = { url:url, W:W, H:H, s0:s0, z:1, ox:0, oy:0 };
+    $('crZ').value = 1;
+    CR.ox = (W - im.naturalWidth * s0) / 2; CR.oy = (H - im.naturalHeight * s0) / 2;
+    crDraw();
+  }
+  function crClamp(){ var im = $('crI'), s = CR.s0 * CR.z, dw = im.naturalWidth * s, dh = im.naturalHeight * s; CR.ox = Math.min(0, Math.max(CR.W - dw, CR.ox)); CR.oy = Math.min(0, Math.max(CR.H - dh, CR.oy)); }
+  function crDraw(){ crClamp(); var s = CR.s0 * CR.z; $('crI').style.transform = 'translate(' + CR.ox + 'px,' + CR.oy + 'px) scale(' + s + ')'; }
+  $('crZ').addEventListener('input', function(){
+    if (!CR) return; var s1 = CR.s0 * CR.z, z = +this.value, s2 = CR.s0 * z;
+    var cx = (CR.W / 2 - CR.ox) / s1, cy = (CR.H / 2 - CR.oy) / s1;
+    CR.z = z; CR.ox = CR.W / 2 - cx * s2; CR.oy = CR.H / 2 - cy * s2; crDraw();
+  });
+  (function(){
+    var F = $('crF'), drag = null;
+    F.addEventListener('pointerdown', function(e){ if (!CR) return; drag = { x:e.clientX, y:e.clientY, ox:CR.ox, oy:CR.oy }; F.setPointerCapture(e.pointerId); });
+    F.addEventListener('pointermove', function(e){ if (!drag) return; CR.ox = drag.ox + e.clientX - drag.x; CR.oy = drag.oy + e.clientY - drag.y; crDraw(); });
+    ['pointerup','pointercancel'].forEach(function(ev){ F.addEventListener(ev, function(){ drag = null; }); });
+    F.addEventListener('wheel', function(e){ if (!CR) return; e.preventDefault(); var z = Math.min(3, Math.max(1, CR.z * (e.deltaY < 0 ? 1.06 : 1 / 1.06))); $('crZ').value = z; $('crZ').dispatchEvent(new Event('input')); }, { passive:false });
+  })();
+  function crClose(){ $('cr').hidden = true; if (CR) URL.revokeObjectURL(CR.url); CR = null; }
+  $('crNo').addEventListener('click', crClose);
+  $('crOk').addEventListener('click', function(){
+    if (!CR || !ED) return;
+    var im = $('crI'), s = CR.s0 * CR.z, OW = 1080, OH = 720;
+    var c = document.createElement('canvas'); c.width = OW; c.height = OH;
+    var x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+    x.drawImage(im, -CR.ox / s, -CR.oy / s, CR.W / s, CR.H / s, 0, 0, OW, OH);
+    var btn = this; btn.disabled = true; btn.textContent = 'Yükleniyor…';
+    var done = function(){ btn.disabled = false; btn.textContent = 'Kırp ve kullan'; };
+    c.toBlob(function(b){
+      if (!b){ done(); toast('Fotoğraf hazırlanamadı', true); return; }
+      if (b.type !== 'image/webp'){ c.toBlob(function(j){ up(j); }, 'image/jpeg', 0.86); } else up(b);
+    }, 'image/webp', 0.84);
+    function up(b){
+      fetch('/api/gorsel-yukle?k=' + encodeURIComponent(K), { method:'POST', headers:authH({ 'content-type': b.type }), body:b })
+        .then(function(r){ return r.json(); }).then(function(j){
+          done();
+          if (!j.ok){ toast(j.error || 'Yüklenemedi', true); return; }
+          ED.img = j.url; drawPh(); crClose();
+          toast('Fotoğraf hazır — “Kaydet”e basınca menüde görünür');
+        }).catch(function(){ done(); toast('Bağlantı hatası', true); });
+    }
+  });
+
+  /* ---------- kullanıcılar ---------- */
+  var USERS = [], SUBS = [], UEDIT = null;
+  var YAD = { stok:'Var / tükendi', oneri:'Öneri', istatistik:'İstatistik', fiyat:'Fiyat' };
+  function uApi(body){ return apiTo('/api/kullanici', body); }
+  function loadUsers(){
+    $('uList').innerHTML = '<div class="empty">Yükleniyor…</div>';
+    uApi({ list:true }).then(function(j){
+      if (!j.ok){ $('uList').innerHTML = '<div class="empty">' + esc(j.error || 'Liste alınamadı') + '</div>'; return; }
+      USERS = j.kullanicilar || []; SUBS = (j.isletme && j.isletme.subeler) || [];
+      drawUsers();
+    }).catch(function(){ $('uList').innerHTML = '<div class="empty">Bağlantı hatası</div>'; });
+  }
+  function subName(id){ var x = SUBS.filter(function(s){ return s.id === id; })[0]; return x ? x.ad : id; }
+  function drawUsers(){
+    if (!USERS.length){ $('uList').innerHTML = '<div class="empty">Henüz kullanıcı yok. “+ Yeni kullanıcı” ile ekleyin.</div>'; return; }
+    $('uList').innerHTML = USERS.map(function(u, i){
+      var sb = u.subeler.indexOf('*') !== -1 ? 'Tüm şubeler' : u.subeler.map(subName).join(', ');
+      var y = Object.keys(YAD).filter(function(k){ return u.yetkiler[k]; }).map(function(k){ return '<span class="y">' + YAD[k] + '</span>'; }).join('');
+      return '<div class="urow"><div class="tx"><b>' + esc(u.ad || u.kullanici) + '</b><small>@' + esc(u.kullanici) + '</small><div class="tags">' + y + (sb ? '<span>' + esc(sb) + '</span>' : '') + '</div></div>' +
+        '<div style="display:flex;gap:6px;flex:none"><button class="btn ghost sm" type="button" data-ue="' + i + '">Düzenle</button><button class="btn danger sm" type="button" data-ud="' + i + '">Sil</button></div></div>';
+    }).join('');
+  }
+  function genPw(){ var A = 'abcdefghjkmnpqrstuvwxyz', D = '23456789', r = crypto.getRandomValues(new Uint8Array(10)), s = ''; for (var i = 0; i < 6; i++) s += A[r[i] % A.length]; for (; i < 10; i++) s += D[r[i] % D.length]; return s; }
+  function uForm(u){
+    UEDIT = u || null;
+    $('uFT').textContent = u ? 'Kullanıcıyı düzenle' : 'Yeni kullanıcı';
+    $('uAd').value = u ? u.ad : ''; $('uKu').value = u ? u.kullanici : ''; $('uKu').disabled = !!u;
+    $('uPw').value = u ? '' : genPw(); $('uPw').placeholder = u ? 'Boş bırakırsanız şifre değişmez' : '';
+    $('uPwL').textContent = u ? 'Yeni şifre (isteğe bağlı)' : 'Şifre';
+    [].forEach.call($('uYet').querySelectorAll('input'), function(c){ c.checked = !!(u && u.yetkiler[c.value]); });
+    var sel = u ? u.subeler : [];
+    $('uSub').innerHTML = '<label><input type="checkbox" value="*"' + (sel.indexOf('*') !== -1 ? ' checked' : '') + '>Tüm şubeler</label>' + SUBS.map(function(s){ return '<label><input type="checkbox" value="' + s.id + '"' + (sel.indexOf(s.id) !== -1 ? ' checked' : '') + '>' + esc(s.ad) + '</label>'; }).join('');
+    $('uErr').textContent = ''; $('uShare').hidden = true; $('uForm').hidden = false;
+    $('uForm').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  $('uSub').addEventListener('change', function(e){
+    var c = e.target; if (!c.matches('input')) return;
+    if (c.value === '*' && c.checked) [].forEach.call(this.querySelectorAll('input'), function(x){ if (x.value !== '*') x.checked = false; });
+    else if (c.value !== '*' && c.checked) this.querySelector('input[value="*"]').checked = false;
+  });
+  $('uPre').addEventListener('click', function(e){
+    var b = e.target.closest('[data-p]'); if (!b) return;
+    var P = { personel:['stok','oneri'], mudur:['stok','oneri','istatistik'], patron:['stok','oneri','istatistik','fiyat'], satin:['fiyat'] }[b.dataset.p];
+    [].forEach.call($('uYet').querySelectorAll('input'), function(c){ c.checked = P.indexOf(c.value) !== -1; });
+    if (b.dataset.p === 'patron'){ [].forEach.call($('uSub').querySelectorAll('input'), function(c){ c.checked = c.value === '*'; }); }
+    if (b.dataset.p === 'satin'){ [].forEach.call($('uSub').querySelectorAll('input'), function(c){ c.checked = false; }); }
+  });
+  $('uGen').addEventListener('click', function(){ $('uPw').value = genPw(); });
+  $('uNew').addEventListener('click', function(){ uForm(null); });
+  $('uCancel').addEventListener('click', function(){ $('uForm').hidden = true; });
+  $('uList').addEventListener('click', function(e){
+    var ed = e.target.closest('[data-ue]'), dl = e.target.closest('[data-ud]');
+    if (ed) uForm(USERS[+ed.dataset.ue]);
+    if (dl){
+      var u = USERS[+dl.dataset.ud];
+      if (!confirm('“' + (u.ad || u.kullanici) + '” silinsin mi? Bu kişi panele bir daha giremez.')) return;
+      uApi({ sil:u.kullanici }).then(function(j){ if (!j.ok){ toast(j.error || 'Silinemedi', true); return; } USERS = j.kullanicilar || []; drawUsers(); $('uForm').hidden = true; toast('Kullanıcı silindi'); });
+    }
+  });
+  $('uSave').addEventListener('click', function(){
+    $('uErr').textContent = '';
+    var yet = {}; [].forEach.call($('uYet').querySelectorAll('input:checked'), function(c){ yet[c.value] = true; });
+    var sub = [].map.call($('uSub').querySelectorAll('input:checked'), function(c){ return c.value; });
+    var set = { kullanici:$('uKu').value, ad:$('uAd').value, yetkiler:yet, subeler:sub };
+    var pw = $('uPw').value.trim(); if (pw) set.sifre = pw;
+    var btn = this; btn.disabled = true;
+    uApi({ set:set }).then(function(j){
+      btn.disabled = false;
+      if (!j.ok){ $('uErr').textContent = j.error || 'Kaydedilemedi'; return; }
+      USERS = j.kullanicilar || []; drawUsers();
+      var u = USERS.filter(function(x){ return x.kullanici === j.kullanici; })[0];
+      if (pw){
+        var txt = 'Cafe Şölen Panel\nAdres: https://cartemenusistemleri.com.tr/cafe-solen/panel/\nKullanıcı adı: ' + j.kullanici + '\nŞifre: ' + pw;
+        $('uShare').innerHTML = '<b>Kaydedildi.</b> Bu bilgileri kişiye iletin (şifre bir daha gösterilmez):<br>Adres: <code>cartemenusistemleri.com.tr/cafe-solen/panel</code><br>Kullanıcı adı: <code>' + esc(j.kullanici) + '</code><br>Şifre: <code>' + esc(pw) + '</code><br><button class="btn sm" type="button" id="uCopy" style="margin-top:8px">Bilgileri kopyala</button>';
+        $('uShare').hidden = false;
+        $('uCopy').onclick = function(){ (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function(){ toast('Kopyalandı'); }).catch(function(){ toast('Kopyalanamadı, elle seçin', true); }); };
+        UEDIT = u; $('uKu').disabled = true; $('uPw').value = ''; $('uPw').placeholder = 'Boş bırakırsanız şifre değişmez'; $('uFT').textContent = 'Kullanıcıyı düzenle';
+      } else { $('uForm').hidden = true; }
+      toast('Kullanıcı kaydedildi');
+    }).catch(function(){ btn.disabled = false; $('uErr').textContent = 'Bağlantı hatası'; });
   });
 
   $('menuSel').addEventListener('change', function(){ K = this.value; $('openMenu').href = '/' + K + '/'; NIDX = null; OPTS = null; load(); });
