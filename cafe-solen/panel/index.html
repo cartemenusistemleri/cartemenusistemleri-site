@@ -229,7 +229,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
   };
   function homeAreas(){
     var a = [];
-    if (can('fiyat')) a.push({ kind:'fiyat', title:'Fiyatlar', sub:'Fiyat güncelleme, Excel’den yükleme, toplu zam', href:'/cafe-solen/panel/fiyatlar/' });
+    if (can('fiyat')) a.push({ kind:'fiyat', title:'Ürün güncellemeleri', sub:'Fiyat, fotoğraf, alerjen, kalori · Excel’den fiyat yükleme, toplu zam · tüm şubelerde geçerli', href:'/cafe-solen/panel/urunler/' });
     if (can('istatistik') && ME.subeler.length > 1) a.push({ kind:'ist', title:'Tüm şubeler', sub:'Şubelerin toplam istatistiği', go:{ v:'tum' } });
     if (subeYetki()) ME.subeler.forEach(function(s){
       var parts = []; if (can('stok')) parts.push('Var / tükendi'); if (can('oneri')) parts.push('Öneri'); if (can('istatistik')) parts.push('İstatistik');
