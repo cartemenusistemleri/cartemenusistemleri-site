@@ -169,6 +169,13 @@ textarea.inp{resize:vertical;min-height:70px;line-height:1.45}
 .cr input[type=range]{width:100%;margin:14px 0 4px;accent-color:var(--bg)}
 .cr .ed-f{padding-left:0;padding-right:0;border:0}
 .busy{opacity:.6;pointer-events:none}
+.sfg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.sfc{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
+.sfc .im{aspect-ratio:4/3;background:var(--soft2) center/cover no-repeat;position:relative}
+.sfc .im .tg{position:absolute;top:8px;left:8px;margin:0}
+.sfc .bd{padding:10px 12px 12px}
+.sfc .bd b{display:block;font-weight:500;margin-bottom:8px}
+.sfc .bd .btn{width:100%;margin-top:6px}
 /* kullanıcılar */
 .ulist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .urow{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);flex-wrap:wrap}
@@ -244,6 +251,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
       <button type="button" data-tab="toplu">Toplu zam</button>
       <button type="button" data-tab="gecmis">Geçmiş</button>
       <button type="button" class="admin-only" data-tab="kullanici">Kullanıcılar</button>
+      <button type="button" class="admin-only" data-tab="subeler">Şubeler</button>
     </nav>
   </header>
 
@@ -312,6 +320,15 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
         <button class="btn danger sm" id="reset" type="button">Tüm değişiklikleri sıfırla</button>
       </div>
     </section>
+    <!-- Şube fotoğrafları -->
+    <section id="t-subeler" hidden>
+      <div class="card">
+        <h2>Şube fotoğrafları</h2>
+        <p class="sub">Menünün şube seçim ekranında (cartemenusistemleri.com.tr/cafe-solen) her şube bu fotoğrafla görünür. Fotoğraf yüklemediğiniz şubede bir ürün fotoğrafı gösterilir.</p>
+        <div class="sfg" id="sfList"></div>
+      </div>
+    </section>
+
     <!-- Kullanıcılar (yalnızca Carte yöneticisi) -->
     <section id="t-kullanici" hidden>
       <div class="card">
@@ -606,8 +623,9 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
   [].forEach.call(document.querySelectorAll('.tabs button'), function(b){
     b.addEventListener('click', function(){
       [].forEach.call(document.querySelectorAll('.tabs button'), function(x){ x.classList.toggle('on', x === b); });
-      ['fiyat','excel','toplu','gecmis','kullanici'].forEach(function(t){ $('t-' + t).hidden = t !== b.dataset.tab; });
+      ['fiyat','excel','toplu','gecmis','kullanici','subeler'].forEach(function(t){ $('t-' + t).hidden = t !== b.dataset.tab; });
       if (b.dataset.tab === 'kullanici') loadUsers();
+      if (b.dataset.tab === 'subeler') loadSF();
       scrollTo(0, 0);
     });
   });
@@ -942,10 +960,19 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
   });
 
   /* ---------- fotoğraf kırpma ---------- */
-  var CR = null;
+  var CR = null, CR_OPT = null;
+  function cropFile(f, opt){
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)){ toast('Bir fotoğraf dosyası seçin', true); return; }
+    CR_OPT = opt; $('crF').style.aspectRatio = opt.w + '/' + opt.h;
+    var url = URL.createObjectURL(f), im = $('crI');
+    im.onload = function(){ $('cr').hidden = false; requestAnimationFrame(function(){ crInit(im, url); }); };
+    im.onerror = function(){ URL.revokeObjectURL(url); toast('Bu fotoğraf açılamadı (HEIC ise telefonda “En Uyumlu” formatta paylaşın)', true); };
+    im.src = url;
+  }
   $('edFile').addEventListener('change', function(){
     var f = this.files && this.files[0]; this.value = '';
     if (!f) return;
+    return cropFile(f, { w:1080, h:720, done:function(url){ ED.img = url; drawPh(); toast('Fotoğraf hazır — “Kaydet”e basınca menüde görünür'); } });
     if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)){ toast('Bir fotoğraf dosyası seçin', true); return; }
     var url = URL.createObjectURL(f), im = $('crI');
     im.onload = function(){ $('cr').hidden = false; requestAnimationFrame(function(){ crInit(im, url); }); };
@@ -977,8 +1004,8 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
   function crClose(){ $('cr').hidden = true; if (CR) URL.revokeObjectURL(CR.url); CR = null; }
   $('crNo').addEventListener('click', crClose);
   $('crOk').addEventListener('click', function(){
-    if (!CR || !ED) return;
-    var im = $('crI'), s = CR.s0 * CR.z, OW = 1080, OH = 720;
+    if (!CR || !CR_OPT) return;
+    var im = $('crI'), s = CR.s0 * CR.z, OW = CR_OPT.w, OH = CR_OPT.h;
     var c = document.createElement('canvas'); c.width = OW; c.height = OH;
     var x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
     x.drawImage(im, -CR.ox / s, -CR.oy / s, CR.W / s, CR.H / s, 0, 0, OW, OH);
@@ -993,11 +1020,37 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
         .then(function(r){ return r.json(); }).then(function(j){
           done();
           if (!j.ok){ toast(j.error || 'Yüklenemedi', true); return; }
-          ED.img = j.url; drawPh(); crClose();
-          toast('Fotoğraf hazır — “Kaydet”e basınca menüde görünür');
+          var cb = CR_OPT.done; crClose(); cb(j.url);
         }).catch(function(){ done(); toast('Bağlantı hatası', true); });
     }
   });
+
+  /* ---------- şube fotoğrafları ---------- */
+  var SF = {}, SFS = [];
+  var SF_VARS = { 'merkez':'cedric_grolet_antep_fistik', 'bayrakli':'fistik_soleni', 'evka-3':'cafe_solen3617', 'folkart':'san_sebastian_cheesecake_ispanyol_cheesecake', 'bostanli':'pavlova' };
+  function loadSF(){
+    $('sfList').innerHTML = '<div class="empty">Yükleniyor…</div>';
+    apiTo('/api/sube-foto', { get:true }).then(function(j){
+      if (!j.ok){ $('sfList').innerHTML = '<div class="empty">' + esc(j.error || 'Alınamadı') + '</div>'; return; }
+      SF = j.foto || {}; SFS = j.subeler || []; drawSF();
+    });
+  }
+  function drawSF(){
+    $('sfList').innerHTML = SFS.map(function(x){
+      var u = SF[x.id] || '/' + K + '/img/' + (SF_VARS[x.id] || 'beyaz_inci') + '.webp';
+      return '<div class="sfc"><div class="im" style="background-image:url(\'' + esc(u) + '\')">' + (SF[x.id] ? '' : '<span class="tg">Geçici ürün fotoğrafı</span>') + '</div><div class="bd"><b>' + esc(x.ad) + '</b>' +
+        '<label class="btn sm">Fotoğraf yükle<input type="file" accept="image/*" hidden data-sf="' + x.id + '"></label>' + (SF[x.id] ? '<button class="btn ghost sm" type="button" data-sfx="' + x.id + '">Kaldır</button>' : '') + '</div></div>';
+    }).join('');
+  }
+  function setSF(sube, img){
+    apiTo('/api/sube-foto', { sube:sube, img:img }).then(function(j){ if (!j.ok){ toast(j.error || 'Kaydedilemedi', true); return; } SF = j.foto || {}; drawSF(); toast(img ? 'Şube fotoğrafı yayında' : 'Fotoğraf kaldırıldı'); });
+  }
+  $('sfList').addEventListener('change', function(e){
+    var inp = e.target.closest('[data-sf]'); if (!inp) return;
+    var f = inp.files && inp.files[0], sube = inp.dataset.sf; inp.value = ''; if (!f) return;
+    cropFile(f, { w:1200, h:900, done:function(url){ setSF(sube, url); } });
+  });
+  $('sfList').addEventListener('click', function(e){ var b = e.target.closest('[data-sfx]'); if (b && confirm('Şube fotoğrafı kaldırılsın mı?')) setSF(b.dataset.sfx, ''); });
 
   /* ---------- kullanıcılar ---------- */
   var USERS = [], SUBS = [], UEDIT = null;
