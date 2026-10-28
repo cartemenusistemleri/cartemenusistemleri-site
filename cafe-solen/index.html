@@ -20,7 +20,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/cafe-solen/favicon.png"><link rel="apple-touch-icon" href="/cafe-solen/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Gilda+Display&family=Jost:wght@300;400;500;600&display=swap">
@@ -56,7 +56,7 @@ button{font-family:inherit}
 /* ---------- cover ---------- */
 .cover{position:relative;height:100vh;height:100svh;cursor:pointer}
 .cover .face{position:absolute;inset:0;background:#120D0A;overflow:hidden}
-.cover .photo{position:absolute;inset:-6%;background:url(img/cedric_grolet_antep_fistik.webp) center/cover;filter:saturate(.8) blur(5px);opacity:.3;transform:scale(1.06);will-change:transform}
+.cover .photo{position:absolute;inset:-6%;background:url(/cafe-solen/img/cedric_grolet_antep_fistik.webp) center/cover;filter:saturate(.8) blur(5px);opacity:.3;transform:scale(1.06);will-change:transform}
 .cover .face::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 55% at 50% 48%,rgba(18,13,10,.35) 0%,rgba(18,13,10,.82) 70%,#120D0A 100%)}
 .cover .face::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(180deg,rgba(246,239,228,0),var(--canvas));pointer-events:none}
 .frame{position:absolute;inset:clamp(14px,3vw,28px);border:1px solid rgba(201,164,106,.45);border-radius:4px}
@@ -320,6 +320,16 @@ html.big .act small{font-size:16px}
 
 .cover .by{position:absolute;z-index:2;left:calc(clamp(14px,3vw,28px) + 18px);bottom:calc(clamp(14px,3vw,28px) + 12px);font-family:'Allura',cursive;font-size:24px;line-height:1;color:rgba(43,30,22,.6);text-decoration:none;letter-spacing:0;transition:color .3s}
 .cover .by:hover{color:var(--text)}
+.spick{margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:9px;width:min(300px,100%)}
+.spick:empty{display:none}
+.spick .sp-h{margin:0 0 4px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--text-2);font-weight:500}
+.spick a.sb{display:block;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;color:var(--text);font-family:var(--brand);font-size:21px;line-height:1.2;border:1px solid rgba(140,106,63,.45);border-radius:14px;padding:11px 16px;background:rgba(255,253,248,.6);transition:background .3s var(--ease),border-color .3s var(--ease)}
+.spick a.sb:hover,.spick a.sb:focus-visible{background:#FFFDF8;border-color:var(--yel)}
+.spick a.sb.last{border-color:var(--yel);box-shadow:0 0 0 1px var(--yel) inset}
+.spick a.chg{font-size:12px;letter-spacing:.06em;color:var(--text-3);text-decoration:underline;text-underline-offset:3px;padding:6px}
+html.pick .cover ~ *:not(script):not(#fly){display:none!important}
+html.pick .cover{cursor:default;min-height:620px}
+html.pick .cover .bottom,html.pick .cover .tag{display:none}
 html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 
 @media (max-width:480px){
@@ -440,6 +450,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
         <p class="tag" data-i="tag">Yarım asırlık lezzet şöleni</p>
         <div class="rule" data-i="rule">İzmir · 1976</div>
         <div class="clangs" id="coverLangs" role="group" aria-label="Dil"></div>
+        <nav class="spick" id="spick" aria-label="Şubeler"></nav>
       </div>
       <a class="by" href="https://cartemenusistemleri.com.tr/" target="_blank" rel="noopener" aria-label="Carte Menü Sistemleri">Carte</a>
       <div class="bottom"><span data-i="cue">Menü için kaydırın</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></div>
@@ -484,7 +495,6 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   <p class="evsub" data-i="evSub"></p>
   <ul class="cat-grid" id="tocEvka"></ul>
   <p class="legend" data-i-html="legend"></p>
-  <p class="demo-note" data-i-html="demo"></p>
 </section>
 
 <main class="wrap" id="menu"></main>
@@ -544,27 +554,32 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 </div>
 
 <script src="/api/menu-data?k=cafe-solen"></script>
-<script>window.CS_MENU||document.write('<script src="data.js?v=3"><\/script>')</script>
+<script>window.CS_MENU||document.write('<script src="/cafe-solen/data.js?v=3"><\/script>')</script>
 <script>
 (function(){
   'use strict';
   var MENU = window.CS_MENU;
+  /* şubeler: /cafe-solen/<şube>/ ; yemek menüsü yalnızca Evka 3'te */
+  var SUBELER = [{ id:'merkez', ad:'Merkez' }, { id:'bayrakli', ad:'Bayraklı' }, { id:'evka-3', ad:'Evka 3' }, { id:'folkart', ad:'Folkart' }, { id:'bostanli', ad:'Bostanlı' }];
+  var SUBE = (function(){ var m = /^\/cafe-solen\/([a-z0-9-]+)\/?$/.exec(location.pathname), id = window.CS_SUBE || (m && m[1]) || ''; return SUBELER.some(function(x){ return x.id === id; }) ? id : ''; })();
+  var SUBE_AD = SUBE ? SUBELER.filter(function(x){ return x.id === SUBE; })[0].ad : '';
+  if (SUBE !== 'evka-3') MENU = MENU.filter(function(s){ return s.grp !== 'evka'; });
+  if (!SUBE) document.documentElement.classList.add('pick');
   var AL_KEYS = ['g','s','y','k','yf','su','so','ke','h','sl','b'];
   var LANGS = ['tr','en'];
   var I18N = {
-    tr: { soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
+    tr: { pickH:'Şubenizi seçin', pickChg:'Şube değiştir', branch:'Şubesi', soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
       cue:'Menü için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
       tocEb:'Cafe Şölen · Menü', tocH:'Kafe & Pastane',
       evH:'Yemek Menüsü', evBadge:'Evka 3 şubesine özel', evSub:'Pizza, makarna, burger ve ana yemeklerimiz yalnızca Evka 3 şubemizde servis edilir.',
       evEb:'Evka 3 Şubesi', evChip:'Evka 3 · Yemek',
       legend:'Her ürüne dokunarak <b>kalorisini</b>, <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. + ile ürünleri listenize ekleyin, siparişte ekibimize gösterin.',
-      demo:'<b>Demo menü:</b> Ürünler ve görseller Cafe Şölen’e aittir; fiyatlar temsilidir.',
       search:'Yazarak filtreleyin (ör. fıstık, latte)', searchAria:'Menüyü filtrele', fltBtn:'Filtrele', fltTop:'Menüyü filtreleyin', fltSub:'Seçtikleriniz menüye hemen uygulanır.', fltQ:'Ürün ya da içerik', fltA:'Bu alerjenleri içermesin', fltD:'Tercih',
       empty:'Bu seçimlere uyan ürün bulunamadı.',
-      foot:'Bu bir demo menüdür; fiyatlar temsilidir. Kalori değerleri yaklaşıktır. İçerik ve alerjen bilgileri temsilidir; atölyemizde tüm alerjenler işlendiğinden eser miktarda bulaşma olabilir. Alerjiniz varsa lütfen sipariş öncesi ekibimize bildirin.',
+      foot:'Kalori değerleri yaklaşıktır. Atölyemizde tüm alerjenler işlendiğinden eser miktarda bulaşma olabilir. Alerjiniz varsa lütfen sipariş öncesi ekibimize bildirin.',
       made:'Bu menü <i>Carte</i> ile hazırlandı',
       ing:'İçindekiler', alg:'Alerjenler', yes:'İçerir: {a}', no:'{a} yok', noAl:'Alerjen içermez',
-      note:'Bilgiler temsilidir. Ortak üretim alanında eser miktarda bulaşma olabilir.', price:'Fiyat (temsili)', close:'Kapat', count:'{n} çeşit', lang:'Dil',
+      note:'Ortak üretim alanında eser miktarda bulaşma olabilir.', price:'Fiyat', close:'Kapat', count:'{n} çeşit', lang:'Dil',
       energy:'Enerji', portion:'Porsiyon', bigText:'Büyük yazı',
       al:{ g:'Gluten', s:'Süt', y:'Yumurta', k:'Sert kabuklu', yf:'Yer fıstığı', su:'Susam', so:'Soya', ke:'Kereviz', h:'Hardal', sl:'Sülfit', b:'Balık' },
       diet:{ v:'Vejetaryen', vg:'Vegan', gf:'Glutensiz' },
@@ -572,19 +587,18 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       listNote:'Bu liste sipariş değildir. Siparişinizi verirken ekibimize gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.',
       total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
       actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', webT:'İnternet sitemiz', telT:'Bizi arayın', tocActs:'Instagram · İnternet sitemiz' },
-    en: { soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
+    en: { pickH:'Choose your branch', pickChg:'Change branch', branch:'Branch', soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
       cue:'Scroll for the menu', coverAria:'Menu cover. Tap or scroll to open.',
       tocEb:'Cafe Şölen · Menu', tocH:'Café & Patisserie',
       evH:'Food Menu', evBadge:'Evka 3 branch only', evSub:'Our pizzas, pasta, burgers and main courses are served only at our Evka 3 branch.',
       evEb:'Evka 3 Branch', evChip:'Evka 3 · Food',
       legend:'Tap any item to see its <b>calories</b>, <b>ingredients</b> and <b>allergens</b>. Add items with + and show the list to our team when ordering.',
-      demo:'<b>Demo menu:</b> Products and photos belong to Cafe Şölen; prices are indicative.',
       search:'Type to filter (e.g. pistachio, latte)', searchAria:'Filter the menu', fltBtn:'Filter', fltTop:'Filter the menu', fltSub:'Your choices apply to the menu instantly.', fltQ:'Item or ingredient', fltA:'Exclude these allergens', fltD:'Preference',
       empty:'No items match your selection.',
-      foot:'This is a demo menu; prices are indicative. Calorie values are approximate. Ingredient and allergen information is indicative; all allergens are handled in our workshop, so traces may be present. If you have an allergy, please tell our team before ordering.',
+      foot:'Calorie values are approximate. All allergens are handled in our workshop, so traces may be present. If you have an allergy, please tell our team before ordering.',
       made:'This menu was made with <i>Carte</i>',
       ing:'Ingredients', alg:'Allergens', yes:'Contains: {a}', no:'No {a}', noAl:'No allergens',
-      note:'Information is indicative. Traces may be present in a shared kitchen.', price:'Price (indicative)', close:'Close', count:'{n} items', lang:'Language',
+      note:'Traces may be present in a shared kitchen.', price:'Price', close:'Close', count:'{n} items', lang:'Language',
       energy:'Energy', portion:'Portion', bigText:'Large text',
       al:{ g:'Gluten', s:'Milk', y:'Egg', k:'Tree nuts', yf:'Peanut', su:'Sesame', so:'Soy', ke:'Celery', h:'Mustard', sl:'Sulphites', b:'Fish' },
       diet:{ v:'Vegetarian', vg:'Vegan', gf:'Gluten-free' },
@@ -603,6 +617,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
   function codes(str){ return str ? str.split(',') : []; }
+  function imgSrc(n){ return n.charAt(0) === '/' ? n : '/cafe-solen/img/' + n + '.webp'; }
   function fmt(t, o){ return t.replace(/\{(\w)\}/g, function(_, k){ return o[k]; }); }
   function money(n){ return (Math.round(n) === n ? n.toLocaleString('tr-TR') : n.toLocaleString('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 })) + ' ₺'; }
   function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
@@ -618,7 +633,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     });
   });
   var LIST = {};
-  try { var raw = localStorage.getItem('cs-list'); if (raw){ var pl = JSON.parse(raw); Object.keys(pl).forEach(function(k){ if (DATA[+k] && pl[k] > 0) LIST[k] = Math.min(+pl[k], 99); }); } } catch(e){}
+  // liste ürün kimliğiyle saklanır; menü değişse de doğru ürünü gösterir
+  try { var raw = localStorage.getItem('cs-list2'); if (raw){ var pl = JSON.parse(raw), IX = {}; DATA.forEach(function(o, i){ if (o.id) IX[o.id] = i; }); Object.keys(pl).forEach(function(id){ if (IX[id] != null && pl[id] > 0) LIST[IX[id]] = Math.min(+pl[id], 99); }); } localStorage.removeItem('cs-list'); } catch(e){}
 
   var L = 'tr', T = I18N.tr;
   function txt(o){ return (L === 'en' && o.en) ? o.en : o.tr; }
@@ -637,6 +653,13 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     [].forEach.call(document.querySelectorAll('[data-i-ph]'), function(el){ el.placeholder = getKey(el.dataset.iPh); });
     [].forEach.call(document.querySelectorAll('[data-i-aria]'), function(el){ el.setAttribute('aria-label', getKey(el.dataset.iAria)); });
     document.getElementById('lCode').textContent = L.toUpperCase();
+    var pill = document.querySelector('.cover .pill');
+    if (pill && SUBE) pill.textContent = T.pill + ' · ' + SUBE_AD;
+    var last = store('cs-sube');
+    document.getElementById('spick').innerHTML = SUBE
+      ? '<a class="chg" href="/cafe-solen/">' + esc(T.pickChg) + '</a>'
+      : '<p class="sp-h">' + esc(T.pickH) + '</p>' + SUBELER.map(function(x){ return '<a class="sb' + (x.id === last ? ' last' : '') + '" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '">' + esc(x.ad) + '</a>'; }).join('');
+    document.title = 'Cafe Şölen' + (SUBE ? ' · ' + SUBE_AD : '') + ' · ' + (L === 'tr' ? 'Menü' : 'Menu');
     document.getElementById('lBtn').setAttribute('aria-label', T.lang + ': ' + T.name);
     document.getElementById('lMenu').innerHTML = LANGS.map(function(k){ return '<button type="button" data-lang="'+k+'" lang="'+k+'" aria-pressed="'+(k===L)+'">'+I18N[k].name+'</button>'; }).join('');
     document.getElementById('coverLangs').innerHTML = LANGS.map(function(k){ return '<button type="button" data-lang="'+k+'" lang="'+k+'" aria-pressed="'+(k===L)+'" aria-label="'+I18N[k].name+'">'+k.toUpperCase()+'</button>'; }).join('');
@@ -664,17 +687,17 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
         html += '<div class="evdiv flip'+(first?'':' in')+'" id="evka"><span class="badge">'+PIN+esc(T.evBadge)+'</span><h2>'+esc(T.evH)+'</h2><p>'+esc(T.evSub)+'</p></div>';
       }
       chipHtml += '<a class="chip" href="#'+s.id+'" data-id="'+s.id+'">'+esc(title)+'</a>';
-      var tile = '<li><a class="tile'+(ico?' ico':'')+'" href="#'+s.id+'">'+(ico ? ICONS[s.ban.slice(1)] : '<img src="img/'+s.ban+'.webp" alt="" width="720" height="480" loading="lazy" decoding="async">')+'<span class="tt"><i>'+num+'</i><b>'+esc(title)+'</b><small>'+esc(fmt(T.count,{n:count}))+'</small></span></a></li>';
+      var tile = '<li><a class="tile'+(ico?' ico':'')+'" href="#'+s.id+'">'+(ico ? ICONS[s.ban.slice(1)] : '<img src="/cafe-solen/img/'+s.ban+'.webp" alt="" width="720" height="480" loading="lazy" decoding="async">')+'<span class="tt"><i>'+num+'</i><b>'+esc(title)+'</b><small>'+esc(fmt(T.count,{n:count}))+'</small></span></a></li>';
       if (ev) tocEvHtml += tile; else tocHtml += tile;
       html += '<section class="sec flip'+(ev?' ev':'')+(first?'':' in')+'" id="'+s.id+'" aria-labelledby="h-'+s.id+'"><div class="sec-head"><h2 id="h-'+s.id+'"><i>'+num+'</i>'+esc(title)+'</h2><span class="n">'+esc(fmt(T.count,{n:count}))+'</span></div>';
-      if (s.ban && !ico) html += '<figure class="ban"><img src="img/'+s.ban+'.webp" alt="" width="720" height="480" loading="lazy" decoding="async"></figure>';
+      if (s.ban && !ico) html += '<figure class="ban"><img src="/cafe-solen/img/'+s.ban+'.webp" alt="" width="720" height="480" loading="lazy" decoding="async"></figure>';
       var cards = '', rows = '';
       s.idx.forEach(function(i){
         var o = DATA[i], t = txt(o);
         var q = esc((t[0]+' '+t[1]+' '+t[2]+' '+o.tr[0]+' '+o.tr[2]+' '+title).toLocaleLowerCase(L === 'tr' ? 'tr' : undefined));
         if (o.img){
           cards += '<div class="cw" data-k="'+i+'" data-q="'+q+'"><button type="button" class="card" data-k="'+i+'">'+
-            '<span class="ph"><img src="img/'+o.img+'.webp" alt="'+esc(t[0])+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
+            '<span class="ph"><img src="'+imgSrc(o.img)+'" alt="'+esc(t[0])+'" width="720" height="480" loading="lazy" decoding="async"></span>'+
             '<span class="tx"><span class="row"><b>'+esc(t[0])+'</b><span class="price">'+money(o.p)+'</span></span>'+(t[1] ? '<small>'+esc(t[1])+'</small>' : '')+kcHtml(o)+alHtml(o.a)+'</span></button>'+addBtn(i,t[0])+'</div>';
         } else {
           rows += '<div class="dw" data-k="'+i+'" data-q="'+q+'"><button type="button" class="dr" data-k="'+i+'"><span class="t"><b>'+esc(t[0])+'</b>'+(t[1] ? '<small>'+esc(t[1])+'</small>' : '')+kcHtml(o)+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+money(o.p)+'</span></button>'+addBtn(i,t[0])+'</div>';
@@ -687,6 +710,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     });
     tocHtml += '<li><a class="tile alt" href="#bizden"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.2 3.8 8.5s-1.2 6.1-3.8 8.5M12 3.5C9.4 5.9 8.2 8.7 8.2 12s1.2 6.1 3.8 8.5"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/></svg></span><span class="tt"><i>★</i><b>'+esc(T.tocActs)+'</b></span></a></li>';
     menu.innerHTML = html; chips.innerHTML = chipHtml; toc.innerHTML = tocHtml; tocEv.innerHTML = tocEvHtml;
+    [document.querySelector('.evh'), document.querySelector('.evsub'), tocEv].forEach(function(el){ if (el) el.style.display = tocEvHtml ? '' : 'none'; });
     secs = [].slice.call(menu.querySelectorAll('.sec'));
     chipEls = [].slice.call(chips.querySelectorAll('.chip'));
     current = null;
@@ -744,12 +768,13 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   addEventListener('load', measure);
   function turnPage(){ var c = document.getElementById('top'); scrollTo({ top: c.getBoundingClientRect().top + scrollY - (topbar.offsetHeight || 104) - 8, behavior: reduce ? 'auto' : 'smooth' }); }
   cover.addEventListener('click', function(e){
-    if (e.target.closest('.by')) return;
+    if (e.target.closest('.by') || e.target.closest('a')) return;
+    if (!SUBE && !e.target.closest('[data-lang]')) return;
     var lb = e.target.closest('[data-lang]');
     if (lb){ e.stopPropagation(); setLang(lb.dataset.lang, true); return; }
     turnPage();
   });
-  cover.addEventListener('keydown', function(e){ if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('[data-lang]')){ e.preventDefault(); turnPage(); } });
+  cover.addEventListener('keydown', function(e){ if (SUBE && (e.key === 'Enter' || e.key === ' ') && !e.target.closest('[data-lang]') && !e.target.closest('a')){ e.preventDefault(); turnPage(); } });
   flyLink.addEventListener('click', function(e){ e.preventDefault(); scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' }); });
 
   var lBtn = document.getElementById('lBtn'), lMenu = document.getElementById('lMenu');
@@ -835,7 +860,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     var o = DATA[+el.dataset.k], t = txt(o);
     sheet.classList.toggle('noimg', !o.img);
     var img = document.getElementById('sImg');
-    if (o.img){ img.src = 'img/' + o.img + '.webp'; img.alt = t[0]; } else { img.removeAttribute('src'); img.alt = ''; }
+    if (o.img){ img.src = imgSrc(o.img); img.alt = t[0]; } else { img.removeAttribute('src'); img.alt = ''; }
     document.getElementById('sCat').textContent = secTitle(MENU[o.sec]);
     document.getElementById('sTitle').textContent = t[0];
     document.getElementById('sDesc').textContent = t[1];
@@ -870,7 +895,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 
   /* Seçtiklerim */
   var cartbar = document.getElementById('cartbar'), curK = -1, listOpen = false;
-  function saveList(){ store('cs-list', JSON.stringify(LIST)); }
+  function saveList(){ var o = {}; Object.keys(LIST).forEach(function(k){ var d = DATA[+k]; if (d && d.id) o[d.id] = LIST[k]; }); store('cs-list2', JSON.stringify(o)); }
   function addItem(k, d){
     if (d > 0 && isOut(k)) return;
     if (d > 0 && DATA[k] && EV.a.length < 60) EV.a.push(DATA[k].id);
@@ -925,7 +950,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   bBtn.addEventListener('click', function(){ setBig(!document.documentElement.classList.contains('big')); });
 
   /* anlık stok (var / tükendi) */
-  var STOK_K = 'cafe-solen', OUT = {}, FAV = {}, NEW = {};
+  var STOK_K = SUBE ? 'cafe-solen:' + SUBE : 'cafe-solen', OUT = {}, FAV = {}, NEW = {};
+  if (SUBE) store('cs-sube', SUBE);
   function isOut(k){ var o = DATA[k]; return !!(o && OUT[o.id]); }
   function markOut(){
     [].forEach.call(menu.querySelectorAll('.cw[data-k],.dw[data-k]'), function(el){
@@ -945,7 +971,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     DATA.forEach(function(o, i){
       if (!FAV[o.id] || OUT[o.id]) return;
       var t = txt(o);
-      h += '<button type="button" class="fcard" data-k="'+i+'"><span class="ph">'+(o.img ? '<img src="img/'+o.img+'.webp" alt="" loading="lazy" width="720" height="480">' : '')+(NEW[o.id] ? '<span class="bdgs"><span class="bdg n">'+esc(T.bNew)+'</span></span>' : '')+'</span><span class="tx"><b>'+esc(t[0])+'</b><span class="price">'+money(o.p)+'</span></span></button>';
+      h += '<button type="button" class="fcard" data-k="'+i+'"><span class="ph">'+(o.img ? '<img src="'+imgSrc(o.img)+'" alt="" loading="lazy" width="720" height="480">' : '')+(NEW[o.id] ? '<span class="bdgs"><span class="bdg n">'+esc(T.bNew)+'</span></span>' : '')+'</span><span class="tx"><b>'+esc(t[0])+'</b><span class="price">'+money(o.p)+'</span></span></button>';
     });
     row.innerHTML = h; box.hidden = !h;
   }
