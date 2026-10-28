@@ -324,6 +324,36 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 .card .row{flex-wrap:wrap;row-gap:2px}
 .card .row b{min-width:0;overflow-wrap:anywhere}
 .card .price{flex:none}
+/* stok / öneri */
+.so{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#EDE7DF;background:rgba(110,104,98,.92);border:1px solid rgba(251,246,238,.18);border-radius:999px;padding:4px 9px;white-space:nowrap}
+.cw.out .card .ph img{filter:grayscale(1);opacity:.5}
+.out .card b,.out .dr b{color:var(--text-3)}
+.out .price{color:var(--text-3)}
+.out .add{opacity:.45}
+.sheet .sso{display:none;margin-top:10px}
+.sheet.isout .sso{display:inline-flex}
+.sheet.isout .ph img{filter:grayscale(1);opacity:.6}
+.lst .so{margin-inline-start:6px;padding:2px 7px;font-size:9.5px}
+.card .ph{position:relative}
+.bdgs{position:absolute;top:10px;left:10px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 64px);z-index:1}
+.dr .bdgs{position:static;max-width:none;margin-top:6px}
+.bdg{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.bdg.f{background:var(--yel);color:var(--on-yel)}
+.bdg.n{background:#FFF9EE;color:#16120F}
+.dr .bdg.n{background:transparent;color:var(--text);border:1px solid var(--line)}
+.favs{margin:4px 0 30px}
+.favs h2{margin:0 0 12px;font-family:var(--brand);font-weight:800;font-size:clamp(24px,4.6vw,32px);display:flex;align-items:center;gap:10px}
+.favs h2 i{font-style:normal;color:var(--yel);font-size:.8em}
+.frow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:2px 0 4px}
+@media (min-width:640px){.frow{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}}
+.fcard{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;min-width:0;background:var(--panel);border:1px solid rgba(245,178,27,.35);border-radius:16px;overflow:hidden}
+.fcard .ph{display:block;aspect-ratio:3/2;background:var(--panel-2);position:relative}
+.fcard .ph img{width:100%;height:100%;object-fit:cover}
+.fcard .tx{display:flex;justify-content:space-between;gap:8px;align-items:baseline;padding:10px 12px 12px;flex:1}
+@media (max-width:420px){.fcard .tx{flex-direction:column;gap:4px;padding:9px 11px 11px}}
+.fcard b{font-weight:500;font-size:15px;line-height:1.25;color:var(--text)}
+.fcard .price{flex:none;font-size:14.5px}
+.fcard:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -380,6 +410,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 </header>
 
 <section class="wrap cats" id="top" aria-labelledby="catsH">
+  <div class="favs" id="favs" hidden><h2><i aria-hidden="true">★</i><span data-i="favH">Bugün öneriyoruz</span></h2><div class="frow" id="frow"></div></div>
   <div class="eb" data-i="tocEb">Yarım Ekmek · Menü</div>
   <h1 class="ph1" id="catsH"><b style="font-weight:inherit" data-i="tocH">Kategoriler</b><span aria-hidden="true"></span></h1>
   <ul class="cat-grid" id="tocList"></ul>
@@ -417,6 +448,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   <div class="body">
     <div class="cat" id="sCat"></div>
     <h3 id="sTitle"></h3>
+    <span class="so sso" data-i="soldOut">Tükendi</span>
     <p class="desc" id="sDesc"></p>
     <div class="diet" id="sDiet"></div>
     <div class="kcal"><span class="big"><b id="sKv"></b> kcal</span><span class="por"><span data-i="energy">Enerji</span> · <span data-i="portion">1 porsiyon</span> <span id="sPor"></span></span></div>
@@ -433,7 +465,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   <div class="body" id="aBody"></div>
 </div>
 
-<script src="data.js?v=1"></script>
+<script src="/api/menu-data?k=yarim-ekmek"></script>
+<script>window.YE_MENU||document.write('<script src="/yarim-ekmek/data.js?v=2"><\/script>')</script>
 <script>
 (function(){
   'use strict';
@@ -441,7 +474,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   var AL_KEYS = ['g','s','y','k','yf','su','so','ke','h','sl','b'];
   var LANGS = ['tr','en'];
   var I18N = {
-    tr: { name:'Türkçe', top:'Izgara · Dürüm · Porsiyon', pill:'Menü', tag:'Ekmek yarım, lezzet tam!', rule:'Şef Enes’in ızgarasından',
+    tr: { soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Izgara · Dürüm · Porsiyon', pill:'Menü', tag:'Ekmek yarım, lezzet tam!', rule:'Şef Enes’in ızgarasından',
       cue:'Menü için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
       tocEb:'Yarım Ekmek · Menü', tocH:'Kategoriler',
       legend:'Her ürüne dokunarak <b>kalorisini</b>, <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. + ile ürünleri listenize ekleyin, siparişte garsonumuza gösterin.',
@@ -458,7 +491,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       listNote:'Bu liste sipariş değildir. Siparişinizi verirken garsonumuza gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.',
       total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
       actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', tocActs:'Bizi değerlendirin · Instagram' },
-    en: { name:'English', top:'Grill · Wraps · Plates', pill:'Menu', tag:'Half the loaf, all the flavour!', rule:'From Chef Enes’s grill',
+    en: { soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Grill · Wraps · Plates', pill:'Menu', tag:'Half the loaf, all the flavour!', rule:'From Chef Enes’s grill',
       cue:'Scroll for the menu', coverAria:'Menu cover. Tap or scroll to open.',
       tocEb:'Yarım Ekmek · Menu', tocH:'Categories',
       legend:'Tap any item to see its <b>calories</b>, <b>ingredients</b> and <b>allergens</b>. Add items with + and show the list to your waiter.',
@@ -481,22 +514,23 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
   function codes(str){ return str ? str.split(',') : []; }
+  function imgSrc(n){ return n.charAt(0) === '/' ? n : 'img/' + n + '.webp'; }
   function fmt(t, o){ return t.replace(/\{(\w)\}/g, function(_, k){ return o[k]; }); }
-  function money(n){ return n.toLocaleString('tr-TR') + ' ₺'; }
+  function money(n){ return (Math.round(n) === n ? n.toLocaleString('tr-TR') : n.toLocaleString('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 })) + ' ₺'; }
   function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
 
   var DATA = [];
   MENU.forEach(function(s, si){
     s.idx = [];
     s.items.forEach(function(it){
-      var o = { tr:[it.n, it.d || '', it.i], en:it.en || null, img:it.img || '', p:it.p, a:codes(it.a), diet:codes(it.v), kc:it.k || null, sec:si };
+      var o = { id:it.id, tr:[it.n, it.d || '', it.i], en:it.en || null, img:it.img || '', p:it.p, a:codes(it.a), diet:codes(it.v), kc:it.k || null, sec:si };
       if (o.a.indexOf('g') === -1 && o.diet.indexOf('gf') === -1) o.diet.push('gf');
       if (o.diet.indexOf('vg') !== -1 && o.diet.indexOf('v') === -1) o.diet.unshift('v');
       s.idx.push(DATA.push(o) - 1);
     });
   });
   var LIST = {};
-  try { var raw = localStorage.getItem('ye-list'); if (raw){ var pl = JSON.parse(raw); Object.keys(pl).forEach(function(k){ if (DATA[+k] && pl[k] > 0) LIST[k] = Math.min(+pl[k], 99); }); } } catch(e){}
+  try { var raw = localStorage.getItem('ye-list2'); if (raw){ var pl = JSON.parse(raw), IX = {}; DATA.forEach(function(o, i){ if (o.id) IX[o.id] = i; }); Object.keys(pl).forEach(function(id){ if (IX[id] != null && pl[id] > 0) LIST[IX[id]] = Math.min(+pl[id], 99); }); } localStorage.removeItem('ye-list'); } catch(e){}
 
   var L = 'tr', T = I18N.tr;
   function txt(o){ return (L === 'en' && o.en) ? o.en : o.tr; }
@@ -543,7 +577,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
         var q = esc((t[0]+' '+t[1]+' '+t[2]+' '+o.tr[0]+' '+o.tr[2]+' '+title).toLocaleLowerCase(L === 'tr' ? 'tr' : undefined));
         if (o.img){
           cards += '<div class="cw" data-k="'+i+'" data-q="'+q+'"><button type="button" class="card" data-k="'+i+'">'+
-            '<span class="ph"><img src="img/'+o.img+'.webp" alt="'+esc(t[0])+'" width="900" height="600" loading="lazy" decoding="async"></span>'+
+            '<span class="ph"><img src="'+imgSrc(o.img)+'" alt="'+esc(t[0])+'" width="900" height="600" loading="lazy" decoding="async"></span>'+
             '<span class="tx"><span class="row"><b>'+esc(t[0])+'</b><span class="price">'+money(o.p)+'</span></span>'+(t[1] ? '<small>'+esc(t[1])+'</small>' : '')+kcHtml(o)+alHtml(o.a)+'</span></button>'+addBtn(i,t[0])+'</div>';
         } else {
           rows += '<div class="dw" data-k="'+i+'" data-q="'+q+'"><button type="button" class="dr" data-k="'+i+'"><span class="t"><b>'+esc(t[0])+'</b>'+(t[1] ? '<small>'+esc(t[1])+'</small>' : '')+kcHtml(o)+alHtml(o.a)+'</span><span class="lead" aria-hidden="true"></span><span class="price">'+money(o.p)+'</span></button>'+addBtn(i,t[0])+'</div>';
@@ -566,7 +600,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     if (LANGS.indexOf(l) === -1) return;
     L = l; T = I18N[l];
     if (save) store('ye-lang', l);
-    applyStatic(); render(false); apply(true); syncCart(); syncSAdd(); if (listOpen) renderList(); measure();
+    applyStatic(); render(false); markOut(); apply(true); syncCart(); syncSAdd(); if (listOpen) renderList(); measure();
     closeLangMenu();
   }
 
@@ -701,7 +735,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     var o = DATA[+el.dataset.k], t = txt(o);
     sheet.classList.toggle('noimg', !o.img);
     var img = document.getElementById('sImg');
-    if (o.img){ img.src = 'img/' + o.img + '.webp'; img.alt = t[0]; } else { img.removeAttribute('src'); img.alt = ''; }
+    if (o.img){ img.src = imgSrc(o.img); img.alt = t[0]; } else { img.removeAttribute('src'); img.alt = ''; }
     document.getElementById('sCat').textContent = secTitle(MENU[o.sec]);
     document.getElementById('sTitle').textContent = t[0];
     document.getElementById('sDesc').textContent = t[1];
@@ -715,7 +749,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     document.getElementById('sAg').innerHTML =
       yes.map(function(k){ return '<div class="yes">'+ICON_YES+esc(fmt(T.yes,{a:T.al[k]}))+'</div>'; }).join('') +
       no.map(function(k){ return '<div class="no">'+ICON_NO+esc(fmt(T.no,{a:T.al[k]}))+'</div>'; }).join('');
-    curK = +el.dataset.k; syncSAdd();
+    curK = +el.dataset.k; if (DATA[curK] && EV.v.length < 60) EV.v.push(DATA[curK].id); sheet.classList.toggle('isout', isOut(curK)); syncSAdd();
     show(sheet, el);
   }
   function closeSheet(){
@@ -726,7 +760,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     if (lastFocus) lastFocus.focus({ preventScroll:true });
   }
   menu.addEventListener('click', function(e){
-    var a = e.target.closest('[data-add]'); if (a){ addItem(+a.dataset.add, 1); a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); return; }
+    var a = e.target.closest('[data-add]'); if (a && isOut(+a.dataset.add)){ openProduct(a.closest('.cw,.dw').querySelector('.card,.dr')); return; }
+    if (a){ addItem(+a.dataset.add, 1); a.classList.remove('pop'); void a.offsetWidth; a.classList.add('pop'); return; }
     var c = e.target.closest('.card,.dr'); if (c) openProduct(c);
   });
   bg.addEventListener('click', closeSheet);
@@ -735,8 +770,10 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 
   /* Seçtiklerim */
   var cartbar = document.getElementById('cartbar'), curK = -1, listOpen = false;
-  function saveList(){ store('ye-list', JSON.stringify(LIST)); }
+  function saveList(){ var o = {}; Object.keys(LIST).forEach(function(k){ var d = DATA[+k]; if (d && d.id) o[d.id] = LIST[k]; }); store('ye-list2', JSON.stringify(o)); }
   function addItem(k, d){
+    if (d > 0 && isOut(k)) return;
+    if (d > 0 && DATA[k] && EV.a.length < 60) EV.a.push(DATA[k].id);
     var n = (LIST[k] || 0) + d; if (n <= 0) delete LIST[k]; else LIST[k] = Math.min(n, 99);
     saveList(); syncAdds(); syncCart(); syncSAdd(); if (listOpen) renderList();
   }
@@ -755,7 +792,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   }
   function syncSAdd(){
     var b = document.getElementById('sAdd'); if (curK < 0) return;
-    var n = LIST[curK] || 0;
+    var n = LIST[curK] || 0; b.disabled = isOut(curK);
+    if (b.disabled){ b.innerHTML = '<span>'+esc(T.soldOut)+'</span>'; b.classList.remove('on'); return; }
     b.innerHTML = n ? '<b>'+esc(T.inList)+': '+n+'</b> · + ' + esc(T.addShort) : PLUS + '<span>'+esc(T.add)+'</span>';
     b.classList.toggle('on', !!n);
   }
@@ -767,7 +805,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     h += '<p class="desc">'+esc(T.listNote)+'</p><ul class="lst">';
     keys.forEach(function(k){
       var o = DATA[+k], tx = txt(o), n = LIST[k];
-      h += '<li><span class="ln"><b>'+esc(tx[0])+'</b><small>'+esc(secTitle(MENU[o.sec]))+' · '+money(o.p*n)+(o.kc ? ' · '+(o.kc[0]*n)+' kcal' : '')+'</small></span>'+
+      h += '<li><span class="ln"><b>'+esc(tx[0])+(isOut(+k) ? '<span class="so">'+esc(T.soldOut)+'</span>' : '')+'</b><small>'+esc(secTitle(MENU[o.sec]))+' · '+money(o.p*n)+(o.kc ? ' · '+(o.kc[0]*n)+' kcal' : '')+'</small></span>'+
         '<span class="step"><button type="button" data-step="'+k+'" data-d="-1" aria-label="−">−</button><b>'+n+'</b><button type="button" data-step="'+k+'" data-d="1" aria-label="+">+</button></span></li>';
     });
     h += '</ul><div class="ltot main"><span>'+esc(T.total)+'</span><b>'+money(t.p)+'</b></div>';
@@ -786,10 +824,51 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   function setBig(on){ document.documentElement.classList.toggle('big', on); bBtn.setAttribute('aria-pressed', on); store('ye-big', on ? '1' : '0'); }
   bBtn.addEventListener('click', function(){ setBig(!document.documentElement.classList.contains('big')); });
 
+  /* anlık stok (var / tükendi) + öneri — Yarım Ekmek tek şube */
+  var STOK_K = 'yarim-ekmek:merkez', OUT = {}, FAV = {}, NEW = {};
+  function isOut(k){ var o = DATA[k]; return !!(o && OUT[o.id]); }
+  function markOut(){
+    [].forEach.call(menu.querySelectorAll('.cw[data-k],.dw[data-k]'), function(el){
+      var out = isOut(+el.dataset.k);
+      el.classList.toggle('out', out);
+      var id = DATA[+el.dataset.k].id, bh = (FAV[id] && !out ? '<span class="bdg f">★ '+esc(T.bFav)+'</span>' : '') + (NEW[id] ? '<span class="bdg n">'+esc(T.bNew)+'</span>' : '');
+      var bd = el.querySelector('.bdgs');
+      if (bh){ if (!bd){ bd = document.createElement('span'); bd.className = 'bdgs'; (el.querySelector('.card .ph') || el.querySelector('.dr .t')).appendChild(bd); } bd.innerHTML = bh; }
+      else if (bd) bd.remove();
+    });
+    renderFavs();
+    if (openEl === sheet && curK >= 0){ sheet.classList.toggle('isout', isOut(curK)); syncSAdd(); }
+    if (listOpen) renderList();
+  }
+  function renderFavs(){
+    var box = document.getElementById('favs'), row = document.getElementById('frow'), h = '';
+    DATA.forEach(function(o, i){
+      if (!FAV[o.id] || OUT[o.id]) return;
+      var t = txt(o);
+      h += '<button type="button" class="fcard" data-k="'+i+'"><span class="ph">'+(o.img ? '<img src="'+imgSrc(o.img)+'" alt="" loading="lazy" width="720" height="480">' : '')+(NEW[o.id] ? '<span class="bdgs"><span class="bdg n">'+esc(T.bNew)+'</span></span>' : '')+'</span><span class="tx"><b>'+esc(t[0])+'</b><span class="price">'+money(o.p)+'</span></span></button>';
+    });
+    row.innerHTML = h; box.hidden = !h;
+  }
+  document.getElementById('frow').addEventListener('click', function(e){ var c = e.target.closest('.fcard'); if (c) openProduct(c); });
+  var EV = { v:[], a:[] }, sentS = false;
+  function flush(){
+    if (!navigator.sendBeacon || (sentS && !EV.v.length && !EV.a.length)) return;
+    try { navigator.sendBeacon('/api/olay', JSON.stringify({ k:STOK_K, s: sentS ? 0 : 1, v:EV.v, a:EV.a })); sentS = true; EV = { v:[], a:[] }; } catch(e){}
+  }
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) flush(); });
+  addEventListener('pagehide', flush);
+  function loadStock(){
+    fetch('/api/stok?k=' + STOK_K + '&_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
+      if (j && j.ok){ OUT = j.out || {}; FAV = j.fav || {}; NEW = j.yeni || {}; markOut(); }
+    }).catch(function(){});
+  }
+  setInterval(function(){ if (!document.hidden) loadStock(); }, 45000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) loadStock(); });
+
   /* boot */
   L = pick(); T = I18N[L];
   if (store('ye-big') === '1'){ document.documentElement.classList.add('big'); bBtn.setAttribute('aria-pressed','true'); }
-  applyStatic(); render(true); observe(); apply(true); syncCart();
+  applyStatic(); render(true); observe(); apply(true); syncCart(); loadStock();
   measure();
 })();
 </script>
