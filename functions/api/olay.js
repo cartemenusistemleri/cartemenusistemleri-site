@@ -1,7 +1,8 @@
 // Menü istatistiği — hangi ürüne bakıldı / listeye eklendi.
 // POST /api/olay  body (sendBeacon, text/plain JSON): { k, s?:1, v:[urunId...], a:[urunId...] }
 // Veri: D1 (binding: ISTATISTIK). Kişisel veri tutulmaz; sadece günlük sayaç.
-const MENULER = ['cafe-solen'];
+import { menuAnahtari } from './oturum.js';
+const ESKI = ['cafe-solen'];
 const ID = /^[a-z0-9-]{1,64}$/;
 
 export async function onRequestPost({ request, env }) {
@@ -10,7 +11,7 @@ export async function onRequestPost({ request, env }) {
   let b;
   try { b = JSON.parse(await request.text()); } catch (e) { return ok; }
   const k = String(b.k || '');
-  if (MENULER.indexOf(k) === -1) return ok;
+  if (ESKI.indexOf(k) === -1 && !menuAnahtari(k)) return ok;
   // Türkiye saatine göre gün
   const gun = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
   const say = {};

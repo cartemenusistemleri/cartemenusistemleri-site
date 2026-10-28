@@ -4,8 +4,10 @@
 // fav = "Öneriyoruz", yeni = "Yeni" etiketi
 // Veri: ODEME_LINKS KV içinde "stok:<k>" anahtarı (tek JSON). Miktar tutulmaz, sadece var/yok.
 
-// İzinli menüler. İleride şubeye göre: 'cafe-solen:evka-3' gibi eklenir.
-const MENULER = ['cafe-solen'];
+// Şube bazlı anahtarlar: 'cafe-solen:bayrakli' gibi (liste oturum.js -> ISLETMELER).
+// Eski tek anahtar 'cafe-solen' geriye dönük uyumluluk için duruyor (eski personel şifresiyle).
+import { menuAnahtari, kimlik, izinli } from './oturum.js';
+const ESKI = ['cafe-solen'];
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {
@@ -14,7 +16,7 @@ function json(body, status) {
   });
 }
 
-function gecerliMenu(k) { return MENULER.indexOf(String(k || '')) !== -1; }
+function gecerliMenu(k) { return ESKI.indexOf(String(k || '')) !== -1 || !!menuAnahtari(k); }
 
 // Personel şifresi: ADMIN_SECRET + menü + sürüm'den türetilir, hiçbir yerde saklanmaz.
 export async function stokSifresi(env, k) {
@@ -48,9 +50,19 @@ export async function onRequestPost({ request, env }) {
   const k = String(body.k || '');
   if (!gecerliMenu(k)) return json({ ok: false, error: 'Menü bulunamadı' }, 404);
 
-  const pass = (request.headers.get('x-stok-pass') || '').trim();
-  const ok = pass && (pass === env.ADMIN_SECRET || pass.toLowerCase() === await stokSifresi(env, k));
-  if (!ok) return json({ ok: false, error: 'Şifre hatalı' }, 401);
+  const mk = menuAnahtari(k);
+  const alan0 = body.all === 'var' ? 'out' : (body.alan === 'fav' || body.alan === 'yeni' ? body.alan : 'out');
+  const yetki = alan0 === 'out' ? 'stok' : 'oneri';
+  let ok = false;
+  if (mk) {
+    const kim = await kimlik(request, env);
+    ok = body.check ? (izinli(kim, mk.k, 'stok', mk.sube) || izinli(kim, mk.k, 'oneri', mk.sube)) : izinli(kim, mk.k, yetki, mk.sube);
+    if (!ok && kim) return json({ ok: false, error: 'Bu işlem için yetkiniz yok' }, 403);
+  } else {
+    const pass = (request.headers.get('x-stok-pass') || '').trim();
+    ok = pass && (pass === env.ADMIN_SECRET || pass.toLowerCase() === await stokSifresi(env, k));
+  }
+  if (!ok) return json({ ok: false, error: 'Oturum geçersiz, tekrar giriş yapın' }, 401);
 
   if (body.check) return json({ ok: true });
 

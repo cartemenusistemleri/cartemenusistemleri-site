@@ -7,6 +7,7 @@
 // Veri: ODEME_LINKS KV -> "fiyat:<k>" = { p, t }, "fiyatlog:<k>" = son 30 değişiklik
 
 import { temelMenu, fiyatlariOku } from './menu-data.js';
+import { kimlik, izinli } from './oturum.js';
 
 const MENULER = ['cafe-solen'];
 
@@ -22,12 +23,14 @@ async function logOku(env, k) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const auth = request.headers.get('x-admin-secret') || '';
-  if (!env.ADMIN_SECRET || auth !== env.ADMIN_SECRET) return json({ ok: false, error: 'Yönetici şifresi hatalı' }, 401);
   let body;
   try { body = await request.json(); } catch (e) { return json({ ok: false, error: 'Geçersiz istek' }, 400); }
   const k = String(body.k || '');
   if (MENULER.indexOf(k) === -1) return json({ ok: false, error: 'Menü bulunamadı' }, 404);
+  const kim = await kimlik(request, env);
+  if (!izinli(kim, k, 'fiyat', null)) return json({ ok: false, error: kim ? 'Fiyat yetkiniz yok' : 'Şifre hatalı veya oturum süresi doldu' }, kim ? 403 : 401);
+  if (body.reset && !kim.admin) return json({ ok: false, error: 'Bu işlem yalnızca yöneticiye açık' }, 403);
+  const kimAdi = kim.admin ? 'Carte' : kim.ad;
 
   if (body.check) return json({ ok: true });
 
@@ -65,7 +68,7 @@ export async function onRequestPost({ request, env }) {
   if (degisen.length) {
     f.t = new Date().toISOString();
     await env.ODEME_LINKS.put('fiyat:' + k, JSON.stringify({ p: f.p, t: f.t }));
-    log.unshift({ t: f.t, d: degisen.slice(0, 300), n: degisen.length, kaynak: String(body.kaynak || '').slice(0, 60) });
+    log.unshift({ t: f.t, d: degisen.slice(0, 300), n: degisen.length, kaynak: String(body.kaynak || '').slice(0, 60), kim: kimAdi });
     await env.ODEME_LINKS.put('fiyatlog:' + k, JSON.stringify(log.slice(0, 30)));
   }
   return json({ ok: true, p: f.p, t: f.t, n: degisen.length, log: log.slice(0, 30) });
