@@ -10,11 +10,11 @@ export const ISLETMELER = {
   'cafe-solen': {
     ad: 'Cafe Şölen',
     subeler: [
-      { id: 'merkez', ad: 'Merkez' },
+      { id: 'merkez', ad: 'Bornova Merkez' },
       { id: 'bayrakli', ad: 'Bayraklı' },
       { id: 'evka-3', ad: 'Evka 3' },
       { id: 'folkart', ad: 'Folkart' },
-      { id: 'bostanli', ad: 'Bostanlı' },
+      { id: 'bostanli', ad: 'Bostanlı', acik: false }, // henüz açılmadı: müşteri şube seçiminde görünmez
     ],
   },
 };
