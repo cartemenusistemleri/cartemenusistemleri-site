@@ -90,6 +90,13 @@ button{font-family:inherit}
 .ibtn .dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--yel);display:none}
 .ibtn.has .dot{display:block}
 .ltxt{font-size:12px;font-weight:500;letter-spacing:.08em}
+.fpill{width:auto;border-radius:999px;padding:0 14px 0 12px;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;letter-spacing:.02em}
+.fpill svg{width:17px;height:17px}
+.fpill .fc{display:none;min-width:18px;height:18px;border-radius:9px;background:var(--yel);color:#FFF9EE;font-size:11px;line-height:18px;text-align:center;padding:0 5px}
+.fpill.has .fc{display:inline-block}
+.fpill.has .dot{display:none}
+.flt-top{font-family:var(--brand);font-size:20px;margin:2px 0 2px}
+.flt-sub{font-size:13px;color:var(--text-3);margin:0 0 4px}
 #bBtn .aa{display:block;font-size:15px;font-weight:500;line-height:1;transform:translateY(1px)}
 #bBtn .aa small{font-size:11px;font-weight:500;margin-inline-start:1px}
 #bBtn[aria-pressed="true"]{background:var(--yel);color:var(--on-yel);border-color:var(--yel)}
@@ -393,12 +400,14 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 .favs{margin:4px 0 30px}
 .favs h2{margin:0 0 12px;font-family:var(--brand);font-weight:400;font-size:clamp(24px,4.6vw,32px);display:flex;align-items:center;gap:10px}
 .favs h2 i{font-style:normal;color:var(--yel);font-size:.8em}
-.frow{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 8px;scroll-snap-type:x mandatory}
+.frow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:2px 0 4px}
+@media (min-width:640px){.frow{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}}
 .frow::-webkit-scrollbar{display:none}
-.fcard{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:min(62vw,230px);scroll-snap-align:start;background:var(--panel);border:1px solid rgba(140,106,63,.35);border-radius:16px;overflow:hidden;box-shadow:0 14px 30px -22px rgba(60,40,20,.5)}
+.fcard{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;min-width:0;background:var(--panel);border:1px solid rgba(140,106,63,.35);border-radius:16px;overflow:hidden;box-shadow:0 14px 30px -22px rgba(60,40,20,.5)}
 .fcard .ph{display:block;aspect-ratio:3/2;background:#EDE6DC;position:relative}
 .fcard .ph img{width:100%;height:100%;object-fit:cover}
-.fcard .tx{display:flex;justify-content:space-between;gap:8px;align-items:baseline;padding:10px 12px 12px}
+.fcard .tx{display:flex;justify-content:space-between;gap:8px;align-items:baseline;padding:10px 12px 12px;flex:1}
+@media (max-width:420px){.fcard .tx{flex-direction:column;gap:4px;padding:9px 11px 11px}.fcard b{font-size:14.5px}}
 .fcard b{font-weight:500;font-size:15px;line-height:1.25;color:var(--text)}
 .fcard .price{flex:none;font-size:14.5px}
 .fcard:focus-visible{outline:2px solid var(--yel);outline-offset:2px}
@@ -448,17 +457,20 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
         <button class="ibtn ltxt" id="lBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lMenu"><span id="lCode">TR</span></button>
         <div class="lmenu" id="lMenu" hidden></div>
       </div>
-      <button class="ibtn" id="fBtn" type="button" aria-expanded="false" aria-controls="panel" data-i-aria="searchAria" aria-label="Ara">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="dot"></span>
+      <button class="ibtn fpill" id="fBtn" type="button" aria-expanded="false" aria-controls="panel" data-i-aria="searchAria" aria-label="Filtrele">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span data-i="fltBtn">Filtrele</span><span class="fc" id="fCount"></span><span class="dot"></span>
       </button>
     </div>
   </div>
   <div class="panel" id="panel"><div><div class="in">
-    <div class="search"><label class="sr" for="q" data-i="search">Ara</label><input id="q" type="search" data-i-ph="search" placeholder="Ara" autocomplete="off"></div>
+    <div class="flt-top" data-i="fltTop">Menüyü filtreleyin</div>
+    <p class="flt-sub" data-i="fltSub">Seçtikleriniz menüye hemen uygulanır.</p>
     <div class="flt-h" data-i="fltA">Bu alerjenleri içermesin</div>
     <div class="flt" id="fltA"></div>
     <div class="flt-h" data-i="fltD">Tercih</div>
     <div class="flt" id="fltD"></div>
+    <div class="flt-h" data-i="fltQ">Ürün ya da içerik</div>
+    <div class="search"><label class="sr" for="q" data-i="search">Ara</label><input id="q" type="search" data-i-ph="search" placeholder="Ara" autocomplete="off"></div>
   </div></div></div>
   <nav class="chips" id="chips" aria-label="Menü"></nav>
 </header>
@@ -531,7 +543,8 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   <div class="body" id="aBody"></div>
 </div>
 
-<script src="data.js?v=3"></script>
+<script src="/api/menu-data?k=cafe-solen"></script>
+<script>window.CS_MENU||document.write('<script src="data.js?v=3"><\/script>')</script>
 <script>
 (function(){
   'use strict';
@@ -546,7 +559,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       evEb:'Evka 3 Şubesi', evChip:'Evka 3 · Yemek',
       legend:'Her ürüne dokunarak <b>kalorisini</b>, <b>içeriğini</b> ve <b>alerjenlerini</b> görebilirsiniz. + ile ürünleri listenize ekleyin, siparişte ekibimize gösterin.',
       demo:'<b>Demo menü:</b> Ürünler ve görseller Cafe Şölen’e aittir; fiyatlar temsilidir.',
-      search:'Ürün ya da içerik ara (ör. fıstık, latte)', searchAria:'Ara ve alerjen filtrele', fltA:'Bu alerjenleri içermesin', fltD:'Tercih',
+      search:'Yazarak filtreleyin (ör. fıstık, latte)', searchAria:'Menüyü filtrele', fltBtn:'Filtrele', fltTop:'Menüyü filtreleyin', fltSub:'Seçtikleriniz menüye hemen uygulanır.', fltQ:'Ürün ya da içerik', fltA:'Bu alerjenleri içermesin', fltD:'Tercih',
       empty:'Bu seçimlere uyan ürün bulunamadı.',
       foot:'Bu bir demo menüdür; fiyatlar temsilidir. Kalori değerleri yaklaşıktır. İçerik ve alerjen bilgileri temsilidir; atölyemizde tüm alerjenler işlendiğinden eser miktarda bulaşma olabilir. Alerjiniz varsa lütfen sipariş öncesi ekibimize bildirin.',
       made:'Bu menü <i>Carte</i> ile hazırlandı',
@@ -566,7 +579,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       evEb:'Evka 3 Branch', evChip:'Evka 3 · Food',
       legend:'Tap any item to see its <b>calories</b>, <b>ingredients</b> and <b>allergens</b>. Add items with + and show the list to our team when ordering.',
       demo:'<b>Demo menu:</b> Products and photos belong to Cafe Şölen; prices are indicative.',
-      search:'Search items or ingredients (e.g. pistachio, latte)', searchAria:'Search and filter allergens', fltA:'Exclude these allergens', fltD:'Preference',
+      search:'Type to filter (e.g. pistachio, latte)', searchAria:'Filter the menu', fltBtn:'Filter', fltTop:'Filter the menu', fltSub:'Your choices apply to the menu instantly.', fltQ:'Item or ingredient', fltA:'Exclude these allergens', fltD:'Preference',
       empty:'No items match your selection.',
       foot:'This is a demo menu; prices are indicative. Calorie values are approximate. Ingredient and allergen information is indicative; all allergens are handled in our workshop, so traces may be present. If you have an allergy, please tell our team before ordering.',
       made:'This menu was made with <i>Carte</i>',
@@ -591,7 +604,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
   function codes(str){ return str ? str.split(',') : []; }
   function fmt(t, o){ return t.replace(/\{(\w)\}/g, function(_, k){ return o[k]; }); }
-  function money(n){ return n.toLocaleString('tr-TR') + ' ₺'; }
+  function money(n){ return (Math.round(n) === n ? n.toLocaleString('tr-TR') : n.toLocaleString('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 })) + ' ₺'; }
   function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(e){ return null; } }
 
   var DATA = [];
@@ -778,12 +791,13 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   fBtn.addEventListener('click', function(){
     var open = !panel.classList.contains('open');
     panel.classList.toggle('open', open); fBtn.setAttribute('aria-expanded', open);
-    if (open) setTimeout(function(){ q.focus({ preventScroll:true }); }, 250);
+    
   });
   function apply(silent){
     var v = q.value.trim().toLocaleLowerCase(L === 'tr' ? 'tr' : undefined), any = false;
     var ex = Object.keys(exA), nd = Object.keys(needD), active = !!(v || ex.length || nd.length);
     fBtn.classList.toggle('has', active);
+    var fc = document.getElementById('fCount'); if (fc) fc.textContent = (v ? 1 : 0) + ex.length + nd.length;
     secs.forEach(function(s){
       var vis = 0;
       [].slice.call(s.querySelectorAll('[data-q]')).forEach(function(el){
