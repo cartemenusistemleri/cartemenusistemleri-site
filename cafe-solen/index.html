@@ -327,8 +327,25 @@ html.big .act small{font-size:16px}
 .spick a.sb:hover,.spick a.sb:focus-visible{background:#FFFDF8;border-color:var(--yel)}
 .spick a.sb.last{border-color:var(--yel);box-shadow:0 0 0 1px var(--yel) inset}
 .spick a.chg{font-size:12px;letter-spacing:.06em;color:var(--text-3);text-decoration:underline;text-underline-offset:3px;padding:6px}
-html.pick .cover ~ *:not(script):not(#fly){display:none!important}
-html.pick .cover{cursor:default;min-height:620px}
+html.pick .cover ~ *:not(script){display:none!important}
+html.pick .logo-start{visibility:visible}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-top:4px}
+.stile{position:relative;display:block;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#2A2019;text-decoration:none;box-shadow:0 18px 34px -24px rgba(60,40,20,.65);transform:translateZ(0)}
+.stile:last-child:nth-child(odd){grid-column:1/-1;aspect-ratio:16/9}
+.stile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}
+.stile:hover img,.stile:focus-visible img{transform:scale(1.05)}
+.stile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,11,0) 38%,rgba(20,14,11,.8) 100%)}
+.stile .st{position:absolute;left:14px;right:14px;bottom:13px;z-index:1;display:flex;flex-direction:column;gap:3px;text-align:left;color:#FBF6EE;text-shadow:0 1px 10px rgba(0,0,0,.5)}
+.stile .st b{font-family:'Jost',sans-serif;font-weight:500;font-size:19px;line-height:1.15;letter-spacing:.01em}
+.stile .st small{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#E8DCC6;font-weight:500}
+.stile .lb{position:absolute;top:10px;left:10px;z-index:1;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:rgba(251,246,238,.92);color:#2B1E16;border-radius:999px;padding:4px 9px}
+.stile:focus-visible{outline:2px solid var(--yel);outline-offset:3px}
+@media (min-width:760px){.sgrid{grid-template-columns:repeat(5,1fr);gap:14px}.stile,.stile:last-child:nth-child(odd){grid-column:auto;aspect-ratio:3/4}}
+html.pick #fly{display:none}
+html.pick .cover{cursor:default;height:auto;min-height:100vh;min-height:100svh}
+html.pick .cover .face{position:relative;min-height:100vh;min-height:100svh}
+html.pick .cover .mid{position:relative;inset:auto;min-height:100vh;min-height:100svh;box-sizing:border-box;padding:96px 20px 86px}
+html.pick .spick{width:min(1000px,100%);margin-top:26px}
 html.pick .cover .bottom,html.pick .cover .tag{display:none}
 html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 
@@ -507,7 +524,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none"/></svg>
       <b>Instagram</b><small>@cafesolenizmir</small><span class="go" aria-hidden="true">↗</span>
     </a>
-    <a class="act" href="https://www.cafesolen.com/default.aspx" target="_blank" rel="noopener">
+    <a class="act" href="/teklif/cafe-solen/" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.2 3.8 8.5s-1.2 6.1-3.8 8.5M12 3.5C9.4 5.9 8.2 8.7 8.2 12s1.2 6.1 3.8 8.5"/></svg>
       <b data-i="webT">İnternet sitemiz</b><small>cafesolen.com</small><span class="go" aria-hidden="true">↗</span>
     </a>
@@ -525,7 +542,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
 <footer class="wrap">
   <span class="wm"><svg class="mono" viewBox="0 0 100 100" aria-hidden="true"><use href="#cs"/></svg><b>CAFE ŞÖLEN</b></span>
   <p data-i="foot"></p>
-  <a class="site" href="https://www.cafesolen.com/default.aspx" target="_blank" rel="noopener">cafesolen.com ↗</a><a class="made" href="https://cartemenusistemleri.com.tr/" data-i-html="made"></a>
+  <a class="site" href="/teklif/cafe-solen/" target="_blank" rel="noopener">cafesolen.com ↗</a><a class="made" href="https://cartemenusistemleri.com.tr/" data-i-html="made"></a>
 </footer>
 
 <button type="button" class="cartbar" id="cartbar" hidden><span class="cb-t" data-i="listTitle">Seçtiklerim</span><span class="cb-n" id="cbN"></span><span class="cb-p" id="cbP"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -565,10 +582,13 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   var SUBE_AD = SUBE ? SUBELER.filter(function(x){ return x.id === SUBE; })[0].ad : '';
   if (SUBE !== 'evka-3') MENU = MENU.filter(function(s){ return s.grp !== 'evka'; });
   if (!SUBE) document.documentElement.classList.add('pick');
+  // şube fotoğrafları yönetim panelinden değiştirilebilir; yoksa ürün fotoğrafı
+  var SUBE_VARS = { 'merkez':'cedric_grolet_antep_fistik', 'bayrakli':'fistik_soleni', 'evka-3':'cafe_solen3617', 'folkart':'san_sebastian_cheesecake_ispanyol_cheesecake', 'bostanli':'pavlova' };
+  function subeFoto(id){ var f = (window.CS_SUBE_FOTO || {})[id] || SUBE_VARS[id] || 'beyaz_inci'; return f.charAt(0) === '/' ? f : '/cafe-solen/img/' + f + '.webp'; }
   var AL_KEYS = ['g','s','y','k','yf','su','so','ke','h','sl','b'];
   var LANGS = ['tr','en'];
   var I18N = {
-    tr: { pickH:'Şubenizi seçin', pickChg:'Şube değiştir', branch:'Şubesi', soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
+    tr: { pickH:'Şubenizi seçin', pickChg:'Şube değiştir', pickGo:'Menüyü aç', pickLast:'Son ziyaretiniz', branch:'Şubesi', soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
       cue:'Menü için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
       tocEb:'Cafe Şölen · Menü', tocH:'Kafe & Pastane',
       evH:'Yemek Menüsü', evBadge:'Evka 3 şubesine özel', evSub:'Pizza, makarna, burger ve ana yemeklerimiz yalnızca Evka 3 şubemizde servis edilir.',
@@ -587,7 +607,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       listNote:'Bu liste sipariş değildir. Siparişinizi verirken ekibimize gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.',
       total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
       actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', webT:'İnternet sitemiz', telT:'Bizi arayın', tocActs:'Instagram · İnternet sitemiz' },
-    en: { pickH:'Choose your branch', pickChg:'Change branch', branch:'Branch', soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
+    en: { pickH:'Choose your branch', pickChg:'Change branch', pickGo:'Open menu', pickLast:'Last visited', branch:'Branch', soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
       cue:'Scroll for the menu', coverAria:'Menu cover. Tap or scroll to open.',
       tocEb:'Cafe Şölen · Menu', tocH:'Café & Patisserie',
       evH:'Food Menu', evBadge:'Evka 3 branch only', evSub:'Our pizzas, pasta, burgers and main courses are served only at our Evka 3 branch.',
@@ -658,7 +678,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     var last = store('cs-sube');
     document.getElementById('spick').innerHTML = SUBE
       ? '<a class="chg" href="/cafe-solen/">' + esc(T.pickChg) + '</a>'
-      : '<p class="sp-h">' + esc(T.pickH) + '</p>' + SUBELER.map(function(x){ return '<a class="sb' + (x.id === last ? ' last' : '') + '" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '">' + esc(x.ad) + '</a>'; }).join('');
+      : '<p class="sp-h">' + esc(T.pickH) + '</p><div class="sgrid">' + SUBELER.map(function(x){ return '<a class="stile" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '"><img src="' + esc(subeFoto(x.id)) + '" alt="" width="600" height="750" decoding="async"' + (x.id === last ? '' : ' loading="lazy"') + '>' + (x.id === last ? '<span class="lb">' + esc(T.pickLast) + '</span>' : '') + '<span class="st"><b>' + esc(x.ad) + '</b><small>' + esc(T.pickGo) + ' →</small></span></a>'; }).join('') + '</div>';
     document.title = 'Cafe Şölen' + (SUBE ? ' · ' + SUBE_AD : '') + ' · ' + (L === 'tr' ? 'Menü' : 'Menu');
     document.getElementById('lBtn').setAttribute('aria-label', T.lang + ': ' + T.name);
     document.getElementById('lMenu').innerHTML = LANGS.map(function(k){ return '<button type="button" data-lang="'+k+'" lang="'+k+'" aria-pressed="'+(k===L)+'">'+I18N[k].name+'</button>'; }).join('');
@@ -745,6 +765,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
   function frame(){
     raf = null;
+    if (!SUBE) return;
     var y = scrollY, p = Math.min(1, Math.max(0, y / (H*0.45)));
     if (y < H*1.2) photo.style.transform = 'translateY(' + (y*0.35) + 'px) scale(1.06)';
     if ((p !== lastP || p < 1) && A){
