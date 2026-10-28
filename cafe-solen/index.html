@@ -338,7 +338,11 @@ html.pick .logo-start{visibility:visible}
 .stile .st{position:absolute;left:14px;right:14px;bottom:13px;z-index:1;display:flex;flex-direction:column;gap:3px;text-align:left;color:#FBF6EE;text-shadow:0 1px 10px rgba(0,0,0,.5)}
 .stile .st b{font-family:'Jost',sans-serif;font-weight:500;font-size:19px;line-height:1.15;letter-spacing:.01em}
 .stile .st small{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#E8DCC6;font-weight:500}
-.stile .lb{position:absolute;top:10px;left:10px;z-index:1;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:rgba(251,246,238,.92);color:#2B1E16;border-radius:999px;padding:4px 9px}
+.stile .tags{position:absolute;top:10px;left:10px;right:10px;z-index:1;display:flex;flex-wrap:wrap;gap:5px}
+.stile .tags span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;background:rgba(251,246,238,.93);color:#2B1E16;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.stile .tags span.f{background:#8C6A3F;color:#FFF9EE}
+.stile::before{content:"";position:absolute;inset:0 0 auto;height:40%;z-index:0;background:linear-gradient(180deg,rgba(20,14,11,.35),rgba(20,14,11,0));pointer-events:none}
+.stile .lb{position:absolute;bottom:58px;left:14px;z-index:1;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:rgba(251,246,238,.92);color:#2B1E16;border-radius:999px;padding:4px 9px}
 .stile:focus-visible{outline:2px solid var(--yel);outline-offset:3px}
 @media (min-width:760px){.sgrid{grid-template-columns:repeat(5,1fr);gap:14px}.stile,.stile:last-child:nth-child(odd){grid-column:auto;aspect-ratio:3/4}}
 html.pick #fly{display:none}
@@ -588,7 +592,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
   var AL_KEYS = ['g','s','y','k','yf','su','so','ke','h','sl','b'];
   var LANGS = ['tr','en'];
   var I18N = {
-    tr: { pickH:'Şubenizi seçin', pickChg:'Şube değiştir', pickGo:'Menüyü aç', pickLast:'Son ziyaretiniz', branch:'Şubesi', soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
+    tr: { pickH:'Şubenizi seçin', pickChg:'Şube değiştir', pickGo:'Menüyü aç', pickLast:'Son ziyaretiniz', pickCafe:'Kafe Menüsü', pickFood:'Yemek Menüsü', branch:'Şubesi', soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', name:'Türkçe', top:'Pastane · Kafe · Restoran', pill:'Menü', tag:'Yarım asırlık lezzet şöleni', rule:'İzmir · 1976',
       cue:'Menü için kaydırın', coverAria:'Menü kapağı. Açmak için dokunun ya da kaydırın.',
       tocEb:'Cafe Şölen · Menü', tocH:'Kafe & Pastane',
       evH:'Yemek Menüsü', evBadge:'Evka 3 şubesine özel', evSub:'Pizza, makarna, burger ve ana yemeklerimiz yalnızca Evka 3 şubemizde servis edilir.',
@@ -607,7 +611,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
       listNote:'Bu liste sipariş değildir. Siparişinizi verirken ekibimize gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.',
       total:'Toplam', totalKcal:'Toplam enerji', clear:'Listeyi temizle',
       actsH:'Bir dokunuşla', actsEb:'Masanızdan', gT:'Bizi değerlendirin', gS:'Google’da yorum bırakın', webT:'İnternet sitemiz', telT:'Bizi arayın', tocActs:'Instagram · İnternet sitemiz' },
-    en: { pickH:'Choose your branch', pickChg:'Change branch', pickGo:'Open menu', pickLast:'Last visited', branch:'Branch', soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
+    en: { pickH:'Choose your branch', pickChg:'Change branch', pickGo:'Open menu', pickLast:'Last visited', pickCafe:'Café Menu', pickFood:'Food Menu', branch:'Branch', soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', name:'English', top:'Patisserie · Café · Restaurant', pill:'Menu', tag:'Half a century of flavour', rule:'İzmir · 1976',
       cue:'Scroll for the menu', coverAria:'Menu cover. Tap or scroll to open.',
       tocEb:'Cafe Şölen · Menu', tocH:'Café & Patisserie',
       evH:'Food Menu', evBadge:'Evka 3 branch only', evSub:'Our pizzas, pasta, burgers and main courses are served only at our Evka 3 branch.',
@@ -678,7 +682,7 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     var last = store('cs-sube');
     document.getElementById('spick').innerHTML = SUBE
       ? '<a class="chg" href="/cafe-solen/">' + esc(T.pickChg) + '</a>'
-      : '<p class="sp-h">' + esc(T.pickH) + '</p><div class="sgrid">' + SUBELER.map(function(x){ return '<a class="stile" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '"><img src="' + esc(subeFoto(x.id)) + '" alt="" width="600" height="750" decoding="async"' + (x.id === last ? '' : ' loading="lazy"') + '>' + (x.id === last ? '<span class="lb">' + esc(T.pickLast) + '</span>' : '') + '<span class="st"><b>' + esc(x.ad) + '</b><small>' + esc(T.pickGo) + ' →</small></span></a>'; }).join('') + '</div>';
+      : '<p class="sp-h">' + esc(T.pickH) + '</p><div class="sgrid">' + SUBELER.map(function(x){ return '<a class="stile" href="/cafe-solen/' + x.id + '/' + (L !== 'tr' ? '?lang=' + L : '') + '"><img src="' + esc(subeFoto(x.id)) + '" alt="" width="600" height="750" decoding="async"' + (x.id === last ? '' : ' loading="lazy"') + '>' + '<span class="tags"><span>' + esc(T.pickCafe) + '</span>' + (x.id === 'evka-3' ? '<span class="f">' + esc(T.pickFood) + '</span>' : '') + '</span>' + (x.id === last ? '<span class="lb">' + esc(T.pickLast) + '</span>' : '') + '<span class="st"><b>' + esc(x.ad) + '</b><small>' + esc(T.pickGo) + ' →</small></span></a>'; }).join('') + '</div>';
     document.title = 'Cafe Şölen' + (SUBE ? ' · ' + SUBE_AD : '') + ' · ' + (L === 'tr' ? 'Menü' : 'Menu');
     document.getElementById('lBtn').setAttribute('aria-label', T.lang + ': ' + T.name);
     document.getElementById('lMenu').innerHTML = LANGS.map(function(k){ return '<button type="button" data-lang="'+k+'" lang="'+k+'" aria-pressed="'+(k===L)+'">'+I18N[k].name+'</button>'; }).join('');
