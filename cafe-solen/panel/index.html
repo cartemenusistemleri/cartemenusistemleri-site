@@ -6,6 +6,9 @@
 <title>Cafe Şölen Panel</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#17110D">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Şölen Panel">
 <link rel="icon" type="image/png" href="/cafe-solen/favicon.png"><link rel="apple-touch-icon" href="/cafe-solen/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Gilda+Display&family=Jost:wght@300;400;500;600&display=swap">
@@ -114,6 +117,27 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 .back .t{display:flex;flex-direction:column;min-width:0}
 .back .t small{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3)}
 .back .t b{font-family:'Gilda Display',serif;font-weight:400;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ozl{display:flex;flex-direction:column;gap:10px}
+.oz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.oz>b{display:block;font-family:'Gilda Display',serif;font-weight:400;font-size:20px;margin-bottom:8px}
+.ozg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:520px){.ozg{grid-template-columns:1fr 1fr}}
+.ozg span{display:flex;flex-direction:column;gap:1px}
+.ozg small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+.ozg em{font-style:normal;font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.df{font-size:12px;color:var(--text-3)}
+.df.up{color:#A9D8AC}.df.dn{color:#E58A82}
+.ozt{margin:10px 0 0;font-size:13.5px;color:var(--text-3)}
+.ozt b{color:var(--text);font-weight:500}
+.lg-d{margin:22px 0 4px;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3)}
+.lg{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;align-items:baseline}
+.lg i{font-style:normal;color:var(--text-3);font-size:13px;font-variant-numeric:tabular-nums}
+.lg b{font-weight:500}
+.lg small{display:block;color:var(--text-3);font-size:13px;margin-top:2px}
+.lg .a{display:inline-block;font-size:11.5px;font-weight:500;border-radius:999px;padding:2px 8px;margin-left:6px;background:rgba(160,152,144,.2);color:#E0D6CB;vertical-align:1px}
+.lg .a.v{background:rgba(94,155,98,.2);color:#A9D8AC}
+.lg .a.f{background:rgba(201,164,106,.22);color:#E8CF9F}
+.inst{border-style:dashed!important}
 .who{font-size:12.5px;color:var(--text-3);text-align:center;padding:0 0 40px}
 </style>
 </head>
@@ -123,7 +147,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 <section class="login wrap" id="login">
   <div class="brand"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#cs"/></svg>CAFE ŞÖLEN</div>
   <h1>Panel</h1>
-  <p>Size verilen kullanıcı adı ve şifreyle girin. Yetkinize göre şubelerinizi, stok, öneri, istatistik ve fiyat bölümlerini görürsünüz.</p>
+  <p>Size verilen kullanıcı adı ve şifreyle girin. Yetkinize göre şubelerinizi; stok, öneri, istatistik ve ürün güncelleme bölümlerini görürsünüz.</p>
   <form id="lf" autocomplete="on">
     <label for="un">Kullanıcı adı</label>
     <input id="un" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required>
@@ -157,7 +181,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
         <button class="back" id="back" type="button"><span class="ar" id="backAr">‹</span><span class="t"><small id="hSmall">Şube</small><b id="hTitle"></b></span></button>
         <div class="hbtns"><a class="sbtn" id="menuLink" href="/cafe-solen/" target="_blank" rel="noopener" style="text-decoration:none">Menü ↗</a><button class="sbtn" id="out" type="button">Çıkış</button></div>
       </div>
-      <div class="tabs" role="tablist" id="tabs"><button type="button" class="on" data-tab="stok">Ürünler</button><button type="button" data-tab="ist">İstatistik</button></div>
+      <div class="tabs" role="tablist" id="tabs"><button type="button" class="on" data-tab="stok">Ürünler</button><button type="button" data-tab="ist">İstatistik</button><button type="button" data-tab="log">Kayıt</button></div>
       <div id="stokHead">
       <div class="sum" id="sum"></div>
       <div class="search"><input id="q" type="search" placeholder="Ürün ara (ör. latte, baklava)" aria-label="Ürün ara" autocomplete="off"></div>
@@ -166,6 +190,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
     </div>
   </header>
   <main class="wrap" id="list"></main>
+  <section class="wrap ist" id="logv" hidden><p class="hint" style="margin:0 0 6px">Var / tükendi ve öneri işlemleri; kim, ne zaman yaptı. Son 200 kayıt.</p><div id="logBody"></div></section>
   <section class="wrap ist" id="ist" hidden>
     <div class="per"><button type="button" class="on" data-g="7">Son 7 gün</button><button type="button" data-g="30">Son 30 gün</button><button type="button" data-g="1">Bugün</button></div>
     <div id="istBody"></div>
@@ -179,7 +204,7 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 <script>
 (function(){
   'use strict';
-  var IS = 'cafe-solen', LS = 'cs-oturum';
+  var IS = 'cafe-solen', LS = 'oturum-' + IS;
   var ALL = window.CS_MENU || [];
   var SUBELER = [{ id:'merkez', ad:'Bornova Merkez' }, { id:'bayrakli', ad:'Bayraklı' }, { id:'evka-3', ad:'Evka 3' }, { id:'folkart', ad:'Folkart' }, { id:'bostanli', ad:'Bostanlı', acik:false }];
   var TOKEN = null, ME = null, SUBE = null, K = null, MENU = [], OUT = {}, FAV = {}, YENI = {}, cur = 'all', VIEW = 'home';
@@ -248,8 +273,11 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
       if (x.kind === 'sube' && !subeBaslik){ h += '<div class="sect">Şubeler</div>'; subeBaslik = true; }
       h += '<button type="button" class="area' + (x.kind !== 'sube' ? ' big' : '') + '" data-i="' + i + '"><span class="ic">' + IC[x.kind] + '</span><span class="tx"><b>' + esc(x.title) + '</b><small>' + esc(x.sub) + '</small>' + (x.kind === 'sube' ? '<span class="st" id="st-' + x.sube + '">…</span>' : '') + '</span><span class="go">›</span></button>';
     });
+    if (INST || IOS_HINT) h += '<button type="button" class="area inst" id="instBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></span><span class="tx"><b>Ana ekrana ekle</b><small>' + (INST ? 'Panel telefonunuzda uygulama gibi açılsın.' : 'Safari’de alttaki Paylaş (□↑) düğmesine, sonra “Ana Ekrana Ekle”ye dokunun.') + '</small></span><span class="go">›</span></button>';
     $('areas').innerHTML = h;
-    $('areas').onclick = function(e){ var b = e.target.closest('[data-i]'); if (!b) return; var x = areas[+b.dataset.i]; if (x.href) location.href = x.href; else route(x.go); };
+    $('areas').onclick = function(e){
+      if (e.target.closest('#instBtn')){ if (INST){ INST.prompt(); INST.userChoice.then(function(){ INST = null; showHome(); }); } return; }
+      var b = e.target.closest('[data-i]'); if (!b) return; var x = areas[+b.dataset.i]; if (x.href) location.href = x.href; else route(x.go); };
     // şube özetleri
     areas.forEach(function(x){
       if (x.kind !== 'sube') return;
@@ -286,9 +314,27 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
 
   function setTab(t){
     [].forEach.call($('tabs').children, function(x){ x.classList.toggle('on', x.dataset.tab === t); });
-    var ist = t === 'ist';
-    $('stokHead').hidden = ist; $('list').hidden = ist; $('noteWrap').hidden = ist || !can('stok'); $('ist').hidden = !ist;
-    if (ist) loadIst(); else load();
+    var st = t === 'stok';
+    $('stokHead').hidden = !st; $('list').hidden = !st; $('noteWrap').hidden = !st || !can('stok'); $('ist').hidden = t !== 'ist'; $('logv').hidden = t !== 'log';
+    if (t === 'ist') loadIst(); else if (t === 'log') loadLog(); else load();
+  }
+  var ISLEM = { 'tukendi':['Tükendi',''], 'var':['Tekrar var','v'], 'hepsi-var':['Tümü var yapıldı','v'], 'fav+':['★ Önerildi','f'], 'fav-':['Öneriden çıkarıldı',''], 'yeni+':['“Yeni” eklendi','f'], 'yeni-':['“Yeni” kaldırıldı',''] };
+  function loadLog(){
+    var k = K; $('logBody').innerHTML = '<p class="hint">Yükleniyor…</p>';
+    api({ log:true }).then(function(j){
+      if (k !== K) return;
+      if (j.status === 401){ expired(); return; }
+      if (!j.ok){ $('logBody').innerHTML = '<p class="hint">' + esc(j.error || 'Kayıtlar alınamadı') + '</p>'; return; }
+      if (!j.kayit.length){ $('logBody').innerHTML = '<p class="empty">Henüz kayıt yok.</p>'; return; }
+      var N = names(), h = '', gun = '';
+      j.kayit.forEach(function(r){
+        var d = new Date(r.t), g = d.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long' });
+        if (g !== gun){ gun = g; h += '<div class="lg-d">' + esc(g) + '</div>'; }
+        var x = ISLEM[r.islem] || [r.islem, ''];
+        h += '<div class="lg"><i>' + d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) + '</i><span><b>' + esc(r.id === '*' ? 'Tüm ürünler' : (N[r.id] || r.id)) + '</b><span class="a ' + x[1] + '">' + esc(x[0]) + '</span><small>' + esc(r.u) + '</small></span></div>';
+      });
+      $('logBody').innerHTML = h;
+    }).catch(function(){ $('logBody').innerHTML = '<p class="hint">Bağlantı hatası.</p>'; });
   }
   function openSube(s, multi){
     VIEW = 'sube'; SUBE = s; K = IS + ':' + s; cur = 'all'; OUT = {}; FAV = {}; YENI = {};
@@ -298,7 +344,8 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
     $('backAr').style.visibility = multi ? '' : 'hidden'; $('back').style.cursor = multi ? '' : 'default';
     $('menuLink').href = '/cafe-solen/' + s + '/'; $('menuLink').hidden = false;
     var showStok = can('stok') || can('oneri');
-    $('tabs').hidden = !(showStok && can('istatistik'));
+    $('tabs').hidden = !can('istatistik');
+    $('tabs').querySelector('[data-tab="stok"]').hidden = !showStok;
     $('note').innerHTML = 'Değişiklikler anında kaydedilir; müşterinin açık menüsüne en geç 1 dakika içinde yansır. Miktar tutulmaz, sadece var / tükendi. Gün sonunda “Tümünü var yap” ile sıfırlayabilirsiniz. <button class="sbtn" id="allv" type="button" style="margin-top:10px">Tümünü var yap</button>';
     $('q').value = ''; chips();
     setTab(showStok ? 'stok' : 'ist');
@@ -401,6 +448,27 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
     var max = rows[0][key];
     return rows.map(function(r, i){ return '<div class="bar"><i>'+(i+1)+'</i><span class="nm"><span>'+esc(N[r.id])+'</span><span class="tr"><em style="width:'+Math.max(4, Math.round(r[key]/max*100))+'%"></em></span></span><b>'+r[key]+'</b></div>'; }).join('');
   }
+  function fark(c, p){
+    if (!p) return c ? '<span class="df up">yeni</span>' : '';
+    var d = Math.round((c - p) / p * 100);
+    return '<span class="df ' + (d > 0 ? 'up' : d < 0 ? 'dn' : '') + '">' + (d > 0 ? '▲ %' + d : d < 0 ? '▼ %' + (-d) : '=') + '</span>';
+  }
+  function ozetHtml(j){
+    if (VIEW !== 'tum' || !j.ozet) return '';
+    var N = names(), by = {}; j.ozet.forEach(function(x){ by[x.k.split(':')[1]] = x; });
+    var per = gun === 1 ? 'düne göre' : 'önceki ' + gun + ' güne göre';
+    var h = '<h3 style="margin-top:4px">Şube şube</h3><p class="hint" style="margin:0 0 10px">Değişim oklarının hepsi ' + per + '.</p><div class="ozl">';
+    ME.subeler.forEach(function(s){
+      var x = by[s] || { s:0, v:0, a:0, ps:0, pv:0, pa:0, top:null, tk:0 };
+      h += '<div class="oz"><b>' + esc(subeAd(s)) + '</b><div class="ozg">' +
+        '<span><small>Ziyaret</small><em>' + x.s.toLocaleString('tr-TR') + '</em>' + fark(x.s, x.ps) + '</span>' +
+        '<span><small>İnceleme</small><em>' + x.v.toLocaleString('tr-TR') + '</em>' + fark(x.v, x.pv) + '</span>' +
+        '<span><small>Listeye ekleme</small><em>' + x.a.toLocaleString('tr-TR') + '</em>' + fark(x.a, x.pa) + '</span>' +
+        '<span><small>Tükendi işareti</small><em>' + (x.tk || 0) + '</em></span></div>' +
+        (x.top && N[x.top.id] ? '<p class="ozt">En çok bakılan: <b>' + esc(N[x.top.id]) + '</b> (' + x.top.n + ')</p>' : '') + '</div>';
+    });
+    return h + '</div><h3>Tüm şubeler toplamı</h3>';
+  }
   function loadIst(){
     var k = K;
     $('istBody').innerHTML = '<p class="hint">Yükleniyor…</p>';
@@ -412,13 +480,19 @@ h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-t
         var oturum = 0, bakis = 0, ekle = 0;
         j.gunluk.forEach(function(g){ oturum += g.s || 0; });
         j.urunler.forEach(function(u){ bakis += u.v || 0; ekle += u.a || 0; });
-        $('istBody').innerHTML =
+        $('istBody').innerHTML = ozetHtml(j) +
           '<div class="kpis"><div class="kpi"><small>Menü ziyareti</small><b>'+oturum.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Ürün incelemesi</small><b>'+bakis.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Listeye ekleme</small><b>'+ekle.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Ziyaret başına inceleme</small><b>'+(oturum ? (bakis/oturum).toFixed(1).replace('.', ',') : '–')+'</b></div></div>' +
           '<h3>En çok incelenen ürünler</h3>' + bars(j.urunler, 'v') +
           '<h3>En çok listeye eklenenler</h3>' + bars(j.urunler, 'a') +
           '<p class="hint">' + (VIEW === 'tum' ? 'Tüm şubelerin toplamıdır. ' : '') + 'Menüde bir ürüne dokunup detayına bakılması “inceleme”, + ile Seçtiklerim listesine eklenmesi “listeye ekleme” sayılır. Kimlik, konum gibi kişisel bilgi tutulmaz; sadece ürün bazında günlük sayılar.</p>';
       }).catch(function(){ $('istBody').innerHTML = '<p class="hint">Bağlantı hatası.</p>'; });
   }
+
+  /* ---------- ana ekrana ekleme ---------- */
+  var INST = null, STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var IOS_HINT = !STANDALONE && /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent);
+  addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); INST = e; if (VIEW === 'home' && ME) showHome(); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 
   /* ---------- açılış: kayıtlı oturum ---------- */
   TOKEN = store(LS);
