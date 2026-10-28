@@ -4,13 +4,13 @@
 // Ürün bilgisi değişiklikleri (ad, açıklama, alerjen, kalori, görsel, gizle) KV'de "urun:<k>" = { o: { urunId: {...} }, t }.
 // KV'ye ulaşılamazsa statik veri olduğu gibi döner; menü asla boş kalmaz.
 
-const MENULER = ['cafe-solen'];
+import { ISLETMELER } from './oturum.js';
 
 export async function temelMenu(env, request, k) {
   const r = await env.ASSETS.fetch(new URL('/' + k + '/data.js', request.url));
   if (!r.ok) throw new Error('data.js yok');
   const js = await r.text();
-  const i = js.indexOf('['), j = js.lastIndexOf(']');
+  const i = js.indexOf('[', js.indexOf('=')), j = js.lastIndexOf(']');
   return JSON.parse(js.slice(i, j + 1));
 }
 
@@ -57,7 +57,8 @@ function js(body, cache) {
 
 export async function onRequestGet({ request, env }) {
   const k = new URL(request.url).searchParams.get('k') || '';
-  if (MENULER.indexOf(k) === -1) return js('/* menü bulunamadı */', 'no-store');
+  if (!ISLETMELER[k]) return js('/* menü bulunamadı */', 'no-store');
+  const V = ISLETMELER[k].degisken || 'CS_MENU';
   let menu;
   try { menu = await temelMenu(env, request, k); }
   catch (e) { return js('/* temel veri okunamadı */', 'no-store'); }
@@ -65,5 +66,5 @@ export async function onRequestGet({ request, env }) {
   menu = uygula(menu, f.p, u.o);
   let foto = {};
   try { foto = JSON.parse((await env.ODEME_LINKS.get('subefoto:' + k)) || '{}'); } catch (e) { foto = {}; }
-  return js('window.CS_MENU=' + JSON.stringify(menu) + ';window.CS_FIYAT_T=' + JSON.stringify(f.t) + ';window.CS_SUBE_FOTO=' + JSON.stringify(foto) + ';');
+  return js('window.' + V + '=' + JSON.stringify(menu) + ';window.CS_FIYAT_T=' + JSON.stringify(f.t) + ';window.CS_SUBE_FOTO=' + JSON.stringify(foto) + ';');
 }

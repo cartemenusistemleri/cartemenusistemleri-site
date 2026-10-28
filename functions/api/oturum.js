@@ -6,9 +6,11 @@
 // Şifreler PBKDF2-SHA256 ile özetlenir; düz şifre hiçbir yerde saklanmaz.
 // Oturum anahtarı: imzalı (HMAC, ADMIN_SECRET) ve 30 gün geçerli. Şifre değişince / kullanıcı silinince eski oturumlar düşer.
 
+// degisken: menü sayfasının beklediği veri değişkeni (data.js ile aynı)
 export const ISLETMELER = {
   'cafe-solen': {
     ad: 'Cafe Şölen',
+    degisken: 'CS_MENU',
     subeler: [
       { id: 'merkez', ad: 'Bornova Merkez' },
       { id: 'bayrakli', ad: 'Bayraklı' },
@@ -16,6 +18,11 @@ export const ISLETMELER = {
       { id: 'folkart', ad: 'Folkart' },
       { id: 'bostanli', ad: 'Bostanlı', acik: false }, // henüz açılmadı: müşteri şube seçiminde görünmez
     ],
+  },
+  'yarim-ekmek': {
+    ad: 'Yarım Ekmek',
+    degisken: 'YE_MENU',
+    subeler: [{ id: 'merkez', ad: 'Yarım Ekmek' }],
   },
 };
 export const YETKILER = ['stok', 'oneri', 'istatistik', 'fiyat'];

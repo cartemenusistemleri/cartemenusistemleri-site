@@ -8,9 +8,9 @@
 // Veri: ODEME_LINKS KV -> "urun:<k>" = { o, t }; geçmiş "fiyatlog:<k>" içine tur:'urun' olarak yazılır.
 
 import { temelMenu } from './menu-data.js';
-import { kimlik, izinli } from './oturum.js';
+import { kimlik, izinli, ISLETMELER } from './oturum.js';
 
-const MENULER = ['cafe-solen'];
+const MENULER = Object.keys(ISLETMELER);
 const ALERJEN = ['g', 's', 'y', 'k', 'yf', 'su', 'so', 'ke', 'h', 'sl', 'b'];
 const DIYET = ['v', 'vg', 'gf'];
 

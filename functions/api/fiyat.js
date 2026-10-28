@@ -7,9 +7,9 @@
 // Veri: ODEME_LINKS KV -> "fiyat:<k>" = { p, t }, "fiyatlog:<k>" = son 30 değişiklik
 
 import { temelMenu, fiyatlariOku } from './menu-data.js';
-import { kimlik, izinli } from './oturum.js';
+import { kimlik, izinli, ISLETMELER } from './oturum.js';
 
-const MENULER = ['cafe-solen'];
+const MENULER = Object.keys(ISLETMELER);
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {

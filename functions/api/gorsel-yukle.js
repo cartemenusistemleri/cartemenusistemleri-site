@@ -3,8 +3,8 @@
 //   -> { ok, url: '/api/gorsel/<hash>.webp' }
 // Görseller D1 (ISTATISTIK bağlaması) içinde "gorsel" tablosunda tutulur; aynı dosya iki kez yüklenirse tek kayıt olur.
 
-import { kimlik, izinli } from './oturum.js';
-const MENULER = ['cafe-solen'];
+import { kimlik, izinli, ISLETMELER } from './oturum.js';
+const MENULER = Object.keys(ISLETMELER);
 const TIPLER = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png' };
 const MAX = 1500000;
 

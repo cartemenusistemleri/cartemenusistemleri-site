@@ -38,7 +38,26 @@ export async function onRequestPost({ request, env }) {
       db.prepare("SELECT id, SUM(CASE WHEN tur='v' THEN n ELSE 0 END) AS v, SUM(CASE WHEN tur='a' THEN n ELSE 0 END) AS a FROM olay WHERE " + kosul + " AND gun >= ?2 AND id != '_oturum' GROUP BY id").bind(kv, bas),
       db.prepare("SELECT gun, SUM(CASE WHEN tur='s' THEN n ELSE 0 END) AS s, SUM(CASE WHEN tur='v' THEN n ELSE 0 END) AS v FROM olay WHERE " + kosul + " AND gun >= ?2 GROUP BY gun ORDER BY gun").bind(kv, bas),
     ]);
-    return json({ ok: true, bas, gun: gunSay, urunler: urun.results, gunluk: gunluk.results });
+    let ozet = null;
+    // tüm şubeler: şube şube özet + önceki dönemle karşılaştırma
+    if (mk && mk.sube === '*') {
+      const bas2 = new Date(Date.now() + 3 * 3600e3 - (2 * gunSay - 1) * 86400e3).toISOString().slice(0, 10);
+      const [cur, prev, top] = await db.batch([
+        db.prepare("SELECT k, SUM(CASE WHEN tur='s' THEN n ELSE 0 END) AS s, SUM(CASE WHEN tur='v' THEN n ELSE 0 END) AS v, SUM(CASE WHEN tur='a' THEN n ELSE 0 END) AS a FROM olay WHERE k LIKE ?1 AND gun >= ?2 GROUP BY k").bind(kv, bas),
+        db.prepare("SELECT k, SUM(CASE WHEN tur='s' THEN n ELSE 0 END) AS s, SUM(CASE WHEN tur='v' THEN n ELSE 0 END) AS v, SUM(CASE WHEN tur='a' THEN n ELSE 0 END) AS a FROM olay WHERE k LIKE ?1 AND gun >= ?2 AND gun < ?3 GROUP BY k").bind(kv, bas2, bas),
+        db.prepare("SELECT k, id, SUM(n) AS n FROM olay WHERE k LIKE ?1 AND gun >= ?2 AND tur = 'v' AND id != '_oturum' GROUP BY k, id ORDER BY k, n DESC").bind(kv, bas),
+      ]);
+      let tk = [];
+      try { tk = (await db.prepare("SELECT k, COUNT(*) AS c FROM stoklog WHERE k LIKE ?1 AND t >= ?2 AND islem = 'tukendi' GROUP BY k").bind(kv, bas + 'T00:00:00').all()).results || []; } catch (e) { tk = []; }
+      const by = {};
+      const al = function (k) { return by[k] || (by[k] = { k: k, s: 0, v: 0, a: 0, ps: 0, pv: 0, pa: 0, top: null, tk: 0 }); };
+      (cur.results || []).forEach(function (r) { const x = al(r.k); x.s = r.s || 0; x.v = r.v || 0; x.a = r.a || 0; });
+      (prev.results || []).forEach(function (r) { const x = al(r.k); x.ps = r.s || 0; x.pv = r.v || 0; x.pa = r.a || 0; });
+      (top.results || []).forEach(function (r) { const x = al(r.k); if (!x.top) x.top = { id: r.id, n: r.n }; });
+      tk.forEach(function (r) { al(r.k).tk = r.c || 0; });
+      ozet = Object.keys(by).map(function (k) { return by[k]; });
+    }
+    return json({ ok: true, bas, gun: gunSay, urunler: urun.results, gunluk: gunluk.results, ozet });
   } catch (e) {
     return json({ ok: false, error: 'Veritabanı hatası' }, 500);
   }
