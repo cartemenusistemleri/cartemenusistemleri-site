@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#4A1826">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,600&family=Gilda+Display&family=Jost:wght@300;400;500;600&display=swap">
-<script>if (/^\/cafe-solen\/panel\//.test(location.pathname)) document.documentElement.className = 'isletme';</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Baloo+2:wght@700;800&family=Cormorant:ital,wght@1,600&family=Gilda+Display&family=Jost:wght@300;400;500;600&display=swap">
+<script>(function(){ var m = /^\/([a-z0-9-]+)\/panel\//.exec(location.pathname); if (m){ window.ISL_K = m[1]; document.documentElement.className = 'isletme isl-' + m[1]; } })();</script>
 <style>
 :root{--bg:#4A1826;--bg2:#5A2130;--cream:#FFFDF6;--card:#FFFDF8;--soft:#FAF3E4;--soft2:#F3E8D0;--ink:#2A0F17;--muted:#7C5E66;--line:rgba(74,24,38,.14);--ok:#2F6B3A;--okbg:#E6F0E2;--warn:#8A5A00;--warnbg:#FBEFD2;--bad:#A3242F;--badbg:#F8E1E1}
 *{box-sizing:border-box}
@@ -196,6 +196,15 @@ textarea.inp{resize:vertical;min-height:70px;line-height:1.45}
 .pwrow .inp{flex:1}
 .share{margin-top:14px;padding:14px;border-radius:14px;background:var(--okbg);border:1px solid rgba(47,107,58,.25);font-size:14.5px;line-height:1.7}
 .share code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:rgba(255,255,255,.6);border-radius:6px;padding:1px 6px}
+/* Yarım Ekmek kipi */
+html.isletme.isl-yarim-ekmek{--bg:#16120F;--bg2:#221E1B;--soft:#FBF3E3;--soft2:#F2E7D2;--ink:#16120F;--muted:#6E655C;--line:rgba(22,18,15,.13)}
+html.isletme.isl-yarim-ekmek body{background:#FBF3E3}
+html.isletme.isl-yarim-ekmek .top{background:#121010}
+html.isletme.isl-yarim-ekmek h2,html.isletme.isl-yarim-ekmek legend{font-family:'Baloo 2','Jost',sans-serif;font-weight:800;font-style:normal}
+html.isletme.isl-yarim-ekmek .cs-wm{font-family:'Baloo 2','Jost',sans-serif;font-weight:800;letter-spacing:.04em;font-size:18px}
+html.isletme.isl-yarim-ekmek .cs-wm small{color:#F5B21B}
+html.isletme.isl-yarim-ekmek .tabs button.on{border-bottom-color:#F5B21B}
+html.isletme.isl-yarim-ekmek .btn:not(.ghost):not(.danger){background:#F5B21B;color:#140F06}
 /* Cafe Şölen kipi (patron / satın alma) */
 html.isletme{--bg:#2B1E16;--bg2:#3A2A1F;--cream:#FBF6EE;--card:#FFFDF8;--soft:#F6EFE4;--soft2:#EDE3D2;--ink:#2B1E16;--muted:#7A6A5C;--line:rgba(43,30,22,.14)}
 html.isletme body{background:#F6EFE4}
@@ -240,8 +249,8 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     <div class="top-in">
       <div class="wm admin-only"><b>Carte</b><span>Yönetim</span></div>
       <div class="cs-wm"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#7A6346"/><rect x="4" y="4" width="92" height="92" fill="none" stroke="#EADCC4" stroke-width="1"/><text x="50" y="64" text-anchor="middle" font-family="Gilda Display,serif" font-size="44" fill="#FFFDF8">CŞ</text></svg>CAFE ŞÖLEN<small>Ürünler</small></div>
-      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option></select>
-      <a class="lnk isl-only" href="/cafe-solen/panel/">‹ Panele dön</a>
+      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option><option value="yarim-ekmek">Yarım Ekmek</option></select>
+      <a class="lnk isl-only" id="panelBack" href="/cafe-solen/panel/">‹ Panele dön</a>
       <a class="lnk" id="openMenu" href="/cafe-solen/" target="_blank" rel="noopener">Menüyü aç ↗</a>
       <button class="out" id="logout" type="button">Çıkış</button>
     </div>
@@ -324,7 +333,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     <section id="t-subeler" hidden>
       <div class="card">
         <h2>Şube fotoğrafları</h2>
-        <p class="sub">Menünün şube seçim ekranında (cartemenusistemleri.com.tr/cafe-solen) her şube bu fotoğrafla görünür. Fotoğraf yüklemediğiniz şubede bir ürün fotoğrafı gösterilir.</p>
+        <p class="sub">Menünün şube seçim ekranında (<span class="kUrl">cartemenusistemleri.com.tr/cafe-solen</span>) her şube bu fotoğrafla görünür. Fotoğraf yüklemediğiniz şubede bir ürün fotoğrafı gösterilir.</p>
         <div class="sfg" id="sfList"></div>
       </div>
     </section>
@@ -333,7 +342,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     <section id="t-kullanici" hidden>
       <div class="card">
         <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
-          <div style="flex:1;min-width:220px"><h2>Panel kullanıcıları</h2><p class="sub" style="margin:0">Herkes <b>cartemenusistemleri.com.tr/cafe-solen/panel</b> adresinden kendi kullanıcı adı ve şifresiyle girer; sadece burada verdiğiniz şube ve yetkileri görür.</p></div>
+          <div style="flex:1;min-width:220px"><h2>Panel kullanıcıları</h2><p class="sub" style="margin:0">Herkes <b class="kPanel">cartemenusistemleri.com.tr/cafe-solen/panel</b> adresinden kendi kullanıcı adı ve şifresiyle girer; sadece burada verdiğiniz şube ve yetkileri görür.</p></div>
           <button class="btn sm" id="uNew" type="button">+ Yeni kullanıcı</button>
         </div>
         <div class="ulist" id="uList"></div>
@@ -458,7 +467,15 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
 <script>
 (function(){
   var $ = function(id){ return document.getElementById(id); };
-  var SECRET = '', K = 'cafe-solen';
+  var SECRET = '', K = window.ISL_K || 'cafe-solen';
+  var IAD = { 'cafe-solen':'Cafe Şölen', 'yarim-ekmek':'Yarım Ekmek' };
+  function kSetup(){
+    $('openMenu').href = '/' + K + '/'; $('panelBack').href = '/' + K + '/panel/';
+    [].forEach.call(document.querySelectorAll('.kPanel'), function(e){ e.textContent = 'cartemenusistemleri.com.tr/' + K + '/panel'; });
+    [].forEach.call(document.querySelectorAll('.kUrl'), function(e){ e.textContent = 'cartemenusistemleri.com.tr/' + K; });
+    var sb = document.querySelector('.tabs [data-tab="subeler"]'); if (sb) sb.hidden = K !== 'cafe-solen';
+    if (K === 'yarim-ekmek') document.querySelector('.cs-wm').innerHTML = '<img src="/yarim-ekmek/logo-ea.svg" alt="" style="width:30px;height:34px">YARIM EKMEK<small>Ürünler</small>';
+  }
   var MENU = [], ITEMS = [], BYID = {}, BASE = {}, OVR = {}, DRAFT = {}, LOG = [], T = null, SEC = 'all';
   var RAW = {}, U = {};
   var AL = { g:'Gluten', s:'Süt', y:'Yumurta', k:'Sert kabuklu', yf:'Yer fıstığı', su:'Susam', so:'Soya', ke:'Kereviz', h:'Hardal', sl:'Sülfit', b:'Balık' };
@@ -495,18 +512,18 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
   });
   if (ISL){
     // Cafe Şölen Panel'den gelen oturum (fiyat yetkisi gerekir)
-    document.title = 'Cafe Şölen · Ürün güncellemeleri';
+    document.title = (IAD[K] || K) + ' · Ürün güncellemeleri';
     $('login').hidden = true;
-    try { TOKEN = localStorage.getItem('cs-oturum'); } catch(e){}
-    if (!TOKEN) location.replace('/cafe-solen/panel/');
+    try { TOKEN = localStorage.getItem('oturum-' + K); } catch(e){}
+    if (!TOKEN) location.replace('/' + K + '/panel/');
     else fetch('/api/oturum', { headers:{ 'x-oturum': TOKEN }, cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
-      if (!j.ok){ location.replace('/cafe-solen/panel/'); return; }
-      if (!j.yetkiler || !j.yetkiler.fiyat){ document.body.innerHTML = '<p style="padding:40px;text-align:center;font-family:Jost,sans-serif">Ürün güncelleme yetkiniz yok. <a href="/cafe-solen/panel/">Panele dön</a></p>'; return; }
+      if (!j.ok){ location.replace('/' + K + '/panel/'); return; }
+      if (!j.yetkiler || !j.yetkiler.fiyat){ document.body.innerHTML = '<p style="padding:40px;text-align:center;font-family:Jost,sans-serif">Ürün güncelleme yetkiniz yok. <a href="/' + K + '/panel/">Panele dön</a></p>'; return; }
       $('app').hidden = false; load();
     }).catch(function(){ toast('Bağlantı hatası', true); });
   } else if ($('sec').value) setTimeout(function(){ $('lf').requestSubmit ? $('lf').requestSubmit() : $('lf').dispatchEvent(new Event('submit')); }, 0);
   $('logout').addEventListener('click', function(){
-    if (ISL){ try { localStorage.removeItem('cs-oturum'); } catch(e){} location.href = '/cafe-solen/panel/'; return; }
+    if (ISL){ try { localStorage.removeItem('oturum-' + K); } catch(e){} location.href = '/' + K + '/panel/'; return; }
     try { sessionStorage.removeItem('carte_admin_secret'); } catch(e){} location.reload();
   });
 
@@ -517,7 +534,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
       api({ get:true }),
       apiTo('/api/urun', { get:true })
     ]).then(function(res){
-      var js = res[0], i = js.indexOf('['), j = js.lastIndexOf(']');
+      var js = res[0], i = js.indexOf('[', js.indexOf('=')), j = js.lastIndexOf(']');
       MENU = JSON.parse(js.slice(i, j + 1));
       if (!res[1].ok){ toast(res[1].error || 'Veri alınamadı', true); if (res[1].status === 401) $('logout').click(); return; }
       OVR = res[1].p || {}; LOG = res[1].log || []; T = res[1].t; U = (res[2] && res[2].o) || {};
@@ -1123,8 +1140,8 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
       USERS = j.kullanicilar || []; drawUsers();
       var u = USERS.filter(function(x){ return x.kullanici === j.kullanici; })[0];
       if (pw){
-        var txt = 'Cafe Şölen Panel\nAdres: https://cartemenusistemleri.com.tr/cafe-solen/panel/\nKullanıcı adı: ' + j.kullanici + '\nŞifre: ' + pw;
-        $('uShare').innerHTML = '<b>Kaydedildi.</b> Bu bilgileri kişiye iletin (şifre bir daha gösterilmez):<br>Adres: <code>cartemenusistemleri.com.tr/cafe-solen/panel</code><br>Kullanıcı adı: <code>' + esc(j.kullanici) + '</code><br>Şifre: <code>' + esc(pw) + '</code><br><button class="btn sm" type="button" id="uCopy" style="margin-top:8px">Bilgileri kopyala</button>';
+        var txt = (IAD[K] || K) + ' Panel\nAdres: https://cartemenusistemleri.com.tr/' + K + '/panel/\nKullanıcı adı: ' + j.kullanici + '\nŞifre: ' + pw;
+        $('uShare').innerHTML = '<b>Kaydedildi.</b> Bu bilgileri kişiye iletin (şifre bir daha gösterilmez):<br>Adres: <code>cartemenusistemleri.com.tr/' + K + '/panel</code><br>Kullanıcı adı: <code>' + esc(j.kullanici) + '</code><br>Şifre: <code>' + esc(pw) + '</code><br><button class="btn sm" type="button" id="uCopy" style="margin-top:8px">Bilgileri kopyala</button>';
         $('uShare').hidden = false;
         $('uCopy').onclick = function(){ (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function(){ toast('Kopyalandı'); }).catch(function(){ toast('Kopyalanamadı, elle seçin', true); }); };
         UEDIT = u; $('uKu').disabled = true; $('uPw').value = ''; $('uPw').placeholder = 'Boş bırakırsanız şifre değişmez'; $('uFT').textContent = 'Kullanıcıyı düzenle';
@@ -1133,7 +1150,10 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     }).catch(function(){ btn.disabled = false; $('uErr').textContent = 'Bağlantı hatası'; });
   });
 
-  $('menuSel').addEventListener('change', function(){ K = this.value; $('openMenu').href = '/' + K + '/'; NIDX = null; OPTS = null; load(); });
+  $('menuSel').addEventListener('change', function(){
+    K = this.value; NIDX = null; OPTS = null; USERS = []; SF = {}; kSetup(); goTab('fiyat'); load();
+  });
+  kSetup();
 })();
 </script>
 </body>
