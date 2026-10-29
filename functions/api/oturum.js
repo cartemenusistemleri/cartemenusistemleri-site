@@ -24,6 +24,12 @@ export const ISLETMELER = {
     degisken: 'YE_MENU',
     subeler: [{ id: 'merkez', ad: 'Yarım Ekmek' }],
   },
+  'cafe-carte': {
+    ad: 'Cafe Carte',
+    degisken: 'CC_MENU',
+    demo: true, // müşterilere gösterim için deneme işletmesi
+    subeler: [{ id: 'merkez', ad: 'Cafe Carte' }],
+  },
 };
 export const YETKILER = ['stok', 'oneri', 'istatistik', 'fiyat'];
 const GUN = 30;
