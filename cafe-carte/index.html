@@ -6,6 +6,7 @@
 <title>Cafe Carte · Menü</title>
 <meta name="description" content="Cafe Carte dijital menüsü: kahveler, soğuk içecekler, fırın ürünleri, mutfak ve tatlılar. Her ürün için kalori, içerik ve alerjen bilgisi.">
 <meta name="theme-color" content="#3A121D">
+<script>if(/[?&]tema=acik\b/.test(location.search)){document.documentElement.classList.add('acik');document.querySelector('meta[name=theme-color]').content='#FAF3E4'}</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Cafe Carte · Örnek Dijital Menü">
 <meta property="og:description" content="Carte Menü Sistemleri örnek menü arayüzü: menü kapağı, kalori, içerik ve alerjen bilgisi, dört dil.">
@@ -158,6 +159,35 @@ main{padding-bottom:30px}
 .sheet .kcal .por{font-size:13.5px;color:var(--ink-soft)}
 /* product grid */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+/* ---------- gündüz teması: ?tema=acik ---------- */
+html.acik{--canvas:#FAF3E4;--canvas-deep:#F3E8D0;--panel:#FFFDF6;--text:#2A0F17;--text-2:#5E3F47;--text-3:#8B6E76;--line:rgba(74,24,38,.14)}
+html.acik .env{background:radial-gradient(120% 70% at 50% 0%,#FFFDF6 0%,#FAF3E4 55%,#F3E8D0 100%)}
+html.acik .cover .face{background:radial-gradient(120% 80% at 50% 35%,#FFFDF8 0%,#FAF3E4 50%,#EFE2C8 100%)}
+html.acik .cover .face::after{background:linear-gradient(180deg,rgba(250,243,228,0),var(--canvas))}
+html.acik .frame{border-color:rgba(74,24,38,.3)}html.acik .frame::before{border-color:rgba(74,24,38,.12)}
+html.acik .corner{color:rgba(74,24,38,.5)}
+html.acik .cover .top,html.acik .cover .bottom{color:rgba(74,24,38,.62)}
+html.acik .cover .by{color:rgba(74,24,38,.55)}
+html.acik .topbar{background:rgba(250,243,228,.92)}
+html.acik .ibtn:hover,html.acik .ibtn[aria-expanded="true"]{background:rgba(74,24,38,.07);border-color:rgba(74,24,38,.35)}
+html.acik .chip:hover{border-color:rgba(74,24,38,.4)}
+html.acik .chip.on,html.acik .flt button[aria-pressed="true"],html.acik .clangs button[aria-pressed="true"],html.acik #bBtn[aria-pressed="true"]{background:var(--ink);color:#FFFDF6;border-color:var(--ink)}
+html.acik .search input{background:rgba(74,24,38,.04)}
+html.acik .search input:focus{border-color:rgba(74,24,38,.4)}
+html.acik .tile{border-color:rgba(74,24,38,.12)}
+html.acik .tile:hover{border-color:rgba(74,24,38,.35)}
+html.acik .tile:not(.ico) .tt b,html.acik .tile:not(.ico) .tt i,html.acik .tile:not(.ico) .tt small,html.acik .tile.alt .ic{color:#FFFDF6}
+html.acik .tile.ico{background:radial-gradient(120% 90% at 30% 20%,#FFFDF8,#F3E8D0)}
+html.acik .tile.ico::after{background:none}
+html.acik .tile.ico .big{color:rgba(74,24,38,.8)}
+html.acik .card,html.acik .fcard{box-shadow:0 0 0 1px rgba(74,24,38,.1),0 14px 30px -20px rgba(74,24,38,.45)}
+html.acik .dr .lead{border-bottom-color:rgba(74,24,38,.22)}
+html.acik .add{border-color:rgba(74,24,38,.3)}
+html.acik .al s.ok{border-color:rgba(74,24,38,.3)}
+html.acik .act{background:rgba(74,24,38,.03)}html.acik .act:hover{background:rgba(74,24,38,.07);border-color:rgba(74,24,38,.3)}
+html.acik .bdg.n{box-shadow:0 0 0 1px rgba(74,24,38,.12)}
+html.acik .dr .bdg.f{background:var(--ink);color:#FFFDF6}
+html.acik :focus-visible{outline-color:var(--ink)}
 /* stok / öneri */
 .so{display:inline-flex;align-items:center;font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#F3EDE6;background:rgba(92,80,82,.92);border-radius:999px;padding:4px 9px;white-space:nowrap}
 .cw.out .card .ph img{filter:grayscale(1);opacity:.5}
@@ -896,9 +926,9 @@ html[dir="rtl"] .cover .by{left:auto;right:calc(clamp(14px,3vw,28px) + 18px)}
     row.innerHTML = h; box.hidden = !h;
   }
   document.getElementById('frow').addEventListener('click', function(e){ var c = e.target.closest('.fcard'); if (c) openProduct(c); });
-  var EV = { v:[], a:[] }, sentS = false;
+  var EV = { v:[], a:[] }, sentS = false, ONIZ = /[?&]onizleme=1\b/.test(location.search); /* site önizlemesi istatistiğe sayılmaz */
   function flush(){
-    if (!navigator.sendBeacon || (sentS && !EV.v.length && !EV.a.length)) return;
+    if (ONIZ || !navigator.sendBeacon || (sentS && !EV.v.length && !EV.a.length)) return;
     try { navigator.sendBeacon('/api/olay', JSON.stringify({ k:STOK_K, s: sentS ? 0 : 1, v:EV.v, a:EV.a })); sentS = true; EV = { v:[], a:[] }; } catch(e){}
   }
   document.addEventListener('visibilitychange', function(){ if (document.hidden) flush(); });
