@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carte QR Menü</title>
+<meta name="description" content="Masadaki QR'ı okutun, menü açılsın. Cafe Carte terasında, İzmir'deki gerçek güneş ışığıyla bir QR menü denemesi.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2A0D15">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,500&family=Jost:wght@300;400;500&display=swap">
+<style>
+:root{--bordo:#4A1826;--bordo-d:#2A0D15;--cream:#FFFDF6;--cream-2:#F3E8D0;--text-2:#E6D6C7;--ease:cubic-bezier(.23,1,.32,1);
+  --sky1:#3F86D2;--sky2:#BCD9F0;--sea1:#3C7DB8;--sea2:#1D4B7A;--land:#6E7F86;--amb:0;--glow:.2;--stars:0;--sunx:50%;--suny:40%;--sunop:1;--sun:#FFF6D8;--refl:.5;--hz:58%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--bordo-d)}
+body{margin:0;background:var(--bordo-d);color:var(--cream);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:300;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+::selection{background:var(--cream-2);color:var(--bordo)}
+a{color:inherit}
+.top{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(16px,4vw,40px);pointer-events:none}
+.top a{pointer-events:auto;text-decoration:none}
+.logo{font-family:'Allura',cursive;font-size:38px;line-height:1;color:var(--cream);text-shadow:0 1px 12px rgba(0,0,0,.25)}
+.top .cta{font-size:14px;font-weight:500;color:var(--bordo);background:var(--cream);border-radius:999px;padding:10px 16px;transition:transform 160ms var(--ease)}
+.top .cta:active{transform:scale(.97)}
+
+/* sahne */
+.scroller{position:relative;height:520vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;isolation:isolate}
+.world{position:absolute;inset:-3%;transform-origin:62% 70%;will-change:transform}
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) var(--hz))}
+.stars{position:absolute;inset:0 0 calc(100% - var(--hz));opacity:var(--stars);background-image:radial-gradient(1.2px 1.2px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 27% 32%,#fff 50%,transparent 51%),radial-gradient(1.4px 1.4px at 41% 12%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 58% 26%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 71% 9%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 84% 30%,#fff 50%,transparent 51%),radial-gradient(1.3px 1.3px at 93% 16%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 6% 40%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 35% 44%,#fff 50%,transparent 51%),radial-gradient(1.1px 1.1px at 64% 41%,#fff 50%,transparent 51%)}
+.sun{position:absolute;left:var(--sunx);top:var(--suny);width:clamp(46px,6vw,78px);aspect-ratio:1;margin:calc(clamp(46px,6vw,78px)/-2) 0 0 calc(clamp(46px,6vw,78px)/-2);border-radius:50%;background:var(--sun);opacity:var(--sunop);box-shadow:0 0 60px 24px color-mix(in srgb,var(--sun) 55%,transparent),0 0 180px 90px color-mix(in srgb,var(--sun) 22%,transparent)}
+.moon{position:absolute;right:16%;top:16%;width:34px;aspect-ratio:1;border-radius:50%;background:#F4F1E6;box-shadow:0 0 40px 10px rgba(244,241,230,.18);opacity:var(--stars)}
+.land{position:absolute;left:0;right:0;top:calc(var(--hz) - 9%);height:9.4%;color:var(--land)}
+.land svg{width:100%;height:100%;display:block}
+.lights{position:absolute;left:0;right:0;top:calc(var(--hz) - 1.2%);height:1.4%;opacity:var(--stars);background-image:radial-gradient(1.4px 1.4px at 8% 50%,#FFD9A0 60%,transparent 61%),radial-gradient(1.4px 1.4px at 15% 30%,#FFE6BE 60%,transparent 61%),radial-gradient(1.4px 1.4px at 23% 60%,#FFD9A0 60%,transparent 61%),radial-gradient(1.4px 1.4px at 31% 40%,#FFF0D6 60%,transparent 61%),radial-gradient(1.4px 1.4px at 44% 55%,#FFD9A0 60%,transparent 61%),radial-gradient(1.4px 1.4px at 52% 35%,#FFE6BE 60%,transparent 61%),radial-gradient(1.4px 1.4px at 66% 50%,#FFD9A0 60%,transparent 61%),radial-gradient(1.4px 1.4px at 74% 30%,#FFF0D6 60%,transparent 61%),radial-gradient(1.4px 1.4px at 86% 55%,#FFD9A0 60%,transparent 61%),radial-gradient(1.4px 1.4px at 94% 40%,#FFE6BE 60%,transparent 61%)}
+.sea{position:absolute;left:0;right:0;top:var(--hz);bottom:0;background:linear-gradient(180deg,var(--sea1),var(--sea2) 40%)}
+.refl{position:absolute;top:var(--hz);left:var(--sunx);width:clamp(40px,5vw,90px);height:18%;transform:translateX(-50%);opacity:var(--refl);background:repeating-linear-gradient(180deg,color-mix(in srgb,var(--sun) 70%,transparent) 0 1px,transparent 1px 6px);-webkit-mask:radial-gradient(50% 100% at 50% 0%,#000 20%,transparent 100%);mask:radial-gradient(50% 100% at 50% 0%,#000 20%,transparent 100%);filter:blur(1.2px)}
+.rail{position:absolute;left:0;right:0;top:calc(var(--hz) + 6%);height:7px;background:linear-gradient(180deg,#1B0A10,#0F0508);box-shadow:0 1px 0 rgba(255,253,246,.12)}
+.glass{position:absolute;left:0;right:0;top:calc(var(--hz) + 6%);bottom:0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0))}
+.table{position:absolute;left:-4%;right:-4%;top:calc(var(--hz) + 15%);bottom:-4%;background:linear-gradient(180deg,#F1E7D6 0%,#E3D4BC 30%,#C9B699 100%);border-radius:50% 50% 0 0/12% 12% 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.18) inset}
+.table::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(60% 50% at var(--sunx) 0%,color-mix(in srgb,var(--sun) 40%,transparent),transparent 70%);opacity:var(--refl);mix-blend-mode:soft-light}
+.amb{position:absolute;left:0;right:0;top:0;height:calc(var(--hz) + 15%);background:#0B0714;opacity:var(--amb);pointer-events:none}
+.amb-fg{position:absolute;left:0;right:0;top:calc(var(--hz) + 15%);bottom:0;background:#120A10;opacity:calc(var(--amb) * .55);pointer-events:none}
+.candle-glow{position:absolute;z-index:3;left:var(--cx);top:var(--cy);width:60vmin;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,190,110,.55),rgba(255,160,80,.18) 45%,transparent);opacity:var(--glow);mix-blend-mode:screen;pointer-events:none}
+
+/* masadaki nesneler */
+.obj{position:absolute;z-index:2}
+.cardwrap{left:58%;top:calc(var(--hz) + 15%);width:clamp(150px,19vw,250px);transform:translate(-50%,-100%) translateY(4.5vh)}
+.cardwrap .qrcard{display:block;width:100%;height:auto;filter:drop-shadow(0 18px 18px rgba(30,10,15,.35))}
+.cardwrap .stand{position:absolute;left:8%;right:8%;bottom:-6px;height:16px;border-radius:4px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.18));box-shadow:0 10px 18px rgba(30,10,15,.3)}
+.cardwrap .shade{position:absolute;inset:0;border-radius:6%;background:#0B0714;opacity:calc(var(--amb) * .3);pointer-events:none}
+.cup{left:34%;top:calc(var(--hz) + 23%);width:clamp(90px,10vw,140px);transform:translate(-50%,-100%)}
+.candle{left:76%;top:calc(var(--hz) + 21%);width:clamp(44px,4.6vw,64px);transform:translate(-50%,-100%)}
+.cup svg,.candle svg{display:block;width:100%;height:auto}
+.flame{transform-origin:50% 90%;animation:flick 2.6s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scale(1,1)}40%{transform:scale(.94,1.06)}70%{transform:scale(1.03,.96)}}
+
+/* telefon */
+.phone{position:absolute;left:50%;top:50%;width:min(300px,42vh);aspect-ratio:9/19.3;margin:0;transform:translate(-50%,120vh);will-change:transform;z-index:5}
+.phone .body{position:absolute;inset:0;border-radius:15%/7%;background:#121014;padding:3.2%;box-shadow:0 40px 80px -20px rgba(0,0,0,.6),0 0 0 1.5px #2A262C inset}
+.screen{position:relative;width:100%;height:100%;border-radius:12.5%/5.8%;overflow:hidden;background:#000}
+.screen .layer{position:absolute;inset:0;opacity:0}
+.screen .cam{opacity:1;background:#1a1416}
+.cam .feedw{position:absolute;left:50%;top:44%;width:84%;transform:translate(-50%,-50%)}
+.cam .feedw img{display:block;width:100%;height:auto;border-radius:4%}
+.cam .blurbg{position:absolute;inset:-10%;background:linear-gradient(180deg,var(--sky2) 0%,var(--sea1) 34%,var(--sea2) 46%,#E3D4BC 62%,#C9B699 100%);filter:blur(14px)}
+.cam .finder{position:absolute;left:16%;top:20.4%;width:68%;aspect-ratio:1}
+.cam .finder i{position:absolute;width:22%;height:22%;border:3px solid #FFD54A}
+.cam .finder i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-radius:14px 0 0 0}
+.cam .finder i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-radius:0 14px 0 0}
+.cam .finder i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-radius:0 0 0 14px}
+.cam .finder i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-radius:0 0 14px 0}
+.cam .pill{position:absolute;left:8%;right:8%;bottom:16%;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:rgba(255,213,74,.96);color:#1a1406;font-size:11.5px;font-weight:500;line-height:1.25;opacity:0;transform:translateY(8px)}
+.cam .pill b{display:block;font-weight:500}
+.cam .pill small{display:block;font-size:10.5px;opacity:.75}
+.cam .shutter{position:absolute;left:50%;bottom:4.5%;width:16%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;border:3px solid rgba(255,255,255,.9);background:rgba(255,255,255,.25)}
+.screen img.menu{position:absolute;left:0;top:0;width:100%;height:auto}
+.notch{position:absolute;left:50%;top:1.6%;width:30%;height:3.2%;transform:translateX(-50%);border-radius:999px;background:#000;z-index:3}
+
+/* metinler */
+.caps{position:absolute;z-index:6;left:clamp(16px,6vw,96px);top:clamp(96px,18vh,170px);width:min(620px,46vw)}
+.cap{position:absolute;left:0;top:0;width:100%;opacity:0;transform:translateY(14px)}
+.cap h2{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(40px,5.2vw,68px);line-height:1.02;letter-spacing:-.01em;text-wrap:balance;text-shadow:0 2px 24px rgba(20,8,14,.35)}
+.cap p{margin:16px 0 0;font-size:clamp(16px,1.35vw,19px);color:var(--cream);max-width:34ch;text-shadow:0 1px 14px rgba(20,8,14,.45)}
+.cap.c0 h1{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(44px,5.2vw,74px);line-height:1;letter-spacing:-.01em;text-wrap:balance;text-shadow:0 2px 24px rgba(20,8,14,.35)}
+.hint{position:absolute;z-index:6;left:50%;bottom:22px;transform:translateX(-50%);font-size:13px;letter-spacing:.06em;color:var(--cream);opacity:.85;display:flex;flex-direction:column;align-items:center;gap:8px}
+.hint span{width:1px;height:28px;background:linear-gradient(var(--cream),transparent);animation:cue 1.8s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* saat */
+.clock{position:fixed;z-index:21;right:clamp(12px,3vw,28px);bottom:clamp(12px,3vw,24px);display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:rgba(26,10,16,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--cream);font-size:13px}
+.clock b{font-weight:500;font-variant-numeric:tabular-nums;font-size:15px}
+.clock small{display:block;color:var(--text-2);font-size:11.5px;line-height:1.3}
+.clock input{width:clamp(110px,16vw,180px);accent-color:var(--cream-2)}
+.clock button{font:inherit;font-size:12px;color:var(--bordo);background:var(--cream-2);border:0;border-radius:999px;padding:6px 10px;cursor:pointer}
+.clock button[hidden]{display:none}
+
+/* son bölüm */
+.end{position:relative;background:var(--bordo-d);padding:clamp(80px,12vw,160px) clamp(16px,6vw,96px)}
+.end .in{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(32px,6vw,96px);align-items:center}
+.end h2{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(40px,5vw,64px);line-height:1.04;text-wrap:balance}
+.end p{margin:18px 0 0;color:var(--text-2);max-width:46ch}
+.end ul{margin:26px 0 0;padding:0;list-style:none;display:grid;gap:12px}
+.end li{display:flex;gap:12px;align-items:baseline}
+.end li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--cream-2);transform:translateY(-2px)}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 22px;border-radius:999px;font-weight:500;font-size:16px;text-decoration:none;transition:transform 160ms var(--ease),background-color 200ms ease}
+.btn:active{transform:scale(.97)}
+.btn.a{background:var(--cream);color:var(--bordo)}
+.btn.g{color:var(--cream);box-shadow:0 0 0 1.5px rgba(255,253,246,.4) inset}
+.scan{justify-self:center;width:min(360px,100%);text-align:center}
+.scan .qrcard{width:100%;height:auto;display:block;border-radius:22px;box-shadow:0 30px 60px -20px rgba(0,0,0,.55)}
+.scan p{margin:16px auto 0;font-size:15px}
+footer{padding:28px clamp(16px,6vw,96px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--text-2);font-size:14px;background:var(--bordo-d)}
+footer .s{font-family:'Allura',cursive;font-size:30px;color:var(--cream)}
+:focus-visible{outline:2px solid var(--cream-2);outline-offset:3px;border-radius:6px}
+
+@media (max-width:760px){
+  :root{--hz:50%}
+  .caps{left:16px;right:16px;width:auto;top:84px}
+  .cap h2{font-size:38px}.cap.c0 h1{font-size:46px}
+  .cap p{font-size:16px;margin-top:10px}
+  .cardwrap{left:62%;width:clamp(128px,38vw,190px)}
+  .cup{left:22%;width:24vw}.candle{left:88%;width:11vw}
+  .phone{width:min(250px,56vw)}
+  .clock{left:12px;right:12px;justify-content:space-between}
+  .clock input{flex:1;width:auto}
+  .end .in{grid-template-columns:1fr}
+  .hint{bottom:96px}
+  .moon{top:36%;right:12%}
+}
+@media (prefers-reduced-motion:reduce){
+  .flame,.hint span{animation:none}
+}
+</style>
+</head>
+<body>
+<header class="top"><a class="logo" href="/" aria-label="Carte ana sayfa">Carte</a><a class="cta" href="/#iletisim">QR menü yaptıralım</a></header>
+
+<main>
+<section class="scroller" id="sahne" aria-label="QR menü nasıl çalışır">
+  <div class="stage" id="stage">
+    <div class="world" id="world" aria-hidden="true">
+      <div class="sky"></div><div class="stars"></div><div class="moon"></div><div class="sun"></div>
+      <div class="land"><svg viewBox="0 0 1000 100" preserveAspectRatio="none"><path fill="currentColor" d="M0 70 C60 52 110 40 170 46 C230 52 260 30 330 24 C400 18 430 44 500 50 C560 55 600 36 660 30 C720 24 760 8 830 14 C890 19 930 42 1000 48 L1000 100 L0 100Z"/></svg></div>
+      <div class="lights"></div>
+      <div class="sea"></div><div class="refl"></div>
+      <div class="rail"></div><div class="glass"></div>
+      <div class="table"></div>
+      <div class="obj cup"><svg viewBox="0 0 140 110"><ellipse cx="66" cy="100" rx="62" ry="9" fill="#000" opacity=".18"/><ellipse cx="66" cy="96" rx="58" ry="10" fill="#FFFDF8"/><path d="M28 40h76l-6 44c-1 7-7 12-14 12H48c-7 0-13-5-14-12z" fill="#FFFDF8"/><path d="M104 50c14 0 20 8 18 16-2 9-12 12-20 10" fill="none" stroke="#FFFDF8" stroke-width="7"/><ellipse cx="66" cy="40" rx="38" ry="7" fill="#6B3A22"/><ellipse cx="62" cy="39" rx="14" ry="2.6" fill="#E9C9A3" opacity=".8"/></svg></div>
+      <div class="obj cardwrap" id="card"><svg class="qrcard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" role="img" aria-label="Cafe Carte QR menü kartı. Okutunca demo menü açılır.">
+<defs>
+ <radialGradient id="g" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#5A2130"/><stop offset="1" stop-color="#3A121D"/></radialGradient>
+</defs>
+<rect width="1000" height="1400" rx="56" fill="url(#g)"/>
+<rect x="30" y="30" width="940" height="1340" rx="34" fill="none" stroke="#F3E8D0" stroke-opacity=".38" stroke-width="2"/>
+<text x="500" y="200" text-anchor="middle" font-family="Allura, cursive" font-size="150" fill="#FFFDF6">Cafe Carte</text>
+<text x="500" y="262" text-anchor="middle" font-family="Jost, sans-serif" font-weight="400" font-size="24" letter-spacing="9" fill="#E6D6C7">KAHVE · MUTFAK · TATLI</text>
+<rect x="200" y="330" width="600" height="600" rx="40" fill="#FFFDF6"/>
+<g transform="translate(238.298 368.298) scale(12.76596)" fill="#3A121D"><path d="M0 0h7v1h-7zM8 0h2v1h-2zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM23 0h3v1h-3zM27 0h1v1h-1zM30 0h2v1h-2zM34 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h1v1h-1zM13 1h1v1h-1zM15 1h4v1h-4zM20 1h1v1h-1zM24 1h6v1h-6zM34 1h1v1h-1zM40 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h1v1h-1zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM21 2h2v1h-2zM24 2h2v1h-2zM27 2h3v1h-3zM31 2h2v1h-2zM34 2h1v1h-1zM36 2h3v1h-3zM40 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h3v1h-3zM17 3h5v1h-5zM23 3h5v1h-5zM29 3h1v1h-1zM31 3h1v1h-1zM34 3h1v1h-1zM36 3h3v1h-3zM40 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM13 4h2v1h-2zM17 4h2v1h-2zM20 4h1v1h-1zM22 4h1v1h-1zM26 4h3v1h-3zM34 4h1v1h-1zM36 4h3v1h-3zM40 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h5v1h-5zM19 5h1v1h-1zM23 5h2v1h-2zM26 5h2v1h-2zM29 5h1v1h-1zM31 5h1v1h-1zM34 5h1v1h-1zM40 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h7v1h-7zM9 7h4v1h-4zM17 7h1v1h-1zM19 7h1v1h-1zM21 7h2v1h-2zM24 7h1v1h-1zM29 7h2v1h-2zM32 7h1v1h-1zM3 8h1v1h-1zM6 8h1v1h-1zM9 8h1v1h-1zM11 8h2v1h-2zM14 8h1v1h-1zM17 8h1v1h-1zM21 8h1v1h-1zM23 8h2v1h-2zM26 8h3v1h-3zM31 8h1v1h-1zM35 8h3v1h-3zM39 8h2v1h-2zM2 9h2v1h-2zM7 9h1v1h-1zM10 9h4v1h-4zM16 9h7v1h-7zM24 9h1v1h-1zM28 9h1v1h-1zM32 9h4v1h-4zM37 9h4v1h-4zM0 10h1v1h-1zM2 10h1v1h-1zM5 10h7v1h-7zM14 10h1v1h-1zM16 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h3v1h-3zM28 10h1v1h-1zM31 10h1v1h-1zM37 10h2v1h-2zM0 11h1v1h-1zM2 11h4v1h-4zM9 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM16 11h3v1h-3zM21 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h2v1h-2zM38 11h1v1h-1zM2 12h2v1h-2zM6 12h1v1h-1zM8 12h4v1h-4zM15 12h5v1h-5zM21 12h5v1h-5zM29 12h1v1h-1zM31 12h2v1h-2zM34 12h2v1h-2zM37 12h1v1h-1zM39 12h2v1h-2zM2 13h3v1h-3zM7 13h2v1h-2zM10 13h2v1h-2zM13 13h2v1h-2zM20 13h1v1h-1zM22 13h2v1h-2zM27 13h3v1h-3zM32 13h1v1h-1zM34 13h1v1h-1zM37 13h3v1h-3zM1 14h3v1h-3zM6 14h1v1h-1zM8 14h3v1h-3zM12 14h1v1h-1zM16 14h2v1h-2zM19 14h1v1h-1zM21 14h1v1h-1zM24 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM34 14h1v1h-1zM36 14h1v1h-1zM38 14h3v1h-3zM0 15h1v1h-1zM2 15h4v1h-4zM13 15h1v1h-1zM16 15h1v1h-1zM18 15h2v1h-2zM22 15h1v1h-1zM25 15h1v1h-1zM27 15h1v1h-1zM29 15h2v1h-2zM32 15h1v1h-1zM34 15h3v1h-3zM40 15h1v1h-1zM1 16h1v1h-1zM3 16h5v1h-5zM9 16h2v1h-2zM13 16h1v1h-1zM16 16h5v1h-5zM22 16h1v1h-1zM25 16h1v1h-1zM28 16h3v1h-3zM32 16h1v1h-1zM35 16h1v1h-1zM39 16h2v1h-2zM1 17h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM10 17h4v1h-4zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h2v1h-2zM24 17h2v1h-2zM28 17h2v1h-2zM34 17h2v1h-2zM39 17h2v1h-2zM0 18h2v1h-2zM3 18h2v1h-2zM6 18h1v1h-1zM8 18h2v1h-2zM11 18h2v1h-2zM14 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM21 18h1v1h-1zM29 18h1v1h-1zM34 18h1v1h-1zM36 18h5v1h-5zM0 19h1v1h-1zM3 19h3v1h-3zM8 19h2v1h-2zM11 19h1v1h-1zM18 19h4v1h-4zM24 19h1v1h-1zM27 19h2v1h-2zM35 19h1v1h-1zM40 19h1v1h-1zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h4v1h-4zM11 20h1v1h-1zM13 20h3v1h-3zM18 20h3v1h-3zM24 20h3v1h-3zM28 20h2v1h-2zM33 20h4v1h-4zM38 20h3v1h-3zM4 21h1v1h-1zM8 21h1v1h-1zM10 21h2v1h-2zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM20 21h1v1h-1zM24 21h3v1h-3zM29 21h1v1h-1zM32 21h1v1h-1zM34 21h1v1h-1zM36 21h1v1h-1zM38 21h3v1h-3zM0 22h2v1h-2zM3 22h1v1h-1zM6 22h1v1h-1zM9 22h2v1h-2zM13 22h3v1h-3zM17 22h1v1h-1zM19 22h1v1h-1zM21 22h1v1h-1zM25 22h1v1h-1zM28 22h1v1h-1zM30 22h2v1h-2zM33 22h2v1h-2zM39 22h1v1h-1zM0 23h1v1h-1zM3 23h3v1h-3zM7 23h3v1h-3zM14 23h1v1h-1zM16 23h1v1h-1zM18 23h1v1h-1zM25 23h3v1h-3zM30 23h2v1h-2zM34 23h7v1h-7zM0 24h1v1h-1zM2 24h2v1h-2zM5 24h2v1h-2zM10 24h1v1h-1zM12 24h1v1h-1zM15 24h1v1h-1zM21 24h1v1h-1zM26 24h4v1h-4zM32 24h4v1h-4zM38 24h2v1h-2zM0 25h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM8 25h5v1h-5zM14 25h1v1h-1zM16 25h1v1h-1zM19 25h1v1h-1zM21 25h2v1h-2zM24 25h3v1h-3zM29 25h3v1h-3zM33 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM1 26h1v1h-1zM3 26h1v1h-1zM5 26h4v1h-4zM10 26h1v1h-1zM12 26h8v1h-8zM22 26h1v1h-1zM24 26h2v1h-2zM28 26h2v1h-2zM32 26h2v1h-2zM35 26h2v1h-2zM39 26h2v1h-2zM2 27h1v1h-1zM5 27h1v1h-1zM7 27h2v1h-2zM11 27h1v1h-1zM14 27h2v1h-2zM19 27h2v1h-2zM23 27h2v1h-2zM27 27h4v1h-4zM32 27h3v1h-3zM39 27h1v1h-1zM0 28h1v1h-1zM3 28h4v1h-4zM8 28h1v1h-1zM11 28h2v1h-2zM14 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM26 28h1v1h-1zM29 28h1v1h-1zM33 28h2v1h-2zM39 28h1v1h-1zM2 29h1v1h-1zM4 29h1v1h-1zM9 29h2v1h-2zM14 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM26 29h8v1h-8zM35 29h1v1h-1zM38 29h3v1h-3zM0 30h1v1h-1zM6 30h1v1h-1zM9 30h3v1h-3zM13 30h2v1h-2zM16 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM23 30h2v1h-2zM27 30h2v1h-2zM35 30h1v1h-1zM37 30h4v1h-4zM2 31h2v1h-2zM5 31h1v1h-1zM8 31h1v1h-1zM15 31h2v1h-2zM23 31h3v1h-3zM29 31h2v1h-2zM33 31h1v1h-1zM35 31h1v1h-1zM37 31h1v1h-1zM0 32h1v1h-1zM2 32h1v1h-1zM4 32h4v1h-4zM10 32h3v1h-3zM15 32h1v1h-1zM17 32h4v1h-4zM22 32h1v1h-1zM24 32h1v1h-1zM26 32h3v1h-3zM32 32h7v1h-7zM40 32h1v1h-1zM8 33h1v1h-1zM12 33h1v1h-1zM14 33h2v1h-2zM17 33h8v1h-8zM26 33h1v1h-1zM28 33h2v1h-2zM31 33h2v1h-2zM36 33h1v1h-1zM38 33h3v1h-3zM0 34h7v1h-7zM11 34h2v1h-2zM16 34h1v1h-1zM20 34h2v1h-2zM25 34h2v1h-2zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1zM34 34h1v1h-1zM36 34h2v1h-2zM39 34h1v1h-1zM0 35h1v1h-1zM6 35h1v1h-1zM9 35h2v1h-2zM13 35h1v1h-1zM16 35h1v1h-1zM18 35h2v1h-2zM21 35h1v1h-1zM30 35h1v1h-1zM32 35h1v1h-1zM36 35h1v1h-1zM38 35h1v1h-1zM0 36h1v1h-1zM2 36h3v1h-3zM6 36h1v1h-1zM10 36h1v1h-1zM12 36h2v1h-2zM15 36h1v1h-1zM18 36h1v1h-1zM20 36h3v1h-3zM25 36h1v1h-1zM28 36h1v1h-1zM30 36h1v1h-1zM32 36h6v1h-6zM39 36h1v1h-1zM0 37h1v1h-1zM2 37h3v1h-3zM6 37h1v1h-1zM8 37h1v1h-1zM12 37h1v1h-1zM16 37h1v1h-1zM18 37h1v1h-1zM22 37h2v1h-2zM26 37h1v1h-1zM29 37h6v1h-6zM36 37h1v1h-1zM39 37h1v1h-1zM0 38h1v1h-1zM2 38h3v1h-3zM6 38h1v1h-1zM10 38h3v1h-3zM15 38h1v1h-1zM18 38h2v1h-2zM21 38h3v1h-3zM26 38h1v1h-1zM28 38h1v1h-1zM30 38h1v1h-1zM36 38h1v1h-1zM40 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM9 39h2v1h-2zM12 39h1v1h-1zM14 39h4v1h-4zM19 39h1v1h-1zM21 39h2v1h-2zM25 39h2v1h-2zM29 39h1v1h-1zM31 39h2v1h-2zM35 39h1v1h-1zM37 39h1v1h-1zM39 39h1v1h-1zM0 40h7v1h-7zM10 40h3v1h-3zM16 40h4v1h-4zM21 40h2v1h-2zM25 40h2v1h-2zM28 40h2v1h-2zM32 40h1v1h-1zM35 40h5v1h-5z"/></g>
+<rect x="404" y="588" width="192" height="84" rx="22" fill="#FFFDF6"/>
+<rect x="414" y="598" width="172" height="64" rx="15" fill="#4A1826"/>
+<text x="500" y="645" text-anchor="middle" font-family="Allura, cursive" font-size="54" fill="#FFFDF6">Carte</text>
+<text x="500" y="1036" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-style="italic" font-weight="500" font-size="58" fill="#FFFDF6">Menü için okutun</text>
+<text x="500" y="1086" text-anchor="middle" font-family="Jost, sans-serif" font-weight="300" font-size="25" letter-spacing="3" fill="#E6D6C7">Scan for the menu · Меню · القائمة</text>
+<line x1="430" y1="1140" x2="570" y2="1140" stroke="#F3E8D0" stroke-opacity=".45" stroke-width="2"/>
+<text x="84" y="1300" font-family="Allura, cursive" font-size="74" fill="#F3E8D0" fill-opacity=".85">Carte</text>
+<text x="916" y="1292" text-anchor="end" font-family="Jost, sans-serif" font-weight="400" font-size="22" letter-spacing="6" fill="#E6D6C7" fill-opacity=".8">WI-FI · CafeCarte_Misafir</text>
+</svg><div class="stand"></div><div class="shade"></div></div>
+      <div class="obj candle"><svg viewBox="0 0 60 110"><ellipse cx="30" cy="104" rx="26" ry="5" fill="#000" opacity=".2"/><path d="M6 46h48v52c0 4-3 7-7 7H13c-4 0-7-3-7-7z" fill="rgba(255,255,255,.35)" stroke="rgba(255,255,255,.6)"/><rect x="14" y="60" width="32" height="40" rx="3" fill="#FFF6E6"/><path d="M30 60v-8" stroke="#3a2a20" stroke-width="2"/><g class="flame"><path d="M30 28c6 9 8 14 8 18a8 8 0 0 1-16 0c0-4 2-9 8-18z" fill="#FFC15A"/><path d="M30 38c3 4 4 7 4 9a4 4 0 0 1-8 0c0-2 1-5 4-9z" fill="#FFF2C4"/></g></svg></div>
+      <div class="amb"></div><div class="amb-fg"></div>
+      <div class="candle-glow" style="--cx:76%;--cy:calc(var(--hz) + 15%)"></div>
+    </div>
+
+    <div class="caps" id="caps">
+      <div class="cap c0"><h1>Menü, manzaraya bakarken açılır.</h1><p>Masadaki QR'ı okutun, Cafe Carte'nin menüsü telefonunuzda. Uygulama yok, bekleme yok.</p></div>
+      <div class="cap c1"><h2>Kamerayı karta tutun.</h2><p>Her telefonun kamerası QR'ı kendiliğinden tanır. Ekranda menünün adresi belirir.</p></div>
+      <div class="cap c2"><h2>Menü elinizde.</h2><p>Fotoğraflar, fiyatlar, kalori ve alerjenler; Türkçe, İngilizce, Rusça ve Arapça.</p></div>
+      <div class="cap c3"><h2>Fiyat değişti mi? Kart aynı kalır.</h2><p>İşletme panelden fiyatı, stoğu ve günün önerisini değiştirir; menü anında güncellenir.</p></div>
+    </div>
+
+    <div class="phone" id="phone" aria-hidden="true"><div class="body"><div class="screen">
+      <div class="notch"></div>
+      <div class="layer cam" id="cam"><div class="blurbg"></div><div class="feedw"><img src="kart.webp" alt="" width="600" height="840"><div class="finder"><i></i><i></i><i></i><i></i></div></div><div class="pill" id="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span><b>Cafe Carte · Menü</b><small>cartemenusistemleri.com.tr</small></span></div><div class="shutter"></div></div>
+      <div class="layer" id="m1"><img class="menu" src="menu-1.webp" alt="" width="520" height="1125"></div>
+      <div class="layer" id="m2"><img class="menu" src="menu-2.webp" alt="" width="520" height="1125"></div>
+      <div class="layer" id="m3"><img class="menu" src="menu-3.webp" alt="" width="520" height="1125"></div>
+    </div></div></div>
+
+    <div class="hint" id="hint"><span></span>Kaydırın</div>
+  </div>
+</section>
+
+<section class="end" id="dene" aria-labelledby="end-t">
+  <div class="in">
+    <div>
+      <h2 id="end-t">Şimdi kendi telefonunuzla okutun.</h2>
+      <p>Yandaki kart gerçek. Kameranızı tutun, Cafe Carte'nin demo menüsü açılsın. İşletmeniz için aynısını kendi logonuz ve renklerinizle hazırlıyoruz.</p>
+      <ul>
+        <li>Masaya özel QR kart, logonuz ortada</li>
+        <li>Dört dilde menü, fotoğraflı ürünler, alerjen filtresi</li>
+        <li>Fiyat, stok ve öneri için işletme paneli</li>
+      </ul>
+      <div class="btns"><a class="btn a" href="/#iletisim">QR menünüzü tasarlayalım</a><a class="btn g" href="/cafe-carte/">Demo menüyü aç</a></div>
+    </div>
+    <div class="scan"><svg class="qrcard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" role="img" aria-label="Cafe Carte QR menü kartı. Okutunca demo menü açılır.">
+<defs>
+ <radialGradient id="g2" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#5A2130"/><stop offset="1" stop-color="#3A121D"/></radialGradient>
+</defs>
+<rect width="1000" height="1400" rx="56" fill="url(#g2)"/>
+<rect x="30" y="30" width="940" height="1340" rx="34" fill="none" stroke="#F3E8D0" stroke-opacity=".38" stroke-width="2"/>
+<text x="500" y="200" text-anchor="middle" font-family="Allura, cursive" font-size="150" fill="#FFFDF6">Cafe Carte</text>
+<text x="500" y="262" text-anchor="middle" font-family="Jost, sans-serif" font-weight="400" font-size="24" letter-spacing="9" fill="#E6D6C7">KAHVE · MUTFAK · TATLI</text>
+<rect x="200" y="330" width="600" height="600" rx="40" fill="#FFFDF6"/>
+<g transform="translate(238.298 368.298) scale(12.76596)" fill="#3A121D"><path d="M0 0h7v1h-7zM8 0h2v1h-2zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM23 0h3v1h-3zM27 0h1v1h-1zM30 0h2v1h-2zM34 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h1v1h-1zM13 1h1v1h-1zM15 1h4v1h-4zM20 1h1v1h-1zM24 1h6v1h-6zM34 1h1v1h-1zM40 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h1v1h-1zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM21 2h2v1h-2zM24 2h2v1h-2zM27 2h3v1h-3zM31 2h2v1h-2zM34 2h1v1h-1zM36 2h3v1h-3zM40 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h3v1h-3zM17 3h5v1h-5zM23 3h5v1h-5zM29 3h1v1h-1zM31 3h1v1h-1zM34 3h1v1h-1zM36 3h3v1h-3zM40 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM13 4h2v1h-2zM17 4h2v1h-2zM20 4h1v1h-1zM22 4h1v1h-1zM26 4h3v1h-3zM34 4h1v1h-1zM36 4h3v1h-3zM40 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h5v1h-5zM19 5h1v1h-1zM23 5h2v1h-2zM26 5h2v1h-2zM29 5h1v1h-1zM31 5h1v1h-1zM34 5h1v1h-1zM40 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h7v1h-7zM9 7h4v1h-4zM17 7h1v1h-1zM19 7h1v1h-1zM21 7h2v1h-2zM24 7h1v1h-1zM29 7h2v1h-2zM32 7h1v1h-1zM3 8h1v1h-1zM6 8h1v1h-1zM9 8h1v1h-1zM11 8h2v1h-2zM14 8h1v1h-1zM17 8h1v1h-1zM21 8h1v1h-1zM23 8h2v1h-2zM26 8h3v1h-3zM31 8h1v1h-1zM35 8h3v1h-3zM39 8h2v1h-2zM2 9h2v1h-2zM7 9h1v1h-1zM10 9h4v1h-4zM16 9h7v1h-7zM24 9h1v1h-1zM28 9h1v1h-1zM32 9h4v1h-4zM37 9h4v1h-4zM0 10h1v1h-1zM2 10h1v1h-1zM5 10h7v1h-7zM14 10h1v1h-1zM16 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h3v1h-3zM28 10h1v1h-1zM31 10h1v1h-1zM37 10h2v1h-2zM0 11h1v1h-1zM2 11h4v1h-4zM9 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM16 11h3v1h-3zM21 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h2v1h-2zM38 11h1v1h-1zM2 12h2v1h-2zM6 12h1v1h-1zM8 12h4v1h-4zM15 12h5v1h-5zM21 12h5v1h-5zM29 12h1v1h-1zM31 12h2v1h-2zM34 12h2v1h-2zM37 12h1v1h-1zM39 12h2v1h-2zM2 13h3v1h-3zM7 13h2v1h-2zM10 13h2v1h-2zM13 13h2v1h-2zM20 13h1v1h-1zM22 13h2v1h-2zM27 13h3v1h-3zM32 13h1v1h-1zM34 13h1v1h-1zM37 13h3v1h-3zM1 14h3v1h-3zM6 14h1v1h-1zM8 14h3v1h-3zM12 14h1v1h-1zM16 14h2v1h-2zM19 14h1v1h-1zM21 14h1v1h-1zM24 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM34 14h1v1h-1zM36 14h1v1h-1zM38 14h3v1h-3zM0 15h1v1h-1zM2 15h4v1h-4zM13 15h1v1h-1zM16 15h1v1h-1zM18 15h2v1h-2zM22 15h1v1h-1zM25 15h1v1h-1zM27 15h1v1h-1zM29 15h2v1h-2zM32 15h1v1h-1zM34 15h3v1h-3zM40 15h1v1h-1zM1 16h1v1h-1zM3 16h5v1h-5zM9 16h2v1h-2zM13 16h1v1h-1zM16 16h5v1h-5zM22 16h1v1h-1zM25 16h1v1h-1zM28 16h3v1h-3zM32 16h1v1h-1zM35 16h1v1h-1zM39 16h2v1h-2zM1 17h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM10 17h4v1h-4zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h2v1h-2zM24 17h2v1h-2zM28 17h2v1h-2zM34 17h2v1h-2zM39 17h2v1h-2zM0 18h2v1h-2zM3 18h2v1h-2zM6 18h1v1h-1zM8 18h2v1h-2zM11 18h2v1h-2zM14 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM21 18h1v1h-1zM29 18h1v1h-1zM34 18h1v1h-1zM36 18h5v1h-5zM0 19h1v1h-1zM3 19h3v1h-3zM8 19h2v1h-2zM11 19h1v1h-1zM18 19h4v1h-4zM24 19h1v1h-1zM27 19h2v1h-2zM35 19h1v1h-1zM40 19h1v1h-1zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h4v1h-4zM11 20h1v1h-1zM13 20h3v1h-3zM18 20h3v1h-3zM24 20h3v1h-3zM28 20h2v1h-2zM33 20h4v1h-4zM38 20h3v1h-3zM4 21h1v1h-1zM8 21h1v1h-1zM10 21h2v1h-2zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM20 21h1v1h-1zM24 21h3v1h-3zM29 21h1v1h-1zM32 21h1v1h-1zM34 21h1v1h-1zM36 21h1v1h-1zM38 21h3v1h-3zM0 22h2v1h-2zM3 22h1v1h-1zM6 22h1v1h-1zM9 22h2v1h-2zM13 22h3v1h-3zM17 22h1v1h-1zM19 22h1v1h-1zM21 22h1v1h-1zM25 22h1v1h-1zM28 22h1v1h-1zM30 22h2v1h-2zM33 22h2v1h-2zM39 22h1v1h-1zM0 23h1v1h-1zM3 23h3v1h-3zM7 23h3v1h-3zM14 23h1v1h-1zM16 23h1v1h-1zM18 23h1v1h-1zM25 23h3v1h-3zM30 23h2v1h-2zM34 23h7v1h-7zM0 24h1v1h-1zM2 24h2v1h-2zM5 24h2v1h-2zM10 24h1v1h-1zM12 24h1v1h-1zM15 24h1v1h-1zM21 24h1v1h-1zM26 24h4v1h-4zM32 24h4v1h-4zM38 24h2v1h-2zM0 25h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM8 25h5v1h-5zM14 25h1v1h-1zM16 25h1v1h-1zM19 25h1v1h-1zM21 25h2v1h-2zM24 25h3v1h-3zM29 25h3v1h-3zM33 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM1 26h1v1h-1zM3 26h1v1h-1zM5 26h4v1h-4zM10 26h1v1h-1zM12 26h8v1h-8zM22 26h1v1h-1zM24 26h2v1h-2zM28 26h2v1h-2zM32 26h2v1h-2zM35 26h2v1h-2zM39 26h2v1h-2zM2 27h1v1h-1zM5 27h1v1h-1zM7 27h2v1h-2zM11 27h1v1h-1zM14 27h2v1h-2zM19 27h2v1h-2zM23 27h2v1h-2zM27 27h4v1h-4zM32 27h3v1h-3zM39 27h1v1h-1zM0 28h1v1h-1zM3 28h4v1h-4zM8 28h1v1h-1zM11 28h2v1h-2zM14 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM26 28h1v1h-1zM29 28h1v1h-1zM33 28h2v1h-2zM39 28h1v1h-1zM2 29h1v1h-1zM4 29h1v1h-1zM9 29h2v1h-2zM14 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM26 29h8v1h-8zM35 29h1v1h-1zM38 29h3v1h-3zM0 30h1v1h-1zM6 30h1v1h-1zM9 30h3v1h-3zM13 30h2v1h-2zM16 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM23 30h2v1h-2zM27 30h2v1h-2zM35 30h1v1h-1zM37 30h4v1h-4zM2 31h2v1h-2zM5 31h1v1h-1zM8 31h1v1h-1zM15 31h2v1h-2zM23 31h3v1h-3zM29 31h2v1h-2zM33 31h1v1h-1zM35 31h1v1h-1zM37 31h1v1h-1zM0 32h1v1h-1zM2 32h1v1h-1zM4 32h4v1h-4zM10 32h3v1h-3zM15 32h1v1h-1zM17 32h4v1h-4zM22 32h1v1h-1zM24 32h1v1h-1zM26 32h3v1h-3zM32 32h7v1h-7zM40 32h1v1h-1zM8 33h1v1h-1zM12 33h1v1h-1zM14 33h2v1h-2zM17 33h8v1h-8zM26 33h1v1h-1zM28 33h2v1h-2zM31 33h2v1h-2zM36 33h1v1h-1zM38 33h3v1h-3zM0 34h7v1h-7zM11 34h2v1h-2zM16 34h1v1h-1zM20 34h2v1h-2zM25 34h2v1h-2zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1zM34 34h1v1h-1zM36 34h2v1h-2zM39 34h1v1h-1zM0 35h1v1h-1zM6 35h1v1h-1zM9 35h2v1h-2zM13 35h1v1h-1zM16 35h1v1h-1zM18 35h2v1h-2zM21 35h1v1h-1zM30 35h1v1h-1zM32 35h1v1h-1zM36 35h1v1h-1zM38 35h1v1h-1zM0 36h1v1h-1zM2 36h3v1h-3zM6 36h1v1h-1zM10 36h1v1h-1zM12 36h2v1h-2zM15 36h1v1h-1zM18 36h1v1h-1zM20 36h3v1h-3zM25 36h1v1h-1zM28 36h1v1h-1zM30 36h1v1h-1zM32 36h6v1h-6zM39 36h1v1h-1zM0 37h1v1h-1zM2 37h3v1h-3zM6 37h1v1h-1zM8 37h1v1h-1zM12 37h1v1h-1zM16 37h1v1h-1zM18 37h1v1h-1zM22 37h2v1h-2zM26 37h1v1h-1zM29 37h6v1h-6zM36 37h1v1h-1zM39 37h1v1h-1zM0 38h1v1h-1zM2 38h3v1h-3zM6 38h1v1h-1zM10 38h3v1h-3zM15 38h1v1h-1zM18 38h2v1h-2zM21 38h3v1h-3zM26 38h1v1h-1zM28 38h1v1h-1zM30 38h1v1h-1zM36 38h1v1h-1zM40 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM9 39h2v1h-2zM12 39h1v1h-1zM14 39h4v1h-4zM19 39h1v1h-1zM21 39h2v1h-2zM25 39h2v1h-2zM29 39h1v1h-1zM31 39h2v1h-2zM35 39h1v1h-1zM37 39h1v1h-1zM39 39h1v1h-1zM0 40h7v1h-7zM10 40h3v1h-3zM16 40h4v1h-4zM21 40h2v1h-2zM25 40h2v1h-2zM28 40h2v1h-2zM32 40h1v1h-1zM35 40h5v1h-5z"/></g>
+<rect x="404" y="588" width="192" height="84" rx="22" fill="#FFFDF6"/>
+<rect x="414" y="598" width="172" height="64" rx="15" fill="#4A1826"/>
+<text x="500" y="645" text-anchor="middle" font-family="Allura, cursive" font-size="54" fill="#FFFDF6">Carte</text>
+<text x="500" y="1036" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-style="italic" font-weight="500" font-size="58" fill="#FFFDF6">Menü için okutun</text>
+<text x="500" y="1086" text-anchor="middle" font-family="Jost, sans-serif" font-weight="300" font-size="25" letter-spacing="3" fill="#E6D6C7">Scan for the menu · Меню · القائمة</text>
+<line x1="430" y1="1140" x2="570" y2="1140" stroke="#F3E8D0" stroke-opacity=".45" stroke-width="2"/>
+<text x="84" y="1300" font-family="Allura, cursive" font-size="74" fill="#F3E8D0" fill-opacity=".85">Carte</text>
+<text x="916" y="1292" text-anchor="end" font-family="Jost, sans-serif" font-weight="400" font-size="22" letter-spacing="6" fill="#E6D6C7" fill-opacity=".8">WI-FI · CafeCarte_Misafir</text>
+</svg><p>Telefonunuzun kamerasını bu karta tutun.</p></div>
+  </div>
+</section>
+</main>
+<footer><span class="s">Carte</span><span>Carte Menü Sistemleri · cartemenusistemleri@gmail.com · Instagram @cartemenusistemleri</span></footer>
+
+<div class="clock" id="clock" role="group" aria-label="Manzaradaki saat">
+  <div><b id="clT">--:--</b><small id="clS">İzmir'de şu an</small></div>
+  <input type="range" id="clR" min="0" max="1439" step="5" aria-label="Saati değiştir">
+  <button type="button" id="clN" hidden>Şimdi</button>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var root = document.documentElement.style, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* ---------- güneş: İzmir (38.42 K, 27.14 D), Türkiye UTC+3 ---------- */
+  var LAT = 38.42, LON = 27.14, RAD = Math.PI/180;
+  function sunPos(minLocal){
+    var d = new Date(), start = Date.UTC(d.getUTCFullYear(),0,0), n = Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()) - start)/864e5);
+    var decl = 23.44*Math.sin(2*Math.PI*(284+n)/365)*RAD, B = 2*Math.PI*(n-81)/364;
+    var eot = 9.87*Math.sin(2*B) - 7.53*Math.cos(B) - 1.5*Math.sin(B);
+    var utcMin = minLocal - 180, solar = utcMin + 4*LON + eot, H = (solar/4 - 180)*RAD, phi = LAT*RAD;
+    var el = Math.asin(Math.sin(phi)*Math.sin(decl) + Math.cos(phi)*Math.cos(decl)*Math.cos(H));
+    var az = Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(phi) - Math.tan(decl)*Math.cos(phi)) / RAD + 180;
+    return { el: el/RAD, az: az };
+  }
+  var K = [
+    { e:-18, s1:'#070A18', s2:'#151B35', w1:'#0A0F22', w2:'#04060E', l:'#06070D', amb:.58, glow:1,   st:1, sun:'#FFFFFF' },
+    { e:-9,  s1:'#121838', s2:'#3E2C55', w1:'#191B38', w2:'#0A0B1A', l:'#110D1D', amb:.44, glow:.85, st:.6, sun:'#FFB27A' },
+    { e:-3,  s1:'#26305F', s2:'#E28A5C', w1:'#5A3A57', w2:'#1C1830', l:'#2A1A2A', amb:.28, glow:.6,  st:.1, sun:'#FF9A5C' },
+    { e:3,   s1:'#4D6EA6', s2:'#F5B37D', w1:'#B07A6E', w2:'#3A3858', l:'#4A3540', amb:.14, glow:.35, st:0,  sun:'#FFC98A' },
+    { e:12,  s1:'#6C9ED6', s2:'#F2DDBF', w1:'#6C92B7', w2:'#2D4D72', l:'#5E6971', amb:.05, glow:.15, st:0,  sun:'#FFE9B8' },
+    { e:40,  s1:'#3F86D2', s2:'#BCD9F0', w1:'#3C7DB8', w2:'#1D4B7A', l:'#6E7F86', amb:0,   glow:.08, st:0,  sun:'#FFF8E0' }
+  ];
+  function hx(h){ return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+  function mix(a, b, t){ var A = hx(a), B = hx(b); return 'rgb(' + A.map(function(v, i){ return Math.round(v + (B[i]-v)*t); }).join(',') + ')'; }
+  function light(minLocal){
+    var s = sunPos(minLocal), e = Math.max(K[0].e, Math.min(K[K.length-1].e, s.el)), i = 0;
+    while (i < K.length-2 && e > K[i+1].e) i++;
+    var a = K[i], b = K[i+1], t = (e - a.e)/(b.e - a.e), L = function(x, y){ return x + (y-x)*t; };
+    root.setProperty('--sky1', mix(a.s1, b.s1, t)); root.setProperty('--sky2', mix(a.s2, b.s2, t));
+    root.setProperty('--sea1', mix(a.w1, b.w1, t)); root.setProperty('--sea2', mix(a.w2, b.w2, t));
+    root.setProperty('--land', mix(a.l, b.l, t)); root.setProperty('--sun', mix(a.sun, b.sun, t));
+    root.setProperty('--amb', L(a.amb, b.amb).toFixed(3)); root.setProperty('--glow', L(a.glow, b.glow).toFixed(3)); root.setProperty('--stars', L(a.st, b.st).toFixed(3));
+    var x = (s.az - 70)/(290 - 70); x = Math.max(.04, Math.min(.96, x));
+    var hz = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hz')) || 58;
+    var top = matchMedia('(max-width:760px)').matches ? 33 : 8;
+    var y = hz - Math.max(-6, s.el) * (hz - top) / 60;
+    root.setProperty('--sunx', (x*100).toFixed(2) + '%'); root.setProperty('--suny', y.toFixed(2) + '%');
+    root.setProperty('--sunop', s.el > -2.5 ? 1 : 0);
+    root.setProperty('--refl', Math.max(0, Math.min(.9, (s.el + 2)/14)).toFixed(3));
+  }
+  var R = document.getElementById('clR'), T = document.getElementById('clT'), S = document.getElementById('clS'), N = document.getElementById('clN'), manual = false;
+  function nowMin(){ var d = new Date(); return ((d.getUTCHours() + 3) % 24)*60 + d.getUTCMinutes(); }
+  function fmt(m){ m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m % 60).padStart(2,'0'); }
+  function setTime(m){ R.value = m; T.textContent = fmt(m); light(m); }
+  R.addEventListener('input', function(){ manual = true; N.hidden = false; S.textContent = 'Saati siz seçtiniz'; T.textContent = fmt(+R.value); light(+R.value); });
+  N.addEventListener('click', function(){ manual = false; N.hidden = true; S.textContent = "İzmir'de şu an"; setTime(nowMin()); });
+  setTime(nowMin());
+  setInterval(function(){ if (!manual && !document.hidden) setTime(nowMin()); }, 60000);
+
+  /* ---------- kaydırma sahnesi ---------- */
+  var sc = document.getElementById('sahne'), world = document.getElementById('world'), phone = document.getElementById('phone');
+  var caps = [].slice.call(document.querySelectorAll('.cap')), hint = document.getElementById('hint');
+  var cam = document.getElementById('cam'), pill = document.getElementById('pill'), m1 = document.getElementById('m1'), m2 = document.getElementById('m2'), m3 = document.getElementById('m3');
+  var m3img = m3.querySelector('img');
+  function cl(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function seg(p, a, b){ return cl((p - a)/(b - a)); }
+  function ease(t){ return 1 - Math.pow(1 - t, 3); }
+  function io(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2; }
+  var CAP = [[-1, 0, .14, .2], [.2, .26, .4, .46], [.5, .56, .7, .76], [.78, .84, 2, 2]];
+  var mob = matchMedia('(max-width:760px)');
+  function frame(){
+    raf = 0;
+    var r = sc.getBoundingClientRect(), H = innerHeight, p = reduce ? .72 : cl(-r.top / (r.height - H));
+    var W = innerWidth, small = mob.matches;
+    /* kamera yavaşça masaya yaklaşır */
+    var z = 1 + .08*io(seg(p, 0, .5));
+    world.style.transform = 'scale(' + z.toFixed(4) + ')';
+    /* telefon: alttan gelir, kartın önünde durur, sonra ortaya geçip büyür */
+    var card = document.getElementById('card').getBoundingClientRect();
+    var tx0 = small ? 0 : W*.08, ty0 = H*.95;
+    var txScan = small ? (card.left + card.width/2 - W/2) : (card.left + card.width/2 - W/2) - card.width*.05, tyScan = small ? H*.1 : H*.06;
+    var txEnd = small ? 0 : W*.16, tyEnd = small ? H*.1 : 0;
+    var a = ease(seg(p, .14, .42)), b = io(seg(p, .48, .6));
+    var tx = tx0 + (txScan - tx0)*a, ty = ty0 + (tyScan - ty0)*a, rot = 10*(1 - a), sc1 = .86 + .1*a;
+    tx = tx + (txEnd - tx)*b; ty = ty + (tyEnd - ty)*b; var s = sc1 + ((small ? .98 : 1.08) - sc1)*b;
+    phone.style.transform = 'translate(-50%,-50%) translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + s.toFixed(4) + ')';
+    /* kamera görüntüsü, QR tanıma, menü */
+    var pl = ease(seg(p, .38, .44));
+    pill.style.opacity = pl; pill.style.transform = 'translateY(' + (8*(1 - pl)).toFixed(1) + 'px)';
+    var o1 = seg(p, .5, .56); cam.style.opacity = 1 - o1; m1.style.opacity = o1;
+    var o2 = seg(p, .62, .68); m2.style.opacity = o2;
+    var o3 = seg(p, .76, .8); m3.style.opacity = o3;
+    var scroll = io(seg(p, .8, .97)); m3img.style.transform = 'translateY(' + (-scroll*18).toFixed(2) + '%)';
+    /* metinler */
+    caps.forEach(function(c, i){
+      var k = CAP[i], op = p < k[0] ? 0 : p < k[1] ? seg(p, k[0], k[1]) : p < k[2] ? 1 : 1 - seg(p, k[2], k[3]);
+      if (i === 0 && p < k[1]) op = 1 - seg(p, k[2], k[3]);
+      c.style.opacity = op.toFixed(3); c.style.transform = 'translateY(' + (14*(1 - op)).toFixed(1) + 'px)';
+      c.style.visibility = op < .01 ? 'hidden' : 'visible';
+    });
+    hint.style.opacity = (1 - seg(p, 0, .05))*.85;
+  }
+  var raf = 0;
+  function req(){ if (!raf) raf = requestAnimationFrame(frame); }
+  addEventListener('scroll', req, { passive:true }); addEventListener('resize', function(){ req(); light(+R.value); });
+  if (reduce){ sc.style.height = '100vh'; }
+  frame();
+})();
+</script>
+</body>
+</html>
