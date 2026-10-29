@@ -215,7 +215,8 @@ footer .cr a{color:inherit}
   function clock(tz, d){ return new Intl.DateTimeFormat('tr-TR', { hour:'2-digit', minute:'2-digit', timeZone:tz }).format(d); }
   function phase(e){ return e > 6 ? 'gunduz' : e > -4 ? 'alaca' : 'gece'; }
   var mobile = matchMedia('(max-width:900px)');
-  function src(y, gece){ return 'konum/' + y.id + '-' + (gece ? 'gece' : 'gunduz') + (mobile.matches ? '-m' : '') + '.webp'; }
+  function src(y, gece){ return 'konum/' + y.id + '-' + (gece ? 'gece' : 'gunduz') + (mobile.matches ? '-m' : '') + '.webp?v=' + VER; }
+  var VER = '3'; /* fotoğraf değişince artır: tarayıcı önbelleği eskisini göstermesin */
 
   var chips = document.getElementById('chips'), nowT = document.getElementById('nowT'), flip = document.getElementById('flip');
   var A = document.getElementById('bgA'), B = document.getElementById('bgB'), front = A;
