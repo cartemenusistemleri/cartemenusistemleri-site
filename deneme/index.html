@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,500&family=Jost:wght@300;400;500&display=swap">
-<link rel="preload" as="image" href="konum/istanbul-gece.webp">
+
 <style>
 :root{--bordo:#4A1826;--bordo-d:#1A0A10;--cream:#FFFDF6;--cream-2:#F3E8D0;--text-2:#E9DCD0;--ease:cubic-bezier(.23,1,.32,1);--fade:cubic-bezier(.77,0,.175,1)}
 *{box-sizing:border-box}
@@ -115,7 +115,7 @@ footer .cr a{color:inherit}
   <div class="in">
     <div class="txt">
       <h1 id="h1">Yer değişse de, <span class="s">Carte</span> her yerde.</h1>
-      <p class="lead">Masadaki QR'ı okutun, menü telefonda açılsın. Boğaz'da bir kahve ya da Alplerde bir sıcak çikolata; menü aynı, kolaylık aynı.</p>
+      <p class="lead">Masadaki QR'ı okutun, menü telefonda açılsın. Ayasofya karşısında bir çay ya da Alplerde bir cappuccino; menü aynı, kolaylık aynı.</p>
       <div class="yer" role="group" aria-labelledby="yerH">
         <h2 id="yerH">Bir yer seçin. Saat, o şehrin şu anki saati.</h2>
         <div class="chips" id="chips"></div>
@@ -197,12 +197,12 @@ footer .cr a{color:inherit}
 (function(){
   'use strict';
   var Y = [
-    { id:'istanbul', ad:'İstanbul', yer:'Boğaz', tz:'Europe/Istanbul', lat:41.05, lon:29.03, f:['AlaDin Habboubi','Hulki Okan Tabak'] },
-    { id:'alpler', ad:'Alpler', yer:'Zermatt', tz:'Europe/Zurich', lat:46.02, lon:7.75, f:['András Gál','Lukas W.'] },
-    { id:'como', ad:'Como Gölü', yer:'İtalya', tz:'Europe/Rome', lat:45.99, lon:9.26, f:['Yianni Mathioudakis','Julia Solonina'] },
-    { id:'edinburgh', ad:'Edinburgh', yer:'İskoçya', tz:'Europe/London', lat:55.95, lon:-3.19, f:['Jörg Angeli','Roan Lavery'] },
-    { id:'santorini', ad:'Santorini', yer:'Ege', tz:'Europe/Athens', lat:36.46, lon:25.38, f:['Michael Lock','James Ting'] },
-    { id:'kyoto', ad:'Kyoto', yer:'Japonya', tz:'Asia/Tokyo', lat:35.01, lon:135.77, f:['Roméo A.','ayumi kubo'] }
+    { id:'istanbul', ad:'İstanbul', yer:'Sultanahmet', tz:'Europe/Istanbul', lat:41.01, lon:28.98, f:['Alexis J.','Zeki Okur'], g:'Ayasofya karşısında çay', n:'Kilimin üstünde demli çay' },
+    { id:'alpler', ad:'Alpler', yer:'İsviçre', tz:'Europe/Zurich', lat:46.02, lon:7.75, f:['Barney Goodman','Andri Aeschlimann'], g:'Karın ortasında cappuccino', n:'Dağ evinde peynir fondü' },
+    { id:'como', ad:'Como Gölü', yer:'İtalya', tz:'Europe/Rome', lat:45.99, lon:9.26, f:['Timothy Abraham','MD ARIF JAWED'], g:'Göl balkonunda iki kadeh', n:'Göle karşı mum ışığında akşam' },
+    { id:'santorini', ad:'Santorini', yer:'Ege', tz:'Europe/Athens', lat:36.46, lon:25.38, f:['Anastase Maragos','Anastase Maragos'], g:'Kaldera manzaralı kahvaltı', n:'Denize karşı akşam sofrası' },
+    { id:'tokyo', ad:'Tokyo', yer:'Japonya', tz:'Asia/Tokyo', lat:35.68, lon:139.69, f:['Zion C','bady abbas'], g:'Şehrin tepesinde Japon sofrası', n:'Akşam suşisi' },
+    { id:'paris', ad:'Paris', yer:'Fransa', tz:'Europe/Paris', lat:48.86, lon:2.35, f:['Veronika Martinelli','Frede Langlois'], g:'Kahve ve krem karamel', n:'Eyfel\'e bakan bir kafe' }
   ];
   var RAD = Math.PI/180;
   function elev(lat, lon, d){
@@ -232,7 +232,7 @@ footer .cr a{color:inherit}
   }
   function setMenuTheme(acik){
     scr.classList.toggle('acik', acik);
-    try { var de = frame.contentDocument && frame.contentDocument.documentElement; if (de){ de.classList.toggle('acik', acik); var m = frame.contentDocument.querySelector('meta[name=theme-color]'); if (m) m.content = acik ? '#FAF3E4' : '#3A121D'; } } catch(e){}
+    try { var de = frame.contentDocument && frame.contentDocument.documentElement; if (de){ if (!frame.contentDocument.getElementById('cerceve-stil')){ var st = frame.contentDocument.createElement('style'); st.id = 'cerceve-stil'; st.textContent = 'html,body{scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{width:0;height:0;display:none}'; frame.contentDocument.head.appendChild(st); } de.classList.toggle('acik', acik); var m = frame.contentDocument.querySelector('meta[name=theme-color]'); if (m) m.content = acik ? '#FAF3E4' : '#3A121D'; } } catch(e){}
   }
   function renderChips(d){
     chips.innerHTML = Y.map(function(y){ return '<button type="button" class="chip" data-id="' + y.id + '" aria-pressed="' + (y === cur) + '">' + y.ad + '<small>' + clock(y.tz, d) + '</small></button>'; }).join('');
@@ -241,7 +241,7 @@ footer .cr a{color:inherit}
     var d = new Date(), e = elev(cur.lat, cur.lon, d), ph = phase(e), gece = isNight(cur, d);
     renderChips(d);
     var ad = { gunduz:'gündüz', alaca:'alacakaranlık', gece:'gece' }[ph];
-    nowT.innerHTML = cur.ad + ', ' + cur.yer + ' · <b>' + clock(cur.tz, d) + '</b> · şu an ' + ad + (override != null ? ' (siz ' + (gece ? 'geceyi' : 'gündüzü') + ' seçtiniz)' : '');
+    nowT.innerHTML = cur.ad + ' · <b>' + clock(cur.tz, d) + '</b> · ' + (gece ? cur.n : cur.g) + (override != null ? ' <span style="color:var(--text-2)">(şu an orada ' + ad + ')</span>' : '');
     flip.textContent = gece ? 'Gündüz hâlini gör' : 'Gece hâlini gör';
     setBg(src(cur, gece));
     setMenuTheme(!gece);
