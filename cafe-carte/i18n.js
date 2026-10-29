@@ -2,7 +2,7 @@
    Ürün çevirileri Türkçe ürün adına göre eşleşir: 'Türkçe Ad': [ad, kısa açıklama, içindekiler] */
 window.CC_I18N = {
   tr: {
-    listTitle:'Seçtiklerim', add:'Listeme ekle', addShort:'ekle', inList:'Listede', addAria:'Listeme ekle: {n}', items:'{n} ürün', listNote:'Bu liste sipariş değildir. Siparişinizi verirken garsonunuza gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.', totalKcal:'Toplam enerji', clear:'Listeyi temizle', bigText:'Büyük yazı',
+    soldOut:'Tükendi', favH:'Bugün öneriyoruz', bFav:'Öneriyoruz', bNew:'Yeni', listTitle:'Seçtiklerim', add:'Listeme ekle', addShort:'ekle', inList:'Listede', addAria:'Listeme ekle: {n}', items:'{n} ürün', listNote:'Bu liste sipariş değildir. Siparişinizi verirken garsonunuza gösterin.', listEmpty:'Listeniz boş. Ürünlerdeki + ile ekleyebilirsiniz.', totalKcal:'Toplam enerji', clear:'Listeyi temizle', bigText:'Büyük yazı',
     webText:'Gerçek menüde işletmenin kendi internet sitesi açılır. Örnek olarak Carte sitesini açabilirsiniz.', webBtn:'Siteyi aç',
     energy:'Enerji', portion:'1 porsiyon', kcalNote:'Kalori değerleri porsiyon başına yaklaşıktır.',
     name:'Türkçe', top:'Kahve · Mutfak · Tatlı', pill:'Menü', tag:'Kahve, fırından taze lezzetler ve ev yapımı tatlılar.', rule:'Afiyet olsun',
@@ -28,7 +28,7 @@ window.CC_I18N = {
     more:'Bu kartların hepsi Carte’ta'
   },
   en: {
-    listTitle:'My picks', add:'Add to my list', addShort:'add', inList:'In list', addAria:'Add to my list: {n}', items:'{n} items', listNote:'This list is not an order. Show it to your waiter when ordering.', listEmpty:'Your list is empty. Use + on any item to add it.', totalKcal:'Total energy', clear:'Clear list', bigText:'Large text',
+    soldOut:'Sold out', favH:'Today we recommend', bFav:'Recommended', bNew:'New', listTitle:'My picks', add:'Add to my list', addShort:'add', inList:'In list', addAria:'Add to my list: {n}', items:'{n} items', listNote:'This list is not an order. Show it to your waiter when ordering.', listEmpty:'Your list is empty. Use + on any item to add it.', totalKcal:'Total energy', clear:'Clear list', bigText:'Large text',
     webText:'On a real menu this opens the venue’s own website. As an example you can open the Carte website.', webBtn:'Open website',
     energy:'Energy', portion:'1 portion', kcalNote:'Calorie values are approximate, per portion.',
     name:'English', top:'Coffee · Kitchen · Desserts', pill:'Menu', tag:'Coffee, fresh bakery and homemade desserts.', rule:'Bon appétit',
@@ -54,7 +54,7 @@ window.CC_I18N = {
     more:'All of these cards are made by Carte'
   },
   ru: {
-    listTitle:'Мой выбор', add:'Добавить в список', addShort:'ещё', inList:'В списке', addAria:'Добавить в список: {n}', items:'{n} поз.', listNote:'Этот список не является заказом. Покажите его официанту при заказе.', listEmpty:'Список пуст. Нажмите + у блюда, чтобы добавить.', totalKcal:'Всего энергии', clear:'Очистить список', bigText:'Крупный текст',
+    soldOut:'Нет в наличии', favH:'Сегодня рекомендуем', bFav:'Рекомендуем', bNew:'Новинка', listTitle:'Мой выбор', add:'Добавить в список', addShort:'ещё', inList:'В списке', addAria:'Добавить в список: {n}', items:'{n} поз.', listNote:'Этот список не является заказом. Покажите его официанту при заказе.', listEmpty:'Список пуст. Нажмите + у блюда, чтобы добавить.', totalKcal:'Всего энергии', clear:'Очистить список', bigText:'Крупный текст',
     webText:'В настоящем меню открывается сайт заведения. Для примера можно открыть сайт Carte.', webBtn:'Открыть сайт',
     energy:'Энергия', portion:'1 порция', kcalNote:'Калорийность указана примерно, на порцию.',
     name:'Русский', top:'Кофе · Кухня · Десерты', pill:'Меню', tag:'Кофе, свежая выпечка и домашние десерты.', rule:'Приятного аппетита',
@@ -80,7 +80,7 @@ window.CC_I18N = {
     more:'Все эти карты делает Carte'
   },
   ar: {
-    listTitle:'اختياراتي', add:'أضف إلى قائمتي', addShort:'إضافة', inList:'في القائمة', addAria:'أضف إلى قائمتي: {n}', items:'{n} أصناف', listNote:'هذه القائمة ليست طلبًا. اعرضها على النادل عند الطلب.', listEmpty:'قائمتك فارغة. استخدم + بجانب أي صنف لإضافته.', totalKcal:'إجمالي الطاقة', clear:'مسح القائمة', bigText:'خط كبير',
+    soldOut:'نفد', favH:'نوصي به اليوم', bFav:'نوصي به', bNew:'جديد', listTitle:'اختياراتي', add:'أضف إلى قائمتي', addShort:'إضافة', inList:'في القائمة', addAria:'أضف إلى قائمتي: {n}', items:'{n} أصناف', listNote:'هذه القائمة ليست طلبًا. اعرضها على النادل عند الطلب.', listEmpty:'قائمتك فارغة. استخدم + بجانب أي صنف لإضافته.', totalKcal:'إجمالي الطاقة', clear:'مسح القائمة', bigText:'خط كبير',
     webText:'في القائمة الحقيقية يُفتح موقع المكان الإلكتروني. كمثال يمكنك فتح موقع Carte.', webBtn:'افتح الموقع',
     energy:'الطاقة', portion:'حصة واحدة', kcalNote:'قيم السعرات تقريبية لكل حصة.',
     name:'العربية', top:'قهوة · مطبخ · حلويات', pill:'القائمة', tag:'قهوة، مخبوزات طازجة وحلويات منزلية.', rule:'بالهناء والشفاء',
