@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cafe Carte Panel</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2A0D15">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Carte Panel">
+<link rel="icon" type="image/png" href="/cafe-carte/panel/icon-192.png"><link rel="apple-touch-icon" href="/cafe-carte/panel/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;1,500&family=Jost:wght@300;400;500;600&display=swap">
+<style>
+:root{--canvas:#2A0D15;--panel:#3A121D;--panel-2:#4A1826;--gold:#F3E8D0;--on-gold:#4A1826;--text:#FBF6EE;--text-2:#D9D0C4;--text-3:#9C9287;--line:rgba(251,246,238,.12);--red:#6E6862;--green:#5E9B62;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--text);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:300;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input{font-family:inherit}
+.wrap{width:min(720px,100% - 28px);margin-inline:auto}
+.brand{display:flex;align-items:baseline;gap:10px;font-family:'Jost',sans-serif;font-weight:400;letter-spacing:.24em;font-size:12px;text-transform:uppercase;color:var(--text-2)}
+.brand .cc{font-family:'Allura',cursive;font-size:34px;letter-spacing:0;text-transform:none;color:var(--text);line-height:1}
+.login .brand .cc{font-size:52px}
+.demo-n{display:inline-block;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--on-gold);background:var(--gold);border-radius:999px;padding:4px 10px}
+.brand svg{width:30px;height:30px;flex:none}
+/* login */
+.login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px 0;text-align:center}
+.login .brand{font-size:24px}
+.login .brand svg{width:44px;height:44px}
+.login h1{margin:0;font-weight:400;font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.login p{margin:0;color:var(--text-3);font-size:14.5px;max-width:34ch}
+.login form{display:flex;flex-direction:column;gap:12px;width:min(320px,100%)}
+.login input{font-size:17px;text-align:center;letter-spacing:.04em;color:var(--text);background:rgba(251,246,238,.06);border:1px solid var(--line);border-radius:14px;padding:14px}
+.login input:focus{outline:none;border-color:var(--gold)}
+.btn{font-size:16px;font-weight:500;border:0;border-radius:14px;padding:14px;background:var(--gold);color:var(--on-gold);cursor:pointer}
+.err{color:#E58A82;font-size:14px;min-height:20px}
+.by{font-family:'Allura',cursive;font-size:22px;color:var(--text-3);text-decoration:none;margin-top:10px}
+/* panel */
+header{position:sticky;top:0;z-index:5;background:rgba(42,13,21,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;height:58px}
+.hbtns{display:flex;gap:8px}
+.sbtn{font-size:13px;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.sum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:2px 0 10px;font-size:13.5px;color:var(--text-3)}
+.sum b{color:var(--text);font-weight:500}
+.sum .pill{border-radius:999px;padding:3px 10px;background:rgba(160,152,144,.18);color:#D2CBC3}
+.sum .pill.ok{background:rgba(94,155,98,.18);color:#A9D8AC}
+.search input{width:100%;font-size:16px;color:var(--text);background:rgba(251,246,238,.06);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+.search input:focus{outline:none;border-color:var(--gold)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 0 12px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:13.5px;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--gold);color:var(--on-gold);border-color:var(--gold);font-weight:500}
+h2{margin:26px 0 6px;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:24px}
+h2 small{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3);margin-inline-start:8px}
+.it{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.it img,.it .noimg{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none;background:var(--panel-2)}
+.it .n{flex:1;min-width:0}
+.it .n b{display:block;font-weight:500;font-size:16px}
+.it .n small{font-size:13px;color:var(--text-3)}
+.it.out img{filter:grayscale(1);opacity:.5}
+.it.out .n b{color:var(--text-3)}
+.tg{flex:none;display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:rgba(0,0,0,.2)}
+.tg button{border:0;background:transparent;color:var(--text-3);font-size:13.5px;font-weight:500;border-radius:999px;padding:8px 12px;cursor:pointer;min-width:58px}
+.it:not(.out) .tg .v{background:var(--green);color:#fff}
+.it.out .tg .y{background:var(--red);color:#fff}
+.it.busy .tg{opacity:.5}
+.empty{color:var(--text-3);text-align:center;padding:40px 0}
+.note{margin:26px 0 90px;font-size:13px;color:var(--text-3);line-height:1.6}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--text);color:var(--canvas);font-weight:500;font-size:14.5px;border-radius:999px;padding:11px 18px;transition:.35s var(--ease);pointer-events:none;z-index:9;white-space:nowrap}
+.toast.on{transform:translate(-50%,0);opacity:1}
+.toast.bad{background:#B5463F;color:#fff}
+.fl{display:flex;gap:6px;margin-top:6px}
+.fl button{font-size:12px;font-weight:500;color:var(--text-3);background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+.fl button[aria-pressed="true"]{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.fl button.yn[aria-pressed="true"]{background:var(--text);color:var(--canvas);border-color:var(--text)}
+.tabs{display:flex;gap:6px;padding:0 0 10px}
+.tabs button{flex:1;font-size:14px;font-weight:500;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:12px;padding:9px;cursor:pointer}
+.tabs button.on{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.ist{padding:18px 0 90px}
+.per{display:flex;gap:6px;margin-bottom:16px}
+.per button{font-size:13.5px;color:var(--text-2);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer}
+.per button.on{background:var(--text);color:var(--canvas);border-color:var(--text)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi small{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
+.kpi b{display:block;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:32px;margin-top:4px}
+.ist h3{margin:26px 0 8px;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:21px}
+.bar{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.bar i{font-style:normal;color:var(--text-3);font-size:13px}
+.bar .nm{min-width:0}
+.bar .nm span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .tr{display:block;height:5px;border-radius:3px;background:var(--panel-2);margin-top:5px;overflow:hidden}
+.bar .tr em{display:block;height:100%;background:var(--gold);border-radius:3px}
+.bar b{font-weight:500;font-variant-numeric:tabular-nums}
+.ist .hint{font-size:13px;color:var(--text-3);line-height:1.6;margin-top:22px}
+[hidden]{display:none!important}
+
+.login label{display:block;text-align:left;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin:4px 2px -6px}
+.hello{padding:26px 0 4px}
+.hello small{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.hello h1{margin:6px 0 0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(28px,6vw,38px);line-height:1.15}
+.hello p{margin:8px 0 0;color:var(--text-3);font-size:14.5px}
+.areas{display:flex;flex-direction:column;gap:12px;padding:18px 0 90px}
+.area{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;transition:border-color .3s var(--ease),transform .3s var(--ease)}
+.area:hover,.area:focus-visible{border-color:rgba(243,232,208,.55)}
+.area:active{transform:scale(.99)}
+.area .ic{width:48px;height:48px;border-radius:14px;background:var(--panel-2);display:grid;place-items:center;color:var(--gold);flex:none}
+.area .ic svg{width:24px;height:24px}
+.area .tx{flex:1;min-width:0}
+.area .tx b{display:block;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:22px;line-height:1.2}
+.area .tx small{display:block;color:var(--text-3);font-size:13.5px;margin-top:3px}
+.area .tx .st{display:inline-block;margin-top:8px;font-size:12.5px;border-radius:999px;padding:3px 10px;background:rgba(94,155,98,.18);color:#A9D8AC}
+.area .tx .st.o{background:rgba(160,152,144,.2);color:#E0D6CB}
+.area .go{color:var(--text-3);font-size:22px;flex:none}
+.area.big{background:linear-gradient(135deg,rgba(243,232,208,.18),rgba(243,232,208,.04));border-color:rgba(243,232,208,.35)}
+.sect{margin:18px 0 0;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3)}
+.back{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;min-width:0}
+.back .ar{font-size:22px;color:var(--gold);line-height:1}
+.back .t{display:flex;flex-direction:column;min-width:0}
+.back .t small{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3)}
+.back .t b{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ozl{display:flex;flex-direction:column;gap:10px}
+.oz{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.oz>b{display:block;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:20px;margin-bottom:8px}
+.ozg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:520px){.ozg{grid-template-columns:1fr 1fr}}
+.ozg span{display:flex;flex-direction:column;gap:1px}
+.ozg small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+.ozg em{font-style:normal;font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.df{font-size:12px;color:var(--text-3)}
+.df.up{color:#A9D8AC}.df.dn{color:#E58A82}
+.ozt{margin:10px 0 0;font-size:13.5px;color:var(--text-3)}
+.ozt b{color:var(--text);font-weight:500}
+.lg-d{margin:22px 0 4px;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3)}
+.lg{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;align-items:baseline}
+.lg i{font-style:normal;color:var(--text-3);font-size:13px;font-variant-numeric:tabular-nums}
+.lg b{font-weight:500}
+.lg small{display:block;color:var(--text-3);font-size:13px;margin-top:2px}
+.lg .a{display:inline-block;font-size:11.5px;font-weight:500;border-radius:999px;padding:2px 8px;margin-left:6px;background:rgba(160,152,144,.2);color:#E0D6CB;vertical-align:1px}
+.lg .a.v{background:rgba(94,155,98,.2);color:#A9D8AC}
+.lg .a.f{background:rgba(243,232,208,.22);color:#FFFDF6}
+.inst{border-style:dashed!important}
+.who{font-size:12.5px;color:var(--text-3);text-align:center;padding:0 0 40px}
+</style>
+</head>
+<body>
+
+
+<section class="login wrap" id="login">
+  <div class="brand"><span class="cc">Cafe Carte</span></div>
+  <h1>Panel</h1>
+  <p>Size verilen kullanıcı adı ve şifreyle girin. Deneme işletmesi: panelden yaptığınız her değişiklik Cafe Carte menüsünde anında görünür.</p>
+  <form id="lf" autocomplete="on">
+    <label for="un">Kullanıcı adı</label>
+    <input id="un" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <label for="pw">Şifre</label>
+    <input id="pw" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn" type="submit">Giriş</button>
+    <div class="err" id="lerr" role="alert"></div>
+  </form>
+  <a class="by" href="https://cartemenusistemleri.com.tr/" target="_blank" rel="noopener">Carte</a>
+</section>
+
+<!-- Ana sayfa: kişinin erişebildiği her şey alt alta -->
+<div id="home" hidden>
+  <header>
+    <div class="wrap"><div class="hrow">
+      <div class="brand"><span class="cc">Carte</span>Panel</div>
+      <div class="hbtns"><button class="sbtn" id="out1" type="button">Çıkış</button></div>
+    </div></div>
+  </header>
+  <main class="wrap">
+    <div class="hello"><small>Cafe Carte · deneme işletmesi</small><h1 id="hi"></h1><p id="hiSub"></p></div>
+    <div class="areas" id="areas"></div>
+  </main>
+</div>
+
+<!-- Şube / istatistik ekranı -->
+<div id="app" hidden>
+  <header>
+    <div class="wrap">
+      <div class="hrow">
+        <button class="back" id="back" type="button"><span class="ar" id="backAr">‹</span><span class="t"><small id="hSmall">Şube</small><b id="hTitle"></b></span></button>
+        <div class="hbtns"><a class="sbtn" id="menuLink" href="/cafe-carte/" target="_blank" rel="noopener" style="text-decoration:none">Menü ↗</a><button class="sbtn" id="out" type="button">Çıkış</button></div>
+      </div>
+      <div class="tabs" role="tablist" id="tabs"><button type="button" class="on" data-tab="stok">Ürünler</button><button type="button" data-tab="ist">İstatistik</button><button type="button" data-tab="log">Kayıt</button></div>
+      <div id="stokHead">
+      <div class="sum" id="sum"></div>
+      <div class="search"><input id="q" type="search" placeholder="Ürün ara (ör. latte, baklava)" aria-label="Ürün ara" autocomplete="off"></div>
+      <nav class="chips" id="chips" aria-label="Kategoriler"></nav>
+      </div>
+    </div>
+  </header>
+  <main class="wrap" id="list"></main>
+  <section class="wrap ist" id="logv" hidden><p class="hint" style="margin:0 0 6px">Var / tükendi ve öneri işlemleri; kim, ne zaman yaptı. Son 200 kayıt.</p><div id="logBody"></div></section>
+  <section class="wrap ist" id="ist" hidden>
+    <div class="per"><button type="button" class="on" data-g="7">Son 7 gün</button><button type="button" data-g="30">Son 30 gün</button><button type="button" data-g="1">Bugün</button></div>
+    <div id="istBody"></div>
+  </section>
+  <div class="wrap" id="noteWrap"><p class="note" id="note"></p></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="/api/menu-data?k=cafe-carte"></script>
+<script>window.CC_MENU||document.write('<script src="/cafe-carte/data.js?v=1"><\/script>')</script>
+<script>
+(function(){
+  'use strict';
+  var IS = 'cafe-carte', LS = 'oturum-' + IS;
+  var ALL = window.CC_MENU || [];
+  var SUBELER = [{ id:'merkez', ad:'Cafe Carte' }];
+  var TOKEN = null, ME = null, SUBE = null, K = null, MENU = [], OUT = {}, FAV = {}, YENI = {}, cur = 'all', VIEW = 'home';
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
+  function store(k, v){ try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch(e){ return null; } }
+  var tt;
+  function toast(msg, bad){ var t = $('toast'); t.textContent = msg; t.classList.toggle('bad', !!bad); t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function(){ t.classList.remove('on'); }, 1900); }
+  function subeAd(id){ var x = SUBELER.filter(function(s){ return s.id === id; })[0]; return x ? x.ad : id; }
+  function can(y){ return !!(ME && ME.yetkiler && ME.yetkiler[y]); }
+  function subeYetki(){ return can('stok') || can('oneri') || can('istatistik'); }
+  function api(body){
+    return fetch('/api/stok', { method:'POST', headers:{ 'content-type':'application/json', 'x-oturum': TOKEN }, body: JSON.stringify(Object.assign({ k:K }, body)) })
+      .then(function(r){ return r.json().then(function(j){ j.status = r.status; return j; }); });
+  }
+  function expired(){ toast('Oturum süresi doldu, tekrar giriş yapın', true); logout(); }
+
+  /* ---------- giriş ---------- */
+  function begin(me){
+    ME = me; $('login').hidden = true;
+    var areas = homeAreas();
+    // tek alanı olan (ör. şube personeli) doğrudan o alana girer
+    var h = parseHash();
+    if (h) return route(h, true);
+    if (areas.length === 1 && areas[0].go) return route(areas[0].go, true);
+    showHome();
+  }
+  $('lf').addEventListener('submit', function(e){
+    e.preventDefault(); $('lerr').textContent = '';
+    var btn = this.querySelector('.btn'); btn.disabled = true;
+    fetch('/api/oturum', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ k:IS, kullanici:$('un').value, sifre:$('pw').value }) })
+      .then(function(r){ return r.json(); }).then(function(j){
+        btn.disabled = false;
+        if (!j.ok){ $('lerr').textContent = j.error || 'Giriş yapılamadı'; return; }
+        TOKEN = j.token; store(LS, j.token); $('pw').value = '';
+        begin(j);
+      }).catch(function(){ btn.disabled = false; $('lerr').textContent = 'Bağlantı hatası, tekrar deneyin.'; });
+  });
+  function logout(){ store(LS, null); TOKEN = null; ME = null; $('home').hidden = true; $('app').hidden = true; $('login').hidden = false; history.replaceState(null, '', location.pathname); }
+  $('out').addEventListener('click', logout); $('out1').addEventListener('click', logout);
+
+  /* ---------- ana sayfa ---------- */
+  var IC = {
+    sube:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+    ist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+    fiyat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>'
+  };
+  function homeAreas(){
+    var a = [];
+    if (can('fiyat')) a.push({ kind:'fiyat', title:'Ürün güncellemeleri', sub:'Fiyat, fotoğraf, alerjen, kalori · Excel’den fiyat yükleme, toplu zam', href:'/cafe-carte/panel/urunler/' });
+    if (can('istatistik') && ME.subeler.length > 1) a.push({ kind:'ist', title:'Tüm şubeler', sub:'Şubelerin toplam istatistiği', go:{ v:'tum' } });
+    if (subeYetki()) ME.subeler.forEach(function(s){
+      var parts = []; if (can('stok')) parts.push('Var / tükendi'); if (can('oneri')) parts.push('Öneri'); if (can('istatistik')) parts.push('İstatistik');
+      var sx = SUBELER.filter(function(x){ return x.id === s; })[0];
+      a.push({ kind:'sube', sube:s, title:subeAd(s), sub:parts.join(' · ') + (sx && sx.acik === false ? ' · Henüz açılmadı, menüde görünmüyor' : ''), go:{ v:'sube', s:s } });
+    });
+    return a;
+  }
+  function showHome(){
+    VIEW = 'home'; $('app').hidden = true; $('home').hidden = false;
+    $('hi').textContent = 'Merhaba, ' + (ME.ad || ME.kullanici);
+    var areas = homeAreas();
+    $('hiSub').textContent = areas.length ? 'Erişiminiz olan bölümler aşağıda.' : 'Hesabınıza henüz bir yetki tanımlanmamış.';
+    var h = '', subeBaslik = false;
+    areas.forEach(function(x, i){
+      if (x.kind === 'sube' && !subeBaslik){ h += '<div class="sect">Menü</div>'; subeBaslik = true; }
+      h += '<button type="button" class="area' + (x.kind !== 'sube' ? ' big' : '') + '" data-i="' + i + '"><span class="ic">' + IC[x.kind] + '</span><span class="tx"><b>' + esc(x.title) + '</b><small>' + esc(x.sub) + '</small>' + (x.kind === 'sube' ? '<span class="st" id="st-' + x.sube + '">…</span>' : '') + '</span><span class="go">›</span></button>';
+    });
+    if (INST || IOS_HINT) h += '<button type="button" class="area inst" id="instBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></span><span class="tx"><b>Ana ekrana ekle</b><small>' + (INST ? 'Panel telefonunuzda uygulama gibi açılsın.' : 'Safari’de alttaki Paylaş (□↑) düğmesine, sonra “Ana Ekrana Ekle”ye dokunun.') + '</small></span><span class="go">›</span></button>';
+    $('areas').innerHTML = h;
+    $('areas').onclick = function(e){
+      if (e.target.closest('#instBtn')){ if (INST){ INST.prompt(); INST.userChoice.then(function(){ INST = null; showHome(); }); } return; }
+      var b = e.target.closest('[data-i]'); if (!b) return; var x = areas[+b.dataset.i]; if (x.href) location.href = x.href; else route(x.go); };
+    // şube özetleri
+    areas.forEach(function(x){
+      if (x.kind !== 'sube') return;
+      fetch('/api/stok?k=' + IS + ':' + x.sube + '&_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
+        var el = $('st-' + x.sube); if (!el || !j.ok) return;
+        var n = Object.keys(j.out || {}).length, f = Object.keys(j.fav || {}).length;
+        el.className = 'st' + (n ? ' o' : ''); el.textContent = (n ? n + ' ürün tükendi' : 'Tüm ürünler var') + (f ? ' · ' + f + ' öneri' : '');
+      }).catch(function(){});
+    });
+    if (location.hash) history.replaceState(null, '', location.pathname);
+    scrollTo(0, 0);
+  }
+
+  /* ---------- yönlendirme ---------- */
+  function parseHash(){
+    var m = /^#(?:s=([a-z0-9-]+)|(tum))$/.exec(location.hash || '');
+    if (!m) return null;
+    return m[2] ? { v:'tum' } : { v:'sube', s:m[1] };
+  }
+  function route(r, replace){
+    var multi = homeAreas().length > 1;
+    if (r.v === 'sube'){
+      if (ME.subeler.indexOf(r.s) === -1 || !subeYetki()) return showHome();
+      openSube(r.s, multi);
+    } else if (r.v === 'tum'){
+      if (!can('istatistik') || ME.subeler.length < 2) return showHome();
+      openTum();
+    } else return showHome();
+    var hash = r.v === 'tum' ? '#tum' : '#s=' + r.s;
+    if (replace) history.replaceState(null, '', hash); else history.pushState(null, '', hash);
+  }
+  addEventListener('popstate', function(){ if (!ME) return; var h = parseHash(); if (h) route(h, true); else showHome(); });
+  $('back').addEventListener('click', function(){ if (homeAreas().length > 1) { history.pushState(null, '', location.pathname); showHome(); } });
+
+  function setTab(t){
+    [].forEach.call($('tabs').children, function(x){ x.classList.toggle('on', x.dataset.tab === t); });
+    var st = t === 'stok';
+    $('stokHead').hidden = !st; $('list').hidden = !st; $('noteWrap').hidden = !st || !can('stok'); $('ist').hidden = t !== 'ist'; $('logv').hidden = t !== 'log';
+    if (t === 'ist') loadIst(); else if (t === 'log') loadLog(); else load();
+  }
+  var ISLEM = { 'tukendi':['Tükendi',''], 'var':['Tekrar var','v'], 'hepsi-var':['Tümü var yapıldı','v'], 'fav+':['★ Önerildi','f'], 'fav-':['Öneriden çıkarıldı',''], 'yeni+':['“Yeni” eklendi','f'], 'yeni-':['“Yeni” kaldırıldı',''] };
+  function loadLog(){
+    var k = K; $('logBody').innerHTML = '<p class="hint">Yükleniyor…</p>';
+    api({ log:true }).then(function(j){
+      if (k !== K) return;
+      if (j.status === 401){ expired(); return; }
+      if (!j.ok){ $('logBody').innerHTML = '<p class="hint">' + esc(j.error || 'Kayıtlar alınamadı') + '</p>'; return; }
+      if (!j.kayit.length){ $('logBody').innerHTML = '<p class="empty">Henüz kayıt yok.</p>'; return; }
+      var N = names(), h = '', gun = '';
+      j.kayit.forEach(function(r){
+        var d = new Date(r.t), g = d.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long' });
+        if (g !== gun){ gun = g; h += '<div class="lg-d">' + esc(g) + '</div>'; }
+        var x = ISLEM[r.islem] || [r.islem, ''];
+        h += '<div class="lg"><i>' + d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) + '</i><span><b>' + esc(r.id === '*' ? 'Tüm ürünler' : (N[r.id] || r.id)) + '</b><span class="a ' + x[1] + '">' + esc(x[0]) + '</span><small>' + esc(r.u) + '</small></span></div>';
+      });
+      $('logBody').innerHTML = h;
+    }).catch(function(){ $('logBody').innerHTML = '<p class="hint">Bağlantı hatası.</p>'; });
+  }
+  function openSube(s, multi){
+    VIEW = 'sube'; SUBE = s; K = IS + ':' + s; cur = 'all'; OUT = {}; FAV = {}; YENI = {};
+    MENU = s === 'evka-3' ? ALL : ALL.filter(function(x){ return x.grp !== 'evka'; });
+    $('home').hidden = true; $('app').hidden = false;
+    $('hSmall').textContent = 'Panel'; $('hTitle').textContent = subeAd(s);
+    $('backAr').style.visibility = multi ? '' : 'hidden'; $('back').style.cursor = multi ? '' : 'default';
+    $('menuLink').href = '/cafe-carte/'; $('menuLink').hidden = false;
+    var showStok = can('stok') || can('oneri');
+    $('tabs').hidden = !can('istatistik');
+    $('tabs').querySelector('[data-tab="stok"]').hidden = !showStok;
+    $('note').innerHTML = 'Değişiklikler anında kaydedilir; müşterinin açık menüsüne en geç 1 dakika içinde yansır. Miktar tutulmaz, sadece var / tükendi. Gün sonunda “Tümünü var yap” ile sıfırlayabilirsiniz. <button class="sbtn" id="allv" type="button" style="margin-top:10px">Tümünü var yap</button>';
+    $('q').value = ''; chips();
+    setTab(showStok ? 'stok' : 'ist');
+    scrollTo(0, 0);
+  }
+  function openTum(){
+    VIEW = 'tum'; SUBE = '*'; K = IS + ':*';
+    $('home').hidden = true; $('app').hidden = false;
+    $('hSmall').textContent = 'İstatistik'; $('hTitle').textContent = 'Tüm şubeler';
+    $('backAr').style.visibility = ''; $('menuLink').hidden = true; $('tabs').hidden = true;
+    MENU = ALL;
+    setTab('ist'); scrollTo(0, 0);
+  }
+
+  /* ---------- ürün listesi ---------- */
+  function load(){
+    if (VIEW !== 'sube') return Promise.resolve();
+    var k = K;
+    return fetch('/api/stok?k=' + k + '&_=' + Date.now(), { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){ if (j.ok && k === K){ OUT = j.out || {}; FAV = j.fav || {}; YENI = j.yeni || {}; draw(); } });
+  }
+  function chips(){
+    var h = '<button class="chip on" data-c="all" type="button">Tümü</button>';
+    if (can('stok')) h += '<button class="chip" data-c="out" type="button">Tükenenler</button>';
+    h += '<button class="chip" data-c="fav" type="button">★ Önerilenler</button><button class="chip" data-c="yeni" type="button">Yeni</button>';
+    $('chips').innerHTML = h + MENU.map(function(s){ return '<button class="chip" data-c="'+s.id+'" type="button">'+esc(s.tr)+'</button>'; }).join('');
+  }
+  $('chips').addEventListener('click', function(e){
+    var b = e.target.closest('[data-c]'); if (!b) return;
+    cur = b.dataset.c; [].forEach.call($('chips').children, function(c){ c.classList.toggle('on', c === b); }); draw(); scrollTo(0,0);
+  });
+  $('q').addEventListener('input', draw);
+  function norm(t){ return t.toLocaleLowerCase('tr'); }
+  function imgSrc(n){ return n.charAt(0) === '/' ? n : '/cafe-carte/img/' + n + '.webp'; }
+  function draw(){
+    var q = norm($('q').value.trim()), html = '', nOut = Object.keys(OUT).length, st = can('stok'), on = can('oneri');
+    MENU.forEach(function(s){
+      if (cur !== 'all' && cur !== 'out' && cur !== 'fav' && cur !== 'yeni' && cur !== s.id) return;
+      var rows = s.items.filter(function(it){
+        if (cur === 'out' && !OUT[it.id]) return false;
+        if (cur === 'fav' && !FAV[it.id]) return false;
+        if (cur === 'yeni' && !YENI[it.id]) return false;
+        return !q || norm(it.n + ' ' + s.tr).indexOf(q) !== -1;
+      });
+      if (!rows.length) return;
+      html += '<h2>'+esc(s.tr)+'</h2>';
+      rows.forEach(function(it){
+        var o = !!OUT[it.id];
+        html += '<div class="it'+(o?' out':'')+'" data-id="'+it.id+'">'+(it.img ? '<img src="'+esc(imgSrc(it.img))+'" alt="" loading="lazy" width="52" height="52">' : '<span class="noimg"></span>')+
+          '<span class="n"><b>'+esc(it.n)+'</b><small>'+(o ? 'Tükendi' : 'Var')+'</small>'+(on ? '<span class="fl"><button type="button" data-f="fav" aria-pressed="'+!!FAV[it.id]+'">★ Öner</button><button type="button" class="yn" data-f="yeni" aria-pressed="'+!!YENI[it.id]+'">Yeni</button></span>' : '')+'</span>'+
+          (st ? '<span class="tg" role="group" aria-label="'+esc(it.n)+'"><button type="button" class="v" data-set="0" aria-pressed="'+!o+'">Var</button><button type="button" class="y" data-set="1" aria-pressed="'+o+'">Tükendi</button></span>' : '')+'</div>';
+      });
+    });
+    $('list').innerHTML = html || '<p class="empty">'+(cur === 'out' ? 'Tükenen ürün yok. 🎉' : cur === 'fav' ? 'Önerilen ürün yok.' + (on ? ' Ürünlerdeki “★ Öner” ile ekleyin.' : '') : cur === 'yeni' ? '“Yeni” işaretli ürün yok.' : 'Ürün bulunamadı.')+'</p>';
+    var nFav = Object.keys(FAV).length;
+    $('sum').innerHTML = (nOut ? '<span class="pill"><b>'+nOut+'</b> ürün tükendi</span>' : '<span class="pill ok">Tüm ürünler var</span>') + (nFav ? '<span><b>'+nFav+'</b> ürün öneriliyor</span>' : '');
+  }
+  function fail(j){ if (j.status === 401){ expired(); return true; } if (!j.ok){ toast(j.error || 'Kaydedilemedi', true); return true; } return false; }
+  $('list').addEventListener('click', function(e){
+    var f = e.target.closest('[data-f]');
+    if (f){
+      var r = f.closest('.it'), fid = r.dataset.id, alan = f.dataset.f, map = alan === 'fav' ? FAV : YENI, val = !map[fid];
+      if (r.classList.contains('busy')) return;
+      r.classList.add('busy');
+      api({ id:fid, alan:alan, val:val }).then(function(j){
+        r.classList.remove('busy'); if (fail(j)) return;
+        OUT = j.out || {}; FAV = j.fav || {}; YENI = j.yeni || {}; draw();
+        toast(alan === 'fav' ? (val ? 'Menüde öne çıkarıldı' : 'Öneriden kaldırıldı') : (val ? '“Yeni” etiketi eklendi' : '“Yeni” etiketi kaldırıldı'));
+      }).catch(function(){ r.classList.remove('busy'); toast('Bağlantı hatası', true); });
+      return;
+    }
+    var b = e.target.closest('[data-set]'); if (!b) return;
+    var row = b.closest('.it'), id = row.dataset.id, out = b.dataset.set === '1';
+    if (!!OUT[id] === out || row.classList.contains('busy')) return;
+    row.classList.add('busy');
+    api({ id:id, out:out }).then(function(j){
+      row.classList.remove('busy'); if (fail(j)) return;
+      OUT = j.out || {}; FAV = j.fav || FAV; YENI = j.yeni || YENI; draw(); toast(out ? 'Tükendi olarak işaretlendi' : 'Tekrar satışta');
+    }).catch(function(){ row.classList.remove('busy'); toast('Bağlantı hatası', true); });
+  });
+  $('noteWrap').addEventListener('click', function(e){
+    if (!e.target.closest('#allv')) return;
+    if (!Object.keys(OUT).length){ toast('Zaten tüm ürünler var'); return; }
+    if (!confirm('Tüm ürünler "Var" olarak işaretlensin mi?')) return;
+    api({ all:'var' }).then(function(j){ if (fail(j)) return; OUT = {}; draw(); toast('Tüm ürünler satışta'); });
+  });
+  setInterval(function(){ if (TOKEN && VIEW === 'sube' && !document.hidden && $('ist').hidden) load(); }, 30000);
+
+  /* ---------- istatistik ---------- */
+  var gun = 7;
+  $('tabs').addEventListener('click', function(e){ var b = e.target.closest('[data-tab]'); if (b){ setTab(b.dataset.tab); scrollTo(0,0); } });
+  document.querySelector('.per').addEventListener('click', function(e){
+    var b = e.target.closest('[data-g]'); if (!b) return;
+    gun = +b.dataset.g; [].forEach.call(this.children, function(x){ x.classList.toggle('on', x === b); }); loadIst();
+  });
+  function names(){ var N = {}; ALL.forEach(function(s){ s.items.forEach(function(it){ N[it.id] = it.n; }); }); return N; }
+  function bars(rows, key){
+    var N = names();
+    rows = rows.filter(function(r){ return r[key] > 0 && N[r.id]; }).sort(function(a, b){ return b[key] - a[key]; }).slice(0, 10);
+    if (!rows.length) return '<p class="hint">Henüz veri yok.</p>';
+    var max = rows[0][key];
+    return rows.map(function(r, i){ return '<div class="bar"><i>'+(i+1)+'</i><span class="nm"><span>'+esc(N[r.id])+'</span><span class="tr"><em style="width:'+Math.max(4, Math.round(r[key]/max*100))+'%"></em></span></span><b>'+r[key]+'</b></div>'; }).join('');
+  }
+  function fark(c, p){
+    if (!p) return c ? '<span class="df up">yeni</span>' : '';
+    var d = Math.round((c - p) / p * 100);
+    return '<span class="df ' + (d > 0 ? 'up' : d < 0 ? 'dn' : '') + '">' + (d > 0 ? '▲ %' + d : d < 0 ? '▼ %' + (-d) : '=') + '</span>';
+  }
+  function ozetHtml(j){
+    if (VIEW !== 'tum' || !j.ozet) return '';
+    var N = names(), by = {}; j.ozet.forEach(function(x){ by[x.k.split(':')[1]] = x; });
+    var per = gun === 1 ? 'düne göre' : 'önceki ' + gun + ' güne göre';
+    var h = '<h3 style="margin-top:4px">Şube şube</h3><p class="hint" style="margin:0 0 10px">Değişim oklarının hepsi ' + per + '.</p><div class="ozl">';
+    ME.subeler.forEach(function(s){
+      var x = by[s] || { s:0, v:0, a:0, ps:0, pv:0, pa:0, top:null, tk:0 };
+      h += '<div class="oz"><b>' + esc(subeAd(s)) + '</b><div class="ozg">' +
+        '<span><small>Ziyaret</small><em>' + x.s.toLocaleString('tr-TR') + '</em>' + fark(x.s, x.ps) + '</span>' +
+        '<span><small>İnceleme</small><em>' + x.v.toLocaleString('tr-TR') + '</em>' + fark(x.v, x.pv) + '</span>' +
+        '<span><small>Listeye ekleme</small><em>' + x.a.toLocaleString('tr-TR') + '</em>' + fark(x.a, x.pa) + '</span>' +
+        '<span><small>Tükendi işareti</small><em>' + (x.tk || 0) + '</em></span></div>' +
+        (x.top && N[x.top.id] ? '<p class="ozt">En çok bakılan: <b>' + esc(N[x.top.id]) + '</b> (' + x.top.n + ')</p>' : '') + '</div>';
+    });
+    return h + '</div><h3>Tüm şubeler toplamı</h3>';
+  }
+  function loadIst(){
+    var k = K;
+    $('istBody').innerHTML = '<p class="hint">Yükleniyor…</p>';
+    fetch('/api/istatistik', { method:'POST', headers:{ 'content-type':'application/json', 'x-oturum': TOKEN }, body: JSON.stringify({ k:k, gun:gun }) })
+      .then(function(r){ return r.json().then(function(j){ j.status = r.status; return j; }); }).then(function(j){
+        if (k !== K) return;
+        if (j.status === 401){ expired(); return; }
+        if (!j.ok){ $('istBody').innerHTML = '<p class="hint">'+esc(j.error || 'İstatistik alınamadı')+'</p>'; return; }
+        var oturum = 0, bakis = 0, ekle = 0;
+        j.gunluk.forEach(function(g){ oturum += g.s || 0; });
+        j.urunler.forEach(function(u){ bakis += u.v || 0; ekle += u.a || 0; });
+        $('istBody').innerHTML = ozetHtml(j) +
+          '<div class="kpis"><div class="kpi"><small>Menü ziyareti</small><b>'+oturum.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Ürün incelemesi</small><b>'+bakis.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Listeye ekleme</small><b>'+ekle.toLocaleString('tr-TR')+'</b></div><div class="kpi"><small>Ziyaret başına inceleme</small><b>'+(oturum ? (bakis/oturum).toFixed(1).replace('.', ',') : '–')+'</b></div></div>' +
+          '<h3>En çok incelenen ürünler</h3>' + bars(j.urunler, 'v') +
+          '<h3>En çok listeye eklenenler</h3>' + bars(j.urunler, 'a') +
+          '<p class="hint">' + (VIEW === 'tum' ? 'Tüm şubelerin toplamıdır. ' : '') + 'Menüde bir ürüne dokunup detayına bakılması “inceleme”, + ile Seçtiklerim listesine eklenmesi “listeye ekleme” sayılır. Kimlik, konum gibi kişisel bilgi tutulmaz; sadece ürün bazında günlük sayılar.</p>';
+      }).catch(function(){ $('istBody').innerHTML = '<p class="hint">Bağlantı hatası.</p>'; });
+  }
+
+  /* ---------- ana ekrana ekleme ---------- */
+  var INST = null, STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var IOS_HINT = !STANDALONE && /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent);
+  addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); INST = e; if (VIEW === 'home' && ME) showHome(); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+
+  /* ---------- açılış: kayıtlı oturum ---------- */
+  TOKEN = store(LS);
+  if (TOKEN){
+    fetch('/api/oturum', { headers:{ 'x-oturum': TOKEN }, cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){
+      if (j.ok) begin(j); else { store(LS, null); TOKEN = null; $('login').hidden = false; }
+    }).catch(function(){ $('login').hidden = false; $('lerr').textContent = 'Bağlantı hatası, sayfayı yenileyin.'; });
+    $('login').hidden = true;
+  }
+})();
+</script>
+</body>
+</html>

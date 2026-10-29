@@ -1,0 +1,15 @@
+{
+  "name": "Cafe Carte Panel",
+  "short_name": "Carte Panel",
+  "description": "Cafe Carte deneme paneli: stok, öneri, istatistik ve ürün güncellemeleri",
+  "lang": "tr",
+  "start_url": "/cafe-carte/panel/",
+  "scope": "/cafe-carte/panel/",
+  "display": "standalone",
+  "background_color": "#2A0D15",
+  "theme_color": "#2A0D15",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
