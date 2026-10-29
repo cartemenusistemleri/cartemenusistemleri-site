@@ -217,6 +217,14 @@ html.isletme .cs-wm{display:flex}
 html.isletme .admin-only{display:none!important}
 html:not(.isletme) .isl-only{display:none!important}
 html.isletme .tabs button.on{border-bottom-color:#C9A46A}
+/* Cafe Carte (demo) kipi: Carte kimliği */
+html.isletme.isl-cafe-carte{--bg:#4A1826;--bg2:#5A2130;--cream:#FFFDF6;--card:#FFFDF8;--soft:#FAF3E4;--soft2:#F3E8D0;--ink:#2A0F17;--muted:#7C5E66;--line:rgba(74,24,38,.14)}
+html.isletme.isl-cafe-carte body{background:#FAF3E4}
+html.isletme.isl-cafe-carte .top{background:#2A0D15}
+html.isletme.isl-cafe-carte h2,html.isletme.isl-cafe-carte legend{font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:600}
+html.isletme.isl-cafe-carte .cs-wm{font-family:'Allura',cursive;letter-spacing:0;font-size:30px;line-height:1}
+html.isletme.isl-cafe-carte .cs-wm small{color:#F3E8D0}
+html.isletme.isl-cafe-carte .tabs button.on{border-bottom-color:#F3E8D0}
 @media (max-width:560px){
   .row{padding:9px 10px}
   .pin input{width:92px}
@@ -249,7 +257,7 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
     <div class="top-in">
       <div class="wm admin-only"><b>Carte</b><span>Yönetim</span></div>
       <div class="cs-wm"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#7A6346"/><rect x="4" y="4" width="92" height="92" fill="none" stroke="#EADCC4" stroke-width="1"/><text x="50" y="64" text-anchor="middle" font-family="Gilda Display,serif" font-size="44" fill="#FFFDF8">CŞ</text></svg>CAFE ŞÖLEN<small>Ürünler</small></div>
-      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option><option value="yarim-ekmek">Yarım Ekmek</option></select>
+      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option><option value="yarim-ekmek">Yarım Ekmek</option><option value="cafe-carte">Cafe Carte (demo)</option></select>
       <a class="lnk isl-only" id="panelBack" href="/cafe-solen/panel/">‹ Panele dön</a>
       <a class="lnk" id="openMenu" href="/cafe-solen/" target="_blank" rel="noopener">Menüyü aç ↗</a>
       <button class="out" id="logout" type="button">Çıkış</button>
@@ -468,12 +476,13 @@ html.isletme .tabs button.on{border-bottom-color:#C9A46A}
 (function(){
   var $ = function(id){ return document.getElementById(id); };
   var SECRET = '', K = window.ISL_K || 'cafe-solen';
-  var IAD = { 'cafe-solen':'Cafe Şölen', 'yarim-ekmek':'Yarım Ekmek' };
+  var IAD = { 'cafe-solen':'Cafe Şölen', 'yarim-ekmek':'Yarım Ekmek', 'cafe-carte':'Cafe Carte' };
   function kSetup(){
     $('openMenu').href = '/' + K + '/'; $('panelBack').href = '/' + K + '/panel/';
     [].forEach.call(document.querySelectorAll('.kPanel'), function(e){ e.textContent = 'cartemenusistemleri.com.tr/' + K + '/panel'; });
     [].forEach.call(document.querySelectorAll('.kUrl'), function(e){ e.textContent = 'cartemenusistemleri.com.tr/' + K; });
     var sb = document.querySelector('.tabs [data-tab="subeler"]'); if (sb) sb.hidden = K !== 'cafe-solen';
+    if (K === 'cafe-carte') document.querySelector('.cs-wm').innerHTML = 'Cafe Carte<small>Ürünler</small>';
     if (K === 'yarim-ekmek') document.querySelector('.cs-wm').innerHTML = '<img src="/yarim-ekmek/logo-ea.svg" alt="" style="width:30px;height:34px">YARIM EKMEK<small>Ürünler</small>';
   }
   var MENU = [], ITEMS = [], BYID = {}, BASE = {}, OVR = {}, DRAFT = {}, LOG = [], T = null, SEC = 'all';
