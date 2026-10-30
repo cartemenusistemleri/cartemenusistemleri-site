@@ -243,7 +243,7 @@ footer .cr{max-width:1120px;margin:12px auto 0;font-size:12.5px;color:#BFA6A0}
   function cl(v, a, b){ return v < a ? a : v > b ? b : v; }
   function lin(e, pts){ /* pts: [[e,v],...] artan e */ if (e <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (e <= pts[i][0]){ var t = (e - pts[i-1][0])/(pts[i][0] - pts[i-1][0]); return pts[i-1][1] + (pts[i][1] - pts[i-1][1])*t; } return pts[pts.length-1][1]; }
   function fmt(m){ m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m % 60).padStart(2,'0'); }
-  function phaseName(e){ return e > 12 ? 'gündüz' : e > 2 ? 'akşamüstü ışığı' : e > -4 ? 'gün batımı' : e > -10 ? 'alacakaranlık' : 'gece'; }
+  function phaseName(e, az){ var sabah = az < 180; return e > 12 ? 'gündüz' : e > 2 ? (sabah ? 'sabah ışığı' : 'akşamüstü ışığı') : e > -4 ? (sabah ? 'gün doğumu' : 'gün batımı') : e > -10 ? 'alacakaranlık' : 'gece'; }
 
   var lastNight = null, geo = null;
   function light(minLocal){
@@ -261,7 +261,7 @@ footer .cr{max-width:1120px;margin:12px auto 0;font-size:12.5px;color:#BFA6A0}
     fxF.style.background = 'radial-gradient(60% 55% at ' + (sx*100).toFixed(1) + '% ' + (8 - cl(e,0,40)*0.2).toFixed(1) + '%, rgba(255,214,150,.75), rgba(255,180,110,.18) 45%, transparent 70%)';
     if (geo){ fxL.style.opacity = lamp.toFixed(3); fxL.style.background = 'radial-gradient(' + (geo.w*1.8) + 'px ' + (geo.h*1.1) + 'px at ' + geo.cx + 'px ' + geo.cy + 'px, rgba(255,190,120,.55), rgba(255,160,90,.12) 55%, transparent 75%)'; }
     card.style.filter = 'brightness(' + (1/Math.max(br,.5)*lin(e,[[-14,.78],[0,.9],[10,1]])).toFixed(3) + ')';
-    clT.textContent = fmt(minLocal); clS.textContent = cur.ad + ' · ' + phaseName(e);
+    clT.textContent = fmt(minLocal); clS.textContent = cur.ad + ' · ' + phaseName(e, s.az);
     var night = e < -4;
     if (night !== lastNight){ lastNight = night; setMenuTheme(!night); }
     return e;
