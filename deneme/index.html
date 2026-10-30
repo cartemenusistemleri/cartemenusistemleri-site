@@ -4,69 +4,91 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Carte QR Menü</title>
-<meta name="description" content="Yer değişse de, Carte her yerde. Masadaki QR'ı okutun, menü açılsın. İstanbul'dan Kyoto'ya, o şehrin şu anki saatiyle canlı bir QR menü denemesi.">
+<meta name="description" content="Yer değişse de, Carte her yerde. İstanbul'dan Tokyo'ya masadaki QR kart, o şehrin güneşiyle değişen ışıkta.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1A0A10">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@1,500&family=Jost:wght@300;400;500&display=swap">
-
 <style>
-:root{--bordo:#4A1826;--bordo-d:#1A0A10;--cream:#FFFDF6;--cream-2:#F3E8D0;--text-2:#E9DCD0;--ease:cubic-bezier(.23,1,.32,1);--fade:cubic-bezier(.77,0,.175,1)}
+:root{--bordo:#4A1826;--bordo-d:#1A0A10;--cream:#FFFDF6;--cream-2:#F3E8D0;--text-2:#E9DCD0;--ease:cubic-bezier(.23,1,.32,1);--drawer:cubic-bezier(.32,.72,0,1)}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--bordo-d);overflow-x:clip}
 body{margin:0;background:var(--bordo-d);color:var(--cream);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:300;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body.open{overflow:hidden}
 ::selection{background:var(--cream-2);color:var(--bordo)}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--cream-2);outline-offset:3px;border-radius:8px}
-.top{position:absolute;inset:0 0 auto;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(16px,4vw,48px)}
-.top a{text-decoration:none}
-.logo{font-family:'Allura',cursive;font-size:40px;line-height:1;text-shadow:0 1px 14px rgba(0,0,0,.3)}
+button{font-family:inherit}
+.top{position:absolute;inset:0 0 auto;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(16px,4vw,48px);pointer-events:none}
+.top a{pointer-events:auto;text-decoration:none}
+.logo{font-family:'Allura',cursive;font-size:40px;line-height:1;text-shadow:0 1px 14px rgba(0,0,0,.35)}
 .top .cta{font-size:14px;font-weight:500;color:var(--bordo);background:var(--cream);border-radius:999px;padding:10px 16px;transition:transform 160ms var(--ease)}
 .top .cta:active{transform:scale(.97)}
 
 /* ---------- sahne ---------- */
-.hero{position:relative;min-height:100vh;min-height:100svh;overflow:hidden;isolation:isolate;display:grid;align-items:center}
-.bg{position:absolute;inset:0;z-index:-2}
-.bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.04);transition:opacity 900ms var(--fade),transform 6s var(--ease)}
-.bg img.on{opacity:1;transform:scale(1)}
-.hero::before{content:"";position:absolute;inset:0;z-index:-1;transition:opacity 900ms ease;background:linear-gradient(90deg,rgba(18,7,11,.78) 0%,rgba(18,7,11,.5) 38%,rgba(18,7,11,.12) 70%,rgba(18,7,11,.05) 100%),linear-gradient(180deg,rgba(18,7,11,.35) 0%,rgba(18,7,11,0) 22%,rgba(18,7,11,0) 70%,rgba(18,7,11,.55) 100%)}
-.in{width:min(1240px,100% - 2*clamp(16px,4vw,48px));margin:0 auto;padding:110px 0 70px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:clamp(24px,4vw,72px);align-items:center}
-h1{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(46px,5.6vw,80px);line-height:1;letter-spacing:-.01em;text-wrap:balance;text-shadow:0 2px 30px rgba(0,0,0,.35)}
-h1 .s{font-family:'Allura',cursive;font-style:normal;font-size:1.18em;line-height:.8}
-.lead{margin:20px 0 0;font-size:clamp(16.5px,1.3vw,19px);max-width:40ch;color:var(--cream);text-shadow:0 1px 16px rgba(0,0,0,.45)}
+.hero{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;isolation:isolate}
+.world{position:absolute;inset:0;will-change:filter}
+.world>img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 700ms ease}
+.world>img.bg.on{opacity:1}
+.fx{position:absolute;inset:0;pointer-events:none}
+.warm{background:#FF9447;mix-blend-mode:soft-light}
+.blue{background:#1C2A6A;mix-blend-mode:multiply}
+.flare{mix-blend-mode:screen}
+.lamp{mix-blend-mode:screen}
+.read{background:linear-gradient(90deg,rgba(14,6,9,.55) 0%,rgba(14,6,9,.18) 34%,rgba(14,6,9,0) 55%),linear-gradient(180deg,rgba(14,6,9,.4) 0%,rgba(14,6,9,0) 24%,rgba(14,6,9,0) 66%,rgba(14,6,9,.62) 100%)}
 
-.yer{margin-top:34px}
-.yer h2{margin:0 0 12px;font-size:14px;font-weight:400;color:var(--text-2)}
+/* masadaki kart */
+.card{position:absolute;left:0;top:0;transform-origin:50% 100%;cursor:pointer;border:0;padding:0;background:none;z-index:1;-webkit-tap-highlight-color:transparent}
+.card img{display:block;width:100%;height:auto;border-radius:5%;box-shadow:0 1px 0 rgba(255,255,255,.18) inset}
+.card .stand{position:absolute;left:6%;right:6%;bottom:-3.2%;height:5%;border-radius:3px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.12));box-shadow:0 2px 3px rgba(0,0,0,.25)}
+.card .gloss{position:absolute;inset:0;border-radius:5%;background:linear-gradient(115deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 32%,rgba(255,255,255,0) 70%,rgba(255,255,255,.06) 100%);pointer-events:none}
+.card.flat .stand{display:none}
+.card .ring{position:absolute;left:20%;top:23.6%;width:60%;aspect-ratio:1;border-radius:9%;box-shadow:0 0 0 2px rgba(255,253,246,.85);opacity:0;animation:ping 2.8s var(--ease) infinite 1.2s;pointer-events:none}
+@keyframes ping{0%{opacity:.9;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.18)}}
+.shadow{position:absolute;left:0;top:0;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),rgba(0,0,0,0));pointer-events:none}
+.tap{position:absolute;z-index:3;left:0;top:0;transform:translate(-50%,0);white-space:nowrap;font-size:13.5px;font-weight:400;color:var(--cream);background:rgba(20,8,12,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:999px;padding:6px 12px;pointer-events:none;transition:opacity 300ms ease}
+
+/* metin ve kontrol */
+.head{position:absolute;z-index:4;left:clamp(16px,4vw,48px);top:clamp(86px,14vh,130px);max-width:min(520px,44vw)}
+h1{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(42px,5vw,72px);line-height:1;letter-spacing:-.01em;text-wrap:balance;text-shadow:0 2px 30px rgba(0,0,0,.4)}
+h1 .s{font-family:'Allura',cursive;font-style:normal;font-size:1.18em;line-height:.8}
+.lead{margin:16px 0 0;font-size:clamp(16px,1.25vw,18.5px);max-width:38ch;text-shadow:0 1px 16px rgba(0,0,0,.55)}
+.ctrl{position:absolute;z-index:4;left:clamp(16px,4vw,48px);right:clamp(16px,4vw,48px);bottom:clamp(16px,3vh,32px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:inherit;font-size:15px;font-weight:400;color:var(--cream);background:rgba(26,10,16,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0;box-shadow:0 0 0 1px rgba(255,253,246,.28) inset;border-radius:999px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:baseline;gap:8px;transition:transform 140ms var(--ease),background-color 200ms ease,color 200ms ease}
-.chip small{font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums;transition:color 200ms ease}
+.chip{font-size:15px;color:var(--cream);background:rgba(20,8,12,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0;box-shadow:0 0 0 1px rgba(255,253,246,.28) inset;border-radius:999px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:baseline;gap:8px;transition:transform 140ms var(--ease),background-color 200ms ease,color 200ms ease}
+.chip small{font-size:12.5px;color:var(--text-2);font-variant-numeric:tabular-nums}
 .chip:active{transform:scale(.97)}
-@media (hover:hover) and (pointer:fine){.chip:hover{background:rgba(26,10,16,.62)}}
+@media (hover:hover) and (pointer:fine){.chip:hover{background:rgba(20,8,12,.65)}}
 .chip[aria-pressed="true"]{background:var(--cream);color:var(--bordo);box-shadow:none}
 .chip[aria-pressed="true"] small{color:#7C5E66}
-.now{margin-top:18px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;font-size:15px}
-.now b{font-weight:500;font-variant-numeric:tabular-nums}
-.now .dot{width:8px;height:8px;border-radius:50%;background:var(--cream-2)}
-.now button{font:inherit;font-size:13.5px;color:var(--cream);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,253,246,.5)}
+.time{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:rgba(20,8,12,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);min-width:min(420px,100%)}
+.time .t{min-width:96px}
+.time b{display:block;font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;line-height:1.2}
+.time small{display:block;font-size:12px;color:var(--text-2);line-height:1.3}
+.time input{flex:1;accent-color:var(--cream-2);min-width:90px}
+.time button{font-size:12.5px;color:var(--bordo);background:var(--cream-2);border:0;border-radius:999px;padding:7px 11px;cursor:pointer;white-space:nowrap;transition:transform 140ms var(--ease)}
+.time button:active{transform:scale(.97)}
+.time button.g{background:transparent;color:var(--cream);box-shadow:0 0 0 1px rgba(255,253,246,.35) inset}
 
-/* telefon + kart */
-.vis{position:relative;justify-self:center;width:min(100%,520px);height:min(76vh,760px);min-height:540px}
-.phone{position:absolute;right:4%;top:50%;transform:translateY(-50%);height:100%;aspect-ratio:390/844;max-height:760px}
-.phone .body{position:absolute;inset:-2.6% -5.4%;border-radius:13%/6.2%;background:#0E0C0F;box-shadow:0 0 0 1.5px #2C282E inset,0 50px 90px -30px rgba(0,0,0,.75),0 20px 40px -20px rgba(0,0,0,.5)}
-.phone .scr{position:absolute;inset:0;border-radius:10.5%/4.9%;overflow:hidden;background:#3A121D;transition:background-color 400ms ease}
-.phone .scr.acik{background:#FAF3E4}
-.phone iframe{position:absolute;left:0;top:0;width:390px;height:844px;border:0;transform-origin:0 0;background:transparent}
-.phone .isl{position:absolute;left:50%;top:1.4%;width:28%;height:3.4%;transform:translateX(-50%);border-radius:999px;background:#000;z-index:2;pointer-events:none}
-.card{position:absolute;left:-2%;bottom:3%;width:35%;transform:rotate(-5deg);transform-origin:50% 100%;filter:drop-shadow(0 26px 30px rgba(0,0,0,.5));z-index:3}
-.card .qrcard{display:block;width:100%;height:auto}
-.card .stand{position:absolute;left:10%;right:10%;bottom:-8px;height:18px;border-radius:5px;background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.2));backdrop-filter:blur(6px)}
-.tip{position:absolute;right:0;bottom:-34px;font-size:13px;color:var(--text-2);text-shadow:0 1px 10px rgba(0,0,0,.5)}
+/* telefon çekmecesi */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(10,4,7,.55);opacity:0;pointer-events:none;transition:opacity 360ms ease}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;z-index:41;left:50%;bottom:0;height:min(86vh,800px);aspect-ratio:390/844;transform:translate(-50%,108%);transition:transform 520ms var(--drawer);pointer-events:none}
+.drawer.on{transform:translate(-50%,-4vh);pointer-events:auto}
+.drawer .body{position:absolute;inset:-2.4% -5%;border-radius:13%/6.2%;background:#0E0C0F;box-shadow:0 0 0 1.5px #2C282E inset,0 60px 100px -30px rgba(0,0,0,.8)}
+.drawer .scr{position:absolute;inset:0;border-radius:10.5%/4.9%;overflow:hidden;background:#2A0D15}
+.drawer .scr.acik{background:#FAF3E4}
+.drawer iframe{position:absolute;left:0;top:0;width:390px;border:0;transform-origin:0 0}
+.drawer .isl{position:absolute;left:50%;top:1.3%;width:28%;height:3.3%;transform:translateX(-50%);border-radius:999px;background:#000;z-index:2;pointer-events:none}
+.close{position:fixed;z-index:42;right:clamp(16px,4vw,40px);top:clamp(16px,4vh,32px);width:46px;height:46px;border-radius:50%;border:0;background:var(--cream);color:var(--bordo);font-size:22px;line-height:1;cursor:pointer;opacity:0;pointer-events:none;transform:scale(.9);transition:opacity 240ms ease,transform 240ms var(--ease)}
+.close.on{opacity:1;pointer-events:auto;transform:none}
+.close:active{transform:scale(.95)}
 
-/* ---------- alt bölümler ---------- */
+/* alt bölümler */
 .why{background:var(--bordo-d);padding:clamp(80px,11vw,150px) clamp(16px,6vw,96px) clamp(40px,6vw,80px)}
 .why .w{max-width:1120px;margin:0 auto}
-.why h2,.end h2{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(38px,4.6vw,60px);line-height:1.05;text-wrap:balance;max-width:20ch}
+.why h2,.end h2{margin:0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(38px,4.6vw,60px);line-height:1.05;text-wrap:balance;max-width:22ch}
 .pts{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,56px)}
 .pts b{display:block;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:27px;line-height:1.15}
 .pts p{margin:10px 0 0;color:var(--text-2);font-size:16.5px}
@@ -81,69 +103,56 @@ h1 .s{font-family:'Allura',cursive;font-style:normal;font-size:1.18em;line-heigh
 .scan{justify-self:center;width:min(330px,100%);text-align:center}
 .scan .qrcard{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 40px rgba(0,0,0,.45))}
 .scan p{margin:16px auto 0;font-size:15px;color:var(--text-2)}
-.scan a{color:var(--cream)}
 footer{padding:26px clamp(16px,6vw,96px) 34px;background:var(--bordo-d);color:var(--text-2);font-size:13.5px;border-top:1px solid rgba(255,253,246,.1)}
 footer .r{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:baseline}
 footer .s{font-family:'Allura',cursive;font-size:32px;color:var(--cream)}
 footer .cr{max-width:1120px;margin:12px auto 0;font-size:12.5px;color:#BFA6A0}
-footer .cr a{color:inherit}
 
-.hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity 900ms ease;background:linear-gradient(90deg,rgba(18,7,11,.62) 0%,rgba(18,7,11,.34) 38%,rgba(18,7,11,0) 66%),linear-gradient(180deg,rgba(18,7,11,.3) 0%,rgba(18,7,11,0) 20%,rgba(18,7,11,0) 75%,rgba(18,7,11,.45) 100%)}
-.hero.gun::before{opacity:0}.hero.gun::after{opacity:1}
-@media (max-width:900px){
-  .in{grid-template-columns:minmax(0,1fr);padding:96px 0 56px;gap:34px}
-  .hero::before{background:linear-gradient(180deg,rgba(18,7,11,.7) 0%,rgba(18,7,11,.5) 40%,rgba(18,7,11,.25) 70%,rgba(18,7,11,.6) 100%)}
-  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1*clamp(16px,4vw,48px));padding:2px clamp(16px,4vw,48px)}
+@media (max-width:820px){
+  .head{right:16px;max-width:none;top:80px}
+  h1{font-size:38px}.lead{font-size:15.5px;margin-top:10px}
+  .read{background:linear-gradient(180deg,rgba(14,6,9,.62) 0%,rgba(14,6,9,.25) 30%,rgba(14,6,9,0) 50%,rgba(14,6,9,0) 62%,rgba(14,6,9,.75) 100%)}
+  .ctrl{flex-direction:column;align-items:stretch}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px}
   .chips::-webkit-scrollbar{display:none}
   .chip{flex:none}
-  .vis{height:min(70vh,620px);min-height:480px;width:100%}
-  .phone{right:2%}
-  .card{width:36%;left:-1%}
-  .hero::after{background:linear-gradient(180deg,rgba(18,7,11,.62) 0%,rgba(18,7,11,.38) 40%,rgba(18,7,11,.1) 70%,rgba(18,7,11,.5) 100%)}
+  .time{min-width:0}
+  .drawer{height:min(82vh,760px)}
   .pts{grid-template-columns:1fr}
   .end .w{grid-template-columns:1fr}
 }
-@media (prefers-reduced-motion:reduce){.bg img{transition:opacity 300ms ease;transform:none}.bg img.on{transform:none}}
+@media (prefers-reduced-motion:reduce){.card .ring{animation:none;opacity:.6}.drawer{transition:transform 1ms}.world>img.bg{transition:opacity 200ms ease}}
 </style>
 </head>
 <body>
 <header class="top"><a class="logo" href="/" aria-label="Carte ana sayfa">Carte</a><a class="cta" href="/#iletisim">QR menü yaptıralım</a></header>
 
 <main>
-<section class="hero" aria-labelledby="h1">
-  <div class="bg" id="bg" aria-hidden="true"><img alt="" id="bgA"><img alt="" id="bgB"></div>
-  <div class="in">
-    <div class="txt">
-      <h1 id="h1">Yer değişse de, <span class="s">Carte</span> her yerde.</h1>
-      <p class="lead">Masadaki QR'ı okutun, menü telefonda açılsın. Ayasofya karşısında bir çay ya da Alplerde bir cappuccino; menü aynı, kolaylık aynı.</p>
-      <div class="yer" role="group" aria-labelledby="yerH">
-        <h2 id="yerH">Bir yer seçin. Saat, o şehrin şu anki saati.</h2>
-        <div class="chips" id="chips"></div>
-        <div class="now" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="nowT"></span><button type="button" id="flip"></button></div>
-      </div>
-    </div>
-    <div class="vis">
-      <div class="phone" id="phone"><div class="body" aria-hidden="true"></div><div class="scr" id="scr"><div class="isl" aria-hidden="true"></div><iframe id="menu" title="Cafe Carte demo menüsü" src="/cafe-carte/?tema=acik&onizleme=1" loading="eager"></iframe></div></div>
-      <div class="card"><svg class="qrcard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" role="img" aria-label="Cafe Carte QR menü kartı. Okutunca demo menü açılır.">
-<defs>
- <radialGradient id="g" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#5A2130"/><stop offset="1" stop-color="#3A121D"/></radialGradient>
-</defs>
-<rect width="1000" height="1400" rx="56" fill="url(#g)"/>
-<rect x="30" y="30" width="940" height="1340" rx="34" fill="none" stroke="#F3E8D0" stroke-opacity=".38" stroke-width="2"/>
-<text x="500" y="200" text-anchor="middle" font-family="Allura, cursive" font-size="150" fill="#FFFDF6">Cafe Carte</text>
-<text x="500" y="262" text-anchor="middle" font-family="Jost, sans-serif" font-weight="400" font-size="24" letter-spacing="9" fill="#E6D6C7">KAHVE · MUTFAK · TATLI</text>
-<rect x="200" y="330" width="600" height="600" rx="40" fill="#FFFDF6"/>
-<g transform="translate(238.298 368.298) scale(12.76596)" fill="#3A121D"><path d="M0 0h7v1h-7zM8 0h2v1h-2zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM23 0h3v1h-3zM27 0h1v1h-1zM30 0h2v1h-2zM34 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM11 1h1v1h-1zM13 1h1v1h-1zM15 1h4v1h-4zM20 1h1v1h-1zM24 1h6v1h-6zM34 1h1v1h-1zM40 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h1v1h-1zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM21 2h2v1h-2zM24 2h2v1h-2zM27 2h3v1h-3zM31 2h2v1h-2zM34 2h1v1h-1zM36 2h3v1h-3zM40 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h3v1h-3zM17 3h5v1h-5zM23 3h5v1h-5zM29 3h1v1h-1zM31 3h1v1h-1zM34 3h1v1h-1zM36 3h3v1h-3zM40 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM13 4h2v1h-2zM17 4h2v1h-2zM20 4h1v1h-1zM22 4h1v1h-1zM26 4h3v1h-3zM34 4h1v1h-1zM36 4h3v1h-3zM40 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h5v1h-5zM19 5h1v1h-1zM23 5h2v1h-2zM26 5h2v1h-2zM29 5h1v1h-1zM31 5h1v1h-1zM34 5h1v1h-1zM40 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h7v1h-7zM9 7h4v1h-4zM17 7h1v1h-1zM19 7h1v1h-1zM21 7h2v1h-2zM24 7h1v1h-1zM29 7h2v1h-2zM32 7h1v1h-1zM3 8h1v1h-1zM6 8h1v1h-1zM9 8h1v1h-1zM11 8h2v1h-2zM14 8h1v1h-1zM17 8h1v1h-1zM21 8h1v1h-1zM23 8h2v1h-2zM26 8h3v1h-3zM31 8h1v1h-1zM35 8h3v1h-3zM39 8h2v1h-2zM2 9h2v1h-2zM7 9h1v1h-1zM10 9h4v1h-4zM16 9h7v1h-7zM24 9h1v1h-1zM28 9h1v1h-1zM32 9h4v1h-4zM37 9h4v1h-4zM0 10h1v1h-1zM2 10h1v1h-1zM5 10h7v1h-7zM14 10h1v1h-1zM16 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM24 10h3v1h-3zM28 10h1v1h-1zM31 10h1v1h-1zM37 10h2v1h-2zM0 11h1v1h-1zM2 11h4v1h-4zM9 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM16 11h3v1h-3zM21 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h2v1h-2zM38 11h1v1h-1zM2 12h2v1h-2zM6 12h1v1h-1zM8 12h4v1h-4zM15 12h5v1h-5zM21 12h5v1h-5zM29 12h1v1h-1zM31 12h2v1h-2zM34 12h2v1h-2zM37 12h1v1h-1zM39 12h2v1h-2zM2 13h3v1h-3zM7 13h2v1h-2zM10 13h2v1h-2zM13 13h2v1h-2zM20 13h1v1h-1zM22 13h2v1h-2zM27 13h3v1h-3zM32 13h1v1h-1zM34 13h1v1h-1zM37 13h3v1h-3zM1 14h3v1h-3zM6 14h1v1h-1zM8 14h3v1h-3zM12 14h1v1h-1zM16 14h2v1h-2zM19 14h1v1h-1zM21 14h1v1h-1zM24 14h1v1h-1zM29 14h1v1h-1zM31 14h1v1h-1zM34 14h1v1h-1zM36 14h1v1h-1zM38 14h3v1h-3zM0 15h1v1h-1zM2 15h4v1h-4zM13 15h1v1h-1zM16 15h1v1h-1zM18 15h2v1h-2zM22 15h1v1h-1zM25 15h1v1h-1zM27 15h1v1h-1zM29 15h2v1h-2zM32 15h1v1h-1zM34 15h3v1h-3zM40 15h1v1h-1zM1 16h1v1h-1zM3 16h5v1h-5zM9 16h2v1h-2zM13 16h1v1h-1zM16 16h5v1h-5zM22 16h1v1h-1zM25 16h1v1h-1zM28 16h3v1h-3zM32 16h1v1h-1zM35 16h1v1h-1zM39 16h2v1h-2zM1 17h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM10 17h4v1h-4zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h2v1h-2zM24 17h2v1h-2zM28 17h2v1h-2zM34 17h2v1h-2zM39 17h2v1h-2zM0 18h2v1h-2zM3 18h2v1h-2zM6 18h1v1h-1zM8 18h2v1h-2zM11 18h2v1h-2zM14 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM21 18h1v1h-1zM29 18h1v1h-1zM34 18h1v1h-1zM36 18h5v1h-5zM0 19h1v1h-1zM3 19h3v1h-3zM8 19h2v1h-2zM11 19h1v1h-1zM18 19h4v1h-4zM24 19h1v1h-1zM27 19h2v1h-2zM35 19h1v1h-1zM40 19h1v1h-1zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h4v1h-4zM11 20h1v1h-1zM13 20h3v1h-3zM18 20h3v1h-3zM24 20h3v1h-3zM28 20h2v1h-2zM33 20h4v1h-4zM38 20h3v1h-3zM4 21h1v1h-1zM8 21h1v1h-1zM10 21h2v1h-2zM13 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM20 21h1v1h-1zM24 21h3v1h-3zM29 21h1v1h-1zM32 21h1v1h-1zM34 21h1v1h-1zM36 21h1v1h-1zM38 21h3v1h-3zM0 22h2v1h-2zM3 22h1v1h-1zM6 22h1v1h-1zM9 22h2v1h-2zM13 22h3v1h-3zM17 22h1v1h-1zM19 22h1v1h-1zM21 22h1v1h-1zM25 22h1v1h-1zM28 22h1v1h-1zM30 22h2v1h-2zM33 22h2v1h-2zM39 22h1v1h-1zM0 23h1v1h-1zM3 23h3v1h-3zM7 23h3v1h-3zM14 23h1v1h-1zM16 23h1v1h-1zM18 23h1v1h-1zM25 23h3v1h-3zM30 23h2v1h-2zM34 23h7v1h-7zM0 24h1v1h-1zM2 24h2v1h-2zM5 24h2v1h-2zM10 24h1v1h-1zM12 24h1v1h-1zM15 24h1v1h-1zM21 24h1v1h-1zM26 24h4v1h-4zM32 24h4v1h-4zM38 24h2v1h-2zM0 25h1v1h-1zM3 25h1v1h-1zM5 25h1v1h-1zM8 25h5v1h-5zM14 25h1v1h-1zM16 25h1v1h-1zM19 25h1v1h-1zM21 25h2v1h-2zM24 25h3v1h-3zM29 25h3v1h-3zM33 25h1v1h-1zM37 25h1v1h-1zM39 25h1v1h-1zM1 26h1v1h-1zM3 26h1v1h-1zM5 26h4v1h-4zM10 26h1v1h-1zM12 26h8v1h-8zM22 26h1v1h-1zM24 26h2v1h-2zM28 26h2v1h-2zM32 26h2v1h-2zM35 26h2v1h-2zM39 26h2v1h-2zM2 27h1v1h-1zM5 27h1v1h-1zM7 27h2v1h-2zM11 27h1v1h-1zM14 27h2v1h-2zM19 27h2v1h-2zM23 27h2v1h-2zM27 27h4v1h-4zM32 27h3v1h-3zM39 27h1v1h-1zM0 28h1v1h-1zM3 28h4v1h-4zM8 28h1v1h-1zM11 28h2v1h-2zM14 28h2v1h-2zM20 28h2v1h-2zM23 28h1v1h-1zM26 28h1v1h-1zM29 28h1v1h-1zM33 28h2v1h-2zM39 28h1v1h-1zM2 29h1v1h-1zM4 29h1v1h-1zM9 29h2v1h-2zM14 29h1v1h-1zM18 29h1v1h-1zM21 29h1v1h-1zM23 29h1v1h-1zM26 29h8v1h-8zM35 29h1v1h-1zM38 29h3v1h-3zM0 30h1v1h-1zM6 30h1v1h-1zM9 30h3v1h-3zM13 30h2v1h-2zM16 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM23 30h2v1h-2zM27 30h2v1h-2zM35 30h1v1h-1zM37 30h4v1h-4zM2 31h2v1h-2zM5 31h1v1h-1zM8 31h1v1h-1zM15 31h2v1h-2zM23 31h3v1h-3zM29 31h2v1h-2zM33 31h1v1h-1zM35 31h1v1h-1zM37 31h1v1h-1zM0 32h1v1h-1zM2 32h1v1h-1zM4 32h4v1h-4zM10 32h3v1h-3zM15 32h1v1h-1zM17 32h4v1h-4zM22 32h1v1h-1zM24 32h1v1h-1zM26 32h3v1h-3zM32 32h7v1h-7zM40 32h1v1h-1zM8 33h1v1h-1zM12 33h1v1h-1zM14 33h2v1h-2zM17 33h8v1h-8zM26 33h1v1h-1zM28 33h2v1h-2zM31 33h2v1h-2zM36 33h1v1h-1zM38 33h3v1h-3zM0 34h7v1h-7zM11 34h2v1h-2zM16 34h1v1h-1zM20 34h2v1h-2zM25 34h2v1h-2zM28 34h1v1h-1zM30 34h1v1h-1zM32 34h1v1h-1zM34 34h1v1h-1zM36 34h2v1h-2zM39 34h1v1h-1zM0 35h1v1h-1zM6 35h1v1h-1zM9 35h2v1h-2zM13 35h1v1h-1zM16 35h1v1h-1zM18 35h2v1h-2zM21 35h1v1h-1zM30 35h1v1h-1zM32 35h1v1h-1zM36 35h1v1h-1zM38 35h1v1h-1zM0 36h1v1h-1zM2 36h3v1h-3zM6 36h1v1h-1zM10 36h1v1h-1zM12 36h2v1h-2zM15 36h1v1h-1zM18 36h1v1h-1zM20 36h3v1h-3zM25 36h1v1h-1zM28 36h1v1h-1zM30 36h1v1h-1zM32 36h6v1h-6zM39 36h1v1h-1zM0 37h1v1h-1zM2 37h3v1h-3zM6 37h1v1h-1zM8 37h1v1h-1zM12 37h1v1h-1zM16 37h1v1h-1zM18 37h1v1h-1zM22 37h2v1h-2zM26 37h1v1h-1zM29 37h6v1h-6zM36 37h1v1h-1zM39 37h1v1h-1zM0 38h1v1h-1zM2 38h3v1h-3zM6 38h1v1h-1zM10 38h3v1h-3zM15 38h1v1h-1zM18 38h2v1h-2zM21 38h3v1h-3zM26 38h1v1h-1zM28 38h1v1h-1zM30 38h1v1h-1zM36 38h1v1h-1zM40 38h1v1h-1zM0 39h1v1h-1zM6 39h1v1h-1zM9 39h2v1h-2zM12 39h1v1h-1zM14 39h4v1h-4zM19 39h1v1h-1zM21 39h2v1h-2zM25 39h2v1h-2zM29 39h1v1h-1zM31 39h2v1h-2zM35 39h1v1h-1zM37 39h1v1h-1zM39 39h1v1h-1zM0 40h7v1h-7zM10 40h3v1h-3zM16 40h4v1h-4zM21 40h2v1h-2zM25 40h2v1h-2zM28 40h2v1h-2zM32 40h1v1h-1zM35 40h5v1h-5z"/></g>
-<rect x="404" y="588" width="192" height="84" rx="22" fill="#FFFDF6"/>
-<rect x="414" y="598" width="172" height="64" rx="15" fill="#4A1826"/>
-<text x="500" y="645" text-anchor="middle" font-family="Allura, cursive" font-size="54" fill="#FFFDF6">Carte</text>
-<text x="500" y="1036" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-style="italic" font-weight="500" font-size="58" fill="#FFFDF6">Menü için okutun</text>
-<text x="500" y="1086" text-anchor="middle" font-family="Jost, sans-serif" font-weight="300" font-size="25" letter-spacing="3" fill="#E6D6C7">Scan for the menu · Меню · القائمة</text>
-<line x1="430" y1="1140" x2="570" y2="1140" stroke="#F3E8D0" stroke-opacity=".45" stroke-width="2"/>
-<text x="84" y="1300" font-family="Allura, cursive" font-size="74" fill="#F3E8D0" fill-opacity=".85">Carte</text>
-<text x="916" y="1292" text-anchor="end" font-family="Jost, sans-serif" font-weight="400" font-size="22" letter-spacing="6" fill="#E6D6C7" fill-opacity=".8">WI-FI · CafeCarte_Misafir</text>
-</svg><div class="stand" aria-hidden="true"></div></div>
-      <span class="tip">Menü canlı: kaydırın, dokunun.</span>
+<section class="hero" id="hero" aria-labelledby="h1">
+  <div class="world" id="world">
+    <img class="bg" id="bgA" alt=""><img class="bg" id="bgB" alt="">
+    <div class="shadow" id="shadow" aria-hidden="true"></div>
+    <button type="button" class="card" id="card" aria-label="Masadaki QR kart: menüyü aç"><img id="cardImg" alt="" width="560" height="784"><span class="gloss" aria-hidden="true"></span><span class="stand" aria-hidden="true"></span><span class="ring" aria-hidden="true"></span></button>
+  </div>
+  <div class="fx warm" id="fxW" aria-hidden="true"></div>
+  <div class="fx blue" id="fxB" aria-hidden="true"></div>
+  <div class="fx flare" id="fxF" aria-hidden="true"></div>
+  <div class="fx lamp" id="fxL" aria-hidden="true"></div>
+  <div class="fx read" aria-hidden="true"></div>
+  <span class="tap" id="tap">Masadaki karta dokunun</span>
+
+  <div class="head">
+    <h1 id="h1">Yer değişse de, <span class="s">Carte</span> her yerde.</h1>
+    <p class="lead" id="lead"></p>
+  </div>
+
+  <div class="ctrl">
+    <div class="chips" id="chips" role="group" aria-label="Şehir seçin"></div>
+    <div class="time" role="group" aria-label="Saat">
+      <div class="t"><b id="clT">--:--</b><small id="clS"></small></div>
+      <input type="range" id="clR" min="0" max="1439" step="1" aria-label="Günün saati">
+      <button type="button" id="play">Günü izle</button>
+      <button type="button" class="g" id="nowB" hidden>Şimdi</button>
     </div>
   </div>
 </section>
@@ -153,7 +162,7 @@ footer .cr a{color:inherit}
     <h2 id="why-t">Etraf değişir, menü yerinde kalır.</h2>
     <div class="pts">
       <div><b>Bir kart, bir okutma.</b><p>Her telefonun kamerası QR'ı tanır. Uygulama indirmek, internette aramak yok.</p></div>
-      <div><b>Gündüz açık, gece koyu.</b><p>Menü ortama uyar. Fotoğraflar, fiyatlar, kalori ve alerjenler; dört dilde.</p></div>
+      <div><b>Her şehrin kendi menüsü.</b><p>Tokyo'da yen, Paris'te avro; yerel yemek adları ve Türkçe açıklamalar. Gündüz açık, gece koyu.</p></div>
       <div><b>Değişiklik kart beklemez.</b><p>Fiyatı, stoğu ve günün önerisini işletme panelden değiştirir; menü anında güncellenir.</p></div>
     </div>
   </div>
@@ -193,83 +202,156 @@ footer .cr a{color:inherit}
   <p class="cr" id="cr"></p>
 </footer>
 
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Menü"><div class="body" aria-hidden="true"></div><div class="scr" id="scr"><div class="isl" aria-hidden="true"></div><iframe id="menu" title="Menü" tabindex="0"></iframe></div></div>
+<button type="button" class="close" id="close" aria-label="Menüyü kapat">×</button>
+
 <script>
 (function(){
   'use strict';
+  var VER = '4';
+  /* kart: x,y = kartın masaya bastığı nokta (1920×1200 fotoğrafta), h = kart yüksekliği; flat = masaya yatık */
   var Y = [
-    { id:'istanbul', ad:'İstanbul', yer:'Sultanahmet', tz:'Europe/Istanbul', lat:41.01, lon:28.98, f:['Alexis J.','Zeki Okur'], g:'Ayasofya karşısında çay', n:'Kilimin üstünde demli çay' },
-    { id:'alpler', ad:'Alpler', yer:'İsviçre', tz:'Europe/Zurich', lat:46.02, lon:7.75, f:['Barney Goodman','Andri Aeschlimann'], g:'Karın ortasında cappuccino', n:'Dağ evinde peynir fondü' },
-    { id:'como', ad:'Como Gölü', yer:'İtalya', tz:'Europe/Rome', lat:45.99, lon:9.26, f:['Timothy Abraham','MD ARIF JAWED'], g:'Göl balkonunda iki kadeh', n:'Göle karşı mum ışığında akşam' },
-    { id:'santorini', ad:'Santorini', yer:'Ege', tz:'Europe/Athens', lat:36.46, lon:25.38, f:['Anastase Maragos','Anastase Maragos'], g:'Kaldera manzaralı kahvaltı', n:'Denize karşı akşam sofrası' },
-    { id:'tokyo', ad:'Tokyo', yer:'Japonya', tz:'Asia/Tokyo', lat:35.68, lon:139.69, f:['Zion C','bady abbas'], g:'Şehrin tepesinde Japon sofrası', n:'Akşam suşisi' },
-    { id:'paris', ad:'Paris', yer:'Fransa', tz:'Europe/Paris', lat:48.86, lon:2.35, f:['Veronika Martinelli','Frede Langlois'], g:'Kahve ve krem karamel', n:'Eyfel\'e bakan bir kafe' }
+    { id:'istanbul', ad:'İstanbul', tz:'Europe/Istanbul', lat:41.03, lon:28.95, k:{ x:1065, y:1196, h:360 }, f:'Ilker Ozmen', lead:'Haliç’e karşı iki fincan kahve. Masadaki karta dokunun, menü açılsın.' },
+    { id:'como', ad:'Como Gölü', tz:'Europe/Rome', lat:45.99, lon:9.26, k:{ x:1440, y:766, h:235 }, f:'Timothy Abraham', lead:'Göl balkonunda iki kadeh şarap. Masadaki karta dokunun, menü açılsın.' },
+    { id:'santorini', ad:'Santorini', tz:'Europe/Athens', lat:36.46, lon:25.38, k:{ x:1630, y:1086, h:300 }, f:'Anastase Maragos', lead:'Denize karşı bir sofra. Masadaki karta dokunun, menü açılsın.' },
+    { id:'tokyo', ad:'Tokyo', tz:'Asia/Tokyo', lat:35.68, lon:139.69, k:{ x:1405, y:528, h:236 }, f:'Zion C', lead:'Şehrin tepesinde bir ızgara masası. Masadaki karta dokunun, menü açılsın.' },
+    { id:'paris', ad:'Paris', tz:'Europe/Paris', lat:48.86, lon:2.35, k:{ x:1470, y:400, h:300, flat:true, rot:-14 }, f:'Veronika Martinelli', lead:'Mermer masada kahve ve krem karamel. Karta dokunun, menü açılsın.' },
+    { id:'alpler', ad:'Alpler', tz:'Europe/Zurich', lat:46.02, lon:7.75, k:{ x:1560, y:1012, h:470 }, f:'Barney Goodman', lead:'Karın ortasında bir cappuccino. Karta dokunun, menü açılsın.' }
   ];
-  var RAD = Math.PI/180;
-  function elev(lat, lon, d){
-    var start = Date.UTC(d.getUTCFullYear(),0,0), n = Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()) - start)/864e5);
-    var decl = 23.44*Math.sin(2*Math.PI*(284+n)/365)*RAD, B = 2*Math.PI*(n-81)/364;
-    var eot = 9.87*Math.sin(2*B) - 7.53*Math.cos(B) - 1.5*Math.sin(B);
-    var utcMin = d.getUTCHours()*60 + d.getUTCMinutes(), H = ((utcMin + 4*lon + eot)/4 - 180)*RAD, phi = lat*RAD;
-    return Math.asin(Math.sin(phi)*Math.sin(decl) + Math.cos(phi)*Math.cos(decl)*Math.cos(H))/RAD;
-  }
-  function clock(tz, d){ return new Intl.DateTimeFormat('tr-TR', { hour:'2-digit', minute:'2-digit', timeZone:tz }).format(d); }
-  function phase(e){ return e > 6 ? 'gunduz' : e > -4 ? 'alaca' : 'gece'; }
-  var mobile = matchMedia('(max-width:900px)');
-  function src(y, gece){ return 'konum/' + y.id + '-' + (gece ? 'gece' : 'gunduz') + (mobile.matches ? '-m' : '') + '.webp?v=' + VER; }
-  var VER = '3'; /* fotoğraf değişince artır: tarayıcı önbelleği eskisini göstermesin */
+  var IW = 1920, IH = 1200, RAD = Math.PI/180;
+  var $ = function(id){ return document.getElementById(id); };
+  var hero = $('hero'), world = $('world'), A = $('bgA'), B = $('bgB'), front = A, card = $('card'), cardImg = $('cardImg'), shadow = $('shadow'), tap = $('tap');
+  var fxW = $('fxW'), fxB = $('fxB'), fxF = $('fxF'), fxL = $('fxL');
+  var R = $('clR'), clT = $('clT'), clS = $('clS'), play = $('play'), nowB = $('nowB');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, mob = matchMedia('(max-width:820px)');
+  var cur = Y[0], manual = null, playing = 0;
+  try { var s0 = localStorage.getItem('carte-sahne'); Y.forEach(function(y){ if (y.id === s0) cur = y; }); } catch(e){}
 
-  var chips = document.getElementById('chips'), nowT = document.getElementById('nowT'), flip = document.getElementById('flip');
-  var A = document.getElementById('bgA'), B = document.getElementById('bgB'), front = A;
-  var frame = document.getElementById('menu'), scr = document.getElementById('scr'), hero = document.querySelector('.hero');
-  var cur = Y[0], override = null, shown = '';
-  try { var s0 = localStorage.getItem('carte-yer'); Y.forEach(function(y){ if (y.id === s0) cur = y; }); } catch(e){}
+  /* ---------- güneş ---------- */
+  function tzOffsetMin(tz, d){ var p = new Intl.DateTimeFormat('en-US', { timeZone:tz, hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).formatToParts(d), o = {}; p.forEach(function(x){ o[x.type] = x.value; }); var asUTC = Date.UTC(+o.year, +o.month - 1, +o.day, +o.hour % 24, +o.minute); return Math.round((asUTC - d.getTime())/60000); }
+  function localMin(tz, d){ var off = tzOffsetMin(tz, d); var m = (d.getUTCHours()*60 + d.getUTCMinutes() + off) % 1440; return (m + 1440) % 1440; }
+  function sunAt(y, minLocal){
+    var d = new Date(), off = tzOffsetMin(y.tz, d), utcMin = minLocal - off;
+    var start = Date.UTC(d.getUTCFullYear(),0,0), n = Math.floor((d - start)/864e5);
+    var decl = 23.44*Math.sin(2*Math.PI*(284+n)/365)*RAD, Bb = 2*Math.PI*(n-81)/364, eot = 9.87*Math.sin(2*Bb) - 7.53*Math.cos(Bb) - 1.5*Math.sin(Bb);
+    var H = ((utcMin + 4*y.lon + eot)/4 - 180)*RAD, phi = y.lat*RAD;
+    var el = Math.asin(Math.sin(phi)*Math.sin(decl) + Math.cos(phi)*Math.cos(decl)*Math.cos(H))/RAD;
+    var az = Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(phi) - Math.tan(decl)*Math.cos(phi))/RAD + 180;
+    return { el:el, az:az };
+  }
+  function cl(v, a, b){ return v < a ? a : v > b ? b : v; }
+  function lin(e, pts){ /* pts: [[e,v],...] artan e */ if (e <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (e <= pts[i][0]){ var t = (e - pts[i-1][0])/(pts[i][0] - pts[i-1][0]); return pts[i-1][1] + (pts[i][1] - pts[i-1][1])*t; } return pts[pts.length-1][1]; }
+  function fmt(m){ m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m % 60).padStart(2,'0'); }
+  function phaseName(e){ return e > 12 ? 'gündüz' : e > 2 ? 'akşamüstü ışığı' : e > -4 ? 'gün batımı' : e > -10 ? 'alacakaranlık' : 'gece'; }
 
-  function isNight(y, d){ return override != null ? override : phase(elev(y.lat, y.lon, d)) === 'gece'; }
-  function setBg(url){
-    if (url === shown) return; shown = url;
-    var back = front === A ? B : A, img = new Image();
-    img.onload = function(){ back.src = url; requestAnimationFrame(function(){ back.classList.add('on'); front.classList.remove('on'); front = back; }); };
-    img.src = url;
+  var lastNight = null, geo = null;
+  function light(minLocal){
+    var s = sunAt(cur, minLocal), e = s.el;
+    var br = lin(e, [[-18,.52],[-10,.56],[-4,.68],[0,.8],[8,.94],[20,1.03]]);
+    var sat = lin(e, [[-14,.7],[-4,.85],[4,1.08],[20,1.04]]);
+    var warm = lin(e, [[-8,0],[-3,.42],[3,.58],[10,.3],[18,0]]);
+    var blue = lin(e, [[-18,.42],[-10,.4],[-4,.24],[0,.05],[2,0]]);
+    var flare = lin(e, [[-1,0],[2,.32],[10,.22],[30,.12]]);
+    var lamp = lin(e, [[-14,.85],[-6,.6],[-1,.2],[2,0]]);
+    world.style.filter = 'brightness(' + br.toFixed(3) + ') saturate(' + sat.toFixed(3) + ')';
+    fxW.style.opacity = warm.toFixed(3); fxB.style.opacity = blue.toFixed(3);
+    var sx = cl((s.az - 70)/(220), 0, 1);
+    fxF.style.opacity = flare.toFixed(3);
+    fxF.style.background = 'radial-gradient(60% 55% at ' + (sx*100).toFixed(1) + '% ' + (8 - cl(e,0,40)*0.2).toFixed(1) + '%, rgba(255,214,150,.75), rgba(255,180,110,.18) 45%, transparent 70%)';
+    if (geo){ fxL.style.opacity = lamp.toFixed(3); fxL.style.background = 'radial-gradient(' + (geo.w*1.8) + 'px ' + (geo.h*1.1) + 'px at ' + geo.cx + 'px ' + geo.cy + 'px, rgba(255,190,120,.55), rgba(255,160,90,.12) 55%, transparent 75%)'; }
+    card.style.filter = 'brightness(' + (1/Math.max(br,.5)*lin(e,[[-14,.78],[0,.9],[10,1]])).toFixed(3) + ')';
+    clT.textContent = fmt(minLocal); clS.textContent = cur.ad + ' · ' + phaseName(e);
+    var night = e < -4;
+    if (night !== lastNight){ lastNight = night; setMenuTheme(!night); }
+    return e;
   }
-  function setMenuTheme(acik){
-    scr.classList.toggle('acik', acik);
-    try { var de = frame.contentDocument && frame.contentDocument.documentElement; if (de){ if (!frame.contentDocument.getElementById('cerceve-stil')){ var st = frame.contentDocument.createElement('style'); st.id = 'cerceve-stil'; st.textContent = 'html,body{scrollbar-width:none;-ms-overflow-style:none}html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{width:0;height:0;display:none}'; frame.contentDocument.head.appendChild(st); } de.classList.toggle('acik', acik); var m = frame.contentDocument.querySelector('meta[name=theme-color]'); if (m) m.content = acik ? '#FAF3E4' : '#3A121D'; } } catch(e){}
+
+  /* ---------- kartı fotoğraftaki masaya yerleştir ---------- */
+  function place(){
+    var W = hero.clientWidth, H = hero.clientHeight, s = Math.max(W/IW, H/IH);
+    var px = mob.matches ? cl(cur.k.x/IW, .25, .75) : .5;
+    var ox = (W - IW*s)*px, oy = (H - IH*s)*.5;
+    var img = front; img.style.objectPosition = (px*100) + '% 50%'; (img === A ? B : A).style.objectPosition = (px*100) + '% 50%';
+    var k = cur.k, h = k.h*s, w = h*0.714, x = ox + k.x*s, y = oy + k.y*s;
+    card.className = 'card' + (k.flat ? ' flat' : '');
+    card.style.width = w + 'px';
+    if (k.flat){
+      card.style.transformOrigin = '50% 50%';
+      card.style.transform = 'translate(' + (x - w/2) + 'px,' + (y - h/2) + 'px) perspective(' + (h*4) + 'px) rotateX(48deg) rotateZ(' + (k.rot||0) + 'deg)';
+      shadow.style.width = (w*1.25) + 'px'; shadow.style.height = (h*.7) + 'px'; shadow.style.transform = 'translate(' + (x - w*.62) + 'px,' + (y - h*.26) + 'px)';
+    } else {
+      card.style.transformOrigin = '50% 100%';
+      card.style.transform = 'translate(' + (x - w/2) + 'px,' + (y - h) + 'px)';
+      shadow.style.width = (w*1.5) + 'px'; shadow.style.height = (w*.22) + 'px'; shadow.style.transform = 'translate(' + (x - w*.62) + 'px,' + (y - w*.12) + 'px)';
+    }
+    geo = { cx:x, cy:y - h*.5, w:w, h:h };
+    tap.style.transform = 'translate(' + (x - (tap.offsetWidth/2)) + 'px,' + Math.max(8, y - h - 44) + 'px)';
   }
-  function renderChips(d){
-    chips.innerHTML = Y.map(function(y){ return '<button type="button" class="chip" data-id="' + y.id + '" aria-pressed="' + (y === cur) + '">' + y.ad + '<small>' + clock(y.tz, d) + '</small></button>'; }).join('');
+
+  /* ---------- şehir seçimi ---------- */
+  var chips = $('chips');
+  function clockOf(y){ return fmt(localMin(y.tz, new Date())); }
+  function renderChips(){ chips.innerHTML = Y.map(function(y){ return '<button type="button" class="chip" data-id="' + y.id + '" aria-pressed="' + (y === cur) + '">' + y.ad + '<small>' + clockOf(y) + '</small></button>'; }).join(''); }
+  function showCity(first){
+    var url = 'sahne/' + cur.id + '.webp?v=' + VER, back = front === A ? B : A, im = new Image();
+    cardImg.src = 'kart/' + cur.id + '.webp?v=' + VER;
+    $('lead').textContent = cur.lead;
+    im.onload = function(){ back.src = url; front.classList.remove('on'); back.classList.add('on'); front = back; place(); tick(); };
+    im.src = url;
+    renderChips();
+    if (!first) place();
   }
-  function update(){
-    var d = new Date(), e = elev(cur.lat, cur.lon, d), ph = phase(e), gece = isNight(cur, d);
-    renderChips(d);
-    var ad = { gunduz:'gündüz', alaca:'alacakaranlık', gece:'gece' }[ph];
-    nowT.innerHTML = cur.ad + ' · <b>' + clock(cur.tz, d) + '</b> · ' + (gece ? cur.n : cur.g) + (override != null ? ' <span style="color:var(--text-2)">(şu an orada ' + ad + ')</span>' : '');
-    flip.textContent = gece ? 'Gündüz hâlini gör' : 'Gece hâlini gör';
-    setBg(src(cur, gece));
-    setMenuTheme(!gece);
-    hero.classList.toggle('gun', !gece);
-  }
-  chips.addEventListener('click', function(ev){
-    var b = ev.target.closest('.chip'); if (!b) return;
+  chips.addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if (!b) return;
     Y.forEach(function(y){ if (y.id === b.dataset.id) cur = y; });
-    override = null; try { localStorage.setItem('carte-yer', cur.id); } catch(e){}
-    update();
+    try { localStorage.setItem('carte-sahne', cur.id); } catch(e){}
+    manual = null; stopPlay(); nowB.hidden = true; lastNight = null;
+    showCity(false);
     var c = chips.querySelector('[data-id="' + cur.id + '"]'); if (c) c.focus({ preventScroll:true });
   });
-  flip.addEventListener('click', function(){ override = !isNight(cur, new Date()); update(); });
-  frame.addEventListener('load', function(){ setMenuTheme(!isNight(cur, new Date())); });
-  mobile.addEventListener && mobile.addEventListener('change', function(){ shown = ''; update(); });
-  setInterval(function(){ if (!document.hidden) update(); }, 30000);
 
-  /* telefon ekranına 390 px genişlikteki gerçek menüyü sığdır */
-  var phone = document.getElementById('phone');
-  function fit(){ var w = scr.clientWidth; frame.style.transform = 'scale(' + (w/390).toFixed(4) + ')'; frame.style.height = (scr.clientHeight * 390 / w) + 'px'; }
-  addEventListener('resize', fit); fit();
+  /* ---------- saat ---------- */
+  function minute(){ return manual != null ? manual : localMin(cur.tz, new Date()); }
+  function tick(){ var m = minute(); R.value = Math.round(m); light(m); }
+  R.addEventListener('input', function(){ stopPlay(); manual = +R.value; nowB.hidden = false; light(manual); });
+  nowB.addEventListener('click', function(){ manual = null; stopPlay(); nowB.hidden = true; tick(); });
+  function stopPlay(){ if (playing){ cancelAnimationFrame(playing); playing = 0; play.textContent = 'Günü izle'; } }
+  play.addEventListener('click', function(){
+    if (playing){ stopPlay(); return; }
+    var start = performance.now(), from = minute(), dur = reduce ? 1 : 16000;
+    play.textContent = 'Durdur'; nowB.hidden = false;
+    (function step(t){ var p = Math.min(1, (t - start)/dur); manual = (from + 1440*p) % 1440; R.value = Math.round(manual); light(manual); if (p < 1) playing = requestAnimationFrame(step); else { playing = 0; play.textContent = 'Günü izle'; } })(start);
+  });
+  setInterval(function(){ if (!document.hidden){ renderChips(); if (manual == null) tick(); } }, 30000);
+  addEventListener('resize', function(){ place(); light(minute()); fit(); });
 
-  /* diğer yerlerin fotoğraflarını boşta önden yükle */
-  (window.requestIdleCallback || function(f){ setTimeout(f, 1500); })(function(){ var d = new Date(); Y.forEach(function(y){ var i = new Image(); i.src = src(y, isNight(y, d)); }); });
+  /* ---------- karta dokun: telefon gelir ---------- */
+  var drawer = $('drawer'), scrim = $('scrim'), close = $('close'), frame = $('menu'), scr = $('scr'), lastFocus = null, loadedFor = '';
+  function fit(){ var w = scr.clientWidth; if (!w) return; frame.style.transform = 'scale(' + (w/390).toFixed(4) + ')'; frame.style.height = (scr.clientHeight*390/w) + 'px'; }
+  function setMenuTheme(acik){ scr.classList.toggle('acik', acik); try { var d = frame.contentDocument; if (d && d.documentElement) d.documentElement.classList.toggle('acik', acik); } catch(e){} }
+  function openMenu(){
+    lastFocus = document.activeElement;
+    var acik = !lastNight, want = cur.id;
+    if (loadedFor !== want){ frame.src = 'menu/?m=' + want + '&cerceve=1' + (acik ? '&tema=acik' : ''); loadedFor = want; }
+    else setMenuTheme(acik);
+    scr.classList.toggle('acik', acik);
+    document.body.classList.add('open'); scrim.classList.add('on'); drawer.classList.add('on'); close.classList.add('on'); tap.style.opacity = 0;
+    requestAnimationFrame(fit);
+    setTimeout(function(){ close.focus({ preventScroll:true }); }, 300);
+  }
+  function closeMenu(){
+    document.body.classList.remove('open'); scrim.classList.remove('on'); drawer.classList.remove('on'); close.classList.remove('on'); tap.style.opacity = '';
+    if (lastFocus) lastFocus.focus({ preventScroll:true });
+  }
+  frame.addEventListener('load', function(){ setMenuTheme(!lastNight); });
+  card.addEventListener('click', openMenu);
+  scrim.addEventListener('click', closeMenu); close.addEventListener('click', closeMenu);
+  addEventListener('keydown', function(e){ if (e.key === 'Escape' && drawer.classList.contains('on')) closeMenu(); });
 
-  document.getElementById('cr').innerHTML = 'Fotoğraflar <a href="https://unsplash.com/?utm_source=carte&amp;utm_medium=referral">Unsplash</a>: ' + Y.map(function(y){ return y.ad + ' (' + y.f.join(', ') + ')'; }).join(' · ') + '.';
-  update();
+  $('cr').textContent = 'Fotoğraflar Unsplash: ' + Y.map(function(y){ return y.ad + ' (' + y.f + ')'; }).join(' · ') + '.';
+  showCity(true);
+  (window.requestIdleCallback || function(f){ setTimeout(f, 1500); })(function(){ Y.forEach(function(y){ var i = new Image(); i.src = 'sahne/' + y.id + '.webp?v=' + VER; var j = new Image(); j.src = 'kart/' + y.id + '.webp?v=' + VER; }); });
 })();
 </script>
 </body>

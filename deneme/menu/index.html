@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carte · Menü</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2A0D15">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant:ital,wght@0,500;1,500&family=Jost:wght@300;400;500&display=swap">
+<script>(function(){var q=location.search;if(/[?&]tema=acik\b/.test(q))document.documentElement.classList.add('acik');if(/[?&]cerceve=1\b/.test(q))document.documentElement.classList.add('cerceve');})();</script>
+<style>
+:root{--bg:#2A0D15;--bg2:#3A121D;--card:#4A1826;--text:#FFFDF6;--text-2:#E6D6C7;--text-3:#BFA6A0;--line:rgba(255,253,246,.14);--accent:#F3E8D0;--on-accent:#4A1826;--ease:cubic-bezier(.23,1,.32,1)}
+html.acik{--bg:#FAF3E4;--bg2:#F3E8D0;--card:#FFFDF6;--text:#2A0F17;--text-2:#5E3F47;--text-3:#8B6E76;--line:rgba(74,24,38,.14);--accent:#4A1826;--on-accent:#FFFDF6}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--bg);scroll-padding-top:70px}
+html.cerceve{scrollbar-width:none}html.cerceve::-webkit-scrollbar{display:none}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Jost',-apple-system,'Segoe UI',sans-serif;font-weight:300;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background-color .4s ease,color .4s ease}
+.cover{position:relative;height:min(62vh,520px);min-height:360px;display:flex;flex-direction:column;justify-content:flex-end;padding:0 20px 26px;color:#FFFDF6;overflow:hidden}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.cover::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,8,12,.15) 0%,rgba(20,8,12,.1) 40%,rgba(20,8,12,.78) 100%)}
+.brand{font-family:'Allura',cursive;font-size:76px;line-height:.9;margin:0}
+.city{margin-top:8px;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#F3E8D0}
+.hi{margin:12px 0 0;font-family:'Cormorant',Georgia,serif;font-style:italic;font-size:21px;max-width:30ch}
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:12px 20px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:14px;color:var(--text-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;white-space:nowrap}
+.chip.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:500}
+main{padding:6px 20px 40px;max-width:640px;margin:0 auto}
+section{padding-top:28px}
+h2{margin:0 0 4px;font-family:'Cormorant',Georgia,serif;font-style:italic;font-weight:500;font-size:32px;line-height:1.1}
+h2 small{display:block;font-family:'Jost',sans-serif;font-style:normal;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-3);margin-top:4px}
+.it{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.it b{font-weight:500;font-size:17px}
+.it .p{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;align-self:start}
+.it small{grid-column:1/-1;color:var(--text-2);font-size:14.5px;line-height:1.45}
+.it i{display:block;font-style:normal;font-size:13px;color:var(--text-3);margin-top:1px}
+.note{margin:26px 0 0;font-size:13px;color:var(--text-3)}
+footer{padding:26px 20px 40px;text-align:center;color:var(--text-3);font-size:13px;border-top:1px solid var(--line)}
+footer .s{display:block;font-family:'Allura',cursive;font-size:40px;color:var(--text);line-height:1}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<header class="cover"><img id="cv" alt=""><h1 class="brand">Carte</h1><div class="city" id="city"></div><p class="hi" id="hi"></p></header>
+<nav class="bar" aria-label="Bölümler"><div class="chips" id="chips"></div></nav>
+<main id="main"></main>
+<footer><span class="s">Carte</span>Bu menü <a href="https://cartemenusistemleri.com.tr/" target="_top">Carte Menü Sistemleri</a> ile hazırlandı · Örnek menüdür</footer>
+<script>
+(function(){
+  'use strict';
+  /* [yerel ad, Türkçe açıklama, fiyat] */
+  var M = {
+    istanbul:{ city:'İstanbul · Haliç', hi:'Haliç’e karşı demli bir çay, taze bir simit.', s:[
+      ['Çaylar','Çay ocağından',[['Demli çay','İnce belli bardakta, taze demlenmiş.','40 ₺'],['Rize filiz çayı','Hafif, açık demli ilk hasat.','60 ₺'],['Elma çayı','Kurutulmuş elma ve tarçın.','70 ₺']]],
+      ['Kahve','Közde ve demlikte',[['Türk kahvesi','Lokum ve su ile.','120 ₺'],['Damla sakızlı Türk kahvesi','Sakızın ferahlığıyla.','140 ₺'],['Filtre kahve','Günün çekirdeği.','130 ₺']]],
+      ['Kahvaltılık','Gün boyu',[['Simit & beyaz peynir','Susamlı simit, ezine peyniri, domates.','110 ₺'],['Su böreği','Tereyağlı, peynirli.','160 ₺'],['Menemen','Domates, biber, köy yumurtası.','220 ₺']]],
+      ['Tatlılar','Şerbetli ve sütlü',[['Fıstıklı baklava','Kırk kat yufka, Antep fıstığı.','280 ₺'],['Künefe','Sıcak servis, kaymaklı.','260 ₺'],['Fırın sütlaç','Üstü kızarmış, tarçınlı.','150 ₺']]]
+    ]},
+    alpler:{ city:'Zermatt · Alpler', hi:'Karın ortasında bir fincan, Matterhorn’un gölgesinde bir fondü.', s:[
+      ['Heiße Getränke','Sıcak içecekler',[['Cappuccino','Bol köpüklü, yerel süt.','CHF 5.50'],['Heiße Schokolade','Sıcak çikolata, çırpılmış krema.','CHF 6.50'],['Kaffee Fertig','Kahve ve meyve likörü, dağ usulü.','CHF 9.00']]],
+      ['Hauptgerichte','Ana yemekler',[['Käsefondue moitié-moitié','Gruyère ve Vacherin, iki kişilik.','CHF 58.00'],['Raclette','Eritilmiş peynir, haşlanmış patates, turşu.','CHF 32.00'],['Rösti mit Spiegelei','Kızarmış patates, sahanda yumurta.','CHF 24.00'],['Zürcher Geschnetzeltes','Kremalı dana, rösti ile.','CHF 38.00']]],
+      ['Desserts','Tatlılar',[['Apfelstrudel','Elmalı strudel, vanilya sosu.','CHF 12.00'],['Meringues mit Doppelrahm','Beze ve Gruyère kreması.','CHF 13.50']]]
+    ]},
+    como:{ city:'Como Gölü · İtalya', hi:'Göle karşı bir kadeh, akşamüstü bir risotto.', s:[
+      ['Aperitivi','Aperatif içkiler',[['Aperol Spritz','Aperol, prosecco, soda, portakal.','10 €'],['Negroni','Cin, Campari, vermut.','12 €'],['Bellini','Beyaz şeftali ve prosecco.','11 €']]],
+      ['Antipasti','Başlangıçlar',[['Bresaola della Valtellina','Kurutulmuş dana, roka, parmesan.','16 €'],['Burrata e pomodorini','Burrata, çeri domates, fesleğen.','14 €']]],
+      ['Primi','Ara sıcaklar',[['Risotto al pesce persico','Gölün levreği, tereyağı ve adaçayı. Como’nun klasiği.','24 €'],['Tagliatelle ai porcini','El açması makarna, porçini mantarı.','19 €']]],
+      ['Dolci','Tatlılar',[['Tiramisù','Mascarpone, espresso, kakao.','9 €'],['Panna cotta','Orman meyveleri sosuyla.','8 €']]],
+      ['Vini','Şaraplar',[['Valtellina Superiore','Nebbiolo, kadeh.','9 €'],['Franciacorta','Lombardiya köpüklüsü, kadeh.','12 €']]]
+    ]},
+    santorini:{ city:'Santorini · Ege', hi:'Kalderaya karşı bir sofra, gün batımında bir kadeh Assyrtiko.', s:[
+      ['Μεζέδες','Mezeler',[['Φάβα Σαντορίνης','Santorini fava’sı, kapari, kırmızı soğan.','9 €'],['Ντοματοκεφτέδες','Adanın küçük domateslerinden köfte.','9 €'],['Χωριάτικη','Köy salatası, feta, zeytin.','12 €']]],
+      ['Θάλασσα','Deniz',[['Χταπόδι σχάρας','Izgara ahtapot, zeytinyağı, kekik.','19 €'],['Καλαμάρια','Kızarmış kalamar, limon.','15 €'],['Ψάρι ημέρας','Günün balığı, ızgara.','28 €']]],
+      ['Γλυκά','Tatlılar',[['Λουκουμάδες','Bal ve tarçınlı lokma.','8 €'],['Γιαούρτι με μέλι','Süzme yoğurt, kekik balı, ceviz.','8 €']]],
+      ['Κρασί','Şarap',[['Assyrtiko','Adanın volkanik beyazı, kadeh.','9 €'],['Vinsanto','Güneşte kurutulmuş üzümden tatlı şarap.','10 €']]]
+    ]},
+    tokyo:{ city:'Tokyo · 東京', hi:'Şehrin tepesinde bir ızgara, ardından taze suşi.', s:[
+      ['焼肉','Yakiniku · masada ızgara',[['和牛カルビ','Wagyu kaburga, tuz ve sos ile.','¥2,800'],['牛タン','İnce dilim dana dili, limon.','¥1,900'],['盛り合わせ','Karışık et tabağı, iki kişilik.','¥4,800']]],
+      ['寿司','Suşi',[['握り盛り合わせ','Şefin seçimi sekiz parça nigiri.','¥3,600'],['鮪','Maguro, ton balığı, iki parça.','¥900'],['鮭いくら','Somon ve ikura, iki parça.','¥1,100']]],
+      ['ご飯・汁物','Pilav ve çorba',[['味噌汁','Miso çorbası, tofu, yosun.','¥300'],['冷麺','Soğuk erişte, buzlu et suyu.','¥1,100'],['ご飯','Buharda pirinç.','¥250']]],
+      ['飲み物','İçecekler',[['抹茶','Matcha, geleneksel çırpılmış.','¥700'],['日本酒','Sake, soğuk ya da ılık.','¥1,000'],['ほうじ茶','Kavrulmuş yeşil çay.','¥500']]],
+      ['甘味','Tatlı',[['抹茶アイス','Matcha dondurma.','¥600']]]
+    ]},
+    paris:{ city:'Paris · Fransa', hi:'Mermer bir masa, bir café crème ve sıcak bir kruvasan.', s:[
+      ['Cafés','Kahveler',[['Café crème','Sütlü espresso, Paris usulü.','4,50 €'],['Espresso','Tek shot.','2,80 €'],['Chocolat chaud','Koyu sıcak çikolata.','5,50 €']]],
+      ['Viennoiseries','Fırından',[['Croissant au beurre','Tereyağlı kruvasan.','2,50 €'],['Pain au chocolat','Çikolatalı milföy.','2,80 €']]],
+      ['Bistrot','Bistro',[['Croque-monsieur','Jambon, emmental, beşamel.','12 €'],['Soupe à l’oignon','Soğan çorbası, gratine ekmek.','11 €'],['Quiche lorraine','Pastırma ve kremalı tart.','13 €']]],
+      ['Desserts','Tatlılar',[['Crème caramel','Krem karamel.','8 €'],['Tarte Tatin','Ters elmalı tart, krema.','9 €'],['Crème brûlée','Yakılmış şekerli krema.','8,50 €']]],
+      ['Vins','Şaraplar',[['Bordeaux','Kırmızı, kadeh.','8 €']]]
+    ]}
+  };
+  var id = (new URLSearchParams(location.search).get('m') || 'istanbul').toLowerCase();
+  var m = M[id] || M.istanbul; if (!M[id]) id = 'istanbul';
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  document.title = 'Carte · ' + m.city;
+  document.getElementById('cv').src = '../sahne/' + id + '-k.webp?v=1';
+  document.getElementById('city').textContent = m.city;
+  document.getElementById('hi').textContent = m.hi;
+  document.getElementById('chips').innerHTML = m.s.map(function(s, i){ return '<a class="chip" href="#b' + i + '">' + esc(s[0]) + '</a>'; }).join('');
+  document.getElementById('main').innerHTML = m.s.map(function(s, i){
+    return '<section id="b' + i + '"><h2>' + esc(s[0]) + '<small>' + esc(s[1]) + '</small></h2>' + s[2].map(function(x){
+      return '<div class="it"><b>' + esc(x[0]) + '</b><span class="p">' + esc(x[2]) + '</span><small>' + esc(x[1]) + '</small></div>';
+    }).join('') + '</section>';
+  }).join('') + '<p class="note">Bu, Carte’ın örnek menüsüdür. Fiyatlar temsilidir.</p>';
+  var chips = [].slice.call(document.querySelectorAll('.chip')), secs = [].slice.call(document.querySelectorAll('main section'));
+  function spy(){ var y = 90, cur = 0; secs.forEach(function(s, i){ if (s.getBoundingClientRect().top < y) cur = i; }); chips.forEach(function(c, i){ c.classList.toggle('on', i === cur); }); }
+  addEventListener('scroll', spy, { passive:true }); spy();
+})();
+</script>
+</body>
+</html>
