@@ -174,7 +174,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
   <header class="top">
     <div class="wrap">
       <span class="sig" aria-hidden="true">Otomer</span><span class="caps">Randevu paneli</span>
-      <div class="who"><span id="who"></span><button class="btn sm" id="logout" type="button">Çıkış</button></div>
+      <div class="who"><a class="btn sm" id="toYon" href="/yonetim/" hidden>‹ Carte yönetimi</a><span id="who"></span><button class="btn sm" id="logout" type="button">Çıkış</button></div>
     </div>
     <div class="wrap"><nav class="tabs" role="tablist" aria-label="Bölümler">
       <button class="tab" role="tab" data-t="liste" aria-selected="true">Randevular<b id="pendN" hidden></b></button>
@@ -289,7 +289,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
   const dayLabel = s => { const d = parse(s); return `${d.getDate()} ${AY[d.getMonth()]} ${GUN[d.getDay()]}`; };
 
   /* ---------- auth ---------- */
-  let TOKEN = S.get('otomer.panel.token'), ADMIN = SS.get('otomer.panel.admin'), ME = null;
+  let TOKEN = S.get('otomer.panel.token'), ADMIN = SS.get('otomer.panel.admin') || (S.get('otomer.panel.token') ? null : SS.get('carte_admin_secret')), ME = null; // Carte yönetiminden gelince şifre tekrar sorulmaz
   const H = (h = {}) => { if (ADMIN) h['x-admin-secret'] = ADMIN; else if (TOKEN) h['x-oturum'] = TOKEN; return h; };
   async function api(url, body) {
     const r = await fetch(url, body ? { method: 'POST', headers: H({ 'content-type': 'application/json' }), body: JSON.stringify(body) } : { headers: H() });
@@ -316,7 +316,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     btn.disabled = false;
   });
   function logout(expired) {
-    TOKEN = null; ADMIN = null; S.set('otomer.panel.token', null); SS.set('otomer.panel.admin', null);
+    TOKEN = null; ADMIN = null; S.set('otomer.panel.token', null); SS.set('otomer.panel.admin', null); SS.set('carte_admin_secret', null);
     $('app').hidden = true; $('login').hidden = false; if (expired) $('lErr').textContent = 'Oturum süresi doldu, tekrar giriş yapın.';
   }
   $('logout').onclick = () => logout(false);
@@ -327,7 +327,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     try {
       const j = await api('/api/otomer/panel');
       ITEMS = j.items || []; ME = j;
-      $('who').textContent = j.ad || ''; $('tabU').hidden = !j.admin;
+      $('who').textContent = j.ad || ''; $('tabU').hidden = !j.admin; $('toYon').hidden = !j.admin;
       const pend = ITEMS.filter(x => x.status === 'bekliyor' && x.day >= TODAY()).length;
       $('pendN').hidden = !pend; $('pendN').textContent = pend; document.title = (pend ? `(${pend}) ` : '') + 'Otomer · Randevu paneli';
       drawList(); drawWeek(); drawReport();

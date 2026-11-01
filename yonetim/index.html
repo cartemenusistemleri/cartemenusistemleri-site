@@ -257,7 +257,7 @@ html.isletme.isl-cafe-carte .tabs button.on{border-bottom-color:#F3E8D0}
     <div class="top-in">
       <div class="wm admin-only"><b>Carte</b><span>Yönetim</span></div>
       <div class="cs-wm"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#7A6346"/><rect x="4" y="4" width="92" height="92" fill="none" stroke="#EADCC4" stroke-width="1"/><text x="50" y="64" text-anchor="middle" font-family="Gilda Display,serif" font-size="44" fill="#FFFDF8">CŞ</text></svg>CAFE ŞÖLEN<small>Ürünler</small></div>
-      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option><option value="yarim-ekmek">Yarım Ekmek</option><option value="cafe-carte">Cafe Carte (demo)</option></select>
+      <select id="menuSel" class="admin-only" aria-label="Menü"><option value="cafe-solen">Cafe Şölen</option><option value="yarim-ekmek">Yarım Ekmek</option><option value="cafe-carte">Cafe Carte (demo)</option><option value="otomer">Otomer · randevu paneli ↗</option></select>
       <a class="lnk isl-only" id="panelBack" href="/cafe-solen/panel/">‹ Panele dön</a>
       <a class="lnk" id="openMenu" href="/cafe-solen/" target="_blank" rel="noopener">Menüyü aç ↗</a>
       <button class="out" id="logout" type="button">Çıkış</button>
@@ -1160,6 +1160,7 @@ html.isletme.isl-cafe-carte .tabs button.on{border-bottom-color:#F3E8D0}
   });
 
   $('menuSel').addEventListener('change', function(){
+    if (this.value === 'otomer') { this.value = K; location.href = '/otomer/panel/'; return; } // servis işletmesi: ayrı randevu paneli
     K = this.value; NIDX = null; OPTS = null; USERS = []; SF = {}; kSetup(); goTab('fiyat'); load();
   });
   kSetup();
