@@ -9,7 +9,7 @@
 import { temelMenu, fiyatlariOku } from './menu-data.js';
 import { kimlik, izinli, ISLETMELER } from './oturum.js';
 
-const MENULER = Object.keys(ISLETMELER);
+const MENULER = Object.keys(ISLETMELER).filter(function (k) { return !ISLETMELER[k].servis; });
 
 function json(body, status) {
   return new Response(JSON.stringify(body), {

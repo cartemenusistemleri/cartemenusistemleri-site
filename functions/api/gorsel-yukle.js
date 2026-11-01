@@ -4,7 +4,7 @@
 // Görseller D1 (ISTATISTIK bağlaması) içinde "gorsel" tablosunda tutulur; aynı dosya iki kez yüklenirse tek kayıt olur.
 
 import { kimlik, izinli, ISLETMELER } from './oturum.js';
-const MENULER = Object.keys(ISLETMELER);
+const MENULER = Object.keys(ISLETMELER).filter(function (k) { return !ISLETMELER[k].servis; });
 const TIPLER = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png' };
 const MAX = 1500000;
 

@@ -30,8 +30,13 @@ export const ISLETMELER = {
     demo: true, // müşterilere gösterim için deneme işletmesi
     subeler: [{ id: 'merkez', ad: 'Cafe Carte' }],
   },
+  'otomer': {
+    ad: 'Otomer',
+    servis: true, // menüsü yok: randevu paneli (/otomer/panel)
+    subeler: [{ id: 'merkez', ad: 'Gaziemir' }],
+  },
 };
-export const YETKILER = ['stok', 'oneri', 'istatistik', 'fiyat'];
+export const YETKILER = ['stok', 'oneri', 'istatistik', 'fiyat', 'randevu'];
 const GUN = 30;
 
 export function json(body, status) {

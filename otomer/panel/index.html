@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Otomer · Randevu paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&family=Cinzel:wght@500;600&family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Operate surface: dark steel shell, one accent per state. List first, week grid and report as tabs. */
+:root{
+  color-scheme:dark;
+  --bg:#0B0C0D; --bg2:#121417; --bg3:#191B1E; --bg4:#202328; --line:rgba(225,228,232,.12); --line2:rgba(225,228,232,.24);
+  --fg:#E7E9EC; --fg2:#9EA4AB; --steel:#C9CED4; --white:#fff;
+  --wait:#D8A94F; --ok:#5FBF8A; --no:#D46A6A;
+  --script:'Mrs Saint Delafield',cursive; --caps:'Cinzel',serif; --sans:'Jost',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:400 15px/1.5 var(--sans)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.caps{font:500 11px var(--caps);letter-spacing:.26em;text-transform:uppercase;color:var(--fg2)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.btn{min-height:40px;padding:0 16px;border:1px solid var(--line2);background:transparent;color:var(--fg);cursor:pointer;font:500 14px var(--sans);display:inline-flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:background-color 150ms ease,border-color 150ms ease,transform 120ms cubic-bezier(.23,1,.32,1)}
+.btn:hover{border-color:var(--fg)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.p{background:var(--steel);color:var(--bg);border-color:var(--steel)}
+.btn.ok{border-color:rgba(95,191,138,.6);color:var(--ok)}
+.btn.no{border-color:rgba(212,106,106,.5);color:var(--no)}
+.btn.sm{min-height:34px;padding:0 12px;font-size:13px}
+.inp{height:44px;width:100%;background:var(--bg);border:1px solid var(--line2);padding:0 12px}
+.inp:focus{outline:none;border-color:var(--steel)}
+label.l{display:block;font:500 11px var(--caps);letter-spacing:.22em;text-transform:uppercase;color:var(--fg2);margin:14px 0 6px}
+
+/* Login */
+.login{min-height:100svh;display:grid;place-items:center;padding:24px}
+.login form{width:min(380px,100%);display:flex;flex-direction:column}
+.login .sig{font:400 92px/1.3 var(--script);text-align:center;color:var(--white)}
+.login h1{font:500 12px var(--caps);letter-spacing:.34em;text-transform:uppercase;text-align:center;color:var(--fg2);margin:0 0 18px}
+.login .btn.p{margin-top:20px;justify-content:center;min-height:48px}
+.err{color:var(--no);font-size:14px;min-height:20px;margin-top:10px}
+.alt{margin-top:18px;text-align:center;font-size:13px;color:var(--fg2)}
+.alt button{background:none;border:0;color:var(--fg2);text-decoration:underline;cursor:pointer}
+
+/* Shell */
+.top{position:sticky;top:0;z-index:20;background:rgba(11,12,13,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:18px;height:64px}
+.top .sig{font:400 40px/1.3 var(--script);color:var(--white);transform:translateY(4px)}
+@media (max-width:560px){.top .caps,#who{display:none}}
+.top .who{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--fg2)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:14px 14px 12px;cursor:pointer;color:var(--fg2);font:500 14px var(--sans);white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--steel)}
+.tab b{font:500 12px var(--mono);background:var(--wait);color:#1b1406;border-radius:10px;padding:1px 7px;margin-left:6px}
+main{padding:22px 0 80px}
+
+/* Toolbar */
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.seg{display:flex;border:1px solid var(--line2);max-width:100%;overflow-x:auto}
+.seg button{background:none;border:0;padding:0 14px;min-height:38px;cursor:pointer;color:var(--fg2);font:500 13px var(--sans);border-right:1px solid var(--line);white-space:nowrap}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--bg4);color:var(--fg)}
+.search{flex:1 1 220px;max-width:340px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line2);background:none;cursor:pointer;min-height:34px;padding:0 12px;font:500 13px var(--sans);color:var(--fg2);display:inline-flex;align-items:center;gap:8px}
+.chip i{width:8px;height:8px;border-radius:50%}
+.chip[aria-pressed="true"]{color:var(--fg);border-color:var(--fg)}
+.chip .n{font-family:var(--mono)}
+
+/* List */
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.day-h{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0 8px;border-bottom:1px solid var(--line)}
+.day-h b{font:600 13px var(--caps);letter-spacing:.2em;text-transform:uppercase}
+.row{display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.row .t{font:500 22px var(--mono)}
+.row .t small{display:block;font:400 12px var(--sans);color:var(--fg2)}
+.row .m b{font-weight:500;font-size:16px}
+.row .m .s{color:var(--fg2);font-size:14px}
+.row .m .d{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;font-size:13px;color:var(--fg2)}
+.row .m .d .mono{color:var(--fg)}
+.row .m .note{margin-top:6px;font-size:13px;color:var(--steel)}
+.row .a{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.row .a .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pill{display:inline-flex;align-items:center;gap:7px;font:500 11px var(--caps);letter-spacing:.16em;text-transform:uppercase;padding:4px 10px;border:1px solid}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.bekliyor{color:var(--wait)}.pill.onaylandi{color:var(--ok)}.pill.iptal{color:var(--no)}
+.mailst{font-size:12px;color:var(--fg2)}
+.empty{padding:48px 0;text-align:center;color:var(--fg2)}
+@media (max-width:720px){.row{grid-template-columns:64px minmax(0,1fr)}.row .a{grid-column:1/-1;align-items:flex-start}.row .a .bt{justify-content:flex-start}.row .t{font-size:18px}}
+
+/* Edit sheet */
+.sheet{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(0,0,0,.6);padding:16px}
+.sheet .box{width:min(460px,100%);background:var(--bg2);border:1px solid var(--line2);padding:22px;max-height:calc(100svh - 32px);overflow:auto}
+.sheet h2{margin:0 0 4px;font:500 20px var(--sans)}
+.sheet .sub{color:var(--fg2);font-size:14px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.slot{min-height:36px;border:1px solid var(--line2);background:none;cursor:pointer;font:500 13px var(--mono)}
+.slot[aria-pressed="true"]{background:var(--steel);color:var(--bg);border-color:var(--steel)}
+.slot.taken{border-style:dashed;color:var(--fg2)}
+.chk{display:flex;gap:10px;align-items:center;margin-top:14px;font-size:14px}
+.sheet .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+textarea.inp{height:80px;padding:10px 12px;resize:vertical}
+
+/* Week */
+.week{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:8px;overflow-x:auto;padding-bottom:6px}
+.wcol{background:var(--bg2);border:1px solid var(--line);min-height:300px;display:flex;flex-direction:column}
+.wcol h3{margin:0;padding:10px 12px;border-bottom:1px solid var(--line);font:500 13px var(--sans);display:flex;justify-content:space-between}
+.wcol h3 .mono{color:var(--fg2)}
+.wcol.today{border-color:var(--steel)}
+.wi{margin:6px 6px 0;padding:8px 10px;background:var(--bg3);border-left:3px solid var(--wait);cursor:pointer;font-size:13px;text-align:left;border-top:0;border-right:0;border-bottom:0}
+.wi.onaylandi{border-left-color:var(--ok)}.wi.iptal{border-left-color:var(--no);opacity:.55}
+.wi b{font:500 13px var(--mono);display:block}
+.wi span{color:var(--fg2)}
+
+/* Report */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--bg2);border:1px solid var(--line);padding:14px 16px}
+.kpi b{display:block;font:500 30px var(--mono)}
+.kpi span{font-size:13px;color:var(--fg2)}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.panel2{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:12px}
+@media (max-width:820px){.panel2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--bg2);border:1px solid var(--line);padding:16px}
+.card h3{margin:0 0 4px;font:500 15px var(--sans)}
+.card p.f{margin:0 0 14px;color:var(--fg2);font-size:13px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:180px;border-bottom:1px solid var(--line2);padding-top:18px}
+.bars .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;min-width:0;height:100%;position:relative}
+.bars .c .st{width:100%;max-width:34px;display:flex;flex-direction:column-reverse}
+.bars .c .st i{display:block;width:100%}
+.bars .c .v{font:500 11px var(--mono);color:var(--fg2)}
+.bx{display:flex;gap:4px;margin-top:6px}
+.bx span{flex:1;text-align:center;font:400 10px var(--mono);color:var(--fg2);min-width:0;overflow:hidden}
+.hb{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;margin-bottom:10px;font-size:14px}
+.hb .tr{grid-column:1/-1;height:6px;background:var(--bg4)}
+.hb .tr i{display:block;height:100%;background:var(--steel)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--fg2);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+
+/* Users */
+.urow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.share{margin-top:14px;padding:12px;border:1px dashed var(--line2);font-size:14px}
+.share code{font-family:var(--mono);color:var(--white)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--steel);color:var(--bg);padding:10px 16px;font-weight:500;transition:opacity 200ms ease,transform 260ms cubic-bezier(.23,1,.32,1);z-index:60;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.toast.bad{background:var(--no);color:#fff}
+@media (prefers-reduced-motion:reduce){.toast,.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<section class="login" id="login" hidden>
+  <form id="lf" autocomplete="on">
+    <div class="sig" aria-hidden="true">Otomer</div>
+    <h1>Randevu paneli</h1>
+    <div id="lUser">
+      <label class="l" for="lu">Kullanıcı adı</label><input class="inp" id="lu" autocomplete="username" autocapitalize="off" spellcheck="false">
+      <label class="l" for="lp">Şifre</label><input class="inp" id="lp" type="password" autocomplete="current-password">
+    </div>
+    <div id="lAdmin" hidden>
+      <label class="l" for="la">Carte yönetici şifresi</label><input class="inp" id="la" type="password" autocomplete="off">
+    </div>
+    <button class="btn p" type="submit">Giriş</button>
+    <div class="err" id="lErr" role="alert"></div>
+    <div class="alt"><button type="button" id="lSwitch">Carte yöneticisi girişi</button></div>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap">
+      <span class="sig" aria-hidden="true">Otomer</span><span class="caps">Randevu paneli</span>
+      <div class="who"><span id="who"></span><button class="btn sm" id="logout" type="button">Çıkış</button></div>
+    </div>
+    <div class="wrap"><nav class="tabs" role="tablist" aria-label="Bölümler">
+      <button class="tab" role="tab" data-t="liste" aria-selected="true">Randevular<b id="pendN" hidden></b></button>
+      <button class="tab" role="tab" data-t="hafta" aria-selected="false">Haftalık</button>
+      <button class="tab" role="tab" data-t="rapor" aria-selected="false">Rapor</button>
+      <button class="tab" role="tab" data-t="kullanici" aria-selected="false" id="tabU" hidden>Kullanıcılar</button>
+    </nav></div>
+  </header>
+
+  <main class="wrap">
+    <section id="t-liste">
+      <div class="bar">
+        <div class="seg" id="range">
+          <button type="button" data-r="bugun" aria-pressed="false">Bugün</button>
+          <button type="button" data-r="yarin" aria-pressed="false">Yarın</button>
+          <button type="button" data-r="hafta" aria-pressed="false">Bu hafta</button>
+          <button type="button" data-r="ay" aria-pressed="false">Bu ay</button>
+          <button type="button" data-r="gelecek" aria-pressed="true">Gelecek</button>
+          <button type="button" data-r="tum" aria-pressed="false">Tümü</button>
+        </div>
+        <input class="inp search" id="q" type="search" placeholder="Ad, telefon, şase ya da kod ara" aria-label="Ara">
+        <button class="btn sm" id="refresh" type="button">Yenile</button>
+      </div>
+      <div class="chips" id="stChips" style="margin-bottom:12px"></div>
+      <div class="list" id="list"><div class="empty">Yükleniyor…</div></div>
+    </section>
+
+    <section id="t-hafta" hidden>
+      <div class="bar">
+        <button class="btn sm" id="wPrev" type="button" aria-label="Önceki hafta">‹</button>
+        <button class="btn sm" id="wNow" type="button">Bu hafta</button>
+        <button class="btn sm" id="wNext" type="button" aria-label="Sonraki hafta">›</button>
+        <b id="wTitle" style="font-weight:500"></b>
+      </div>
+      <div class="week" id="week"></div>
+    </section>
+
+    <section id="t-rapor" hidden>
+      <div class="bar">
+        <div class="seg" id="rMode"><button type="button" data-m="hafta" aria-pressed="true">Haftalık</button><button type="button" data-m="ay" aria-pressed="false">Aylık</button></div>
+        <button class="btn sm" id="rPrev" type="button" aria-label="Önceki">‹</button>
+        <button class="btn sm" id="rNow" type="button">Bugün</button>
+        <button class="btn sm" id="rNext" type="button" aria-label="Sonraki">›</button>
+        <b id="rTitle" style="font-weight:500"></b>
+        <button class="btn sm" id="csv" type="button" style="margin-left:auto">CSV indir</button>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="panel2">
+        <div class="card"><h3>Günlere göre randevular</h3><p class="f" id="barF"></p><div class="bars" id="bars"></div><div class="bx" id="bx"></div>
+          <div class="legend"><span><i style="background:var(--ok)"></i>Onaylı</span><span><i style="background:var(--wait)"></i>Bekleyen</span><span><i style="background:var(--no)"></i>İptal</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card"><h3>İşe göre</h3><p class="f" id="jobF"></p><div id="byJob"></div></div>
+          <div class="card"><h3>Markaya göre</h3><div id="byBrand"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="t-kullanici" hidden>
+      <div class="card" style="margin-bottom:12px">
+        <h3>Otomer panel kullanıcıları</h3>
+        <p class="f">Bu kişiler <span class="mono">cartemenusistemleri.com.tr/otomer/panel</span> adresinden kendi kullanıcı adı ve şifresiyle girer; yalnızca randevuları görür.</p>
+        <div id="uList"></div>
+      </div>
+      <div class="card">
+        <h3>Yeni kullanıcı</h3>
+        <label class="l" for="uAd">Ad soyad / görev</label><input class="inp" id="uAd" maxlength="60" placeholder="Servis danışmanı">
+        <label class="l" for="uKu">Kullanıcı adı</label><input class="inp" id="uKu" maxlength="40" autocapitalize="off" spellcheck="false" placeholder="otomer">
+        <label class="l" for="uPw">Şifre</label><div style="display:flex;gap:8px"><input class="inp mono" id="uPw" maxlength="64"><button class="btn" id="uGen" type="button">Şifre üret</button></div>
+        <div class="err" id="uErr" role="alert"></div>
+        <div style="display:flex;justify-content:flex-end"><button class="btn p" id="uSave" type="button">Kullanıcıyı kaydet</button></div>
+        <div class="share" id="uShare" hidden></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="shT">
+  <div class="box">
+    <h2 id="shT"></h2>
+    <p class="sub" id="shS"></p>
+    <div id="shTime">
+      <label class="l" for="shDay">Gün</label><input class="inp" id="shDay" type="date">
+      <label class="l">Saat</label><div class="slots" id="shSlots"></div>
+    </div>
+    <div id="shNote"><label class="l" for="shN">Not <span id="shNl"></span></label><textarea class="inp" id="shN" maxlength="300"></textarea></div>
+    <label class="chk"><input type="checkbox" id="shMail" checked> <span id="shMailL">Müşteriye e-posta gönder</span></label>
+    <div class="acts"><button class="btn" type="button" id="shCancel">Vazgeç</button><button class="btn p" type="button" id="shOk">Kaydet</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ST = { bekliyor: 'Bekliyor', onaylandi: 'Onaylı', iptal: 'İptal' };
+  const GUN = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  const AY = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const HOURS = { 0: null, 1: [510, 1140], 2: [510, 1140], 3: [510, 1140], 4: [510, 1140], 5: [510, 1140], 6: [540, 1080] };
+  const hm = m => String(Math.floor(m / 60)).padStart(2, '0') + '.' + String(m % 60).padStart(2, '0');
+  const S = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
+  const SS = { get: k => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch {} } };
+  let tt; const toast = (m, bad) => { const e = $('toast'); e.textContent = m; e.className = 'toast on' + (bad ? ' bad' : ''); clearTimeout(tt); tt = setTimeout(() => e.className = 'toast', 2800); };
+
+  // dates in İzmir time, as YYYY-MM-DD strings
+  const istNow = () => new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }));
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const monday = d => add(d, -((d.getDay() + 6) % 7));
+  const TODAY = () => iso(istNow());
+  const dayLabel = s => { const d = parse(s); return `${d.getDate()} ${AY[d.getMonth()]} ${GUN[d.getDay()]}`; };
+
+  /* ---------- auth ---------- */
+  let TOKEN = S.get('otomer.panel.token'), ADMIN = SS.get('otomer.panel.admin'), ME = null;
+  const H = (h = {}) => { if (ADMIN) h['x-admin-secret'] = ADMIN; else if (TOKEN) h['x-oturum'] = TOKEN; return h; };
+  async function api(url, body) {
+    const r = await fetch(url, body ? { method: 'POST', headers: H({ 'content-type': 'application/json' }), body: JSON.stringify(body) } : { headers: H() });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) { logout(true); throw new Error('oturum'); }
+    if (!r.ok || j.ok === false) throw new Error(j.error || 'İşlem yapılamadı');
+    return j;
+  }
+  let adminMode = false;
+  $('lSwitch').onclick = () => { adminMode = !adminMode; $('lUser').hidden = adminMode; $('lAdmin').hidden = !adminMode; $('lSwitch').textContent = adminMode ? 'Kullanıcı adıyla giriş' : 'Carte yöneticisi girişi'; $('lErr').textContent = ''; };
+  $('lf').addEventListener('submit', async e => {
+    e.preventDefault(); $('lErr').textContent = '';
+    const btn = e.submitter || $('lf').querySelector('[type=submit]'); btn.disabled = true;
+    try {
+      if (adminMode) { ADMIN = $('la').value.trim(); TOKEN = null; SS.set('otomer.panel.admin', ADMIN); }
+      else {
+        const r = await fetch('/api/oturum', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: 'otomer', kullanici: $('lu').value, sifre: $('lp').value }) });
+        const j = await r.json(); if (!j.ok) throw new Error(j.error || 'Giriş yapılamadı');
+        if (!j.yetkiler || !j.yetkiler.randevu) throw new Error('Bu kullanıcının randevu yetkisi yok');
+        TOKEN = j.token; ADMIN = null; S.set('otomer.panel.token', TOKEN);
+      }
+      await start();
+    } catch (err) { if (err.message !== 'oturum') $('lErr').textContent = err.message; else $('lErr').textContent = 'Şifre hatalı'; }
+    btn.disabled = false;
+  });
+  function logout(expired) {
+    TOKEN = null; ADMIN = null; S.set('otomer.panel.token', null); SS.set('otomer.panel.admin', null);
+    $('app').hidden = true; $('login').hidden = false; if (expired) $('lErr').textContent = 'Oturum süresi doldu, tekrar giriş yapın.';
+  }
+  $('logout').onclick = () => logout(false);
+
+  /* ---------- data ---------- */
+  let ITEMS = [];
+  async function load(quiet) {
+    try {
+      const j = await api('/api/otomer/panel');
+      ITEMS = j.items || []; ME = j;
+      $('who').textContent = j.ad || ''; $('tabU').hidden = !j.admin;
+      const pend = ITEMS.filter(x => x.status === 'bekliyor' && x.day >= TODAY()).length;
+      $('pendN').hidden = !pend; $('pendN').textContent = pend; document.title = (pend ? `(${pend}) ` : '') + 'Otomer · Randevu paneli';
+      drawList(); drawWeek(); drawReport();
+    } catch (e) { if (e.message !== 'oturum' && !quiet) toast(e.message, true); }
+  }
+  async function start() {
+    $('login').hidden = true; $('app').hidden = false;
+    await load();
+    if (!$('app').hidden) setInterval(() => load(true), 60000);
+  }
+
+  /* ---------- tabs ---------- */
+  $$('.tab').forEach(t => t.onclick = () => {
+    $$('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+    ['liste', 'hafta', 'rapor', 'kullanici'].forEach(n => $('t-' + n).hidden = n !== t.dataset.t);
+    if (t.dataset.t === 'kullanici') loadUsers();
+  });
+
+  /* ---------- list ---------- */
+  let RANGE = 'gelecek', STF = '', Q = '';
+  $('range').onclick = e => { const b = e.target.closest('button'); if (!b) return; RANGE = b.dataset.r; $$('#range button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawList(); };
+  $('q').oninput = e => { Q = e.target.value.trim().toLocaleLowerCase('tr'); drawList(); };
+  $('refresh').onclick = () => load();
+  function inRange(x) {
+    const t = TODAY(), d = parse(t);
+    switch (RANGE) {
+      case 'bugun': return x.day === t;
+      case 'yarin': return x.day === iso(add(d, 1));
+      case 'hafta': { const m = monday(d); return x.day >= iso(m) && x.day <= iso(add(m, 6)); }
+      case 'ay': return x.day.slice(0, 7) === t.slice(0, 7);
+      case 'gelecek': return x.day >= t;
+      default: return true;
+    }
+  }
+  function drawList() {
+    const base = ITEMS.filter(inRange).filter(x => !Q || [x.name, x.tel, x.vin, x.code, x.email].join(' ').toLocaleLowerCase('tr').includes(Q));
+    const cnt = { '': base.length, bekliyor: 0, onaylandi: 0, iptal: 0 }; base.forEach(x => cnt[x.status]++);
+    $('stChips').innerHTML = [['', 'Tümü', 'var(--steel)'], ['bekliyor', 'Bekleyen', 'var(--wait)'], ['onaylandi', 'Onaylı', 'var(--ok)'], ['iptal', 'İptal', 'var(--no)']]
+      .map(([k, l, c]) => `<button type="button" class="chip" data-s="${k}" aria-pressed="${STF === k}"><i style="background:${c}"></i>${l} <span class="n">${cnt[k]}</span></button>`).join('');
+    const rows = base.filter(x => !STF || x.status === STF);
+    if (RANGE === 'tum' || RANGE === 'ay') rows.reverse();
+    if (!rows.length) { $('list').innerHTML = '<div class="empty">Bu aralıkta randevu yok.</div>'; return; }
+    let html = '', last = '';
+    rows.forEach(x => {
+      if (x.day !== last) { last = x.day; const n = rows.filter(y => y.day === x.day).length; html += `<div class="day-h"><b>${dayLabel(x.day)}${x.day === TODAY() ? ' · Bugün' : ''}</b><span class="caps">${n} randevu</span></div>`; }
+      const car = [x.brand, x.year].filter(Boolean).join(' · ');
+      html += `<div class="row" data-c="${esc(x.code)}">
+        <div class="t mono">${esc(x.slot)}<small>${esc(x.code)}</small></div>
+        <div class="m"><b>${esc(x.name)}</b> <span class="s">· ${esc(car)} · ${esc(x.job)}</span>
+          <div class="d"><a class="mono" href="tel:${esc(x.tel.replace(/[^\d+]/g, ''))}" style="color:inherit">${esc(x.tel)}</a>${x.email ? `<span>${esc(x.email)}</span>` : ''}${x.vin ? `<span>Şase <span class="mono">${esc(x.vin)}</span></span>` : ''}${x.km ? `<span>${esc(x.km)} km</span>` : ''}</div>
+          ${x.not ? `<div class="note">Not: ${esc(x.not)}</div>` : ''}</div>
+        <div class="a"><span class="pill ${x.status}"><i></i>${ST[x.status]}</span>
+          <div class="bt">${x.status !== 'onaylandi' ? '<button class="btn ok sm" data-act="onay">Onayla</button>' : ''}<button class="btn sm" data-act="saat">Saat değiştir</button>${x.status !== 'iptal' ? '<button class="btn no sm" data-act="iptal">İptal</button>' : ''}<button class="btn sm" data-act="not">Not</button></div>
+          ${x.mail ? `<span class="mailst">E-posta: ${esc(mailTxt(x.mail))}</span>` : ''}</div></div>`;
+    });
+    $('list').innerHTML = html;
+  }
+  const mailTxt = m => { const [s, t] = m.split(' · '); return ({ gonderildi: 'gönderildi', 'ayar-yok': 'e-posta ayarı yok', 'eposta-yok': 'müşterinin e-postası yok', hata: 'gönderilemedi' }[s] || s) + (t ? ' (' + t.slice(8, 10) + '.' + t.slice(5, 7) + ' ' + t.slice(11, 16) + ' UTC)' : ''); };
+  $('stChips').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; STF = b.dataset.s; drawList(); };
+  $('list').onclick = e => { const b = e.target.closest('[data-act]'); if (!b) return; openSheet(b.dataset.act, ITEMS.find(x => x.code === b.closest('.row').dataset.c)); };
+
+  /* ---------- edit sheet ---------- */
+  let SH = null;
+  function slotsFor(day, code, sel) {
+    const d = parse(day), h = HOURS[d.getDay()];
+    if (!h) return '<p class="sub">Pazar kapalı.</p>';
+    const taken = new Set(ITEMS.filter(x => x.day === day && x.code !== code && x.status !== 'iptal').map(x => x.slot));
+    let o = ''; for (let m = h[0]; m <= h[1] - 60; m += 30) { const s = hm(m); o += `<button type="button" class="slot${taken.has(s) ? ' taken' : ''}" data-s="${s}" aria-pressed="${s === sel}" title="${taken.has(s) ? 'Bu saatte başka randevu var' : ''}">${s}</button>`; }
+    return o;
+  }
+  function openSheet(act, x) {
+    SH = { act, x, day: x.day, slot: x.slot };
+    const T = { onay: 'Randevuyu onayla', saat: 'Saati değiştir', iptal: 'Randevuyu iptal et', not: 'Not ekle' };
+    $('shT').textContent = T[act]; $('shS').textContent = `${x.name} · ${dayLabel(x.day)} ${x.slot} · ${x.code}`;
+    $('shTime').hidden = !(act === 'onay' || act === 'saat');
+    $('shNote').hidden = !(act === 'iptal' || act === 'not');
+    $('shNl').textContent = act === 'iptal' ? '(müşteriye iletilir)' : '(yalnızca panelde görünür)';
+    $('shN').value = act === 'not' ? (x.not || '') : '';
+    const mailable = act === 'onay' || act === 'iptal' || (act === 'saat' && x.status === 'onaylandi');
+    $('shMail').parentElement.hidden = !mailable; $('shMail').checked = !!x.email; $('shMail').disabled = !x.email;
+    $('shMailL').textContent = x.email ? `Müşteriye e-posta gönder (${x.email})` : 'Müşteri e-posta bırakmadı; telefonla bilgi verin';
+    $('shDay').value = x.day; $('shDay').min = TODAY(); $('shSlots').innerHTML = slotsFor(x.day, x.code, x.slot);
+    $('shOk').textContent = act === 'iptal' ? 'İptal et' : act === 'onay' ? 'Onayla' : 'Kaydet';
+    $('shOk').className = 'btn ' + (act === 'iptal' ? 'no' : 'p');
+    $('sheet').hidden = false; ($('shTime').hidden ? $('shN') : $('shDay')).focus();
+  }
+  $('shDay').onchange = e => { SH.day = e.target.value; SH.slot = ''; $('shSlots').innerHTML = slotsFor(SH.day, SH.x.code, ''); };
+  $('shSlots').onclick = e => { const b = e.target.closest('.slot'); if (!b) return; SH.slot = b.dataset.s; $$('.slot', $('shSlots')).forEach(x => x.setAttribute('aria-pressed', x === b)); };
+  const closeSheet = () => { $('sheet').hidden = true; SH = null; };
+  $('shCancel').onclick = closeSheet;
+  $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
+  $('shOk').onclick = async () => {
+    const { act, x } = SH; const body = { code: x.code, mail: $('shMail').checked && !$('shMail').disabled };
+    if (act === 'onay' || act === 'saat') { if (!SH.day || !SH.slot) { toast('Gün ve saat seçin', true); return; } body.day = SH.day; body.slot = SH.slot; }
+    if (act === 'onay') body.status = 'onaylandi';
+    if (act === 'iptal') { body.status = 'iptal'; body.not = $('shN').value.trim(); }
+    if (act === 'not') body.not = $('shN').value.trim();
+    $('shOk').disabled = true;
+    try {
+      const j = await api('/api/otomer/panel', body);
+      const i = ITEMS.findIndex(y => y.code === x.code); if (i > -1) ITEMS[i] = j.item;
+      closeSheet(); drawList(); drawWeek(); drawReport();
+      toast({ onay: 'Randevu onaylandı', saat: 'Saat güncellendi', iptal: 'Randevu iptal edildi', not: 'Not kaydedildi' }[act] + (j.mail ? ' · e-posta: ' + mailTxt(j.mail) : ''), j.mail === 'hata');
+      load(true);
+    } catch (e) { if (e.message !== 'oturum') toast(e.message, true); }
+    $('shOk').disabled = false;
+  };
+
+  /* ---------- week ---------- */
+  let WEEK = monday(istNow());
+  $('wPrev').onclick = () => { WEEK = add(WEEK, -7); drawWeek(); };
+  $('wNext').onclick = () => { WEEK = add(WEEK, 7); drawWeek(); };
+  $('wNow').onclick = () => { WEEK = monday(istNow()); drawWeek(); };
+  function drawWeek() {
+    const end = add(WEEK, 5);
+    $('wTitle').textContent = `${WEEK.getDate()} ${AY[WEEK.getMonth()]} – ${end.getDate()} ${AY[end.getMonth()]} ${end.getFullYear()}`;
+    let h = '';
+    for (let i = 0; i < 6; i++) {
+      const d = add(WEEK, i), s = iso(d), its = ITEMS.filter(x => x.day === s).sort((a, b) => a.slot.localeCompare(b.slot));
+      h += `<div class="wcol${s === TODAY() ? ' today' : ''}"><h3><span>${GUN[d.getDay()]} ${d.getDate()}</span><span class="mono">${its.filter(x => x.status !== 'iptal').length}</span></h3>` +
+        its.map(x => `<button type="button" class="wi ${x.status}" data-c="${esc(x.code)}"><b>${esc(x.slot)}</b>${esc(x.name)}<br><span>${esc(x.brand)} · ${esc(x.job)}</span></button>`).join('') + '</div>';
+    }
+    $('week').innerHTML = h;
+  }
+  $('week').onclick = e => { const b = e.target.closest('.wi'); if (!b) return; const x = ITEMS.find(y => y.code === b.dataset.c); openSheet(x.status === 'bekliyor' ? 'onay' : 'saat', x); };
+
+  /* ---------- report ---------- */
+  let RM = 'hafta', RP = istNow();
+  $('rMode').onclick = e => { const b = e.target.closest('button'); if (!b) return; RM = b.dataset.m; $$('#rMode button').forEach(x => x.setAttribute('aria-pressed', x === b)); RP = istNow(); drawReport(); };
+  $('rPrev').onclick = () => { RP = RM === 'hafta' ? add(RP, -7) : new Date(RP.getFullYear(), RP.getMonth() - 1, 1); drawReport(); };
+  $('rNext').onclick = () => { RP = RM === 'hafta' ? add(RP, 7) : new Date(RP.getFullYear(), RP.getMonth() + 1, 1); drawReport(); };
+  $('rNow').onclick = () => { RP = istNow(); drawReport(); };
+  function period() {
+    if (RM === 'hafta') { const a = monday(RP), b = add(a, 6); return { a, b, days: [...Array(7)].map((_, i) => add(a, i)), title: `${a.getDate()} ${AY[a.getMonth()]} – ${b.getDate()} ${AY[b.getMonth()]} ${b.getFullYear()}` }; }
+    const a = new Date(RP.getFullYear(), RP.getMonth(), 1), b = new Date(RP.getFullYear(), RP.getMonth() + 1, 0);
+    return { a, b, days: [...Array(b.getDate())].map((_, i) => add(a, i)), title: `${AY[a.getMonth()]} ${a.getFullYear()}` };
+  }
+  let REP = [];
+  function drawReport() {
+    const P = period(), A = iso(P.a), B = iso(P.b);
+    $('rTitle').textContent = P.title;
+    REP = ITEMS.filter(x => x.day >= A && x.day <= B);
+    const c = { bekliyor: 0, onaylandi: 0, iptal: 0 }; REP.forEach(x => c[x.status]++);
+    const decided = c.onaylandi + c.iptal;
+    $('kpis').innerHTML = [[REP.length, 'Toplam talep'], [c.onaylandi, 'Onaylı'], [c.bekliyor, 'Bekleyen'], [c.iptal, 'İptal'], [decided ? Math.round(c.onaylandi / decided * 100) + '%' : '–', 'Onay oranı']]
+      .map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join('');
+    const per = P.days.map(d => { const s = iso(d), its = REP.filter(x => x.day === s); return { d, ok: its.filter(x => x.status === 'onaylandi').length, w: its.filter(x => x.status === 'bekliyor').length, n: its.filter(x => x.status === 'iptal').length }; });
+    const max = Math.max(1, ...per.map(p => p.ok + p.w + p.n));
+    const busiest = per.reduce((a, p) => (p.ok + p.w + p.n) > (a.ok + a.w + a.n) ? p : a, per[0]);
+    $('barF').textContent = REP.length ? `En yoğun gün: ${busiest.d.getDate()} ${AY[busiest.d.getMonth()]} ${GUN[busiest.d.getDay()]} (${busiest.ok + busiest.w + busiest.n} randevu)` : 'Bu dönemde randevu yok.';
+    const px = v => (v / max * 150) + 'px';
+    $('bars').innerHTML = per.map(p => { const t = p.ok + p.w + p.n; return `<div class="c" title="${p.d.getDate()} ${AY[p.d.getMonth()]}: ${t}"><span class="v">${t || ''}</span><div class="st"><i style="height:${px(p.ok)};background:var(--ok)"></i><i style="height:${px(p.w)};background:var(--wait)"></i><i style="height:${px(p.n)};background:var(--no)"></i></div></div>`; }).join('');
+    $('bx').innerHTML = per.map((p, i) => `<span>${RM === 'hafta' ? ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][p.d.getDay()] : (i % 5 === 0 || i === per.length - 1 ? p.d.getDate() : '')}</span>`).join('');
+    const group = (key, el, f) => {
+      const m = {}; REP.filter(x => x.status !== 'iptal').forEach(x => m[x[key]] = (m[x[key]] || 0) + 1);
+      const arr = Object.entries(m).sort((a, b) => b[1] - a[1]), tot = arr.reduce((s, a) => s + a[1], 0) || 1;
+      $(el).innerHTML = arr.length ? arr.map(([k, v]) => `<div class="hb"><span>${esc(k)}</span><span class="mono">${v} · ${Math.round(v / tot * 100)}%</span><div class="tr"><i style="width:${v / tot * 100}%"></i></div></div>`).join('') : '<p class="f">Veri yok</p>';
+      if (f) $(f).textContent = arr.length ? `En çok: ${arr[0][0]}` : '';
+    };
+    group('job', 'byJob', 'jobF'); group('brand', 'byBrand');
+  }
+  $('csv').onclick = () => {
+    const cols = ['code', 'day', 'slot', 'status', 'name', 'tel', 'email', 'brand', 'year', 'job', 'vin', 'km', 'not', 'createdAt'];
+    const head = ['Kod', 'Gün', 'Saat', 'Durum', 'Ad', 'Telefon', 'E-posta', 'Marka', 'Model yılı', 'İş', 'Şase', 'Km', 'Not', 'Oluşturma'];
+    const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const csv = '﻿' + [head.map(q).join(';')].concat(REP.map(x => cols.map(c => q(c === 'status' ? ST[x[c]] : x[c])).join(';'))).join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `otomer-randevular-${iso(period().a)}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  /* ---------- users (Carte admin only) ---------- */
+  function genPw() { const A = 'abcdefghjkmnpqrstuvwxyz', D = '23456789', r = crypto.getRandomValues(new Uint8Array(10)); let s = ''; for (let i = 0; i < 6; i++) s += A[r[i] % A.length]; for (let i = 6; i < 10; i++) s += D[r[i] % D.length]; return s; }
+  $('uGen').onclick = () => $('uPw').value = genPw();
+  async function loadUsers() {
+    if (!ADMIN) return;
+    $('uList').innerHTML = '<p class="f">Yükleniyor…</p>'; if (!$('uPw').value) $('uPw').value = genPw();
+    try {
+      const j = await api('/api/kullanici', { k: 'otomer', list: true });
+      const L = j.kullanicilar || [];
+      $('uList').innerHTML = L.length ? L.map(u => `<div class="urow"><div><b>${esc(u.ad || u.kullanici)}</b> <span class="mono" style="color:var(--fg2)">@${esc(u.kullanici)}</span></div><div style="display:flex;gap:6px"><button class="btn sm" data-pw="${esc(u.kullanici)}" data-ad="${esc(u.ad)}">Yeni şifre</button><button class="btn no sm" data-del="${esc(u.kullanici)}">Sil</button></div></div>`).join('') : '<p class="f">Henüz kullanıcı yok.</p>';
+    } catch (e) { $('uList').innerHTML = `<p class="f">${esc(e.message)}</p>`; }
+  }
+  async function saveUser(kullanici, ad, sifre) {
+    const j = await api('/api/kullanici', { k: 'otomer', set: { kullanici, ad, sifre, yetkiler: { randevu: true }, subeler: ['*'] } });
+    const txt = `Otomer Randevu Paneli\nAdres: https://cartemenusistemleri.com.tr/otomer/panel/\nKullanıcı adı: ${j.kullanici}\nŞifre: ${sifre}`;
+    $('uShare').innerHTML = `<b>Kaydedildi.</b> Bu bilgileri iletin (şifre bir daha gösterilmez):<br>Adres: <code>cartemenusistemleri.com.tr/otomer/panel</code><br>Kullanıcı adı: <code>${esc(j.kullanici)}</code><br>Şifre: <code>${esc(sifre)}</code><br><button class="btn sm" id="uCopy" type="button" style="margin-top:8px">Bilgileri kopyala</button>`;
+    $('uShare').hidden = false;
+    $('uCopy').onclick = () => navigator.clipboard.writeText(txt).then(() => toast('Kopyalandı'), () => toast('Kopyalanamadı, elle seçin', true));
+    loadUsers();
+  }
+  $('uSave').onclick = async () => {
+    $('uErr').textContent = ''; const pw = $('uPw').value.trim();
+    if (!pw) { $('uErr').textContent = 'Şifre girin'; return; }
+    try { await saveUser($('uKu').value, $('uAd').value, pw); $('uPw').value = genPw(); $('uKu').value = ''; $('uAd').value = ''; } catch (e) { $('uErr').textContent = e.message; }
+  };
+  $('uList').onclick = async e => {
+    const p = e.target.closest('[data-pw]'), d = e.target.closest('[data-del]');
+    try {
+      if (p) await saveUser(p.dataset.pw, p.dataset.ad, genPw());
+      if (d && confirm(`@${d.dataset.del} silinsin mi? Bu kişi panele bir daha giremez.`)) { await api('/api/kullanici', { k: 'otomer', sil: d.dataset.del }); toast('Kullanıcı silindi'); loadUsers(); }
+    } catch (er) { toast(er.message, true); }
+  };
+
+  // boot
+  if (TOKEN || ADMIN) start(); else $('login').hidden = false;
+})();
+</script>
+</body>
+</html>
