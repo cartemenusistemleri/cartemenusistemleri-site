@@ -1,5 +1,5 @@
 // Otomer randevu paneli API — Carte oturum sistemiyle (Cloudflare Pages Function)
-// Kimlik: x-oturum (Otomer panel kullanıcısı, "randevu" yetkisi) ya da x-admin-secret (Carte yöneticisi)
+// Kimlik: yalnızca x-oturum (Otomer panel kullanıcısı, "randevu" yetkisi). Carte yöneticisi buraya erişemez.
 // GET  /api/otomer/panel?from=2026-11-01&to=2026-11-30   → aralıktaki talepler (boşsa hepsi)
 // POST /api/otomer/panel  { code, status?, day?, slot?, not?, mail?:false }
 //      status: "bekliyor" | "onaylandi" | "iptal". Onay/iptalde müşteriye e-posta gider (e-posta varsa ve mail:false değilse).
@@ -7,7 +7,9 @@
 import { kimlik, izinli } from '../oturum.js';
 import { kv, PFX, J, meta, whenText, mailGonder, plakaMail, ics } from './randevu.js';
 
-const yetkili = async (request, env) => { const k = await kimlik(request, env); return izinli(k, 'otomer', 'randevu', null) ? k : null; };
+// Carte yöneticisi (ADMIN_SECRET) randevu verisini göremez; diğer işletmelerdeki gibi yalnızca kullanıcı/yetki yönetir (/api/kullanici).
+// Randevuları görmek isteyen Carte çalışanı kendine "randevu" yetkili bir Otomer kullanıcısı açar.
+const yetkili = async (request, env) => { const k = await kimlik(request, env); return k && !k.admin && izinli(k, 'otomer', 'randevu', null) ? k : null; };
 
 export async function onRequestGet({ request, env }) {
   const kim = await yetkili(request, env);
@@ -24,7 +26,7 @@ export async function onRequestGet({ request, env }) {
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor);
   out.sort((a, b) => (a.day + a.slot).localeCompare(b.day + b.slot));
-  return J({ items: out, ad: kim.admin ? 'Carte yöneticisi' : kim.ad, admin: !!kim.admin });
+  return J({ items: out, ad: kim.ad });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -47,7 +49,7 @@ export async function onRequestPost({ request, env }) {
   if (b.status) rec.status = b.status;
   if (b.not !== undefined) rec.not = String(b.not).slice(0, 300);
   rec.updatedAt = new Date().toISOString();
-  rec.updatedBy = kim.admin ? 'Carte' : kim.ad;
+  rec.updatedBy = kim.ad;
   rec.log = (rec.log || []).concat([{ t: rec.updatedAt, by: rec.updatedBy, status: rec.status, when: rec.when }]).slice(-20);
 
   // müşteriye e-posta: onaylandığında, iptalde ya da onaylı randevunun saati değiştiğinde

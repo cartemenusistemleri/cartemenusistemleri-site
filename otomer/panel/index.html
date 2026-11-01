@@ -166,7 +166,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     </div>
     <button class="btn p" type="submit">Giriş</button>
     <div class="err" id="lErr" role="alert"></div>
-    <div class="alt"><button type="button" id="lSwitch">Carte yöneticisi girişi</button></div>
+    <div class="alt"><button type="button" id="lSwitch">Carte yöneticisi girişi (kullanıcı yönetimi)</button></div>
   </form>
 </section>
 
@@ -235,7 +235,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     <section id="t-kullanici" hidden>
       <div class="card" style="margin-bottom:12px">
         <h3>Otomer panel kullanıcıları</h3>
-        <p class="f">Bu kişiler <span class="mono">cartemenusistemleri.com.tr/otomer/panel</span> adresinden kendi kullanıcı adı ve şifresiyle girer; yalnızca randevuları görür.</p>
+        <p class="f">Bu kişiler <span class="mono">cartemenusistemleri.com.tr/otomer/panel</span> adresinden kendi kullanıcı adı ve şifresiyle girer; yalnızca randevuları görür. Carte yöneticisi randevuları göremez; görmek için kendinize de bir kullanıcı açın.</p>
         <div id="uList"></div>
       </div>
       <div class="card">
@@ -299,7 +299,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     return j;
   }
   let adminMode = false;
-  $('lSwitch').onclick = () => { adminMode = !adminMode; $('lUser').hidden = adminMode; $('lAdmin').hidden = !adminMode; $('lSwitch').textContent = adminMode ? 'Kullanıcı adıyla giriş' : 'Carte yöneticisi girişi'; $('lErr').textContent = ''; };
+  $('lSwitch').onclick = () => { adminMode = !adminMode; $('lUser').hidden = adminMode; $('lAdmin').hidden = !adminMode; $('lSwitch').textContent = adminMode ? 'Kullanıcı adıyla giriş' : 'Carte yöneticisi girişi (kullanıcı yönetimi)'; $('lErr').textContent = ''; };
   $('lf').addEventListener('submit', async e => {
     e.preventDefault(); $('lErr').textContent = '';
     const btn = e.submitter || $('lf').querySelector('[type=submit]'); btn.disabled = true;
@@ -327,7 +327,7 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     try {
       const j = await api('/api/otomer/panel');
       ITEMS = j.items || []; ME = j;
-      $('who').textContent = j.ad || ''; $('tabU').hidden = !j.admin; $('toYon').hidden = !j.admin;
+      $('who').textContent = j.ad || '';
       const pend = ITEMS.filter(x => x.status === 'bekliyor' && x.day >= TODAY()).length;
       $('pendN').hidden = !pend; $('pendN').textContent = pend; document.title = (pend ? `(${pend}) ` : '') + 'Otomer · Randevu paneli';
       drawList(); drawWeek(); drawReport();
@@ -335,6 +335,12 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
   }
   async function start() {
     $('login').hidden = true; $('app').hidden = false;
+    if (ADMIN) { // Carte yöneticisi: randevuları görmez, yalnızca kullanıcı ve yetki yönetir
+      $$('.tab').forEach(t => t.hidden = t.dataset.t !== 'kullanici');
+      $('tabU').hidden = false; $('toYon').hidden = false; $('who').textContent = 'Carte yöneticisi';
+      $('tabU').click(); return;
+    }
+    $$('.tab').forEach(t => t.hidden = t.dataset.t === 'kullanici'); $('toYon').hidden = true; document.querySelector('.tab[data-t=liste]').click();
     await load();
     if (!$('app').hidden) setInterval(() => load(true), 60000);
   }
