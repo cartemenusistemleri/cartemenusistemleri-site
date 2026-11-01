@@ -2,7 +2,9 @@
 // POST /api/otomer/randevu        → yeni talep kaydeder, { code, status } döner
 // GET  /api/otomer/randevu?code=  → müşterinin kartı için yalnızca durum ve saat döner
 // Veri: KV OTOMER_RANDEVU bağlıysa o, yoksa sitenin ODEME_LINKS KV'si; anahtar "otomer:randevu:<kod>"
-// E-posta (isteğe bağlı): MAIL_WEBHOOK_URL + MAIL_WEBHOOK_SECRET (Gmail / Apps Script) ya da RESEND_API_KEY + MAIL_FROM; OTOMER_BILDIRIM (yeni talepte Otomer'e haber)
+// E-posta: varsayılan Gmail köprüsü (functions/api/eposta.js, ayar gerekmez); RESEND_API_KEY varsa Resend. OTOMER_BILDIRIM: yeni talepte Otomer'e haber
+
+import { gmailGonder } from '../eposta.js';
 
 export const kv = env => env.OTOMER_RANDEVU || env.ODEME_LINKS;
 export const PFX = 'otomer:randevu:';
@@ -30,19 +32,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 
 // --- e-posta (Resend). Anahtar yoksa sessizce "ayar-yok" döner. ---
 export async function mailGonder(env, { to, subject, html, text, ics }) {
-  if (!env.MAIL_WEBHOOK_URL && !env.RESEND_API_KEY) return 'ayar-yok';
   if (!to) return 'eposta-yok';
   const replyTo = env.OTOMER_REPLY_TO || 'info@otomerizmir.com';
-  // 1) Gmail (cartemenusistemleri@gmail.com) — Google Apps Script web uygulaması üzerinden
-  if (env.MAIL_WEBHOOK_URL) {
-    try {
-      const r = await fetch(env.MAIL_WEBHOOK_URL, { method: 'POST', headers: { 'content-type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ secret: env.MAIL_WEBHOOK_SECRET || '', to, subject, html, text, name: 'Otomer', replyTo,
-          ics: ics ? btoa(unescape(encodeURIComponent(ics))) : '' }) });
-      const j = await r.json().catch(() => ({}));
-      return j.ok ? 'gonderildi' : 'hata';
-    } catch { return 'hata'; }
-  }
+  // 1) Resend anahtarı varsa onu kullan; yoksa Gmail köprüsü (cartemenusistemleri@gmail.com)
+  if (!env.RESEND_API_KEY) return gmailGonder(env, { to, subject, html, text, name: 'Otomer', replyTo, ics: ics ? btoa(unescape(encodeURIComponent(ics))) : '' });
   // 2) Resend (yedek)
   const body = { from: env.MAIL_FROM || 'Otomer <randevu@cartemenusistemleri.com.tr>', to: [to], subject, html, text, reply_to: env.OTOMER_REPLY_TO || 'info@otomerizmir.com' };
   if (ics) body.attachments = [{ filename: 'otomer-randevu.ics', content: btoa(unescape(encodeURIComponent(ics))) }];
