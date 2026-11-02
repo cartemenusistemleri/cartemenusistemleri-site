@@ -31,11 +31,11 @@ export function meta(r) {
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // --- e-posta (Resend). Anahtar yoksa sessizce "ayar-yok" döner. ---
-export async function mailGonder(env, { to, subject, html, text, ics }) {
+export async function mailGonder(env, { to, subject, html, text, ics, kart }) {
   if (!to) return 'eposta-yok';
   const replyTo = env.OTOMER_REPLY_TO || 'info@otomerizmir.com';
   // 1) Resend anahtarı varsa onu kullan; yoksa Gmail köprüsü (cartemenusistemleri@gmail.com)
-  if (!env.RESEND_API_KEY) return gmailGonder(env, { to, subject, html, text, name: 'Otomer', replyTo, ics: ics ? btoa(unescape(encodeURIComponent(ics))) : '' });
+  if (!env.RESEND_API_KEY) return gmailGonder(env, { to, subject, html, text, name: 'Otomer', replyTo, ics: ics ? btoa(unescape(encodeURIComponent(ics))) : '', kart: kart || '' });
   // 2) Resend (yedek)
   const body = { from: env.MAIL_FROM || 'Otomer <randevu@cartemenusistemleri.com.tr>', to: [to], subject, html, text, reply_to: env.OTOMER_REPLY_TO || 'info@otomerizmir.com' };
   if (ics) body.attachments = [{ filename: 'otomer-randevu.ics', content: btoa(unescape(encodeURIComponent(ics))) }];
@@ -54,18 +54,45 @@ export function ics(r) {
     `SUMMARY:${e('Otomer · ' + r.job)}`, `LOCATION:${e('Otomer, ' + ADRES)}`, `DESCRIPTION:${e('Talep kodu: ' + r.code)}`,
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 }
-// Metal plaka görünümlü e-posta (tablo + satır içi stil: e-posta istemcileri için)
-export function plakaMail(r, baslik, aciklama) {
-  const row = (l, v) => `<td style="padding:8px 14px 8px 0;vertical-align:top"><div style="font:600 10px Georgia,serif;letter-spacing:3px;color:#4A4F55;text-transform:uppercase">${l}</div><div style="font:500 16px Arial,sans-serif;color:#22262B;margin-top:4px">${esc(v)}</div></td>`;
-  return `<!doctype html><html lang="tr"><body style="margin:0;background:#0B0C0D;padding:28px 12px;font-family:Arial,sans-serif">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#D6DADF;background-image:linear-gradient(100deg,#BFC4CA,#E9ECEF 30%,#B6BCC3 57%,#DCE0E4);border-radius:16px;border:1px solid #9AA1A8">
-<tr><td style="padding:26px 30px 6px"><table width="100%" role="presentation"><tr><td style="font:600 12px Georgia,serif;letter-spacing:5px;color:#22262B">OTOMER</td><td align="right" style="font:500 11px Georgia,serif;letter-spacing:4px;color:#40454B">RANDEVU KARTI</td></tr></table></td></tr>
-<tr><td align="center" style="padding:6px 30px 4px;font:italic 400 54px 'Snell Roundhand','Brush Script MT',cursive;color:#2A2E33">Otomer</td></tr>
-<tr><td style="padding:0 30px"><div style="border-top:1px solid #8E949B;margin:6px 0 4px"></div>
-<div style="font:600 20px Georgia,serif;color:#22262B;margin:14px 0 4px">${esc(baslik)}</div><div style="font:15px/1.5 Arial,sans-serif;color:#33383E;margin-bottom:10px">${aciklama}</div>
-<table role="presentation" width="100%"><tr>${row('Gün ve saat', r.when)}${row('İş', r.job)}</tr><tr>${row('Araç', [r.brand, r.year].filter(Boolean).join(' · '))}${row('Talep kodu', r.code)}</tr></table></td></tr>
-<tr><td style="padding:14px 30px 26px;font:14px/1.5 Arial,sans-serif;color:#33383E">${esc(ADRES)} · <a href="https://maps.app.goo.gl/kfHaCNXfLk6vD5QUA" style="color:#22262B">Yol tarifi</a><br>0232 386 33 88 · info@otomerizmir.com</td></tr>
+// E-posta gövdesi — açık zemin, sitedeki randevu kartı + bilgi kutusu.
+// kartVar: panel kartı sitedeki çizimle birebir JPEG olarak yolladıysa (cid:kart) o gösterilir; yoksa
+// sitenin yazı tipleriyle önceden çizilmiş başlık görselli (/otomer/eposta/*.png) metal plaka.
+// E-posta istemcileri web yazı tipi yüklemediği için başlık ve etiketler görsel, değişken bilgiler metin.
+const IMG = 'https://cartemenusistemleri.com.tr/otomer/eposta/';
+const SANS = "font-family:'Jost','Helvetica Neue',Helvetica,Arial,sans-serif";
+const BW = { onay: 289, iptal: 303, saat: 408 }; // başlık görsellerinin genişliği (px)
+export function plakaMail(r, baslik, aciklama, kartVar) {
+  const tur = /iptal/.test(baslik) ? 'iptal' : /saati/.test(baslik) ? 'saat' : 'onay';
+  const arac = [r.brand, r.year].filter(Boolean).join(' · ');
+  const lbl = (k, alt) => `<img src="${IMG}etiket-${k}.png" width="200" height="16" alt="${alt}" style="display:block;border:0;width:200px;height:16px;color:#4A4F55;font-size:10px;letter-spacing:2px">`;
+  const cell = (k, alt, v) => `<td valign="top" width="50%" style="padding:0 12px 18px 0">${lbl(k, alt)}<div style="${SANS};font-size:17px;line-height:1.35;font-weight:500;color:#22262B;margin-top:5px">${esc(v)}</div></td>`;
+  const kart = kartVar
+    ? `<img src="cid:kart" width="600" alt="Otomer randevu kartı · ${esc(r.when)} · ${esc(r.code)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:14px">`
+    : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#D6DADF" style="background:#D6DADF;background-image:linear-gradient(100deg,#BFC4CA 0%,#E9ECEF 30%,#B6BCC3 57%,#DCE0E4 100%);border:1px solid #9AA1A8;border-radius:18px"><tr><td style="padding:12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #8F959C;border-radius:10px"><tr><td style="padding:20px 18px 4px">
+<img src="${IMG}baslik.png" width="536" alt="OTOMER · Randevu kartı" style="display:block;border:0;width:100%;max-width:536px;height:auto">
+<div style="border-top:1px solid #8E949B;margin:12px 0 18px;font-size:0;line-height:0">&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${cell('gun', 'GÜN VE SAAT', r.when)}${cell('is', 'İŞ', r.job)}</tr><tr>${cell('arac', 'ARAÇ', arac)}${cell('kod', 'TALEP KODU', r.code)}</tr></table>
+</td></tr></table></td></tr></table>`;
+  const btn = (href, t, dark) => `<a href="${href}" style="display:inline-block;${SANS};font-size:14px;font-weight:600;text-decoration:none;padding:12px 18px;border-radius:8px;margin:0 8px 8px 0;${dark ? 'background:#22262B;color:#FFFFFF' : 'background:#FFFFFF;color:#22262B;border:1px solid #C9CED4'}">${t}</a>`;
+  const ln = 'color:#5A6068;text-decoration:none';
+  return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light">
+<style>@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap');</style></head>
+<body style="margin:0;padding:0;background:#E9EBEE">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(baslik)} · ${esc(r.when)} · ${esc(r.code)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#E9EBEE" style="background:#E9EBEE"><tr><td align="center" style="padding:28px 12px">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
+<tr><td>${kart}</td></tr>
+<tr><td style="padding-top:14px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF;border-radius:14px;border:1px solid #D9DDE1">
+<tr><td style="padding:26px 26px 6px">
+<img src="${IMG}baslik-${tur}.png?v=2" width="${BW[tur]}" height="42" alt="${esc(baslik)}" style="display:block;border:0;width:${BW[tur]}px;max-width:100%;height:auto;color:#1E2226;font-size:24px">
+<div style="${SANS};font-size:19px;line-height:1.35;font-weight:600;color:#1E2226;margin-top:14px;padding:12px 14px;background:#F2F3F5;border-radius:8px">${esc(r.when)}<div style="font-size:13px;font-weight:400;color:#5A6068;margin-top:3px">${esc(r.job)} · ${esc(arac)}</div></div>
+<div style="${SANS};font-size:15px;line-height:1.6;color:#3A3F45;margin-top:12px">${aciklama}</div></td></tr>
+<tr><td style="padding:14px 26px 18px">${btn('https://maps.app.goo.gl/kfHaCNXfLk6vD5QUA', 'Yol tarifi', true)}${btn('tel:+902323863388', 'Ara · 0232 386 33 88')}</td></tr>
+<tr><td style="padding:0 26px 24px;${SANS};font-size:13px;line-height:1.6;color:#5A6068;border-top:1px solid #ECEEF1"><div style="padding-top:16px"><a href="https://maps.app.goo.gl/kfHaCNXfLk6vD5QUA" style="${ln}">${esc(ADRES)}</a><br><a href="mailto:info@otomerizmir.com" style="${ln}">info@otomerizmir.com</a> · Talep kodu <span style="color:#22262B;font-weight:600;letter-spacing:.04em">${esc(r.code)}</span></div></td></tr>
+</table></td></tr>
+<tr><td style="padding:16px 4px 0;${SANS};font-size:11px;line-height:1.5;color:#7A8088">Bu e-posta Otomer randevu formundan aldığınız talep için gönderildi. Yanıtlarsanız Otomer'e ulaşır.</td></tr>
 </table></td></tr></table></body></html>`;
 }
 

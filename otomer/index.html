@@ -626,7 +626,7 @@ legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)
     field('Şase', c.vin || '—', 150, 690, '500 30px "IBM Plex Mono"'); field('Km', c.km || '—', 1080, 690, '500 30px "IBM Plex Mono"'); field('Telefon', c.tel, 1350, 690, '500 30px "IBM Plex Mono"');
     field('Ad soyad', c.name, 150, 830);
     x.textAlign = 'left'; x.font = '500 28px "IBM Plex Mono"'; x.fillStyle = '#22262B'; x.fillText(c.code, 150, 950);
-    x.font = '400 26px Jost'; x.fillStyle = '#3A3F45'; x.fillText('· Talep kodu', 150 + x.measureText(c.code).width + 16, 950);
+    const cw = x.measureText(c.code).width; x.font = '400 26px Jost'; x.fillStyle = '#3A3F45'; x.fillText('· Talep kodu', 150 + cw + 16, 950);
     x.textAlign = 'right'; sp('6px'); x.font = '500 20px Cinzel'; x.fillText((STATUS[c.status] || STATUS.bekliyor).toLocaleUpperCase('tr'), W - 150, 950);
     const tw = x.measureText((STATUS[c.status] || STATUS.bekliyor).toLocaleUpperCase('tr')).width;
     x.beginPath(); x.arc(W - 150 - tw - 22, 943, 8, 0, Math.PI * 2); x.fillStyle = c.status === 'onaylandi' ? '#2F7A4E' : c.status === 'iptal' ? '#8E2F2F' : '#A87A2C'; x.fill();

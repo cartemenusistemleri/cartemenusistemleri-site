@@ -10,7 +10,7 @@
 <title>Otomer · Randevu paneli</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&family=Cinzel:wght@500;600&family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&family=Cinzel:wght@500;600&family=Cormorant:wght@400;500&family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* Operate surface: dark steel shell, one accent per state. List first, week grid and report as tabs. */
 :root{
@@ -398,6 +398,50 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
   $('stChips').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; STF = b.dataset.s; drawList(); };
   $('list').onclick = e => { const b = e.target.closest('[data-act]'); if (!b) return; openSheet(b.dataset.act, ITEMS.find(x => x.code === b.closest('.row').dataset.c)); };
 
+  /* ---------- randevu kartı görseli (e-postaya gömülür; sitedeki kartla aynı çizim) ---------- */
+  const PSTAT = { bekliyor: 'Onay bekliyor', onaylandi: 'Onaylandı', iptal: 'İptal edildi' };
+  async function kartJpeg(c) {
+    try { await Promise.all(['400 100px "Mrs Saint Delafield"', '600 20px Cinzel', '500 20px Cinzel', '500 40px Cormorant', '500 20px Jost', '500 20px "IBM Plex Mono"'].map(f => document.fonts.load(f))); } catch {}
+    const W = 1800, H = 1040, K = 1, cv = document.createElement('canvas'); cv.width = W * K; cv.height = H * K;
+    const x = cv.getContext('2d'); x.scale(K, K);
+    const rr = (X, Y, w, h, r) => { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); };
+    x.fillStyle = '#E9EBEE'; x.fillRect(0, 0, W, H); // e-posta zemini
+    const P = 14, w = W - 2 * P, h = H - 2 * P;
+    x.save(); x.shadowColor = 'rgba(20,24,28,.28)'; x.shadowBlur = 24; x.shadowOffsetY = 8; rr(P, P, w, h, 40); x.fillStyle = '#C9CED4'; x.fill(); x.restore();
+    const g = x.createLinearGradient(P, 0, P + w, 0);
+    g.addColorStop(0, '#BFC4CA'); g.addColorStop(.3, '#E9ECEF'); g.addColorStop(.57, '#B6BCC3'); g.addColorStop(1, '#DCE0E4');
+    rr(P, P, w, h, 40); x.fillStyle = g; x.fill();
+    x.save(); rr(P, P, w, h, 40); x.clip(); x.fillStyle = 'rgba(255,255,255,.17)'; for (let y = P; y < P + h; y += 3) x.fillRect(P, y, w, 1); x.restore();
+    rr(P + 28, P + 28, w - 56, h - 56, 22); x.strokeStyle = 'rgba(34,38,43,.45)'; x.lineWidth = 2; x.stroke();
+    [[P + 52, P + 52], [P + w - 52, P + 52], [P + 52, P + h - 52], [P + w - 52, P + h - 52]].forEach(([cx, cy]) => {
+      const sg = x.createRadialGradient(cx - 5, cy - 6, 2, cx, cy, 17); sg.addColorStop(0, '#C1C7CD'); sg.addColorStop(1, '#7A818A');
+      x.beginPath(); x.arc(cx, cy, 17, 0, Math.PI * 2); x.fillStyle = sg; x.fill(); x.strokeStyle = '#575D64'; x.lineWidth = 2; x.stroke();
+      x.save(); x.translate(cx, cy); x.rotate(-.42); x.fillStyle = '#454A50'; x.fillRect(-11, -2, 22, 4); x.restore();
+    });
+    const sp = v => { if ('letterSpacing' in x) x.letterSpacing = v; };
+    x.fillStyle = '#22262B'; x.textBaseline = 'alphabetic';
+    sp('9px'); x.font = '600 26px Cinzel'; x.textAlign = 'left'; x.fillText('OTOMER', 140, 160);
+    x.font = '500 24px Cinzel'; x.fillStyle = '#40454B'; x.textAlign = 'right'; x.fillText('RANDEVU KARTI', W - 140, 160);
+    sp('0px'); x.textAlign = 'center'; x.font = '400 250px "Mrs Saint Delafield", cursive';
+    x.fillStyle = 'rgba(255,255,255,.6)'; x.fillText('Otomer', W / 2 + 1, 382); x.fillStyle = '#2A2E33'; x.fillText('Otomer', W / 2, 380);
+    x.beginPath(); x.moveTo(560, 412); x.bezierCurveTo(780, 386, 1040, 386, 1250, 400); x.strokeStyle = '#2A2E33'; x.lineWidth = 4; x.lineCap = 'round'; x.stroke();
+    x.beginPath(); x.moveTo(140, 470); x.lineTo(W - 140, 470); x.strokeStyle = 'rgba(34,38,43,.35)'; x.lineWidth = 2; x.stroke();
+    const field = (label, value, X, Y, font) => {
+      x.textAlign = 'left'; sp('6px'); x.font = '500 19px Cinzel'; x.fillStyle = '#4A4F55'; x.fillText(label.toLocaleUpperCase('tr'), X, Y);
+      sp('0px'); x.font = font || '500 32px Jost'; x.fillStyle = '#22262B'; x.fillText(value, X, Y + 50);
+    };
+    field('Araç', [c.brand, c.year].filter(Boolean).join(' · '), 140, 540); field('İş', c.job, 700, 540); field('Gün ve saat', c.when, 1080, 540, '500 48px Cormorant');
+    field('Şase', c.vin || '—', 140, 690, '500 30px "IBM Plex Mono"'); field('Km', c.km || '—', 1080, 690, '500 30px "IBM Plex Mono"'); field('Telefon', c.tel, 1350, 690, '500 30px "IBM Plex Mono"');
+    field('Ad soyad', c.name, 140, 830);
+    x.textAlign = 'left'; x.font = '500 28px "IBM Plex Mono"'; x.fillStyle = '#22262B'; x.fillText(c.code, 140, 950);
+    const cw = x.measureText(c.code).width; x.font = '400 26px Jost'; x.fillStyle = '#3A3F45'; x.fillText('· Talep kodu', 140 + cw + 16, 950);
+    const st = (PSTAT[c.status] || PSTAT.bekliyor).toLocaleUpperCase('tr');
+    x.textAlign = 'right'; sp('6px'); x.font = '500 20px Cinzel'; x.fillStyle = '#22262B'; x.fillText(st, W - 140, 950);
+    const tw = x.measureText(st).width;
+    x.beginPath(); x.arc(W - 140 - tw - 22, 943, 8, 0, Math.PI * 2); x.fillStyle = c.status === 'onaylandi' ? '#2F7A4E' : c.status === 'iptal' ? '#8E2F2F' : '#A87A2C'; x.fill();
+    return cv.toDataURL('image/jpeg', 0.9).split(',')[1];
+  }
+
   /* ---------- edit sheet ---------- */
   let SH = null;
   function slotsFor(day, code, sel) {
@@ -437,6 +481,10 @@ textarea.inp{height:80px;padding:10px 12px;resize:vertical}
     if (act === 'not') body.not = $('shN').value.trim();
     $('shOk').disabled = true;
     try {
+      if (body.mail && x.email && (act === 'onay' || act === 'iptal' || (act === 'saat' && x.status === 'onaylandi'))) {
+        const day = body.day || x.day, slot = body.slot || x.slot;
+        try { body.kart = await kartJpeg({ ...x, day, slot, status: body.status || x.status, when: dayLabel(day) + ' · ' + slot }); } catch {}
+      }
       const j = await api('/api/otomer/panel', body);
       const i = ITEMS.findIndex(y => y.code === x.code); if (i > -1) ITEMS[i] = j.item;
       closeSheet(); drawList(); drawWeek(); drawReport();

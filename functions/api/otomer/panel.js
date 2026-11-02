@@ -38,6 +38,8 @@ export async function onRequestPost({ request, env }) {
   if (b.status && !['bekliyor', 'onaylandi', 'iptal'].includes(b.status)) return J({ error: 'Durum hatalı' }, 400);
   if (b.day && !/^\d{4}-\d{2}-\d{2}$/.test(b.day)) return J({ error: 'Gün hatalı' }, 400);
   if (b.slot && !/^\d{2}\.\d{2}$/.test(b.slot)) return J({ error: 'Saat hatalı' }, 400);
+  // Kart görseli: panel, sitedeki kartı JPEG olarak çizip yollar (base64, en fazla ~650 KB)
+  const kart = typeof b.kart === 'string' && b.kart.length < 900000 && /^[A-Za-z0-9+/]+=*$/.test(b.kart) ? b.kart : '';
   const key = PFX + b.code;
   const rec = await db.get(key, 'json');
   if (!rec) return J({ error: 'Bulunamadı' }, 404);
@@ -60,7 +62,7 @@ export async function onRequestPost({ request, env }) {
     const baslik = onay ? (eskiDurum === 'onaylandi' ? 'Randevunuzun saati güncellendi' : 'Randevunuz onaylandı') : 'Randevunuz iptal edildi';
     const aciklama = onay ? 'Sizi bekliyoruz. Takvim kaydı ektedir; saatinizi değiştirmeniz gerekirse bizi arayın.'
       : 'Randevunuz iptal edildi' + (rec.not ? ': ' + rec.not.replace(/[<>]/g, '') : '.') + ' Yeni bir saat için bizi arayabilirsiniz.';
-    mail = await mailGonder(env, { to: rec.email, subject: `Otomer · ${baslik} · ${rec.when}`, html: plakaMail(rec, baslik, aciklama),
+    mail = await mailGonder(env, { to: rec.email, subject: `Otomer · ${baslik} · ${rec.when}`, html: plakaMail(rec, baslik, aciklama, !!kart), kart,
       text: `${baslik}\n${rec.when}\n${rec.job} · ${[rec.brand, rec.year].filter(Boolean).join(' · ')}\nTalep kodu: ${rec.code}\n\nOtomer · 0232 386 33 88`,
       ics: onay ? ics(rec) : null });
     rec.mail = mail + ' · ' + rec.updatedAt.slice(0, 16);
