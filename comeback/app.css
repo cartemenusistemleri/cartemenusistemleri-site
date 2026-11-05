@@ -149,12 +149,20 @@ legend{padding:0 0 10px;font-size:13px;font-weight:800}
 .dinlenme .cubuk>span{background:var(--mavi-gece);transition:width 1s linear}
 .dinlenme button{min-height:40px;padding:0 12px;border-radius:20px;border:none;background:#2C2C31;color:var(--koyu-yazi);font-size:13px;font-weight:700}
 
-/* alt menü */
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(236,236,232,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--cizgi)}
-.nav a{flex:1;max-width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:48px;padding-top:4px;text-decoration:none;font-size:11px;font-weight:700;color:#6B6962;border-radius:14px}
+/* alt menü — yüzen cam sekme çubuğu */
+.nav{position:fixed;z-index:30;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(448px,calc(100% - 24px));height:64px;padding:6px;border-radius:32px;display:flex;align-items:stretch;
+  background:rgba(250,250,247,.64);-webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 12px 32px -12px rgba(22,22,26,.32),0 2px 6px -2px rgba(22,22,26,.08),inset 0 1px 0 rgba(255,255,255,.9)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.nav{background:rgba(250,250,247,.97)}}
+.nav a:not(.nav-logo){position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:26px;text-decoration:none;font-size:11px;font-weight:700;color:#55534D;transition:color .2s ease,transform .16s var(--ease)}
+.nav a:not(.nav-logo):active{transform:scale(.94)}
 .nav a svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav a[aria-current="page"]{color:var(--kobalt)}
-.nav a:hover{color:var(--murekkep)}
+.nav a[aria-current="page"] svg{stroke-width:2.2}
+.nav-pil{position:absolute;z-index:0;top:0;left:0;border-radius:26px;background:rgba(22,22,26,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.6);transition:transform .34s cubic-bezier(.32,.72,0,1);pointer-events:none;opacity:0}
+.nav-pil.hazir{opacity:1}
+.nav-logo{display:none}
+@media (hover:hover) and (pointer:fine){.nav a:not(.nav-logo):hover{color:var(--murekkep)}.nav a[aria-current="page"]:hover{color:var(--kobalt)}}
 
 /* bildirim */
 .toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);padding:12px 18px;border-radius:18px;background:var(--murekkep);color:#fff;font-size:14px;font-weight:700;box-shadow:0 14px 30px -14px rgba(0,0,0,.5);animation:in .35s var(--ease)}
@@ -177,7 +185,58 @@ legend{padding:0 0 10px;font-size:13px;font-weight:800}
 .grafik .son{fill:var(--kobalt)}
 .grafik text{font:600 11px var(--font);fill:var(--ikincil)}
 
+/* ---------- hareket ---------- */
+/* sayfa geçişi: kutular kısa bir kademeyle yerine oturur (yalnızca sekme/sayfa değişiminde) */
+.gec .baslik,.gec .t,.gec .btn.buyuk-btn{animation:gir .38s var(--ease) both;animation-delay:calc(var(--s,0) * 35ms)}
+@keyframes gir{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.gec .cubuk>span{animation:dol .7s var(--ease) both;animation-delay:.15s;transform-origin:left}
+@keyframes dol{from{transform:scaleX(0)}}
+/* marka anı: noktanın düşmesi */
+.karsilama .baslik .nokta,.nav-logo i{display:inline-block;animation:dus .62s cubic-bezier(.34,1.4,.64,1) both;animation-delay:.32s}
+@keyframes dus{from{opacity:0;transform:translateY(-.9em)}to{opacity:1;transform:none}}
+/* set tamamlandı */
+.dinlenme{animation:yuk .3s var(--ease) both}
+@keyframes yuk{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+@media (hover:hover) and (pointer:fine){
+  a.t{transition:transform .22s var(--ease),box-shadow .22s var(--ease)}
+  a.t:hover{transform:translateY(-2px);box-shadow:0 16px 32px -20px rgba(22,22,26,.4)}
+  .btn.ana:hover{transform:translateY(-1px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .gec .baslik,.gec .t,.gec .btn.buyuk-btn{animation:solus .2s ease both !important}
+  .nav-pil{transition:none}
+  @keyframes solus{from{opacity:0}}
+}
+
+/* ---------- bilgisayar ---------- */
 @media (min-width:720px){
   .app{padding-top:36px}
   .baslik{font-size:44px}
+}
+.karsilama{display:flex;flex-direction:column;gap:var(--ara)}
+.karsilama .sol{display:flex;flex-direction:column;gap:var(--ara)}
+@media (min-width:1024px){
+  body{background:var(--zemin)}
+  .app{max-width:1120px;margin:0 0 0 264px;padding:40px 48px 64px 32px}
+  .app.tam{margin:0 auto;padding:48px 48px 64px}
+  .app.dar{max-width:760px}
+  .app:not(.tam) .ust .logo{visibility:hidden}
+  .baslik{font-size:56px;padding-bottom:12px}
+  .app:not(.dar) .izgara{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .app:not(.dar) .ana-kutu{grid-column:span 2;grid-row:span 2}
+  .app:not(.dar) .tum{grid-column:1 / -1}
+  .dev{font-size:72px}
+  .buyuk{font-size:56px}
+  .seans-izgara{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ara);align-items:start}
+  .karsilama{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center;min-height:calc(100dvh - 200px)}
+  .karsilama .baslik{font-size:96px !important}
+  .karsilama .izgara{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  /* menü: sola yaslı dikey cam panel */
+  .nav{left:16px;top:16px;bottom:16px;transform:none;width:232px;height:auto;flex-direction:column;align-items:stretch;padding:20px 12px;border-radius:28px;gap:4px}
+  .nav-logo{display:block;font-weight:900;font-size:22px;letter-spacing:-.045em;text-decoration:none;color:var(--murekkep);padding:6px 14px 22px}
+  .nav-logo i{font-style:normal;color:var(--kobalt)}
+  .nav a:not(.nav-logo){flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:12px;height:48px;padding:0 14px;font-size:15px;border-radius:16px}
+  .nav-pil{border-radius:16px}
+  .dinlenme{left:calc(264px + (100vw - 264px) / 2);bottom:24px}
+  .toast{left:calc(264px + (100vw - 264px) / 2)}
 }
