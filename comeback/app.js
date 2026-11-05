@@ -47,9 +47,51 @@
   let kayitZaman;
   function kaydet(hemen) {
     clearTimeout(kayitZaman);
-    const yaz = () => { try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); } catch (e) { toast('Kaydedilemedi: tarayıcı depolaması kapalı.'); } };
+    S.guncelleme = Date.now();
+    const yaz = () => { try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); } catch (e) { /* depolama kapalı; hesapla eşitleniyor */ } senkronPlanla(); };
     if (hemen) yaz(); else kayitZaman = setTimeout(yaz, 300);
   }
+
+  /* ---------- hesap ve eşitleme ---------- */
+  let hesap = null;        // { id, ad, eposta, rol }
+  let cevrimdisi = false;  // sunucuya ulaşılamazsa cihazda devam
+  const API = '/api/comeback/hesap/';
+  async function istek(yol, yontem, veri) {
+    const r = await fetch(API + yol, { method: yontem || 'GET', credentials: 'same-origin', headers: veri ? { 'content-type': 'application/json' } : {}, body: veri ? JSON.stringify(veri) : undefined });
+    const j = await r.json().catch(() => ({}));
+    return { ok: r.ok, durum: r.status, j };
+  }
+  let senkronZaman = null; let senkronda = false;
+  function senkronPlanla() {
+    if (!hesap) return;
+    clearTimeout(senkronZaman); senkronZaman = setTimeout(senkronGonder, 1200);
+  }
+  async function senkronGonder() {
+    if (!hesap || senkronda) return;
+    senkronda = true;
+    try { await istek('veri', 'PUT', { json: JSON.stringify(Object.assign({}, S, { seans: S.seans })), guncelleme: S.guncelleme || Date.now() }); } catch (e) { /* sonra tekrar */ }
+    senkronda = false;
+  }
+  // Sunucudaki veri ile cihazdakini birleştir: yeni olan kazanır; sunucu boşsa cihazdaki gönderilir
+  async function veriCek() {
+    const r = await istek('veri');
+    if (!r.ok) return;
+    const sunucu = r.j.json ? (() => { try { return JSON.parse(r.j.json); } catch (e) { return null; } })() : null;
+    if (sunucu && sunucu.v === 1 && (!S.profil || (r.j.guncelleme || 0) > (S.guncelleme || 0))) {
+      S = Object.assign(bos(), sunucu); S.guncelleme = r.j.guncelleme;
+      try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); } catch (e) { /* yok */ }
+    } else if (S.profil) {
+      await senkronGonder();
+    }
+  }
+  async function hesapYukle() {
+    try {
+      const r = await istek('ben');
+      if (r.ok) { hesap = r.j.kullanici; await veriCek(); }
+      else if (r.durum >= 500) cevrimdisi = true;
+    } catch (e) { cevrimdisi = true; }
+  }
+  window.addEventListener('pagehide', () => { if (hesap && senkronZaman) { clearTimeout(senkronZaman); try { fetch(API + 'veri', { method: 'PUT', keepalive: true, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ json: JSON.stringify(S), guncelleme: S.guncelleme }) }); } catch (e) { /* yok */ } } });
   const gun = (k) => { const key = k || tarihKey(); if (!S.gunluk[key]) S.gunluk[key] = { ogun: [], antrenman: null }; return S.gunluk[key]; };
 
   /* ---------- program motoru ---------- */
@@ -157,8 +199,12 @@
       '<div class="karsilama"><div class="sol">' +
       '<h1 class="baslik" style="font-size:52px;padding-top:28px">Bıraktığın<br>yerden<br>başla<span class="nokta">.</span></h1>' +
       '<p class="ik" style="padding:4px 4px 8px;font-size:16px;max-width:36ch">Sana göre kurulan program, fotoğrafla kalori ve set set antrenman kaydı. Tek uygulamada.</p>' +
-      '<a class="btn ana buyuk-btn" href="#/kurulum" style="margin-top:6px">Programımı oluştur' + IK.ok + '</a>' +
-      '<p class="not">18 yaş ve üstü içindir. Bu ilk sürümde verilerin yalnızca bu cihazda saklanır.</p>' +
+      (hesap || cevrimdisi
+        ? '<a class="btn ana buyuk-btn" href="#/kurulum" style="margin-top:6px">Programımı oluştur' + IK.ok + '</a>'
+        : '<a class="btn ana buyuk-btn" href="#/kayit" style="margin-top:6px">Hesap oluştur' + IK.ok + '</a>' +
+          '<a class="btn cerceve" href="#/giris">Zaten hesabım var · Giriş yap</a>') +
+      (S.profil && !hesap && !cevrimdisi ? '<div class="uyari">Bu cihazda kayıtların var. Hesap oluşturursan hepsi hesabına aktarılır ve her cihazdan erişirsin.</div>' : '') +
+      '<p class="not">18 yaş ve üstü içindir.' + (cevrimdisi ? ' Sunucuya şu an ulaşılamıyor; kayıtların bu cihazda tutuluyor.' : '') + '</p>' +
       '</div><div class="izgara">' +
       '<div class="t kobalt genis h130"><span class="k">Kişiye özel program</span><span class="orta">Yaşın, kilon, hedefin ve sporuna göre.</span></div>' +
       '<div class="t limon h150"><span class="k">Beslenme</span><span class="orta">Fotoğrafla, barkodla, listeden.</span></div>' +
@@ -166,8 +212,40 @@
       '</div></div>';
   }
 
+  const gozIkon = '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const sifreAlani = (ad, oto, yazi) => '<label class="t genis alan"><span>' + yazi + '</span><div class="satir"><input name="' + ad + '" type="password" autocomplete="' + oto + '" minlength="8" required style="font-size:22px;letter-spacing:.02em" placeholder="••••••••"><button type="button" class="ikon-btn" data-act="sifre-goster" aria-label="Şifreyi göster" style="background:var(--zemin)">' + gozIkon + '</button></div></label>';
+  function ekranKayit() {
+    if (hesap) { location.hash = S.profil ? '#/' : '#/kurulum'; return ''; }
+    return ust(geri('#/', 'Başa dön'), '<span class="alt">Hesap oluştur</span>') +
+      '<h1 class="baslik">Aramıza katıl<span class="nokta">.</span></h1>' +
+      '<p class="ik" style="padding:0 4px 6px;font-size:15px">Hesabınla programın, öğünlerin ve rekorların her cihazda seninle olur.</p>' +
+      '<form data-form="kayit" class="izgara" novalidate>' +
+      '<label class="t genis alan"><span>Adın</span><input name="ad" autocomplete="given-name" maxlength="40" required placeholder="Deniz" style="font-size:22px" value="' + esc(S.profil ? S.profil.ad : '') + '"></label>' +
+      '<label class="t genis alan"><span>E-posta</span><input name="eposta" type="email" autocomplete="email" inputmode="email" required placeholder="ornek@eposta.com" style="font-size:20px;letter-spacing:-.01em"></label>' +
+      sifreAlani('sifre', 'new-password', 'Şifre · en az 8 karakter') +
+      '<label class="t genis onay"><input type="checkbox" name="yetiskin"><span>18 yaşından büyüğüm.</span></label>' +
+      '<label class="t genis onay"><input type="checkbox" name="riza"><span>Antrenman, beslenme ve kilo kayıtlarımın programımı hazırlamak için hesabımda saklanmasına onay veriyorum. Programın ve kalori hedeflerinin tıbbi tavsiye olmadığını biliyorum.</span></label>' +
+      '<p class="hata genis" id="formHata" role="alert" hidden></p>' +
+      '<button class="btn ana buyuk-btn genis" type="submit" id="formBtn">Hesabımı oluştur' + IK.ok + '</button>' +
+      '<a class="metin-btn genis" href="#/giris" style="text-align:center;color:var(--murekkep)">Zaten hesabım var · <span style="color:var(--kobalt)">Giriş yap</span></a>' +
+      '</form>';
+  }
+  function ekranGiris() {
+    if (hesap) { location.hash = '#/'; return ''; }
+    return ust(geri('#/', 'Başa dön'), '<span class="alt">Giriş</span>') +
+      '<h1 class="baslik">Tekrar hoş geldin<span class="nokta">.</span></h1>' +
+      '<form data-form="giris" class="izgara" novalidate>' +
+      '<label class="t genis alan"><span>E-posta</span><input name="eposta" type="email" autocomplete="email" inputmode="email" required placeholder="ornek@eposta.com" style="font-size:20px;letter-spacing:-.01em"></label>' +
+      sifreAlani('sifre', 'current-password', 'Şifre') +
+      '<p class="hata genis" id="formHata" role="alert" hidden></p>' +
+      '<button class="btn ana buyuk-btn genis" type="submit" id="formBtn">Giriş yap' + IK.ok + '</button>' +
+      '<button type="button" class="metin-btn genis" data-act="sifremi-unuttum" style="color:var(--ikincil)">Şifremi unuttum</button>' +
+      '<a class="metin-btn genis" href="#/kayit" style="text-align:center;color:var(--murekkep)">Hesabın yok mu? <span style="color:var(--kobalt)">Hesap oluştur</span></a>' +
+      '</form>';
+  }
+
   function ekranKurulum() {
-    const p = S.profil || { ad: '', cinsiyet: 'e', yas: '', boy: '', kilo: '', hedef: 'kas', spor: 'fitness', deneyim: 'orta', gun: 4, sakatlik: [] };
+    const p = S.profil || { ad: hesap ? hesap.ad : '', cinsiyet: 'e', yas: '', boy: '', kilo: '', hedef: 'kas', spor: 'fitness', deneyim: 'orta', gun: 4, sakatlik: [] };
     const hap = (grup, deger, yazi, secili, coklu) => '<button type="button" class="hap' + (coklu ? ' siyah' : '') + '" data-act="hap" data-grup="' + grup + '" data-deger="' + deger + '"' + (coklu ? ' data-coklu="1"' : '') + ' aria-pressed="' + (secili ? 'true' : 'false') + '">' + yazi + '</button>';
     const tekli = (grup, liste, secili) => liste.map((x) => hap(grup, x[0], x[1], x[0] === secili)).join('');
     return ust(S.profil ? geri('#/profil') : logo, '<span class="alt">Program kurulumu</span>') +
@@ -185,7 +263,7 @@
       '<fieldset class="t"><legend>Deneyim</legend><div class="haplar">' + tekli('deneyim', [['baslangic', 'Yeni'], ['orta', 'Orta'], ['ileri', 'İleri']], p.deneyim) + '</div></fieldset>' +
       '<div class="t limon ara-sb"><span class="k">Haftada</span><div class="satir"><button type="button" class="yuvarlak" data-act="gun" data-yon="-1" aria-label="Gün azalt">−</button><span class="buyuk num" id="gunSay">' + p.gun + '</span><button type="button" class="yuvarlak" data-act="gun" data-yon="1" aria-label="Gün artır">+</button></div><span class="k">gün antrenman</span></div>' +
       '<fieldset class="t genis"><legend>Ağrı ya da sakatlık var mı?</legend><div class="haplar">' + [['diz', 'Diz'], ['bel', 'Bel'], ['omuz', 'Omuz']].map((x) => hap('sakatlik', x[0], x[1], (p.sakatlik || []).indexOf(x[0]) >= 0, true)).join('') + '</div><span class="ik">Seçersen o bölgeyi zorlayan hareketlerin yerine güvenli olanları koyarız.</span></fieldset>' +
-      '<label class="t genis onay"><input type="checkbox" name="yetiskin"' + (S.profil ? ' checked' : '') + '><span>18 yaşından büyüğüm. Programın ve kalori hedeflerinin genel bilgi olduğunu, tıbbi tavsiye yerine geçmediğini biliyorum.</span></label>' +
+      '<label class="t genis onay"><input type="checkbox" name="yetiskin"' + (S.profil || hesap ? ' checked' : '') + '><span>18 yaşından büyüğüm. Programın ve kalori hedeflerinin genel bilgi olduğunu, tıbbi tavsiye yerine geçmediğini biliyorum.</span></label>' +
       '<p class="hata genis" id="kurulumHata" role="alert" hidden></p>' +
       '<button class="btn ana buyuk-btn genis" type="submit">Programımı oluştur' + IK.ok + '</button>' +
       '</form>';
@@ -457,6 +535,7 @@
       '<div class="t limon h130"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></div>' +
       '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
       '<a class="btn cerceve genis" href="#/kurulum">Bilgilerimi güncelle, programı yeniden kur</a>' +
+      (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       '<div class="t bos h130"><span class="k">Hocam</span><b>Hoca bağlantısı</b><span class="ik">Yakında: davet koduyla hocana bağlan.</span></div>' +
       '<div class="t bos h130"><span class="k">Topluluk</span><b>Forum ve meydan okumalar</b><span class="ik">Yakında açılıyor.</span></div>' +
       '</div>' +
@@ -468,7 +547,11 @@
     const yol = (location.hash.slice(1) || '/').split('?')[0];
     const parca = yol.split('/').filter(Boolean);
     let html = ''; let sekme = '';
-    if (!parca.length) { html = ekranBugun(); sekme = 'bugun'; }
+    const acik = !!hesap || cevrimdisi; // hesapsız yalnızca karşılama, kayıt ve giriş
+    if (parca[0] === 'kayit') html = ekranKayit();
+    else if (parca[0] === 'giris') html = ekranGiris();
+    else if (!acik) { html = ekranKarsilama(); parca.length = 0; }
+    else if (!parca.length) { html = ekranBugun(); sekme = 'bugun'; }
     else if (parca[0] === 'kurulum') html = ekranKurulum();
     else if (parca[0] === 'plan') { html = ekranPlan(); sekme = 'profil'; }
     else if (parca[0] === 'antrenman') { html = ekranAntrenman(); sekme = 'antrenman'; }
@@ -479,9 +562,9 @@
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
-    const menu = !!S.profil && parca[0] !== 'kurulum';
+    const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris'].indexOf(parca[0]) < 0;
     nav.hidden = !menu; app.classList.toggle('tam', !menu);
-    app.classList.toggle('dar', ['kurulum', 'ekle', 'porsiyon'].indexOf(parca[0]) >= 0);
+    app.classList.toggle('dar', ['kurulum', 'ekle', 'porsiyon', 'kayit', 'giris'].indexOf(parca[0]) >= 0);
     nav.querySelectorAll('a[data-tab]').forEach((a) => { if (a.dataset.tab === sekme) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (S.seans && dinlenme) dinlenmeCiz(); else { const d = document.getElementById('dinlenme'); if (d) d.remove(); }
 
@@ -614,6 +697,17 @@
       kaydet(true); toast('Tabağın kaydedildi.'); fotoSonuc = null; git('#/beslenme');
     },
     'barkod-kamera'() { barkodBaslat(); },
+    'sifre-goster'(el) {
+      const i = el.parentNode.querySelector('input'); const ac = i.type === 'password';
+      i.type = ac ? 'text' : 'password'; el.setAttribute('aria-label', ac ? 'Şifreyi gizle' : 'Şifreyi göster');
+    },
+    'sifremi-unuttum'() { toast('E-postayla şifre sıfırlama çok yakında geliyor.'); },
+    async cikis() {
+      await senkronGonder();
+      try { await istek('cikis', 'POST', {}); } catch (e) { /* yine de çık */ }
+      hesap = null; S = bos(); try { localStorage.removeItem(ANAHTAR); } catch (e) { /* yok */ }
+      toast('Çıkış yapıldı.'); git('#/');
+    },
     sifirla() {
       if (!sifirOnay) { sifirOnay = true; render(); return; }
       S = bos(); kaydet(true); sifirOnay = false; git('#/');
@@ -652,6 +746,7 @@
     e.preventDefault();
     const v = Object.fromEntries(new FormData(f).entries());
     if (f.dataset.form === 'kurulum') return kurulumKaydet(f, v);
+    if (f.dataset.form === 'kayit' || f.dataset.form === 'giris') return hesapFormu(f.dataset.form, f, v);
     if (f.dataset.form === 'ara') { if (aramaQ.trim().length >= 2) markaAra(aramaQ); return; }
     if (f.dataset.form === 'barkod') return barkodBul(String(v.kod || '').replace(/\D/g, ''));
     if (f.dataset.form === 'kilo') {
@@ -666,6 +761,30 @@
       kaydet(true); toast(ad + ' eklendi.'); git('#/beslenme');
     }
   });
+
+  async function hesapFormu(tur, f, v) {
+    const hataEl = document.getElementById('formHata'); const btn = document.getElementById('formBtn');
+    const goster = (m) => { hataEl.textContent = m; hataEl.hidden = false; };
+    hataEl.hidden = true;
+    const eposta = String(v.eposta || '').trim(); const sifre = String(v.sifre || '');
+    if (tur === 'kayit') {
+      if (String(v.ad || '').trim().length < 2) return goster('Adını yaz.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(eposta)) return goster('Geçerli bir e-posta adresi yaz.');
+      if (sifre.length < 8) return goster('Şifre en az 8 karakter olmalı.');
+      if (!v.yetiskin) return goster('COMEBACK. 18 yaş ve üstü içindir; onay kutusunu işaretle.');
+      if (!v.riza) return goster('Kayıtlarının hesabında saklanmasına onay vermelisin.');
+    } else if (!eposta || !sifre) return goster('E-posta ve şifreni yaz.');
+    btn.disabled = true; const eski = btn.innerHTML; btn.textContent = tur === 'kayit' ? 'Hesap oluşturuluyor…' : 'Giriş yapılıyor…';
+    try {
+      const r = await istek(tur, 'POST', tur === 'kayit' ? { ad: v.ad, eposta, sifre, yetiskin: true, riza: true } : { eposta, sifre });
+      if (!r.ok) { btn.disabled = false; btn.innerHTML = eski; return goster(r.j.hata || 'Bir sorun oluştu. Tekrar dene.'); }
+      hesap = r.j.kullanici; cevrimdisi = false;
+      if (tur === 'giris') { const yerel = S.profil; S = yerel ? S : bos(); await veriCek(); }
+      else if (S.profil) await senkronGonder();
+      toast(tur === 'kayit' ? 'Hesabın hazır. Hoş geldin, ' + hesap.ad + '.' : 'Tekrar hoş geldin, ' + hesap.ad + '.');
+      git(S.profil ? '#/' : '#/kurulum');
+    } catch (e) { btn.disabled = false; btn.innerHTML = eski; goster('Bağlantı kurulamadı. İnternetini kontrol et.'); }
+  }
 
   function kurulumKaydet(f, v) {
     const secili = (g) => { const b = f.querySelector('[data-grup="' + g + '"][aria-pressed="true"]'); return b ? b.dataset.deger : null; };
@@ -745,5 +864,6 @@
     } catch (e) { fotoSonuc.durum = 'Bağlantı kurulamadı.'; render(); }
   }
 
-  render();
+  app.innerHTML = '<header class="ust"><span class="logo">COMEBACK<i>.</i></span></header>';
+  hesapYukle().then(render, render);
 })();

@@ -1,0 +1,140 @@
+// COMEBACK. — hesap ve veri eşitleme
+//   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza }
+//   POST /api/comeback/hesap/giris   { eposta, sifre }
+//   POST /api/comeback/hesap/cikis
+//   GET  /api/comeback/hesap/ben     → { kullanici }
+//   GET  /api/comeback/hesap/veri    → { json, guncelleme }
+//   PUT  /api/comeback/hesap/veri    { json, guncelleme }
+// Veritabanı: D1 bağlaması COMEBACK_DB (tablolar: kullanicilar, oturumlar, veriler, giris_deneme)
+// Şifreler PBKDF2-SHA256 (100.000 tur, kullanıcıya özel tuz); oturum çerezi HttpOnly, veritabanında yalnızca özeti tutulur.
+
+const CEREZ = 'cb_oturum';
+const OTURUM_SN = 60 * 60 * 24 * 30;
+const TUR = 100000;
+
+const json = (veri, durum = 200, ek = {}) => new Response(JSON.stringify(veri), {
+  status: durum, headers: Object.assign({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }, ek)
+});
+const hata = (m, d) => json({ hata: m }, d);
+
+const enc = new TextEncoder();
+const hex = (buf) => Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+const rastgele = (n) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return a; };
+const b64url = (a) => btoa(String.fromCharCode.apply(null, a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const ozet = async (s) => hex(await crypto.subtle.digest('SHA-256', enc.encode(s)));
+
+async function sifreHash(sifre, tuzHex) {
+  const tuz = new Uint8Array(tuzHex.match(/../g).map((h) => parseInt(h, 16)));
+  const anahtar = await crypto.subtle.importKey('raw', enc.encode(sifre), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: tuz, iterations: TUR }, anahtar, 256));
+}
+function esit(a, b) { // sabit süreli karşılaştırma
+  if (a.length !== b.length) return false;
+  let f = 0; for (let i = 0; i < a.length; i++) f |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return f === 0;
+}
+function cerezOku(req) {
+  const c = req.headers.get('cookie') || '';
+  const m = c.match(new RegExp('(?:^|;\\s*)' + CEREZ + '=([A-Za-z0-9_-]+)'));
+  return m ? m[1] : null;
+}
+const cerezYaz = (token, sn) => CEREZ + '=' + token + '; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=' + sn;
+
+async function oturumAc(db, kullaniciId) {
+  const token = b64url(rastgele(32));
+  const simdi = Date.now();
+  await db.prepare('INSERT INTO oturumlar (token_hash, kullanici_id, bitis, olusturma) VALUES (?, ?, ?, ?)')
+    .bind(await ozet(token), kullaniciId, simdi + OTURUM_SN * 1000, simdi).run();
+  return token;
+}
+async function kimDir(db, req) {
+  const token = cerezOku(req); if (!token) return null;
+  const s = await db.prepare('SELECT k.id, k.ad, k.eposta, k.rol, o.bitis FROM oturumlar o JOIN kullanicilar k ON k.id = o.kullanici_id WHERE o.token_hash = ?')
+    .bind(await ozet(token)).first();
+  if (!s || s.bitis < Date.now()) return null;
+  return { id: s.id, ad: s.ad, eposta: s.eposta, rol: s.rol };
+}
+// basit sınır: anahtar başına pencere içinde en fazla n deneme
+async function sinir(db, anahtar, n, pencereSn) {
+  const simdi = Date.now();
+  const r = await db.prepare('SELECT sayi, bitis FROM giris_deneme WHERE anahtar = ?').bind(anahtar).first();
+  if (r && r.bitis > simdi && r.sayi >= n) return false;
+  if (!r || r.bitis <= simdi) await db.prepare('INSERT OR REPLACE INTO giris_deneme (anahtar, sayi, bitis) VALUES (?, 1, ?)').bind(anahtar, simdi + pencereSn * 1000).run();
+  else await db.prepare('UPDATE giris_deneme SET sayi = sayi + 1 WHERE anahtar = ?').bind(anahtar).run();
+  return true;
+}
+async function govde(req) {
+  if (!(req.headers.get('content-type') || '').includes('application/json')) return null;
+  try { return await req.json(); } catch (e) { return null; }
+}
+const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
+
+export async function onRequest(ctx) {
+  const { request: req, env, params } = ctx;
+  const db = env.COMEBACK_DB;
+  if (!db) return hata('Hesap sistemi şu an kapalı.', 503);
+  const yol = (Array.isArray(params.yol) ? params.yol : [params.yol]).filter(Boolean).join('/');
+  const ip = req.headers.get('cf-connecting-ip') || 'yok';
+  const m = req.method;
+
+  try {
+    if (yol === 'kayit' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const ad = String(g.ad || '').trim().replace(/[<>]/g, '').slice(0, 40);
+      const eposta = String(g.eposta || '').trim().toLowerCase();
+      const sifre = String(g.sifre || '');
+      if (ad.length < 2) return hata('Adını yaz.', 400);
+      if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
+      if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
+      if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
+      if (g.riza !== true) return hata('Verilerinin hesabında saklanmasına onay vermelisin.', 400);
+      if (!(await sinir(db, 'kayit:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      const var_ = await db.prepare('SELECT id FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
+      if (var_) return hata('Bu e-postayla zaten bir hesap var. Giriş yapmayı dene.', 409);
+      const id = crypto.randomUUID(); const tuz = hex(rastgele(16)); const simdi = Date.now();
+      await db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(id, eposta, ad, await sifreHash(sifre, tuz), tuz, 'uye', simdi, simdi).run();
+      const token = await oturumAc(db, id);
+      return json({ kullanici: { id, ad, eposta, rol: 'uye' } }, 201, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
+    }
+
+    if (yol === 'giris' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const eposta = String(g.eposta || '').trim().toLowerCase(); const sifre = String(g.sifre || '');
+      if (!(await sinir(db, 'giris:' + ip, 10, 900))) return hata('Çok fazla hatalı deneme. 15 dakika sonra tekrar dene.', 429);
+      const k = await db.prepare('SELECT id, ad, eposta, rol, sifre_hash, tuz FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
+      if (!k || !esit(await sifreHash(sifre, k.tuz), k.sifre_hash)) return hata('E-posta ya da şifre hatalı.', 401);
+      await db.prepare('DELETE FROM giris_deneme WHERE anahtar = ?').bind('giris:' + ip).run();
+      await db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ? AND bitis < ?').bind(k.id, Date.now()).run();
+      const token = await oturumAc(db, k.id);
+      return json({ kullanici: { id: k.id, ad: k.ad, eposta: k.eposta, rol: k.rol } }, 200, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
+    }
+
+    if (yol === 'cikis' && m === 'POST') {
+      const token = cerezOku(req);
+      if (token) await db.prepare('DELETE FROM oturumlar WHERE token_hash = ?').bind(await ozet(token)).run();
+      return json({ ok: true }, 200, { 'set-cookie': cerezYaz('', 0) });
+    }
+
+    const kim = await kimDir(db, req);
+    if (yol === 'ben' && m === 'GET') return kim ? json({ kullanici: kim }) : hata('Giriş yapılmamış.', 401);
+    if (!kim) return hata('Giriş yapılmamış.', 401);
+
+    if (yol === 'veri' && m === 'GET') {
+      const v = await db.prepare('SELECT json, guncelleme FROM veriler WHERE kullanici_id = ?').bind(kim.id).first();
+      return json(v ? { json: v.json, guncelleme: v.guncelleme } : { json: null, guncelleme: 0 });
+    }
+    if (yol === 'veri' && m === 'PUT') {
+      const g = await govde(req); if (!g || typeof g.json !== 'string') return hata('Geçersiz istek.', 400);
+      if (g.json.length > 500000) return hata('Veri çok büyük.', 413);
+      try { JSON.parse(g.json); } catch (e) { return hata('Geçersiz veri.', 400); }
+      const zaman = Math.min(Number(g.guncelleme) || Date.now(), Date.now() + 60000);
+      await db.prepare('INSERT INTO veriler (kullanici_id, json, guncelleme) VALUES (?, ?, ?) ON CONFLICT(kullanici_id) DO UPDATE SET json = excluded.json, guncelleme = excluded.guncelleme')
+        .bind(kim.id, g.json, zaman).run();
+      return json({ ok: true, guncelleme: zaman });
+    }
+    return hata('Bulunamadı.', 404);
+  } catch (e) {
+    return hata('Sunucuda bir sorun oluştu. Biraz sonra tekrar dene.', 500);
+  }
+}

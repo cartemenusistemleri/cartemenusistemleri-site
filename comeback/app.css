@@ -94,7 +94,7 @@ a.t:active,button.t:active{transform:scale(.985)}
 .yatay .hap[aria-pressed="true"]{background:var(--murekkep);color:var(--koyu-yazi)}
 .yuvarlak{width:40px;height:40px;border-radius:20px;border:none;background:var(--zemin);font-size:20px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .t.limon .yuvarlak{background:rgba(22,22,26,.1)}
-.metin-btn{background:none;border:none;padding:0;min-height:44px;color:var(--kobalt);font-weight:700;font-size:14px}
+.metin-btn{background:none;border:none;padding:0;min-height:44px;color:var(--kobalt);font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 
 /* form */
 .alan{display:flex;flex-direction:column;gap:4px}

@@ -26,10 +26,19 @@ export async function onRequestPost(ctx) {
   if (!m) return json({ hata: 'Fotoğraf okunamadı.' }, 400);
   if (m[2].length > 3_000_000) return json({ hata: 'Fotoğraf çok büyük.' }, 413);
 
+  // Ücretli analiz yalnızca giriş yapmış üyelere: oturum çerezi D1'de doğrulanır
+  let kisi = request.headers.get('cf-connecting-ip') || 'yok';
+  if (env.COMEBACK_DB) {
+    const cm = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cb_oturum=([A-Za-z0-9_-]+)/);
+    if (!cm) return json({ hata: 'Fotoğraf analizi için giriş yapmalısın.' }, 401);
+    const oz = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(cm[1])))).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const o = await env.COMEBACK_DB.prepare('SELECT kullanici_id, bitis FROM oturumlar WHERE token_hash = ?').bind(oz).first();
+    if (!o || o.bitis < Date.now()) return json({ hata: 'Oturumun sona ermiş. Tekrar giriş yap.' }, 401);
+    kisi = 'u:' + o.kullanici_id;
+  }
   const kv = env.COMEBACK_KV || env.ODEME_LINKS;
   const limit = parseInt(env.COMEBACK_FOTO_LIMIT || '20', 10);
-  const ip = request.headers.get('cf-connecting-ip') || 'yok';
-  const anahtar = 'comeback:foto:' + ip + ':' + new Date().toISOString().slice(0, 10);
+  const anahtar = 'comeback:foto:' + kisi + ':' + new Date().toISOString().slice(0, 10);
   if (kv) {
     const n = parseInt((await kv.get(anahtar)) || '0', 10);
     if (n >= limit) return json({ hata: 'Bugünkü fotoğraf analizi hakkın doldu. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
