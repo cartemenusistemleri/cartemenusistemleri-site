@@ -111,8 +111,12 @@ a.t:active,button.t:active{transform:scale(.985)}
 .mini input{width:100%;min-height:44px;border-radius:12px;border:1.5px solid var(--cizgi);padding:0 10px;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;outline:none;background:#fff}
 .mini input:focus{border-color:var(--kobalt)}
 .hata{color:var(--hata);font-size:14px;font-weight:600}
+.onay{flex-direction:row;align-items:flex-start;gap:12px;cursor:pointer;font-size:14px;line-height:1.45}
+.onay input{width:22px;height:22px;flex-shrink:0;margin:1px 0 0}
 fieldset{border:none;margin:0;padding:0;min-width:0}
 legend{padding:0 0 10px;font-size:13px;font-weight:800}
+fieldset.t>legend{float:left;width:100%;padding:0}
+fieldset.t>legend+*{clear:both}
 
 /* listeler */
 .liste{display:flex;flex-direction:column}
