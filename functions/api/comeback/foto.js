@@ -43,7 +43,7 @@ export async function onRequestPost(ctx) {
       headers: { 'x-api-key': env.COMEBACK_AI_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
       body: JSON.stringify({
         model: env.COMEBACK_AI_MODEL || 'claude-haiku-5-5',
-        max_tokens: 900,
+        max_tokens: 2000,
         messages: [{ role: 'user', content: [
           { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } },
           { type: 'text', text: ISTEM }
