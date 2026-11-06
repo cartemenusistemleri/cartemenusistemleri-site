@@ -244,3 +244,22 @@ fieldset.t>legend+*{clear:both}
   .dinlenme{left:calc(264px + (100vw - 264px) / 2);bottom:24px}
   .toast{left:calc(264px + (100vw - 264px) / 2)}
 }
+
+/* program ayrıntıları: hacim, notlar, kaynaklar, seans ipuçları */
+.hacim{display:grid;gap:7px;margin:4px 0 2px}
+.hacim-satir{display:grid;grid-template-columns:minmax(0,9.5em) 1fr 2.6em;align-items:center;gap:10px;font-size:13px;font-weight:600}
+.hacim-satir>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hacim-satir>b{text-align:right;font-size:13px}
+.hacim-cubuk{position:relative;height:8px;border-radius:4px;background:var(--zemin)}
+.hacim-cubuk>span{display:block;height:100%;border-radius:4px;background:var(--kobalt)}
+.hacim-cubuk>i{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--murekkep);border-radius:1px}
+.hacim-satir.az .hacim-cubuk>span{background:#8E9BF5}
+.hacim-satir.cokaz .hacim-cubuk>span{background:var(--ikincil)}
+.hacim-satir.cokaz>b{color:var(--ikincil)}
+.madde{margin:2px 0 0;padding-left:1.1em;display:grid;gap:8px;font-size:14px;line-height:1.5;max-width:70ch}
+.madde li::marker{color:var(--kobalt)}
+.madde.kaynak a{color:var(--murekkep);text-decoration:underline;text-decoration-color:var(--cizgi);text-underline-offset:3px}
+.madde.kaynak a:hover{text-decoration-color:var(--kobalt)}
+.ipucu{margin:6px 0 2px;font-size:13px;line-height:1.45;color:var(--ikincil);max-width:62ch}
+.ipucu b{color:var(--murekkep);font-weight:700}
+.etiket{flex:none;align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.02em;padding:5px 9px;border-radius:999px;background:var(--kobalt-acik);color:var(--kobalt)}
