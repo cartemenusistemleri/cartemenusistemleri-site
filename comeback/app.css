@@ -263,3 +263,20 @@ fieldset.t>legend+*{clear:both}
 .ipucu{margin:6px 0 2px;font-size:13px;line-height:1.45;color:var(--ikincil);max-width:62ch}
 .ipucu b{color:var(--murekkep);font-weight:700}
 .etiket{flex:none;align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.02em;padding:5px 9px;border-radius:999px;background:var(--kobalt-acik);color:var(--kobalt)}
+
+/* barkod okuyucu */
+.barkod-alan{min-height:0;aspect-ratio:4/3;max-height:60vh}
+.barkod-alan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.barkod-alan .durum{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);white-space:nowrap;max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
+.barkod-cerceve{position:absolute;left:10%;right:10%;top:27.5%;bottom:27.5%;border-radius:16px;box-shadow:0 0 0 999px rgba(0,0,0,.38);opacity:0;transition:opacity .2s ease-out;pointer-events:none}
+.barkod-cerceve::before{content:"";position:absolute;inset:0;border-radius:16px;border:2px solid rgba(255,255,255,.9)}
+.barkod-cerceve i{position:absolute;left:8%;right:8%;top:50%;height:2px;border-radius:1px;background:var(--limon);box-shadow:0 0 12px rgba(217,240,90,.8);animation:barkodTara 1.6s cubic-bezier(.77,0,.175,1) infinite alternate}
+.tariyor .barkod-cerceve{opacity:1}
+.bulundu .barkod-cerceve::before{border-color:var(--limon)}
+.bulundu .barkod-cerceve i{animation:none;opacity:0}
+@keyframes barkodTara{from{transform:translateY(-34px)}to{transform:translateY(34px)}}
+.barkod-fener{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;cursor:pointer;transition:transform .16s ease-out,background .2s ease}
+.barkod-fener svg{width:20px;height:20px;fill:currentColor}
+.barkod-fener[aria-pressed=true]{background:var(--limon);color:var(--murekkep)}
+.barkod-fener:active{transform:scale(.95)}
+@media (prefers-reduced-motion:reduce){.barkod-cerceve i{animation:none}}

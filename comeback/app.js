@@ -417,8 +417,8 @@
         '<p class="not">Marka ürünleri Open Food Facts açık veritabanından gelir; her ürün kayıtlı olmayabilir.</p>';
     }
     if (yol === 'barkod') {
-      const kamera = 'BarcodeDetector' in window && navigator.mediaDevices;
-      return bas + (kamera ? '<div class="foto" id="barkodAlan"><video id="barkodVideo" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><span class="durum" id="barkodDurum">Kamera kapalı</span></div><button class="btn ana" data-act="barkod-kamera">' + IK.kamera + 'Kamerayla okut</button>' : '<div class="uyari">Bu tarayıcı kamerayla barkod okumayı desteklemiyor. Barkodun altındaki numarayı yazabilirsin.</div>') +
+      const kamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && typeof WebAssembly === 'object';
+      return bas + (kamera ? '<div class="foto barkod-alan" id="barkodAlan"><video id="barkodVideo" playsinline muted></video><span class="barkod-cerceve" aria-hidden="true"><i></i></span><span class="durum" id="barkodDurum">Kamera kapalı</span><button class="barkod-fener" id="barkodFener" data-act="fener" aria-pressed="false" aria-label="Fener" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6l-1 6h3l-7 14 1-9H8z"/></svg></button></div><button class="btn ana" data-act="barkod-kamera">' + IK.kamera + 'Kamerayla okut</button>' : '<div class="uyari">Bu tarayıcı kamerayla barkod okumayı desteklemiyor. Barkodun altındaki numarayı yazabilirsin.</div>') +
         '<form data-form="barkod" class="t"><label class="alan"><span>Barkod numarası</span><input name="kod" inputmode="numeric" autocomplete="off" placeholder="8690000000000" style="font-size:26px"></label><button class="btn siyah" type="submit">Ürünü bul</button></form><div id="barkodSonuc"></div>';
     }
     if (yol === 'elle') {
@@ -682,6 +682,7 @@
       kaydet(true); toast('Tabağın kaydedildi.'); fotoSonuc = null; git('#/beslenme');
     },
     'barkod-kamera'() { barkodBaslat(); },
+    fener(el) { fenerDegistir(el); },
     'sifre-goster'(el) {
       const i = el.parentNode.querySelector('input'); const ac = i.type === 'password';
       i.type = ac ? 'text' : 'password'; el.setAttribute('aria-label', ac ? 'Şifreyi gizle' : 'Şifreyi göster');
@@ -812,22 +813,96 @@
       taslak = Object.assign({}, j.urun, { secilenG: j.urun.g || 100, kaynak: 'off', donus: '#/ekle/barkod' }); git('#/porsiyon');
     } catch (e) { kutu.innerHTML = '<div class="t"><span class="hata">Bağlantı kurulamadı.</span></div>'; }
   }
-  let barkodAkis = null;
+  let barkodAkis = null, barkodIz = null;
+  // Okuyucu: tarayıcıda yerleşik BarcodeDetector varsa o (Android Chrome), yoksa kendi sunucumuzdaki ZXing (iPhone Safari dahil)
+  let okuyucuSoz = null;
+  function okuyucuYukle() {
+    if (okuyucuSoz) return okuyucuSoz;
+    const formatlar = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
+    okuyucuSoz = (async () => {
+      if ('BarcodeDetector' in window) {
+        try { const d = await window.BarcodeDetector.getSupportedFormats(); if (d.indexOf('ean_13') >= 0) return new window.BarcodeDetector({ formats: formatlar }); } catch (e) { /* yedeğe geç */ }
+      }
+      await new Promise((ok, red) => { const sc = document.createElement('script'); sc.src = '/comeback/vendor/barkod.js?v=1'; sc.onload = ok; sc.onerror = red; document.head.appendChild(sc); });
+      return new window.CB_BARKOD({ formats: formatlar });
+    })();
+    okuyucuSoz.catch(() => { okuyucuSoz = null; });
+    return okuyucuSoz;
+  }
+  // EAN/UPC kontrol hanesi: yanlış okumaları ele
+  function kodGecerli(k) {
+    if (!/^\d{8}$|^\d{12,13}$/.test(k)) return false;
+    const d = k.split('').map(Number); const kontrol = d.pop(); let t = 0;
+    d.reverse().forEach((x, i) => { t += x * (i % 2 === 0 ? 3 : 1); });
+    return (10 - (t % 10)) % 10 === kontrol;
+  }
   async function barkodBaslat() {
     const durum = document.getElementById('barkodDurum'); const video = document.getElementById('barkodVideo');
+    const alan = document.getElementById('barkodAlan');
+    if (barkodAkis) return;
+    durum.textContent = 'Kamera açılıyor…';
     try {
-      const algila = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
-      barkodAkis = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-      video.srcObject = barkodAkis; await video.play(); durum.textContent = 'Barkodu kameraya göster';
+      const [algila, akis] = await Promise.all([okuyucuYukle(), navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } }, audio: false
+      })]);
+      barkodAkis = akis; barkodIz = akis.getVideoTracks()[0];
+      // Sürekli odak ve (varsa) hafif yakınlaştırma: küçük barkodlar netleşir
+      try {
+        const yet = barkodIz.getCapabilities ? barkodIz.getCapabilities() : {}; const ileri = {};
+        if (yet.focusMode && yet.focusMode.indexOf('continuous') >= 0) ileri.focusMode = 'continuous';
+        if (yet.zoom && yet.zoom.max >= 1.5) ileri.zoom = Math.min(2, yet.zoom.max);
+        if (Object.keys(ileri).length) await barkodIz.applyConstraints({ advanced: [ileri] });
+        if (yet.torch) { const f = document.getElementById('barkodFener'); if (f) f.hidden = false; }
+      } catch (e) { /* desteklenmiyor */ }
+      video.srcObject = akis; await video.play();
+      alan.classList.add('tariyor'); durum.textContent = 'Barkodu çerçevenin içine getir';
+      // Yalnızca ortadaki şeridi oku: daha hızlı ve daha az yanlış okuma
+      const tuval = document.createElement('canvas'); const cx = tuval.getContext('2d', { willReadFrequently: true });
+      let son = '', ayni = 0, deneme = 0;
       const dongu = async () => {
         if (!barkodAkis) return;
-        try { const k = await algila.detect(video); if (k.length) { durum.textContent = 'Bulundu: ' + k[0].rawValue; return barkodBul(k[0].rawValue.replace(/\D/g, '')); } } catch (e) { /* kare atla */ }
-        setTimeout(dongu, 250);
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (vw) {
+          deneme++;
+          // Her 3 karede bir tüm kareyi, diğerlerinde ortadaki şeridi tara
+          const tam = deneme % 3 === 0;
+          const sw = tam ? vw : Math.round(vw * 0.8), sh = tam ? vh : Math.round(vh * 0.45);
+          const sx = Math.round((vw - sw) / 2), sy = Math.round((vh - sh) / 2);
+          const olcek = Math.min(1, 1280 / sw);
+          tuval.width = Math.round(sw * olcek); tuval.height = Math.round(sh * olcek);
+          cx.drawImage(video, sx, sy, sw, sh, 0, 0, tuval.width, tuval.height);
+          try {
+            const k = (await algila.detect(tuval)).map((x) => String(x.rawValue).replace(/\D/g, '')).find(kodGecerli);
+            if (k) {
+              // Aynı kodu iki kez üst üste görünce kabul et (yerleşik okuyucuda tek okuma yeter)
+              ayni = k === son ? ayni + 1 : 1; son = k;
+              if (ayni >= (algila instanceof (window.BarcodeDetector || Object) ? 1 : 2)) {
+                if (navigator.vibrate) navigator.vibrate(40);
+                alan.classList.add('bulundu'); durum.textContent = 'Bulundu: ' + k;
+                const g = document.querySelector('[data-form=barkod] input[name=kod]'); if (g) g.value = k;
+                barkodDurdur(); return barkodBul(k);
+              }
+            }
+          } catch (e) { /* kare atla */ }
+          if (deneme === 40) durum.textContent = 'Biraz uzaklaştır, ışığa çevir ya da numarayı yaz';
+        }
+        setTimeout(dongu, 90);
       };
       dongu();
-    } catch (e) { durum.textContent = 'Kameraya izin verilmedi. Numarayı yazabilirsin.'; barkodDurdur(); }
+    } catch (e) {
+      durum.textContent = e && e.name === 'NotAllowedError' ? 'Kameraya izin verilmedi. Numarayı yazabilirsin.' : 'Kamera açılamadı. Numarayı yazabilirsin.';
+      barkodDurdur();
+    }
   }
-  function barkodDurdur() { if (barkodAkis) { barkodAkis.getTracks().forEach((t) => t.stop()); barkodAkis = null; } }
+  async function fenerDegistir(el) {
+    if (!barkodIz) return;
+    const acik = el.getAttribute('aria-pressed') !== 'true';
+    try { await barkodIz.applyConstraints({ advanced: [{ torch: acik }] }); el.setAttribute('aria-pressed', String(acik)); } catch (e) { el.hidden = true; }
+  }
+  function barkodDurdur() {
+    if (barkodAkis) { barkodAkis.getTracks().forEach((t) => t.stop()); barkodAkis = null; barkodIz = null; }
+    const a = document.getElementById('barkodAlan'); if (a) a.classList.remove('tariyor');
+  }
 
   async function kucult(file) {
     const img = await createImageBitmap(file);
