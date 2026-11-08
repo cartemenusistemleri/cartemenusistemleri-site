@@ -391,3 +391,35 @@ fieldset.t>legend+*{clear:both}
 /* hoca */
 .onay-mini{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.4;color:var(--ikincil)}
 .onay-mini input{margin:2px 0 0;flex:none;width:16px;height:16px}
+
+/* ölçüler ve fotoğraflar */
+.olcu-izgara{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px}
+.olcu-izgara div{display:flex;flex-direction:column;gap:2px}
+.olcu-izgara b{font-size:22px;font-weight:900;letter-spacing:-.03em}
+.olcu-izgara small{font-size:12px;font-weight:700;color:var(--ikincil)}
+.olcu-fark{font-size:13px;font-weight:800;color:var(--ikincil)}
+.olcu-fark.eksi{color:#1F7A3A}.olcu-fark.arti{color:#8A5A00}
+.olcu-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.karsilastir{position:relative;border-radius:20px;overflow:hidden;aspect-ratio:3/4;background:var(--zemin)}
+.karsilastir img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.karsilastir img.ust{clip-path:inset(0 0 0 var(--k))}
+.karsilastir::after{content:'';position:absolute;top:0;bottom:0;left:var(--k);width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);pointer-events:none}
+.karsilastir .etk{position:absolute;bottom:10px;font-size:12px;font-weight:800;background:rgba(22,22,26,.7);color:#fff;padding:4px 9px;border-radius:99px}
+.karsilastir .etk.sol{left:10px}.karsilastir .etk.sag{right:10px}
+.karsilastir input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.tek-foto{width:100%;border-radius:20px;aspect-ratio:3/4;object-fit:cover}
+.foto-serit{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.foto-serit figure{position:relative;margin:0;flex:none;width:96px}
+.foto-serit img{width:96px;height:128px;object-fit:cover;border-radius:14px;display:block}
+.foto-serit figcaption{font-size:11px;font-weight:700;color:var(--ikincil);margin-top:3px}
+.foto-serit .pd-ikon{position:absolute;top:4px;right:4px;width:28px;height:28px;background:rgba(255,255,255,.9)}
+
+/* ısınma / soğuma */
+.rutin-kutu summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;min-height:28px}
+.rutin-kutu summary::-webkit-details-marker{display:none}
+.rutin-kutu[open] summary .ik{display:none}
+.rutin{margin:6px 0 0;padding:0 0 0 20px;display:flex;flex-direction:column;gap:8px}
+.rutin li{padding-left:4px}
+.rutin li::marker{font-weight:800;color:var(--kobalt)}
+.rutin b{display:block;font-size:15px}
+.rutin span{font-size:13px;color:var(--ikincil)}
