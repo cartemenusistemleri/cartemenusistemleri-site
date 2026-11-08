@@ -616,7 +616,7 @@
     const kalan = h.kcal - tp.k;
     const grup = ['kahvalti', 'ogle', 'ara', 'aksam'].map((t) => {
       const l = g.ogun.filter((o) => o.ogun === t); if (!l.length) return '';
-      return '<div class="t genis" style="padding:12px 16px 4px;align-self:start"><div class="satir"><span style="font-size:13px;font-weight:800">' + OGUN_AD[t] + '</span><span class="ik num">' + sayi(toplam(l).k) + ' kcal</span></div><div class="liste">' +
+      return '<div class="t genis" style="padding:12px 16px 4px;align-self:start"><div class="satir"><span style="font-size:13px;font-weight:800">' + OGUN_AD[t] + '</span><span class="satir" style="gap:10px"><span class="ik num">' + sayi(toplam(l).k) + ' kcal</span><button class="metin-btn kucuk-metin" data-act="ogun-kaydet" data-tur="' + t + '">Kaydet</button></span></div><div class="liste">' +
         l.map((o) => '<div><div class="ad"><b>' + esc(o.ad) + '</b><span class="ik num">' + sayi(o.g) + ' g · ' + sayi(o.k) + ' kcal · P ' + sayi(o.p) + ' g</span></div><button class="sil" data-act="ogun-sil" data-id="' + o.id + '" aria-label="' + esc(o.ad) + ' kaydını sil">' + IK.kapat + '</button></div>').join('') + '</div></div>';
     }).join('');
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
@@ -627,8 +627,39 @@
       '<a class="t kobalt genis" href="#/ekle/foto" style="flex-direction:row;align-items:center;justify-content:space-between;min-height:76px"><div class="yigin"><span class="k">Hızlı ekle</span><b style="font-size:18px">Tabağının fotoğrafını çek</b></div><span class="ikon-btn" style="background:#fff;color:var(--kobalt)">' + IK.kamera + '</span></a>' +
       '<a class="t h130" href="#/ekle/ara" style="min-height:100px"><span class="ik" style="color:var(--murekkep)">' + IK.ara.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2"') + '</span><b>Listeden ya da markadan ara</b></a>' +
       '<a class="t h130" href="#/ekle/barkod" style="min-height:100px"><span style="color:var(--murekkep)">' + IK.barkod.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2"') + '</span><b>Barkod okut</b></a>' +
+      suKutu(g) + tekrarKutu(g) + oneriKutu(h.kcal - tp.k, h.protein - tp.p) +
       (grup || '<div class="t bos genis" style="align-items:flex-start"><b>Bugün henüz bir şey eklemedin.</b><span class="ik">Fotoğraf çek, listeden seç ya da <a href="#/ekle/elle" style="color:var(--kobalt);font-weight:700">elle gir</a>.</span></div>') +
       '</div>';
+  }
+
+  /* su, tekrar, kayıtlı öğün, yemek önerisi */
+  const suHedef = () => Math.round(((S.kilo.length ? S.kilo[S.kilo.length - 1].kg : S.profil.kilo) * 35) / 250) * 250; // ~35 ml/kg
+  function suKutu(g) {
+    const ml = g.su || 0; const h = suHedef(); const bardak = Math.round(ml / 250);
+    return '<div class="t genis su-kutu"><div class="satir"><span class="k">Su</span><span class="ik num">hedef ~' + sayi(h / 1000, 1) + ' L</span></div>' +
+      '<div class="satir" style="align-items:center"><span class="orta num">' + sayi(ml / 1000, 2) + '<span class="ik" style="font-weight:600"> L · ' + bardak + ' bardak</span></span>' +
+      '<div class="satir" style="gap:8px"><button class="yuvarlak" data-act="su" data-ml="-250" aria-label="Bir bardak çıkar"' + (ml ? '' : ' disabled') + '>−</button><button class="btn ana" data-act="su" data-ml="250" style="min-height:44px">+ 1 bardak</button></div></div>' +
+      '<div class="cubuk" role="img" aria-label="Su hedefinin yüzde ' + yuzde(ml, h) + '\'i"><span style="width:' + yuzde(ml, h) + '%;background:var(--kobalt)"></span></div></div>';
+  }
+  function dunKey() { const d = new Date(); d.setDate(d.getDate() - 1); return tarihKey(d); }
+  function tekrarKutu(g) {
+    const dun = S.gunluk[dunKey()];
+    const dunTur = dun ? ['kahvalti', 'ogle', 'ara', 'aksam'].filter((t) => dun.ogun.some((o) => o.ogun === t) && !g.ogun.some((o) => o.ogun === t)) : [];
+    const kayitli = S.kayitliOgun || [];
+    if (!dunTur.length && !kayitli.length) return '';
+    return '<div class="t genis"><span class="k">Tek dokunuşla ekle</span><div class="haplar">' +
+      dunTur.map((t) => '<button class="hap" data-act="dunden" data-tur="' + t + '">Dünkü ' + OGUN_AD[t].toLocaleLowerCase('tr') + ' · ' + sayi(toplam(dun.ogun.filter((o) => o.ogun === t)).k) + ' kcal</button>').join('') +
+      kayitli.map((k, i) => '<span class="hap-grup"><button class="hap siyah" data-act="kayitli-ekle" data-i="' + i + '">' + esc(k.ad) + ' · ' + sayi(toplam(k.kalemler).k) + ' kcal</button><button class="hap-sil" data-act="kayitli-sil" data-i="' + i + '" aria-label="' + esc(k.ad) + ' kayıtlı öğününü sil">' + IK.kapat + '</button></span>').join('') +
+      '</div></div>';
+  }
+  let oneri = null; let oneriYuk = false;
+  function oneriKutu(kalanK, kalanP) {
+    const tur = ogunTuru();
+    const baslik = tur === 'aksam' ? 'Akşam ne yesem?' : tur === 'kahvalti' ? 'Kahvaltıda ne yesem?' : tur === 'ogle' ? 'Öğlen ne yesem?' : 'Ara öğün ne olsun?';
+    let ic = '<span class="ik" style="color:var(--koyu-ikincil)">Kalan ' + sayi(Math.max(0, kalanK)) + ' kcal ve ' + sayi(Math.max(0, kalanP)) + ' g proteinine göre Türk mutfağından öneri ve kısa tarif.</span>';
+    if (oneri && oneri.liste.length) ic = oneri.liste.map((x, i) => '<div class="oneri"><div class="satir"><b>' + esc(x.ad) + '</b><button class="btn beyaz kucuk-btn" data-act="oneri-ekle" data-i="' + i + '">Ekle</button></div><span class="ik num" style="color:var(--koyu-ikincil)">~' + sayi(x.k) + ' kcal · P ' + sayi(x.p) + ' g · ' + sayi(x.g) + ' g</span>' + (x.tarif ? '<p class="oneri-tarif">' + esc(x.tarif) + '</p>' : '') + '</div>').join('');
+    return '<div class="t koyu genis" style="gap:10px"><div class="satir"><span class="k">' + baslik + '</span>' + (oneri ? '<button class="metin-btn kucuk-metin" data-act="oneri" style="color:var(--mavi-gece)">Başka öner</button>' : '') + '</div>' + ic +
+      (!oneri ? '<button class="btn beyaz" data-act="oneri"' + (oneriYuk ? ' disabled' : '') + ' style="align-self:flex-start;min-height:44px">' + (oneriYuk ? 'Düşünüyor…' : 'Öner') + IK.ok + '</button>' : '') + '</div>';
   }
 
   /* öğün ekleme */
@@ -919,6 +950,40 @@
       S.seans = null; dinlenme = null; kaydet(true);
       toast(yeni ? 'Antrenman kaydedildi. ' + yeni + ' yeni rekor!' : 'Antrenman kaydedildi. Bir sonrakinde görüşürüz.');
       git('#/');
+    },
+    su(el) { const g = gun(); g.su = Math.max(0, (g.su || 0) + (+el.dataset.ml)); if (+el.dataset.ml > 0) olay('su'); kaydet(); render(); },
+    dunden(el) {
+      const t = el.dataset.tur; const dun = S.gunluk[dunKey()]; if (!dun) return;
+      dun.ogun.filter((o) => o.ogun === t).forEach((o) => gun().ogun.push(Object.assign({}, o, { id: kimlik(), saat: saat() })));
+      kaydet(true); toast('Dünkü ' + OGUN_AD[t].toLocaleLowerCase('tr') + ' eklendi.'); render();
+    },
+    'ogun-kaydet'(el) {
+      const t = el.dataset.tur; const l = gun().ogun.filter((o) => o.ogun === t); if (!l.length) return;
+      const ad = OGUN_AD[t] + ' · ' + l.map((o) => o.ad.split(' · ')[0]).slice(0, 2).join(', ');
+      S.kayitliOgun = (S.kayitliOgun || []).concat([{ ad: ad.slice(0, 40), tur: t, kalemler: l.map((o) => ({ ad: o.ad, g: o.g, k: o.k, p: o.p, kh: o.kh, y: o.y })) }]).slice(-12);
+      kaydet(true); toast('Kaydedildi. Beslenme ekranından tek dokunuşla ekleyebilirsin.'); render();
+    },
+    'kayitli-ekle'(el) {
+      const k = (S.kayitliOgun || [])[+el.dataset.i]; if (!k) return;
+      k.kalemler.forEach((x) => gun().ogun.push(Object.assign({}, x, { id: kimlik(), ogun: ogunTuru(), saat: saat(), kaynak: 'kayitli' })));
+      kaydet(true); toast(k.ad + ' eklendi.'); render();
+    },
+    'kayitli-sil'(el) { (S.kayitliOgun || []).splice(+el.dataset.i, 1); kaydet(true); render(); },
+    async oneri() {
+      if (!hesap) { toast('Öneri için giriş yapmalısın.'); return; }
+      const g = gun(); const tp = toplam(g.ogun); const h = S.hedef;
+      oneriYuk = true; oneri = null; render();
+      try {
+        const r = await fetch('/api/comeback/koc', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tur: 'yemek', ogun: OGUN_AD[ogunTuru()], kalan_kcal: Math.round(h.kcal - tp.k), kalan_protein: Math.round(h.protein - tp.p), hedef: S.profil.hedef, bugun: g.ogun.map((o) => o.ad).slice(0, 12) }) });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && Array.isArray(j.liste)) { oneri = { liste: j.liste }; olay('koc_mesaj'); } else toast(j.hata || 'Öneri alınamadı.');
+      } catch (e) { toast('Bağlantı kurulamadı.'); }
+      oneriYuk = false; render();
+    },
+    'oneri-ekle'(el) {
+      const x = oneri && oneri.liste[+el.dataset.i]; if (!x) return;
+      gun().ogun.push({ id: kimlik(), ad: x.ad, g: x.g, k: x.k, p: x.p, kh: x.kh, y: x.y, ogun: ogunTuru(), saat: saat(), kaynak: 'oneri' });
+      kaydet(true); toast(x.ad + ' eklendi.'); render();
     },
     'ogun-sil'(el) { const g = gun(); g.ogun = g.ogun.filter((o) => o.id !== el.dataset.id); kaydet(true); render(); },
     'yerel-sec'(el) {

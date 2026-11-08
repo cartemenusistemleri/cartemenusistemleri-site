@@ -82,6 +82,21 @@ export async function onRequestPost(ctx) {
     return json({ ozet: temiz(s.ozet, 4), oneriler: temiz(s.oneriler, 5) });
   }
 
+  if (g && g.tur === 'yemek') {
+    if (!(await sinir(ctx, 'comeback:koc:' + uid + ':' + gun, parseInt(env.COMEBACK_KOC_LIMIT || '30', 10)))) return json({ hata: 'Bugünkü öneri hakkın doldu. Yarın tekrar dene.' }, 429);
+    const kK = Math.max(150, Math.min(1500, Number(g.kalan_kcal) || 500)); const kP = Math.max(0, Math.min(120, Number(g.kalan_protein) || 30));
+    const istem = 'Öğün: ' + kisa(g.ogun, 20) + '. Kalan kalori yaklaşık ' + kK + ' kcal, kalan protein ' + kP + ' g. Hedef: ' + kisa(g.hedef, 12) + '. Bugün yedikleri: ' + kisa((g.bugun || []).join(', '), 400) + '.\n' +
+      'Türk mutfağından, evde kolay yapılan ya da kolay bulunan 3 farklı öneri ver. Her biri kalan kaloriyi aşmasın, proteini yüksek olsun, bugün yediklerini tekrar etmesin. ' +
+      'Yalnızca geçerli JSON döndür: {"liste":[{"ad":"kısa ad ve porsiyon","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"tarif":"en fazla 2 cümle hazırlanışı"}]}';
+    let metin;
+    try { metin = await claude(env, 'Sen Türk mutfağını iyi bilen bir spor diyetisyenisin. Gerçekçi porsiyon ve besin değerleri ver. Aşırı kısıtlayıcı öneri verme.', [{ role: 'user', content: istem }], 700); } catch (e) { return json({ hata: 'Öneri şu an alınamıyor.' }, 502); }
+    const bas = metin.indexOf('{'), son = metin.lastIndexOf('}');
+    let s; try { s = JSON.parse(metin.slice(bas, son + 1)); } catch (e) { return json({ hata: 'Öneri okunamadı, tekrar dene.' }, 502); }
+    const n = (v, u) => { const x = Number(v); return isFinite(x) && x >= 0 ? Math.min(u, Math.round(x)) : 0; };
+    const liste = (Array.isArray(s.liste) ? s.liste : []).slice(0, 3).map((x) => ({ ad: kisa(x.ad, 60).replace(/[<>]/g, ''), g: n(x.g, 1500) || 300, k: n(x.k, 2500), p: n(x.p, 200), kh: n(x.kh, 400), y: n(x.y, 200), tarif: kisa(x.tarif, 280).replace(/[<>]/g, '') })).filter((x) => x.k > 0);
+    return json({ liste });
+  }
+
   if (g && g.tur === 'sohbet') {
     const ham = (Array.isArray(g.mesajlar) ? g.mesajlar : []).slice(-12)
       .map((m) => ({ role: m.rol === 'koc' ? 'assistant' : 'user', content: kisa(m.metin, 1200).trim() }))
