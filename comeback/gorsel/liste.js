@@ -1,0 +1,2 @@
+/* COMEBACK. — hazır hareket görselleri (otomatik üretilir) */
+window.CB_GORSEL = {"bench_dips":{"e":["bas"],"k":["bas","bit"]},"bench":{"k":["bas"]},"birddog":{"k":["bas","bit"]},"db_floor":{"e":["bas"]},"db_ohp":{"e":["bas","bit"],"k":["bas","bit"]},"db_row":{"e":["bas","bit"]},"deadlift":{"e":["bas","bit"],"k":["bit"]},"ext_rot":{"k":["bas"]},"goblet":{"e":["bas"],"k":["bas"]},"incline_db":{"e":["bas","bit"],"k":["bas","bit"]},"rev_lunge":{"k":["bas"]},"side_plank":{"k":["tut"]},"split_squat":{"e":["bit"],"k":["bit"]},"ytw":{"k":["bit"]}};

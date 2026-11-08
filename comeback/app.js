@@ -333,6 +333,19 @@
       '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>';
   }
 
+  // hareket görseli: kullanıcının cinsiyetine göre (yoksa diğeri); başlangıç ve bitiş üst üste, yavaşça geçiş yapar
+  function hareketGorsel(id) {
+    const g = (window.CB_GORSEL || {})[id]; if (!g) return '';
+    const tam = (l) => l && (l.indexOf('tut') >= 0 || (l.indexOf('bas') >= 0 && l.indexOf('bit') >= 0));
+    const c0 = S.profil && S.profil.cinsiyet === 'k' ? 'k' : 'e';
+    const c = tam(g[c0]) ? c0 : tam(g[c0 === 'k' ? 'e' : 'k']) ? (c0 === 'k' ? 'e' : 'k') : null;
+    if (!c) return '';
+    const ad = esc(D.HAREKET[id] ? D.HAREKET[id].ad : id);
+    const src = (k) => 'gorsel/' + id + '_' + c + '_' + k + '.webp';
+    if (g[c].indexOf('tut') >= 0) return '<figure class="hg"><img src="' + src('tut') + '" alt="' + ad + ' doğru duruş" loading="lazy" decoding="async" width="960" height="720"></figure>';
+    return '<figure class="hg dongu"><img src="' + src('bas') + '" alt="' + ad + ' başlangıç" loading="lazy" decoding="async" width="960" height="720"><img class="ust" src="' + src('bit') + '" alt="' + ad + ' bitiş" loading="lazy" decoding="async" width="960" height="720"><figcaption><span>Başlangıç</span><span>Bitiş</span></figcaption></figure>';
+  }
+
   function ekranSeans() {
     const s = S.seans; const sg = S.program.gunler.find((x) => x.id === s.gunId);
     const dk = Math.round((Date.now() - s.baslangic) / 60000);
@@ -344,6 +357,7 @@
         const hr = D.HAREKET[x.id]; const l = s.setler[x.id]; const once = S.son[x.id];
         const aktifIdx = l.findIndex((y) => !y.ok);
         return '<section class="t" aria-label="' + esc(hr.ad) + '" style="padding-bottom:6px"><div class="satir"><div class="yigin"><b style="font-size:18px;letter-spacing:-.01em">' + esc(hr.ad) + '</b><span class="ik num">Hedef ' + x.set + ' × ' + esc(x.tekrar) + (x.rir ? ' · ' + esc(x.rir) : '') + (S.rekor[x.id] ? ' · rekor ' + sayi(S.rekor[x.id].kg, 1) + ' × ' + S.rekor[x.id].tekrar : '') + '</span></div>' + (x.blok && x.blok !== 'ana' && x.blok !== 'yard' ? '<span class="etiket">' + BLOK[x.blok] + '</span>' : '') + '</div>' +
+          hareketGorsel(x.id) +
           (x.isinma ? '<p class="ipucu"><b>Önce ısın:</b> çok hafif × 8, sonra orta × 4.</p>' : '') +
           (hr.ipucu ? '<p class="ipucu">' + esc(hr.ipucu) + (x.not ? ' <b>' + esc(x.not) + '.</b>' : '') + '</p>' : '') +
           '<div class="setler"><div class="set bas"><span>Set</span><span>Önceki</span><span style="text-align:center">Kg</span><span style="text-align:center">' + BIRIM[birimOf(x)] + '</span><span></span></div>' +

@@ -290,3 +290,20 @@ fieldset.t>legend+*{clear:both}
 .degis-liste{flex-basis:100%;display:flex;flex-direction:column;gap:8px;padding:4px 0 10px}
 .degis-liste .haplar{display:flex;flex-wrap:wrap;gap:6px}
 @media (hover:hover){.degis-btn:hover{color:var(--murekkep)}}
+
+/* hareket görseli: başlangıç → bitiş geçişi */
+.hg{position:relative;margin:10px 0 4px;border-radius:18px;overflow:hidden;background:#fff;aspect-ratio:4/3;max-height:260px}
+.hg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.hg.dongu .ust{animation:hgDongu 3.6s cubic-bezier(.65,0,.35,1) infinite}
+.hg figcaption{position:absolute;left:10px;bottom:8px;display:flex;gap:6px;font-size:11px;font-weight:700;letter-spacing:.02em}
+.hg figcaption span{padding:3px 8px;border-radius:99px;background:var(--zemin);color:var(--ikincil)}
+.hg figcaption span:first-child{animation:hgEtiket1 3.6s cubic-bezier(.65,0,.35,1) infinite}
+.hg figcaption span:last-child{animation:hgEtiket2 3.6s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes hgDongu{0%,38%{opacity:0}50%,88%{opacity:1}100%{opacity:0}}
+@keyframes hgEtiket1{0%,38%{background:var(--murekkep);color:#fff}50%,88%{background:var(--zemin);color:var(--ikincil)}100%{background:var(--murekkep);color:#fff}}
+@keyframes hgEtiket2{0%,38%{background:var(--zemin);color:var(--ikincil)}50%,88%{background:var(--murekkep);color:#fff}100%{background:var(--zemin);color:var(--ikincil)}}
+@media (prefers-reduced-motion:reduce){
+  .hg.dongu{aspect-ratio:auto;max-height:none;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .hg.dongu img{position:static;aspect-ratio:4/3;height:auto}
+  .hg figcaption{display:none}
+}
