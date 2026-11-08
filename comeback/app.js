@@ -444,6 +444,48 @@
       '<button class="metin-btn" data-act="hp-cikar" style="align-self:center;color:var(--ikincil)">Öğrenciyi listeden çıkar</button>';
   }
 
+  /* ---------- ana ekrana ekle (PWA) ---------- */
+  let kurulumIstemi = null; let ekleAcik = false;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); kurulumIstemi = e; render(); });
+  window.addEventListener('appinstalled', () => { kurulumIstemi = null; try { localStorage.setItem('cb-eklendi', '1'); } catch (er) { /* yok */ } toast('COMEBACK. ana ekranına eklendi.'); render(); });
+  const tekBasina = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const iosMu = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function ekleKutu(kucuk) {
+    if (tekBasina()) return '';
+    let kapali = false; try { kapali = !kucuk && localStorage.getItem('cb-ekle-kapat') === '1'; } catch (e) { /* yok */ }
+    if (kapali) return '';
+    const yonerge = ekleAcik ? '<ol class="rutin" style="margin-top:4px">' + (iosMu()
+      ? '<li><b>Safari\'de alttaki Paylaş düğmesine dokun</b><span>kutudan yukarı çıkan ok simgesi</span></li><li><b>“Ana Ekrana Ekle”yi seç</b><span>listeyi biraz aşağı kaydırman gerekebilir</span></li><li><b>Sağ üstte “Ekle”ye dokun</b><span>COMEBACK. ikonu ana ekranında belirir</span></li>'
+      : '<li><b>Tarayıcının sağ üstündeki ⋮ menüsünü aç</b><span>Chrome, Samsung İnternet</span></li><li><b>“Ana ekrana ekle” ya da “Uygulamayı yükle”yi seç</b><span></span></li><li><b>“Ekle”ye dokun</b><span>COMEBACK. ikonu ana ekranında belirir</span></li>') + '</ol>' : '';
+    return '<div class="t koyu genis ekle-kutu"><div class="satir" style="align-items:flex-start"><div class="yigin" style="gap:4px"><span class="k">Uygulama gibi kullan</span><b style="font-size:19px">Ana ekranına ekle</b><span class="ik" style="color:var(--koyu-ikincil)">Tek dokunuşla aç, tam ekran çalışsın, internet yokken de kayıt al.</span></div>' +
+      (!kucuk ? '<button class="pd-ikon" data-act="ekle-kapat" aria-label="Kapat" style="background:rgba(255,255,255,.1);color:#fff">' + IK.kapat + '</button>' : '') + '</div>' +
+      yonerge + '<button class="btn beyaz" data-act="ekle" style="align-self:flex-start;min-height:44px">' + (kurulumIstemi ? 'Ana ekrana ekle' : ekleAcik ? 'Tamam' : 'Nasıl eklenir?') + IK.ok + '</button></div>';
+  }
+
+  /* ---------- hedef değiştirme ---------- */
+  let hedefTaslak = null;
+  function ekranHedef() {
+    if (!S.profil) return ekranKarsilama();
+    const p = hedefTaslak || (hedefTaslak = JSON.parse(JSON.stringify(S.profil)));
+    const hp = (grup, liste, secili, coklu) => liste.map((x) => '<button type="button" class="hap' + (coklu ? ' siyah' : '') + '" data-act="hedef-sec" data-grup="' + grup + '" data-deger="' + x[0] + '" aria-pressed="' + (coklu ? (secili || []).indexOf(x[0]) >= 0 : x[0] === secili) + '">' + x[1] + '</button>').join('');
+    const yeni = M.hedefHesapla(p);
+    const ozel = S.program && S.program.ozel;
+    return ust(geri('#/profil'), '<span class="alt">Hedefin</span>') +
+      '<h1 class="baslik">Ne istiyorsun<span class="nokta">?</span></h1>' +
+      '<div class="izgara">' +
+      '<div class="t genis"><span class="k">Hedefin</span><div class="haplar">' + hp('hedef', [['kas', 'Kas kazanmak'], ['yag', 'Yağ yakmak'], ['guc', 'Güçlenmek'], ['kondisyon', 'Kondisyon']], p.hedef) + '</div></div>' +
+      '<div class="t genis"><span class="k">Haftada kaç gün?</span><div class="haplar">' + hp('gun', [2, 3, 4, 5, 6].map((n) => [String(n), n + ' gün']), String(p.gun)) + '</div></div>' +
+      '<div class="t genis"><span class="k">Üzerine gitmek istediğin bölge · en fazla 2</span><div class="haplar">' + hp('odak', Object.keys(M.ODAK).map((k) => [k, M.ODAK[k].ad]), p.odak || [], true) + '</div></div>' +
+      '<div class="t genis"><span class="k">Nerede çalışacaksın?</span><div class="haplar">' + hp('ortam', [['salon', 'Spor salonu'], ['ev', 'Evde, dambılla'], ['vucut', 'Ekipmansız'], ['dis', 'Dışarıda']], p.ortam || 'salon') + '</div></div>' +
+      '<div class="t genis"><span class="k">Bir antrenman ne kadar sürsün?</span><div class="haplar">' + hp('sure', [['45', '45 dk'], ['60', '60 dk'], ['75', '75 dk'], ['90', '90 dk']], String(p.sure || 60)) + '</div></div>' +
+      '<div class="t limon genis"><span class="k">Yeni günlük hedefin</span><span class="orta num">' + sayi(yeni.kcal) + ' kcal</span><span class="k">' + yeni.protein + ' g protein · şu an ' + sayi(S.hedef.kcal) + ' kcal</span></div>' +
+      '</div>' +
+      (ozel ? '<div class="uyari">Kendi yazdığın programın korunur, sadece kalori hedefin güncellenir. İstersen programı da yeni hedefe göre COMEBACK. kursun.</div>' : '<div class="uyari">Programın yeni hedefe göre yeniden kurulur. Geçmiş antrenmanların, rekorların ve öğünlerin silinmez.</div>') +
+      '<button class="btn ana buyuk-btn" data-act="hedef-kaydet" data-program="' + (ozel ? '0' : '1') + '">' + (ozel ? 'Kalori hedefimi güncelle' : 'Kaydet, programımı yeniden kur') + IK.ok + '</button>' +
+      (ozel ? '<button class="btn cerceve" data-act="hedef-kaydet" data-program="1">Programımı da COMEBACK. kursun</button>' : '') +
+      '<a class="metin-btn" href="#/kurulum" style="align-self:center;color:var(--ikincil)">Yaş, kilo, sakatlık gibi diğer bilgileri değiştir</a>';
+  }
+
   /* ---------- topluluk: forum, meydan okuma, hoca mesajları ---------- */
   const TAPI = '/api/comeback/topluluk/';
   async function tistek(yol, yontem, veri) {
@@ -721,6 +763,7 @@
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
       rekorKutu +
       '<a class="t koyu genis koc-kutu" href="#/koc"><span class="k">Koç · yapay zekâ</span><b style="font-size:20px;letter-spacing:-.02em">Bir yerin mi ağrıyor, keyfin mi yok?</b><span class="ik" style="color:var(--koyu-ikincil)">Koça danış, programına göre cevap versin.</span></a>' +
+      ekleKutu(false) +
       '<div class="t genis tum"><span class="k">Öğün ekle</span><div class="haplar"><a class="hap" href="#/ekle/foto">' + IK.kamera.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2"') + 'Fotoğrafla</a><a class="hap" href="#/ekle/ara">Listeden</a><a class="hap" href="#/ekle/barkod">Barkod</a><a class="hap" href="#/ekle/elle">Elle</a></div></div>' +
       '</div>';
   }
@@ -1152,10 +1195,12 @@
     return ust(logo) + '<h1 class="baslik">' + esc(p.ad || 'Profil') + '<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(p.kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
-      '<div class="t limon h130"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></div>' +
+      '<a class="t limon h130" href="#/hedef"><span class="k">Günlük hedef · değiştir</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></a>' +
       '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
       '<a class="btn siyah genis" href="#/program">' + (S.program && S.program.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle · kendi programımı yaz') + '</a>' +
-      '<a class="btn cerceve genis" href="#/kurulum">Bilgilerimi güncelle, programı yeniden kur</a>' +
+      '<a class="btn ana genis" href="#/hedef">Hedefimi değiştir · kas, yağ yakma, gün, odak</a>' +
+      '<a class="btn cerceve genis" href="#/kurulum">Tüm bilgilerimi güncelle</a>' +
+      ekleKutu(true) +
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       (hesap && hesap.rol === 'admin' ? '<a class="t koyu genis" href="#/yonetim"><span class="k">Yalnızca sen görürsün</span><b style="font-size:20px">Yönetim</b><span style="opacity:.8">Bekleme listesi, görüşler, hatalar, kullanıcılar.</span></a>' : '') +
       '<a class="t kobalt genis" href="#/gorus"><span class="k">Deneme sürümü</span><b style="font-size:20px">Görüş bildir</b><span class="ik" style="color:inherit;opacity:.8">Hata, öneri, beğendiğin bir şey: bize yaz.</span></a>' +
@@ -1190,6 +1235,7 @@
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
     else if (parca[0] === 'topluluk') { html = ekranTopluluk(parca[1] || '', parca[2] ? decodeURIComponent(parca[2]) : null); sekme = 'profil'; }
     else if (parca[0] === 'mesaj') { html = ekranMesaj(decodeURIComponent(parca[1] || '')); sekme = 'profil'; }
+    else if (parca[0] === 'hedef') { if (sonRota !== 'hedef') hedefTaslak = null; html = ekranHedef(); sekme = 'profil'; }
     else if (parca[0] === 'olcu') { html = ekranOlcu(); sekme = 'ilerleme'; }
     else if (parca[0] === 'rapor') { html = ekranRapor(); sekme = 'ilerleme'; }
     else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
@@ -1498,6 +1544,25 @@
       const r = await histek('atanan/' + a.id + '/yanit', 'POST', { kabul }); if (!r.ok) { toast('Kaydedilemedi.'); return; }
       if (kabul) { S.program = a.program; S.program.ozel = true; S.profil.gun = a.program.gunler.length; S.seans = null; kaydet(true); toast('Hocanın programı artık senin programın.'); }
       hocaDurum.atanan = null; git(kabul ? '#/antrenman' : '#/');
+    },
+    async ekle() {
+      if (kurulumIstemi) { const e = kurulumIstemi; kurulumIstemi = null; e.prompt(); try { await e.userChoice; } catch (er) { /* yok */ } render(); return; }
+      ekleAcik = !ekleAcik; render();
+    },
+    'ekle-kapat'() { try { localStorage.setItem('cb-ekle-kapat', '1'); } catch (e) { /* yok */ } render(); },
+    'hedef-sec'(el) {
+      const g = el.dataset.grup; const d = el.dataset.deger; const p = hedefTaslak;
+      if (g === 'odak') { const l = p.odak || []; const i = l.indexOf(d); if (i >= 0) l.splice(i, 1); else { if (l.length >= 2) { toast('En fazla 2 bölge seçebilirsin.'); return; } l.push(d); } p.odak = l; }
+      else if (g === 'gun' || g === 'sure') p[g] = parseInt(d, 10); else p[g] = d;
+      render();
+    },
+    'hedef-kaydet'(el) {
+      const p = hedefTaslak; if (!p) return;
+      const programDa = el.dataset.program === '1';
+      S.profil = p; S.hedef = hedefHesapla(p);
+      if (programDa) { S.program = programOlustur(p); S.seans = null; }
+      hedefTaslak = null; kaydet(true); olay('kurulum');
+      toast(programDa ? 'Hedefin ve programın güncellendi.' : 'Kalori hedefin güncellendi.'); git(programDa ? '#/plan' : '#/profil');
     },
     'tp-kat'(el) { tp.kat = el.dataset.deger; tp.liste = null; render(); },
     'tp-menu'(el) { const k = el.dataset.tur + el.dataset.id; tp.menu = tp.menu === k ? null : k; render(); },

@@ -440,3 +440,6 @@ fieldset.t>legend+*{clear:both}
 .tp-sira .cubuk{margin:0}
 .tp-sira span:last-child{text-align:right;font-weight:800}
 .mesaj-zaman{display:block;font-size:11px;opacity:.6;margin-top:4px}
+.ekle-kutu{gap:10px}
+.ekle-kutu .rutin b{color:var(--koyu-yazi)}
+.ekle-kutu .rutin span{color:var(--koyu-ikincil)}
