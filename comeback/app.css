@@ -307,3 +307,11 @@ fieldset.t>legend+*{clear:both}
   .hg.dongu img{position:static;aspect-ratio:4/3;height:auto}
   .hg figcaption{display:none}
 }
+
+/* yönetim */
+.btn.kucuk{min-height:36px;padding:0 14px;border-radius:18px;font-size:13px}
+.yon-satir{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--cizgi,rgba(22,22,26,.08))}
+.yon-satir:last-child{border-bottom:0}
+.yon-satir .yigin{gap:3px;min-width:0}
+.yon-is{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;align-items:center;flex:none;max-width:52%}
+.yon-is .etiket{align-self:center}

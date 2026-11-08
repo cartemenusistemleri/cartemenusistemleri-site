@@ -71,6 +71,18 @@
     const j = await r.json().catch(() => ({}));
     return { ok: r.ok, durum: r.status, j };
   }
+  // hata takibi: aynı hata oturumda bir kez, en fazla 10 kayıt
+  const SURUM = '14'; const gonderilenHata = new Set();
+  function hataBildir(mesaj, yer) {
+    try {
+      const anahtar = String(mesaj).slice(0, 200) + '|' + String(yer || '').slice(0, 120);
+      if (gonderilenHata.has(anahtar) || gonderilenHata.size >= 10) return; gonderilenHata.add(anahtar);
+      const govde = JSON.stringify({ mesaj: String(mesaj).slice(0, 500), yer: String(yer || '').slice(0, 300), ekran: (location.hash || '#/').slice(0, 60), surum: SURUM });
+      fetch(API + 'hata', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: govde, keepalive: true }).catch(() => {});
+    } catch (e) { /* sessiz */ }
+  }
+  window.addEventListener('error', (e) => { if (e.message) hataBildir(e.message, (e.filename || '').split('/').pop() + ':' + e.lineno + ':' + e.colno); });
+  window.addEventListener('unhandledrejection', (e) => { const r = e.reason || {}; hataBildir('Promise: ' + (r.message || String(r)), (r.stack || '').split('\n')[1] || ''); });
   let senkronZaman = null; let senkronda = false;
   function senkronPlanla() {
     if (!hesap) return;
@@ -163,8 +175,10 @@
       '<p class="ik" style="padding:4px 4px 8px;font-size:16px;max-width:36ch">Sana göre kurulan program, fotoğrafla kalori ve set set antrenman kaydı. Tek uygulamada.</p>' +
       (hesap || cevrimdisi
         ? '<a class="btn ana buyuk-btn" href="#/kurulum" style="margin-top:6px">Programımı oluştur' + IK.ok + '</a>'
-        : '<a class="btn ana buyuk-btn" href="#/kayit" style="margin-top:6px">Hesap oluştur' + IK.ok + '</a>' +
-          '<a class="btn cerceve" href="#/giris">Zaten hesabım var · Giriş yap</a>') +
+        : '<span class="etiket" style="align-self:flex-start;margin:2px 4px 4px">Kapalı beta</span>' +
+          '<a class="btn ana buyuk-btn" href="#/bekleme" style="margin-top:6px">Bekleme listesine katıl' + IK.ok + '</a>' +
+          '<a class="btn cerceve" href="#/kayit">Onaylandım · Hesap oluştur</a>' +
+          '<a class="metin-btn" href="#/giris" style="align-self:center;color:var(--murekkep)">Zaten hesabım var ·&nbsp;<span style="color:var(--kobalt)">Giriş yap</span></a>') +
       (S.profil && !hesap && !cevrimdisi ? '<div class="uyari">Bu cihazda kayıtların var. Hesap oluşturursan hepsi hesabına aktarılır ve her cihazdan erişirsin.</div>' : '') +
       '<p class="not">18 yaş ve üstü içindir.' + (cevrimdisi ? ' Sunucuya şu an ulaşılamıyor; kayıtların bu cihazda tutuluyor.' : '') + '</p>' +
       '</div><div class="izgara">' +
@@ -176,6 +190,66 @@
 
   const gozIkon = '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   const sifreAlani = (ad, oto, yazi) => '<label class="t genis alan"><span>' + yazi + '</span><div class="satir"><input name="' + ad + '" type="password" autocomplete="' + oto + '" minlength="8" required style="font-size:22px;letter-spacing:.02em" placeholder="••••••••"><button type="button" class="ikon-btn" data-act="sifre-goster" aria-label="Şifreyi göster" style="background:var(--zemin)">' + gozIkon + '</button></div></label>';
+  let beklemeSonuc = null; let beklemeHedef = '';
+  function ekranBekleme() {
+    if (hesap) { location.hash = '#/'; return ''; }
+    if (beklemeSonuc) {
+      const onayli = beklemeSonuc === 'onayli';
+      return ust(geri('#/', 'Başa dön'), '<span class="alt">Kapalı beta</span>') +
+        '<h1 class="baslik">' + (onayli ? 'Onaylısın' : 'Listedesin') + '<span class="nokta">.</span></h1>' +
+        '<div class="izgara"><div class="t ' + (onayli ? 'limon' : 'kobalt') + ' genis" style="gap:8px"><span class="k">' + (onayli ? 'Hazır' : 'Sıradasın') + '</span><span style="font-size:17px;font-weight:600;line-height:1.45">' +
+        (onayli ? 'Bu e-postayla hemen hesap oluşturabilirsin.' : 'COMEBACK. şu an küçük bir grupla deneniyor. Yer açılınca başvurunu onaylayacağız; onaylandığında aynı e-postayla hesap oluşturabileceksin.') + '</span></div></div>' +
+        (onayli ? '<a class="btn ana buyuk-btn" href="#/kayit">Hesap oluştur' + IK.ok + '</a>' : '<a class="btn cerceve" href="#/">Başa dön</a>');
+    }
+    const hedefler = [['yag', 'Kilo vermek'], ['kas', 'Kas yapmak'], ['guc', 'Güçlenmek'], ['spor', 'Sporuma hazırlanmak'], ['donus', 'Spora geri dönmek']];
+    return ust(geri('#/', 'Başa dön'), '<span class="alt">Kapalı beta</span>') +
+      '<h1 class="baslik">İlk sen dene<span class="nokta">.</span></h1>' +
+      '<p class="ik" style="padding:0 4px 6px;font-size:15px">COMEBACK. şu an kapalı betada. E-postanı bırak, yer açılınca seni içeri alalım.</p>' +
+      '<form data-form="bekleme" class="izgara" novalidate>' +
+      '<label class="t genis alan"><span>Adın</span><input name="ad" autocomplete="given-name" maxlength="40" placeholder="Deniz" style="font-size:22px"></label>' +
+      '<label class="t genis alan"><span>E-posta</span><input name="eposta" type="email" autocomplete="email" inputmode="email" required placeholder="ornek@eposta.com" style="font-size:20px;letter-spacing:-.01em"></label>' +
+      '<div class="t genis"><span class="k">Hedefin ne?</span><div class="haplar">' + hedefler.map((x) => '<button type="button" class="hap" data-act="bekleme-hedef" data-deger="' + x[0] + '" aria-pressed="' + (beklemeHedef === x[0]) + '">' + x[1] + '</button>').join('') + '</div></div>' +
+      '<label class="t genis alan"><span>Bizi nereden duydun? · isteğe bağlı</span><input name="kaynak" maxlength="60" placeholder="Instagram, arkadaşım, salonum…" style="font-size:18px"></label>' +
+      '<p class="hata genis" id="formHata" role="alert" hidden></p>' +
+      '<button class="btn ana buyuk-btn genis" type="submit" id="formBtn">Listeye katıl' + IK.ok + '</button>' +
+      '<p class="not genis" style="padding:0 4px">E-postanı yalnızca beta davetin ve COMEBACK. duyuruları için kullanırız. <a href="gizlilik.html" target="_blank" rel="noopener" style="color:var(--kobalt)">Aydınlatma metni</a></p>' +
+      '</form>';
+  }
+
+  // yönetim (yalnızca admin)
+  let yon = { sekme: 'bekleme', veri: null, yukleniyor: false };
+  async function yonetimYukle() {
+    if (yon.yukleniyor) return; yon.yukleniyor = true;
+    try {
+      const [o, b, g, h] = await Promise.all(['ozet', 'bekleme', 'gorusler', 'hatalar'].map((x) => istek('yonetim/' + x)));
+      yon.veri = o.ok ? { ozet: o.j, bekleme: b.j.liste || [], gorusler: g.j.liste || [], hatalar: h.j.liste || [] } : { hata: o.j.hata || 'Yüklenemedi.' };
+    } catch (e) { yon.veri = { hata: 'Bağlantı kurulamadı.' }; }
+    yon.yukleniyor = false; if (location.hash.indexOf('#/yonetim') === 0) render();
+  }
+  function ekranYonetim() {
+    if (!hesap || hesap.rol !== 'admin') { location.hash = '#/'; return ''; }
+    const V = yon.veri;
+    if (!V) { yonetimYukle(); return ust(geri('#/profil'), '<span class="alt">Yönetim</span>') + '<h1 class="baslik">Yönetim<span class="nokta">.</span></h1><p class="ik" style="padding:0 4px">Yükleniyor…</p>'; }
+    if (V.hata) return ust(geri('#/profil'), '<span class="alt">Yönetim</span>') + '<h1 class="baslik">Yönetim<span class="nokta">.</span></h1><div class="t"><span>' + esc(V.hata) + '</span></div>';
+    const o = V.ozet;
+    const tarih = (z) => z ? new Date(z).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+    const kutu = (k, n, ek) => '<div class="t' + (ek ? ' ' + ek : '') + '"><span class="k">' + k + '</span><span class="dev num" style="font-size:40px">' + n + '</span></div>';
+    const DUR = { bekliyor: 'Bekliyor', onayli: 'Onaylı', reddedildi: 'Reddedildi' };
+    const HED = { yag: 'Kilo vermek', kas: 'Kas', guc: 'Güç', spor: 'Spor', donus: 'Geri dönüş' };
+    const sekmeler = [['bekleme', 'Bekleme listesi · ' + o.bekleyen], ['gorusler', 'Görüşler · ' + V.gorusler.length], ['hatalar', 'Hatalar · ' + V.hatalar.length]];
+    let govde = '';
+    if (yon.sekme === 'bekleme') govde = V.bekleme.length ? V.bekleme.map((x) => '<div class="yon-satir"><div class="yigin"><b>' + esc(x.ad || '—') + '</b><span class="ik">' + esc(x.eposta) + '</span><span class="ik">' + [HED[x.hedef] || x.hedef, x.kaynak, tarih(x.zaman)].filter(Boolean).map(esc).join(' · ') + (x.kayitli ? ' · <b>hesap açtı</b>' : '') + '</span></div><div class="yon-is"><span class="etiket">' + DUR[x.durum] + '</span>' +
+      (x.durum !== 'onayli' ? '<button class="btn ana kucuk" data-act="yon-onay" data-eposta="' + esc(x.eposta) + '" data-durum="onayli">Onayla</button>' : '') +
+      (x.durum === 'bekliyor' ? '<button class="btn cerceve kucuk" data-act="yon-onay" data-eposta="' + esc(x.eposta) + '" data-durum="reddedildi">Reddet</button>' : '') + '</div></div>').join('') : '<p class="ik">Henüz başvuru yok.</p>';
+    else if (yon.sekme === 'gorusler') govde = V.gorusler.length ? V.gorusler.map((x) => '<div class="yon-satir"><div class="yigin"><span class="ik">' + esc([x.tur, x.ad || 'isimsiz', x.ekran, tarih(x.zaman)].filter(Boolean).join(' · ')) + '</span><span style="white-space:pre-wrap;line-height:1.5">' + esc(x.metin) + '</span></div></div>').join('') : '<p class="ik">Henüz görüş yok.</p>';
+    else govde = V.hatalar.length ? V.hatalar.map((x) => '<div class="yon-satir"><div class="yigin"><b style="font-size:14px;word-break:break-word">' + esc(x.mesaj) + '</b><span class="ik" style="word-break:break-all">' + esc([x.yer, x.ekran, 'sürüm ' + x.surum].filter(Boolean).join(' · ')) + '</span><span class="ik">' + x.adet + ' kez · ' + x.kisi + ' kişi · son ' + tarih(x.son) + '</span></div></div>').join('') : '<p class="ik">Hata kaydı yok.</p>';
+    return ust(geri('#/profil'), '<button class="ikon-btn" data-act="yon-yenile" aria-label="Yenile" style="background:#fff">' + IK.degis + '</button>') +
+      '<h1 class="baslik">Yönetim<span class="nokta">.</span></h1>' +
+      '<div class="izgara">' + kutu('Kullanıcı', o.kullanici, 'kobalt') + kutu('Son 7 gün aktif', o.aktif) + kutu('Yeni (7 gün)', o.yeniKullanici) + kutu('Bekleyen', o.bekleyen, o.bekleyen ? 'limon' : '') + '</div>' +
+      '<div class="yatay" role="tablist">' + sekmeler.map((x) => '<button class="hap" role="tab" data-act="yon-sekme" data-deger="' + x[0] + '" aria-pressed="' + (yon.sekme === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
+      '<div class="t genis" style="padding:6px 16px">' + govde + '</div>';
+  }
+
   function ekranKayit() {
     if (hesap) { location.hash = S.profil ? '#/' : '#/kurulum'; return ''; }
     return ust(geri('#/', 'Başa dön'), '<span class="alt">Hesap oluştur</span>') +
@@ -556,6 +630,7 @@
       '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
       '<a class="btn cerceve genis" href="#/kurulum">Bilgilerimi güncelle, programı yeniden kur</a>' +
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
+      (hesap && hesap.rol === 'admin' ? '<a class="t koyu genis" href="#/yonetim"><span class="k">Yalnızca sen görürsün</span><b style="font-size:20px">Yönetim</b><span style="opacity:.8">Bekleme listesi, görüşler, hatalar, kullanıcılar.</span></a>' : '') +
       '<a class="t kobalt genis" href="#/gorus"><span class="k">Deneme sürümü</span><b style="font-size:20px">Görüş bildir</b><span class="ik" style="color:inherit;opacity:.8">Hata, öneri, beğendiğin bir şey: bize yaz.</span></a>' +
       '<div class="t bos h130"><span class="k">Hocam</span><b>Hoca bağlantısı</b><span class="ik">Yakında: davet koduyla hocana bağlan.</span></div>' +
       '<div class="t bos h130"><span class="k">Topluluk</span><b>Forum ve meydan okumalar</b><span class="ik">Yakında açılıyor.</span></div>' +
@@ -571,6 +646,7 @@
     let html = ''; let sekme = '';
     const acik = !!hesap || cevrimdisi; // hesapsız yalnızca karşılama, kayıt ve giriş
     if (parca[0] === 'kayit') html = ekranKayit();
+    else if (parca[0] === 'bekleme') html = ekranBekleme();
     else if (parca[0] === 'giris') html = ekranGiris();
     else if (!acik) { html = ekranKarsilama(); parca.length = 0; }
     else if (!parca.length) { html = ekranBugun(); sekme = 'bugun'; }
@@ -583,11 +659,12 @@
     else if (parca[0] === 'ilerleme') { html = ekranIlerleme(); sekme = 'ilerleme'; }
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
+    else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
-    const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris'].indexOf(parca[0]) < 0;
+    const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme'].indexOf(parca[0]) < 0;
     nav.hidden = !menu; app.classList.toggle('tam', !menu);
-    app.classList.toggle('dar', ['kurulum', 'ekle', 'porsiyon', 'kayit', 'giris'].indexOf(parca[0]) >= 0);
+    app.classList.toggle('dar', ['kurulum', 'ekle', 'porsiyon', 'kayit', 'giris', 'bekleme'].indexOf(parca[0]) >= 0);
     nav.querySelectorAll('a[data-tab]').forEach((a) => { if (a.dataset.tab === sekme) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (S.seans && dinlenme) dinlenmeCiz(); else { const d = document.getElementById('dinlenme'); if (d) d.remove(); }
 
@@ -744,6 +821,16 @@
       hesap = null; S = bos(); try { localStorage.removeItem(ANAHTAR); } catch (e) { /* yok */ }
       toast('Çıkış yapıldı.'); git('#/');
     },
+    'bekleme-hedef'(el) { beklemeHedef = el.getAttribute('aria-pressed') === 'true' ? '' : el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.deger === beklemeHedef))); },
+    'yon-sekme'(el) { yon.sekme = el.dataset.deger; render(); },
+    'yon-yenile'() { yon.veri = null; render(); },
+    async 'yon-onay'(el) {
+      el.disabled = true;
+      const r = await istek('yonetim/onay', 'POST', { eposta: el.dataset.eposta, durum: el.dataset.durum }).catch(() => ({ ok: false, j: {} }));
+      if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Kaydedilemedi.'); return; }
+      toast(el.dataset.durum === 'onayli' ? 'Onaylandı. Artık bu e-postayla kayıt olabilir.' : 'Reddedildi.');
+      yon.veri = null; render();
+    },
     'gorus-tur'(el) { gorusTur = el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); },
     'sil-ac'() { silAcik = true; render(); const i = document.querySelector('[data-form="hesap-sil"] input'); if (i) i.focus(); },
     'sil-kapat'() { silAcik = false; render(); },
@@ -787,6 +874,7 @@
     if (f.dataset.form === 'kurulum') return kurulumKaydet(f, v);
     if (f.dataset.form === 'kayit' || f.dataset.form === 'giris') return hesapFormu(f.dataset.form, f, v);
     if (f.dataset.form === 'gorus') return gorusGonder(v);
+    if (f.dataset.form === 'bekleme') return beklemeGonder(v);
     if (f.dataset.form === 'hesap-sil') return hesapSil(v);
     if (f.dataset.form === 'ara') { if (aramaQ.trim().length >= 2) markaAra(aramaQ); return; }
     if (f.dataset.form === 'barkod') return barkodBul(String(v.kod || '').replace(/\D/g, ''));
@@ -803,6 +891,17 @@
     }
   });
 
+  async function beklemeGonder(v) {
+    const hataEl = document.getElementById('formHata'); const btn = document.getElementById('formBtn');
+    const eposta = String(v.eposta || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(eposta)) { hataEl.textContent = 'Geçerli bir e-posta adresi yaz.'; hataEl.hidden = false; return; }
+    btn.disabled = true;
+    try {
+      const r = await istek('bekleme', 'POST', { ad: v.ad, eposta, hedef: beklemeHedef, kaynak: v.kaynak });
+      if (!r.ok) { btn.disabled = false; hataEl.textContent = r.j.hata || 'Kaydedilemedi. Tekrar dene.'; hataEl.hidden = false; return; }
+      beklemeSonuc = r.j.durum || 'bekliyor'; render();
+    } catch (e) { btn.disabled = false; hataEl.textContent = 'Bağlantı kurulamadı. İnternetini kontrol et.'; hataEl.hidden = false; }
+  }
   async function gorusGonder(v) {
     const hataEl = document.getElementById('formHata'); const btn = document.getElementById('formBtn');
     const metin = String(v.metin || '').trim();
@@ -842,6 +941,7 @@
     btn.disabled = true; const eski = btn.innerHTML; btn.textContent = tur === 'kayit' ? 'Hesap oluşturuluyor…' : 'Giriş yapılıyor…';
     try {
       const r = await istek(tur, 'POST', tur === 'kayit' ? { ad: v.ad, eposta, sifre, yetiskin: true, riza: true, saglikRiza: true } : { eposta, sifre });
+      if (!r.ok && r.j.beta) { btn.disabled = false; btn.innerHTML = eski; goster(r.j.hata); if (r.j.beta === 'yok') { hataEl.insertAdjacentHTML('beforeend', ' <a href="#/bekleme" style="color:inherit;font-weight:800">Bekleme listesine katıl →</a>'); } return; }
       if (!r.ok) { btn.disabled = false; btn.innerHTML = eski; return goster(r.j.hata || 'Bir sorun oluştu. Tekrar dene.'); }
       hesap = r.j.kullanici; cevrimdisi = false;
       if (tur === 'giris') { const yerel = S.profil; S = yerel ? S : bos(); await veriCek(); }

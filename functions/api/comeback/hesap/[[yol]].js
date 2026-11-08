@@ -2,6 +2,9 @@
 //   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza, saglikRiza }
 //   POST /api/comeback/hesap/sil     { sifre }  → hesap ve bütün kayıtlar kalıcı silinir
 //   POST /api/comeback/hesap/gorus   { tur, metin, ekran }  (girişsiz de olur)
+//   POST /api/comeback/hesap/bekleme { ad, eposta, hedef, kaynak }  → kapalı beta bekleme listesi
+//   POST /api/comeback/hesap/hata    { mesaj, yer, ekran, surum }  → istemci hata kaydı
+//   Yönetim (rol admin): GET yonetim/ozet · GET yonetim/bekleme · POST yonetim/onay { eposta, durum } · GET yonetim/gorusler · GET yonetim/hatalar
 //   POST /api/comeback/hesap/giris   { eposta, sifre }
 //   POST /api/comeback/hesap/cikis
 //   GET  /api/comeback/hesap/ben     → { kullanici }
@@ -92,6 +95,8 @@ export async function onRequest(ctx) {
       if (g.riza !== true) return hata('Verilerinin hesabında saklanmasına onay vermelisin.', 400);
       if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza vermelisin.', 400);
       if (!(await sinir(db, 'kayit:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      const beta = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
+      if (!beta || beta.durum !== 'onayli') return json({ hata: beta ? 'Beta başvurun alındı, onaylanınca kayıt olabileceksin.' : 'COMEBACK. şu an kapalı betada. Önce bekleme listesine katıl.', beta: beta ? 'bekliyor' : 'yok' }, 403);
       const var_ = await db.prepare('SELECT id FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
       if (var_) return hata('Bu e-postayla zaten bir hesap var. Giriş yapmayı dene.', 409);
       const id = crypto.randomUUID(); const tuz = hex(rastgele(16)); const simdi = Date.now();
@@ -119,7 +124,68 @@ export async function onRequest(ctx) {
       return json({ ok: true }, 200, { 'set-cookie': cerezYaz('', 0) });
     }
 
+    if (yol === 'bekleme' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const eposta = String(g.eposta || '').trim().toLowerCase();
+      if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
+      if (!(await sinir(db, 'bekleme:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Biraz sonra tekrar dene.', 429);
+      const kisa = (v, n) => String(v || '').trim().replace(/[<>]/g, '').slice(0, n);
+      await db.prepare('INSERT OR IGNORE INTO bekleme (eposta, ad, hedef, kaynak, durum, zaman) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(eposta, kisa(g.ad, 40), kisa(g.hedef, 40), kisa(g.kaynak, 60), 'bekliyor', Date.now()).run();
+      const r = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
+      return json({ ok: true, durum: r ? r.durum : 'bekliyor' }, 201);
+    }
+
     const kim = await kimDir(db, req);
+
+    if (yol === 'hata' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      if (!(await sinir(db, 'hata:' + (kim ? kim.id : ip), 30, 3600))) return json({ ok: true });
+      const k = (v, n) => String(v || '').slice(0, n);
+      await db.prepare('INSERT INTO hatalar (kullanici_id, mesaj, yer, ekran, surum, cihaz, zaman) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .bind(kim ? kim.id : null, k(g.mesaj, 500), k(g.yer, 300), k(g.ekran, 60), k(g.surum, 20), k(req.headers.get('user-agent'), 200), Date.now()).run();
+      return json({ ok: true }, 201);
+    }
+
+    if (yol.startsWith('yonetim/')) {
+      if (!kim || kim.rol !== 'admin') return hata('Yetkin yok.', 403);
+      const alt = yol.slice(8);
+      const hafta = Date.now() - 7 * 864e5;
+      if (alt === 'ozet' && m === 'GET') {
+        const say = async (sql, ...b) => ((await db.prepare(sql).bind(...b).first()) || {}).n || 0;
+        return json({
+          kullanici: await say('SELECT COUNT(*) n FROM kullanicilar'),
+          yeniKullanici: await say('SELECT COUNT(*) n FROM kullanicilar WHERE olusturma > ?', hafta),
+          aktif: await say('SELECT COUNT(*) n FROM veriler WHERE guncelleme > ?', hafta),
+          bekleyen: await say("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor'"),
+          onayli: await say("SELECT COUNT(*) n FROM bekleme WHERE durum = 'onayli'"),
+          gorus: await say('SELECT COUNT(*) n FROM gorusler WHERE zaman > ?', hafta),
+          hata: await say('SELECT COUNT(*) n FROM hatalar WHERE zaman > ?', hafta)
+        });
+      }
+      if (alt === 'bekleme' && m === 'GET') {
+        const r = await db.prepare('SELECT b.eposta, b.ad, b.hedef, b.kaynak, b.durum, b.zaman, b.onay_zamani, (SELECT 1 FROM kullanicilar k WHERE k.eposta = b.eposta) kayitli FROM bekleme b ORDER BY CASE b.durum WHEN \'bekliyor\' THEN 0 ELSE 1 END, b.zaman DESC LIMIT 500').all();
+        return json({ liste: r.results || [] });
+      }
+      if (alt === 'onay' && m === 'POST') {
+        const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+        const eposta = String(g.eposta || '').trim().toLowerCase();
+        const durum = ['onayli', 'bekliyor', 'reddedildi'].includes(g.durum) ? g.durum : null;
+        if (!EPOSTA.test(eposta) || !durum) return hata('Geçersiz istek.', 400);
+        await db.prepare('INSERT INTO bekleme (eposta, durum, zaman, onay_zamani) VALUES (?, ?, ?, ?) ON CONFLICT(eposta) DO UPDATE SET durum = excluded.durum, onay_zamani = excluded.onay_zamani')
+          .bind(eposta, durum, Date.now(), durum === 'onayli' ? Date.now() : null).run();
+        return json({ ok: true });
+      }
+      if (alt === 'gorusler' && m === 'GET') {
+        const r = await db.prepare('SELECT g.id, g.tur, g.metin, g.ekran, g.zaman, k.ad, k.eposta FROM gorusler g LEFT JOIN kullanicilar k ON k.id = g.kullanici_id ORDER BY g.zaman DESC LIMIT 200').all();
+        return json({ liste: r.results || [] });
+      }
+      if (alt === 'hatalar' && m === 'GET') {
+        const r = await db.prepare('SELECT mesaj, yer, ekran, surum, COUNT(*) adet, MAX(zaman) son, COUNT(DISTINCT kullanici_id) kisi FROM hatalar GROUP BY mesaj, yer ORDER BY son DESC LIMIT 100').all();
+        return json({ liste: r.results || [] });
+      }
+      return hata('Bulunamadı.', 404);
+    }
 
     if (yol === 'gorus' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
