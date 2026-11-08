@@ -243,7 +243,18 @@
     HAREKET[r[0]] = { id: r[0], ad: r[1], kalip: r[2], birincil: s(r[3]), ikincil: s(r[4]), ekipman: s(r[5]), seviye: r[6], tip: r[7], artis: r[8], kontra: s(r[9]), ipucu: r[10] };
   });
 
-  const veri = { surum: 2, KAS, ANA_KAS, EKIPMAN, ORTAM, HAREKET, GUN, BOLUNME, BOLUNME_VUCUT, SPOR, KAYNAK, satirlar: H };
+  // Ek sakatlık bölgeleri: bu bölgede ağrısı olanın programına bu hareketler girmez (yerine aynı kalıptan güvenli olan gelir)
+  const EK_KONTRA = {
+    bilek: ['bench', 'pushup', 'pushup_incline', 'pushup_decline', 'front_squat', 'ohp', 'dips', 'bench_dips', 'hs_pushup', 'pike_pushup', 'burpee', 'birddog', 'mb_slam', 'skull', 'bb_curl', 'landmine', 'diamond'],
+    dirsek: ['skull', 'oh_ext', 'dips', 'bench_dips', 'diamond', 'bb_curl', 'chinup', 'hs_pushup'],
+    ayak_bilegi: ['box_jump', 'squat_jump', 'pogo', 'drop_landing', 'broad_jump', 'lateral_bound', 'sprint_acc', 'shuttle', 'run_interval', 'burpee', 'lunge', 'lateral_lunge'],
+    kalca: ['lateral_lunge', 'copenhagen', 'copenhagen_kisa', 'split_squat', 'lunge', 'bw_split', 'kb_swing', 'broad_jump'],
+    boyun: ['neck_iso', 'hs_pushup', 'pike_pushup', 'mb_slam'],
+    sirt: ['squat', 'deadlift', 'row', 'rdl', 'kb_swing', 'farmer', 'rower', 'good_morning']
+  };
+  Object.keys(EK_KONTRA).forEach((b) => EK_KONTRA[b].forEach((id) => { if (HAREKET[id] && HAREKET[id].kontra.indexOf(b) < 0) HAREKET[id].kontra.push(b); }));
+  const SAKATLIK = [['diz', 'Diz'], ['bel', 'Bel'], ['omuz', 'Omuz'], ['sirt', 'Sırt'], ['kalca', 'Kalça'], ['bilek', 'El bileği'], ['dirsek', 'Dirsek'], ['ayak_bilegi', 'Ayak bileği'], ['boyun', 'Boyun']];
+  const veri = { surum: 2, SAKATLIK, KAS, ANA_KAS, EKIPMAN, ORTAM, HAREKET, GUN, BOLUNME, BOLUNME_VUCUT, SPOR, KAYNAK, satirlar: H };
   if (typeof module !== 'undefined' && module.exports) module.exports = veri;
   else kok.CB_KUTUPHANE = veri;
 })(typeof window !== 'undefined' ? window : globalThis);

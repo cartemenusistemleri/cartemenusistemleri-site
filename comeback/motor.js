@@ -256,6 +256,22 @@
     return { surum: 2, ad: b.ad + (sporcu ? ' · ' + spor.ad : ''), gunler, hacim, hacimHedef: HEDEF_HACIM, notlar, kurallar, kaynaklar, ortam: p.ortam, spor: p.spor };
   }
 
-  kok.CB_MOTOR = { hedefHesapla, programOlustur, bolgeOf, SEVIYE };
+  // "Bu hareket bende yok": aynı kalıptan, yoksa aynı ana kası çalıştıran uygun hareketler
+  function alternatifler(p0, x, gunIdleri) {
+    const p = Object.assign({ ortam: 'salon', sakatlik: [], spor: 'fitness' }, p0);
+    const h0 = HAREKET[x.id]; if (!h0) return [];
+    const kul = new Set((gunIdleri || []).filter((id) => id !== x.id)); kul.add(x.id);
+    const ayni = adaylar(h0.kalip, p, kul);
+    const kas = Object.keys(HAREKET).map((id) => HAREKET[id]).filter((h) => h.kalip !== h0.kalip && h.tip === h0.tip && h.birincil[0] === h0.birincil[0] && uygun(h, p, kul));
+    return ayni.concat(kas).slice(0, 6).map((h) => h.id);
+  }
+  function degistir(p0, x, yeniId) {
+    const h = HAREKET[yeniId]; if (!h) return x;
+    const d = doz(h, x.rol === 'onleme' ? 'izo' : x.rol, Object.assign({ deneyim: 'orta', hedef: 'kas' }, p0));
+    d.blok = x.blok; d.isinma = x.isinma; if (x.set && x.set < d.set) d.set = x.set;
+    return d;
+  }
+
+  kok.CB_MOTOR = { hedefHesapla, programOlustur, bolgeOf, SEVIYE, alternatifler, degistir };
   if (typeof module !== 'undefined' && module.exports) module.exports = kok.CB_MOTOR;
 })(typeof window !== 'undefined' ? window : globalThis);

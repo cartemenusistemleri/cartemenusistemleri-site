@@ -280,3 +280,13 @@ fieldset.t>legend+*{clear:both}
 .barkod-fener[aria-pressed=true]{background:var(--limon);color:var(--murekkep)}
 .barkod-fener:active{transform:scale(.95)}
 @media (prefers-reduced-motion:reduce){.barkod-cerceve i{animation:none}}
+
+/* hareket değiştirme */
+.liste>.hareket-satir{flex-wrap:wrap;padding:6px 0}
+.degis-btn{width:36px;height:36px;flex-shrink:0;border-radius:18px;border:none;background:var(--zemin);color:var(--ikincil);display:inline-grid;place-items:center;cursor:pointer;transition:transform .16s ease-out,background .2s ease,color .2s ease}
+.degis-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.degis-btn:active{transform:scale(.95)}
+.degis-btn[aria-expanded=true]{background:var(--kobalt);color:#fff}
+.degis-liste{flex-basis:100%;display:flex;flex-direction:column;gap:8px;padding:4px 0 10px}
+.degis-liste .haplar{display:flex;flex-wrap:wrap;gap:6px}
+@media (hover:hover){.degis-btn:hover{color:var(--murekkep)}}

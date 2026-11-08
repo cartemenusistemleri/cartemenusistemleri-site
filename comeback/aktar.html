@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COMEBACK. görsel aktarımı</title>
+<style>
+:root{--zemin:#ECECE8;--murekkep:#16161A;--ikincil:#5F5D57;--kobalt:#2E4BFF}
+body{margin:0;background:var(--zemin);color:var(--murekkep);font:500 15px/1.5 system-ui,sans-serif;padding:24px}
+h1{font-size:28px;letter-spacing:-.03em;margin:0 0 6px}
+p{color:var(--ikincil);margin:0 0 16px;max-width:60ch}
+ol{margin:0;padding-left:20px;font-variant-numeric:tabular-nums}
+.ok{color:#1F7A3A}.hata{color:#B3261E}
+</style>
+</head>
+<body>
+<h1>Görsel aktarımı<span style="color:var(--kobalt)">.</span></h1>
+<p>Bu sekme Dreamina'dan gelen hareket görsellerini COMEBACK.'e kaydeder. Aktarım bitene kadar açık kalsın.</p>
+<ol id="liste"></ol>
+<script>
+  // Yalnızca Dreamina sekmesinden gelen mesajlar kabul edilir; anahtar sayfada saklanmaz, her mesajla gelir.
+  const IZINLI = 'https://dreamina.capcut.com';
+  const liste = document.getElementById('liste');
+  window.addEventListener('message', async (e) => {
+    if (e.origin !== IZINLI || !e.data || e.data.tur !== 'cb-gorsel') return;
+    const { ad, tok, blob, kimlik } = e.data;
+    const li = document.createElement('li'); li.textContent = ad + ' …'; liste.prepend(li);
+    let sonuc;
+    try {
+      const r = await fetch('/api/comeback/gorsel/' + encodeURIComponent(ad), { method: 'POST', headers: { 'content-type': blob.type, 'x-yukleme': tok }, body: blob });
+      const j = await r.json().catch(() => ({}));
+      sonuc = j.tamam ? { tamam: true, boyut: j.boyut } : { tamam: false, hata: j.hata || String(r.status) };
+    } catch (err) { sonuc = { tamam: false, hata: err.message }; }
+    li.textContent = ad + (sonuc.tamam ? ' · kaydedildi (' + Math.round(sonuc.boyut / 1024) + ' KB)' : ' · hata: ' + sonuc.hata);
+    li.className = sonuc.tamam ? 'ok' : 'hata';
+    e.source.postMessage({ tur: 'cb-gorsel-sonuc', ad, kimlik, ...sonuc }, e.origin);
+  });
+  if (window.opener) window.opener.postMessage({ tur: 'cb-aktar-hazir' }, IZINLI);
+</script>
+</body>
+</html>
