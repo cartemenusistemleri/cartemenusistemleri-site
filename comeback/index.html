@@ -32,6 +32,14 @@
 <script src="/comeback/kutuphane.js?v=9"></script>
 <script src="/comeback/motor.js?v=11"></script>
 <script src="/comeback/app.js?v=25"></script>
-<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
+<script>if ('serviceWorker' in navigator) addEventListener('load', () => {
+  const ilk = !navigator.serviceWorker.controller; let yenilendi = false;
+  // yeni sürüm devreye girince sayfayı bir kez yenile (ilk kurulumda değil)
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (ilk || yenilendi) return; yenilendi = true; location.reload(); });
+  navigator.serviceWorker.register('sw.js').then((r) => {
+    // uygulamaya her dönüşte yeni sürüm var mı bak
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') r.update().catch(() => {}); });
+  }).catch(() => {});
+});</script>
 </body>
 </html>
