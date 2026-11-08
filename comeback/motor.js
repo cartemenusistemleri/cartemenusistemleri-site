@@ -298,6 +298,66 @@
     return d;
   }
 
-  kok.CB_MOTOR = { hedefHesapla, programOlustur, bolgeOf, SEVIYE, alternatifler, degistir, ODAK };
+  /* ---------- kullanıcının kendi programı ---------- */
+  const CORE_KALIP = ['core_anti_ext', 'core_anti_rot', 'core_lat', 'core_rot', 'tasima', 'kavrama', 'boyun'];
+  function rolTahmin(h) {
+    if (h.tip === 'k') return 'kardiyo';
+    if (h.tip === 'p') return 'guc';
+    if (CORE_KALIP.indexOf(h.kalip) >= 0) return 'core';
+    if (h.tip === 'i' || h.tip === 's') return 'izo';
+    return h.artis >= 5 ? 'ana' : 'yard';
+  }
+  // kütüphaneden seçilen harekete, profile göre başlangıç dozu (kullanıcı sonra değiştirir)
+  function ozelHareket(p0, id) {
+    const h = HAREKET[id]; if (!h) return null;
+    const p = Object.assign({ deneyim: 'orta', hedef: 'kas' }, p0);
+    const rol = rolTahmin(h);
+    const d = doz(h, rol === 'kardiyo' || rol === 'guc' ? 'yard' : rol, p);
+    d.blok = rol === 'kardiyo' ? 'kardiyo' : rol;
+    return d;
+  }
+  // "8-12", "10", "30 sn" gibi yazılardan alt/üst/birim
+  function tekrarCoz(yazi, birim) {
+    const t = String(yazi || '').replace(/\s+/g, '').replace('–', '-');
+    const m = /^(\d{1,3})(?:-(\d{1,3}))?$/.exec(t);
+    if (!m) return null;
+    let alt = +m[1], ust = m[2] ? +m[2] : +m[1];
+    if (ust < alt) { const z = alt; alt = ust; ust = z; }
+    if (alt < 1 || ust > (birim === 'tekrar' ? 100 : 600)) return null;
+    return { alt, ust, tekrar: alt === ust ? String(alt) : alt + '–' + ust };
+  }
+  // hacim, süre ve uyarılar: kendi programı ya da düzenlenen hazır program için
+  function ozelAnaliz(gunler, p0) {
+    const p = Object.assign({ hedef: 'kas' }, p0);
+    const v = {}; ANA_KAS.forEach((m) => { v[m] = 0; });
+    gunler.forEach((g) => g.hareketler.forEach((x) => {
+      const h = HAREKET[x.id]; if (!h || h.tip === 'k' || h.tip === 'p') return;
+      h.birincil.forEach((m) => { if (m in v) v[m] += x.set; });
+      h.ikincil.forEach((m) => { if (m in v) v[m] += x.set * 0.5; });
+    }));
+    const hedef = { kas: [10, 20], guc: [6, 15], yag: [8, 16], kondisyon: [4, 12] }[p.hedef] || [10, 20];
+    const uyari = [];
+    const az = ANA_KAS.filter((m) => v[m] < hedef[0] * 0.6).map((m) => KAS[m]);
+    const fazla = ANA_KAS.filter((m) => v[m] > hedef[1] + 4).map((m) => KAS[m]);
+    if (az.length) uyari.push('Haftada az çalışan kaslar: ' + az.join(', ') + '.');
+    if (fazla.length) uyari.push('Haftalık set çok yüksek: ' + fazla.join(', ') + '. Toparlanma zorlaşabilir.');
+    gunler.forEach((g) => {
+      const set = g.hareketler.reduce((a, x) => a + (x.birim === 'dk' ? 0 : x.set), 0);
+      if (set > 30) uyari.push(g.ad + ': ' + set + ' set, tek gün için çok fazla.');
+      const kon = g.hareketler.filter((x) => HAREKET[x.id] && (HAREKET[x.id].kontra || []).some((b) => (p.sakatlik || []).indexOf(b) >= 0));
+      if (kon.length) uyari.push(g.ad + ': ' + kon.map((x) => HAREKET[x.id].ad).join(', ') + ' sakatlık bölgeni zorlayabilir.');
+    });
+    const haftaSirasi = gunler.map((g) => g.hafta).sort((a, b) => a - b);
+    for (let i = 0; i < haftaSirasi.length; i++) {
+      const g1 = gunler.find((g) => g.hafta === haftaSirasi[i]); const g2 = gunler.find((g) => g.hafta === (haftaSirasi[i] + 1) % 7);
+      if (!g1 || !g2) continue;
+      const kas = (g) => new Set([].concat.apply([], g.hareketler.filter((x) => HAREKET[x.id] && HAREKET[x.id].tip !== 'k').map((x) => HAREKET[x.id].birincil)));
+      const ortak = [...kas(g1)].filter((m) => kas(g2).has(m) && ['on_bacak', 'arka_bacak', 'kalca', 'gogus', 'sirt_kanat'].indexOf(m) >= 0);
+      if (ortak.length >= 2) uyari.push(g1.ad + ' ve ertesi gün ' + g2.ad + ' aynı büyük kasları çalıştırıyor (' + ortak.map((m) => KAS[m]).join(', ') + '). Arada bir gün dinlenme iyi olur.');
+    }
+    return { hacim: v, hacimHedef: hedef, dk: gunler.map((g) => Math.round(sureDk(g))), uyari };
+  }
+
+  kok.CB_MOTOR = { hedefHesapla, programOlustur, bolgeOf, SEVIYE, alternatifler, degistir, ODAK, ozelHareket, tekrarCoz, ozelAnaliz, rolTahmin };
   if (typeof module !== 'undefined' && module.exports) module.exports = kok.CB_MOTOR;
 })(typeof window !== 'undefined' ? window : globalThis);

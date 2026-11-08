@@ -315,3 +315,52 @@ fieldset.t>legend+*{clear:both}
 .yon-satir .yigin{gap:3px;min-width:0}
 .yon-is{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;align-items:center;flex:none;max-width:52%}
 .yon-is .etiket{align-self:center}
+
+/* kendi programım */
+.gizli{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pd-gun{gap:10px}
+.pd-gunad{flex:1;min-width:0;border:0;background:transparent;font-size:24px;font-weight:900;letter-spacing:-.04em;padding:2px 0;outline:none;border-bottom:1.5px dashed transparent}
+.pd-gunad:focus{border-bottom-color:var(--kobalt)}
+.pd-hafta .hap{padding:7px 10px;font-size:13px}
+.pd-hafta .hap[disabled]{opacity:.35}
+.pd-hareket{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--cizgi)}
+.pd-hareket b{font-size:16px;letter-spacing:-.01em}
+.pd-kontrol{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pd-sayac{display:inline-flex;align-items:center;background:var(--zemin);border-radius:999px;height:40px}
+.pd-sayac button{width:40px;height:40px;border:0;background:transparent;font-size:20px;font-weight:700;border-radius:50%}
+.pd-sayac button:active{transform:scale(.92)}
+.pd-sayac span{min-width:44px;text-align:center;font-weight:800;font-size:16px;display:inline-flex;align-items:baseline;justify-content:center;gap:3px}
+.pd-sayac small,.pd-tekrar small{font-size:11px;font-weight:700;color:var(--ikincil)}
+.pd-tekrar{display:inline-flex;align-items:center;gap:6px;background:var(--zemin);border-radius:999px;height:40px;padding:0 14px 0 6px}
+.pd-tekrar input{width:64px;border:0;background:#fff;border-radius:999px;height:30px;text-align:center;font-weight:800;font-size:15px;outline:none}
+.pd-tekrar input:focus{box-shadow:0 0 0 2px var(--kobalt)}
+.pd-tekrar input.hatali{box-shadow:0 0 0 2px var(--hata)}
+.pd-is{display:inline-flex;gap:4px;margin-left:auto}
+.pd-ikon{width:36px;height:36px;border-radius:50%;border:0;background:var(--zemin);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.pd-ikon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pd-ikon[disabled]{opacity:.3}
+.pd-sec{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;border:0;background:transparent;padding:12px 4px;border-top:1px solid var(--cizgi);cursor:pointer}
+.pd-sec:first-child{border-top:0}
+.pd-sec[disabled]{opacity:.45}
+.pd-sec .yigin{gap:2px;min-width:0}
+.pd-sec b{font-size:16px}
+.pd-not{font-size:12px;font-weight:700;color:#8A5A00}
+
+/* koç */
+.koc-kutu{gap:6px}
+.koc-akis{display:flex;flex-direction:column;gap:8px;padding:4px 0}
+.koc-balon{scroll-margin-bottom:190px;max-width:86%;padding:12px 15px;border-radius:22px;font-size:16px;line-height:1.5;word-wrap:break-word}
+.koc-balon.ben{align-self:flex-end;background:var(--kobalt);color:#fff;border-bottom-right-radius:8px}
+.koc-balon.koc{align-self:flex-start;background:var(--kutu);border-bottom-left-radius:8px}
+.koc-balon.yaziyor{display:inline-flex;gap:5px;padding:16px 18px}
+.koc-balon.yaziyor i{width:7px;height:7px;border-radius:50%;background:var(--ikincil);animation:yaz 1.1s ease-in-out infinite}
+.koc-balon.yaziyor i:nth-child(2){animation-delay:.15s}.koc-balon.yaziyor i:nth-child(3){animation-delay:.3s}
+@keyframes yaz{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.koc-akis .haplar .hap{white-space:normal;text-align:left;line-height:1.35}
+.koc-yaz{position:sticky;bottom:calc(96px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:flex-end;background:var(--kutu);border-radius:28px;padding:6px;box-shadow:0 10px 30px -14px rgba(22,22,26,.35)}
+.koc-yaz textarea{flex:1;min-width:0;border:0;background:transparent;resize:none;font-size:16px;line-height:1.4;padding:12px 6px 12px 14px;outline:none;max-height:140px;field-sizing:content}
+.koc-yaz .btn{min-height:46px;width:46px;padding:0;border-radius:50%;flex:none}
+.koc-yaz .btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.koc-acil{background:#FDE8E6;color:#7A1C15;border-radius:22px;padding:14px 16px;font-size:15px;line-height:1.5}
+.koc-acil a{color:#7A1C15;font-weight:800}
+@media (prefers-reduced-motion:reduce){.koc-balon.yaziyor i{animation:none}}

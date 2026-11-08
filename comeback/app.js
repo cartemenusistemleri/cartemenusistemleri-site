@@ -303,6 +303,7 @@
       '<fieldset class="t genis"><legend>Bir antrenman ne kadar sürsün?</legend><div class="haplar">' + tekli('sure', [['45', '45 dk'], ['60', '60 dk'], ['75', '75 dk'], ['90', '90 dk']], String(p.sure || 60)) + '</div></fieldset>' +
       '<fieldset class="t"><legend>Deneyim</legend><div class="haplar">' + tekli('deneyim', [['baslangic', 'Yeni'], ['orta', 'Orta'], ['ileri', 'İleri']], p.deneyim) + '</div></fieldset>' +
       '<div class="t limon ara-sb"><span class="k">Haftada</span><div class="satir"><button type="button" class="yuvarlak" data-act="gun" data-yon="-1" aria-label="Gün azalt">−</button><span class="buyuk num" id="gunSay">' + p.gun + '</span><button type="button" class="yuvarlak" data-act="gun" data-yon="1" aria-label="Gün artır">+</button></div><span class="k">gün antrenman</span></div>' +
+      '<fieldset class="t genis"><legend>Programını kim yazsın?</legend><div class="haplar">' + tekli('yazan', [['biz', 'COMEBACK. kursun'], ['ben', 'Kendim yazacağım']], S.program && S.program.ozel ? 'ben' : 'biz') + '</div><span class="ik">Kendin yazarsan hareketleri kütüphaneden seçersin; istersen yapay zekâ yorumlar. Hazır programı da sonradan düzenleyebilirsin.</span></fieldset>' +
       '<fieldset class="t genis"><legend>Üzerine gitmek istediğin bölge</legend><div class="haplar">' + Object.keys(M.ODAK).map((k) => hap('odak', k, M.ODAK[k].ad, (p.odak || []).indexOf(k) >= 0, true)).join('') + '</div><span class="ik">En fazla 2 bölge. Seçtiğin bölgeye haftada 2 gün ek hareket koyarız. İstemezsen boş bırak.</span></fieldset>' +
       '<fieldset class="t genis"><legend>Ağrı ya da sakatlık var mı?</legend><div class="haplar">' + K.SAKATLIK.map((x) => hap('sakatlik', x[0], x[1], (p.sakatlik || []).indexOf(x[0]) >= 0, true)).join('') + '</div><span class="ik">Seçersen o bölgeyi zorlayan hareketlerin yerine güvenli olanları koyarız.</span></fieldset>' +
       '<fieldset class="t genis"><legend>Sağlık kontrolü</legend><span style="font-size:14px;line-height:1.5">Doktorun kalp rahatsızlığın olduğunu söyledi mi? Egzersizde ya da dinlenirken göğüs ağrısı, baş dönmesi veya bayılma yaşıyor musun? Hareketle kötüleşebilecek bir kemik ya da eklem sorunun, tansiyon veya kalp için düzenli kullandığın bir ilacın var mı?</span><div class="haplar">' + tekli('saglik', [['hayir', 'Hayır, hiçbiri'], ['evet', 'Evet, en az biri']], p.saglik ? 'evet' : 'hayir') + '</div><span class="ik">Ayrıntı saklanmaz; yalnızca evet/hayır cevabı, doktor onayı uyarısı için tutulur.</span></fieldset>' +
@@ -322,6 +323,126 @@
       return '<div class="hacim-satir ' + durum + '"><span>' + esc(K.KAS[m]) + '</span><div class="hacim-cubuk" aria-hidden="true"><span style="width:' + w + '%"></span><i style="left:' + (alt / ust * 100) + '%"></i></div><b class="num">' + sayi(v, 1) + '</b></div>';
     }).join('');
     return '<div class="t genis tum"><div class="satir"><span class="k">Haftalık set, kas başına</span><span class="ik">çizgi: ' + alt + ' set</span></div><div class="hacim">' + satir + '</div><span class="ik">Ana kas için set 1, destek kas için 0,5 sayıldı. Kas kazanımı için haftada 10–20 set önerilir.</span></div>';
+  }
+
+  /* ---------- koç (yapay zekâ) ---------- */
+  let kocYuk = false; let kocAcil = false;
+  const KOC_HIZLI = ['Dizimde ağrı var, antrenmana devam edeyim mi?', 'Bugün çok yorgun ve isteksizim.', 'Bu hareketi yaparken belimde zorlanma hissettim.', 'Antrenmandan önce ve sonra ne yemeliyim?'];
+  function kocBaglam() {
+    const p = S.profil || {};
+    const son = Object.keys(S.gunluk).sort().reverse().filter((k) => S.gunluk[k].antrenman).slice(0, 5).map((k) => ({ tarih: k, ad: S.gunluk[k].antrenman.ad, set: S.gunluk[k].antrenman.set, dk: S.gunluk[k].antrenman.dk }));
+    const bugun = S.gunluk[tarihKey()]; const tp = bugun ? toplam(bugun.ogun) : null;
+    return {
+      profil: { ad: p.ad, cinsiyet: p.cinsiyet === 'k' ? 'kadın' : 'erkek', yas: p.yas, boy: p.boy, kilo: S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo, hedef: p.hedef, deneyim: p.deneyim, spor: p.spor, ortam: p.ortam, sakatlik: (p.sakatlik || []).map((b) => (K.SAKATLIK.find((x) => x[0] === b) || [b, b])[1]) },
+      hedefler: S.hedef ? { kcal: S.hedef.kcal, protein: S.hedef.protein } : null,
+      bugun: { tarih: tarihYazi(), yenen_kcal: tp ? Math.round(tp.k) : 0, antrenman_suruyor: !!S.seans },
+      program: S.program ? S.program.gunler.map((g) => GUN_AD[g.hafta] + ' · ' + g.ad + ': ' + g.hareketler.map((x) => (D.HAREKET[x.id] || { ad: x.id }).ad + ' ' + x.set + 'x' + x.tekrar).join(', ')) : [],
+      son_antrenmanlar: son
+    };
+  }
+  function ekranKoc() {
+    if (!S.profil) return ekranKarsilama();
+    const l = S.koc || [];
+    const balon = (m) => '<div class="koc-balon ' + (m.rol === 'koc' ? 'koc' : 'ben') + '">' + esc(m.metin).replace(/\n/g, '<br>') + '</div>';
+    return ust(geri('#/'), '<span class="alt">Koç · yapay zekâ</span>') +
+      '<h1 class="baslik">Koça danış<span class="nokta">.</span></h1>' +
+      '<div class="t koyu" style="gap:6px"><span style="font-size:15px;line-height:1.5">Sakatlık, ağrı, yorgunluk, program ya da beslenme: aklına takılanı yaz. Programını ve son antrenmanlarını bilerek cevap verir.</span><span class="ik" style="color:var(--koyu-ikincil)">Doktor değildir, teşhis koymaz. Göğüs ağrısı, nefes darlığı, bayılma gibi durumlarda antrenmanı bırak ve 112\'yi ara.</span></div>' +
+      (kocAcil ? '<div class="koc-acil" role="alert"><b>Bu belirti acil olabilir.</b> Antrenmanı hemen bırak. Kendini iyi hissetmiyorsan <a href="tel:112">112\'yi ara</a> ya da en yakın acile git.</div>' : '') +
+      '<div class="koc-akis" id="kocAkis" aria-live="polite">' + (l.length ? l.map(balon).join('') : '<div class="haplar">' + KOC_HIZLI.map((q) => '<button class="hap" data-act="koc-hizli" data-metin="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>') +
+      (kocYuk ? '<div class="koc-balon koc yaziyor" aria-label="Koç yazıyor"><i></i><i></i><i></i></div>' : '') + '</div>' +
+      '<form data-form="koc" class="koc-yaz" novalidate><label class="gizli" for="kocMetin">Koça mesajın</label><textarea id="kocMetin" name="metin" rows="1" maxlength="1200" placeholder="Örnek: Squat yaparken dizimin içi ağrıdı." ' + (kocYuk ? 'disabled' : '') + '></textarea><button class="btn ana" type="submit" aria-label="Gönder" ' + (kocYuk ? 'disabled' : '') + '>' + IK.ok + '</button></form>' +
+      (l.length ? '<button class="metin-btn" data-act="koc-temizle" style="align-self:center;color:var(--ikincil)">Sohbeti temizle</button>' : '');
+  }
+  async function kocGonder(metin) {
+    metin = String(metin || '').trim(); if (!metin || kocYuk) return;
+    if (!hesap) { toast('Koçla konuşmak için giriş yapmalısın.'); return; }
+    S.koc = (S.koc || []).concat([{ rol: 'ben', metin: metin.slice(0, 1200), zaman: Date.now() }]).slice(-40);
+    kocYuk = true; kaydet(); render(); kocKaydir();
+    try {
+      const r = await fetch('/api/comeback/koc', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tur: 'sohbet', mesajlar: S.koc.slice(-12).map((m) => ({ rol: m.rol, metin: m.metin })), baglam: kocBaglam() }) });
+      const j = await r.json().catch(() => ({}));
+      if (j.acil) kocAcil = true;
+      if (r.ok && j.metin) S.koc.push({ rol: 'koc', metin: j.metin, zaman: Date.now() });
+      else toast(j.hata || 'Koç şu an cevap veremiyor.');
+    } catch (e) { toast('Bağlantı kurulamadı.'); }
+    kocYuk = false; kaydet(); render(); kocKaydir();
+  }
+  function kocKaydir() { const a = document.getElementById('kocAkis'); if (a && a.lastElementChild) a.lastElementChild.scrollIntoView({ block: 'end', behavior: azHareket ? 'auto' : 'smooth' }); }
+
+  /* ---------- kendi programım: düzenleyici ---------- */
+  let ptaslak = null; let pSecGun = 0; let pAra = ''; let pBolge = ''; let pYorumYuk = false;
+  const PBOLGE = [['gogus', 'Göğüs', ['yatay_itme', 'egimli_itme', 'dips']], ['sirt', 'Sırt', ['yatay_cekme', 'dikey_cekme']], ['omuz', 'Omuz', ['dikey_itme', 'yan_omuz', 'arka_omuz', 'rotator']], ['kol', 'Kol', ['biceps', 'triceps']], ['bacak', 'Bacak', ['diz', 'tek_bacak', 'quad_izo', 'hamstring_izo', 'adduktor', 'abduktor', 'baldir']], ['kalca', 'Kalça', ['kalca']], ['karin', 'Karın', ['core_anti_ext', 'core_anti_rot', 'core_lat', 'core_rot', 'tasima', 'kavrama', 'boyun']], ['kondisyon', 'Kondisyon', ['kardiyo', 'surat', 'ceviklik', 'plyo_dikey', 'plyo_inis', 'plyo_yatay', 'plyo_ust']]];
+  const VARSAYILAN_GUN = { 1: [2], 2: [0, 3], 3: [0, 2, 4], 4: [0, 1, 3, 4], 5: [0, 1, 2, 4, 5], 6: [0, 1, 2, 3, 4, 5] };
+  function bosOzelProgram(n) {
+    const gunler = (VARSAYILAN_GUN[n] || VARSAYILAN_GUN[3]).map((h, i) => ({ id: 'ozel-' + kimlik() + i, gid: 'ozel', ad: 'Gün ' + String.fromCharCode(65 + i), hafta: h, bolge: 'ozel', hareketler: [] }));
+    return { surum: 2, ozel: true, ad: 'Kendi programım', gunler, notlar: [], kaynaklar: ['acsm', 'hacim'] };
+  }
+  function ptaslakAl() {
+    if (!ptaslak) {
+      ptaslak = JSON.parse(JSON.stringify(S.program || bosOzelProgram(S.profil ? S.profil.gun : 3)));
+      if (!ptaslak.ozel) { ptaslak.ad = ptaslak.ad + ' · düzenlendi'; }
+    }
+    return ptaslak;
+  }
+  function ekranProgramDuzen() {
+    if (!S.profil) return ekranKarsilama();
+    const pr = ptaslakAl();
+    const an = M.ozelAnaliz(pr.gunler, S.profil);
+    const gunler = pr.gunler.map((g, gi) => {
+      const satirlar = g.hareketler.map((x, i) => {
+        const h = D.HAREKET[x.id] || { ad: x.id, kas: '' };
+        return '<div class="pd-hareket"><div class="yigin" style="min-width:0"><b>' + esc(h.ad) + '</b><span class="ik">' + esc(h.kas || '') + (x.birim !== 'tekrar' ? ' · ' + BIRIM[x.birim].toLowerCase() : '') + '</span></div>' +
+          '<div class="pd-kontrol"><div class="pd-sayac" role="group" aria-label="Set sayısı"><button type="button" data-act="pd-set" data-g="' + gi + '" data-i="' + i + '" data-yon="-1" aria-label="Set azalt">−</button><span class="num">' + x.set + '<small>set</small></span><button type="button" data-act="pd-set" data-g="' + gi + '" data-i="' + i + '" data-yon="1" aria-label="Set artır">+</button></div>' +
+          '<label class="pd-tekrar"><span class="gizli">' + esc(h.ad) + ' ' + BIRIM[x.birim].toLowerCase() + '</span><input data-pd="tekrar" data-g="' + gi + '" data-i="' + i + '" value="' + esc(x.tekrar) + '" inputmode="text" maxlength="7" aria-label="' + esc(h.ad) + ' ' + BIRIM[x.birim].toLowerCase() + '"><small>' + BIRIM[x.birim].toLowerCase() + '</small></label>' +
+          '<div class="pd-is"><button type="button" class="pd-ikon" data-act="pd-tasi" data-g="' + gi + '" data-i="' + i + '" data-yon="-1" aria-label="Yukarı taşı"' + (i === 0 ? ' disabled' : '') + '><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button type="button" class="pd-ikon" data-act="pd-tasi" data-g="' + gi + '" data-i="' + i + '" data-yon="1" aria-label="Aşağı taşı"' + (i === g.hareketler.length - 1 ? ' disabled' : '') + '><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button type="button" class="pd-ikon" data-act="pd-sil" data-g="' + gi + '" data-i="' + i + '" aria-label="' + esc(h.ad) + ' çıkar">' + IK.kapat + '</button></div></div></div>';
+      }).join('');
+      return '<section class="t genis pd-gun" aria-label="' + esc(g.ad) + '">' +
+        '<div class="satir" style="gap:8px"><input class="pd-gunad" data-pd="gunad" data-g="' + gi + '" value="' + esc(g.ad) + '" maxlength="24" aria-label="Gün adı"><span class="ik num">~' + an.dk[gi] + ' dk</span>' +
+        (pr.gunler.length > 1 ? '<button type="button" class="pd-ikon" data-act="pd-gunsil" data-g="' + gi + '" aria-label="' + esc(g.ad) + ' gününü sil">' + IK.kapat + '</button>' : '') + '</div>' +
+        '<div class="haplar pd-hafta" role="group" aria-label="Haftanın günü">' + GUN_KISA.map((k, h) => { const dolu = pr.gunler.some((y, yi) => yi !== gi && y.hafta === h); return '<button type="button" class="hap" data-act="pd-hafta" data-g="' + gi + '" data-h="' + h + '" aria-pressed="' + (g.hafta === h) + '"' + (dolu ? ' disabled' : '') + '>' + k + '</button>'; }).join('') + '</div>' +
+        (satirlar || '<p class="ik" style="padding:6px 0">Bu güne henüz hareket eklemedin.</p>') +
+        '<a class="btn cerceve" href="#/program/ekle/' + gi + '" style="min-height:46px">' + IK.arti.replace('<svg', '<svg width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4"') + 'Hareket ekle</a></section>';
+    }).join('');
+    const yorum = pr.yorum ? '<div class="t genis koyu"><span class="k">Yapay zekâ yorumu</span>' + pr.yorum.ozet.map((x) => '<p style="font-size:15px;line-height:1.5">' + esc(x) + '</p>').join('') +
+      (pr.yorum.oneriler && pr.yorum.oneriler.length ? '<ul class="madde" style="color:var(--koyu-yazi)">' + pr.yorum.oneriler.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '<span class="ik" style="color:var(--koyu-ikincil)">Genel bilgidir, tıbbi tavsiye değildir.</span></div>' : '';
+    return ust(geri(S.program && S.program.gunler.some((g) => g.hareketler.length) ? '#/antrenman' : '#/profil'), '<span class="alt">' + (pr.ozel ? 'Kendi programın' : 'Programı düzenle') + '</span>') +
+      '<h1 class="baslik">Programın<span class="nokta">.</span></h1>' +
+      '<div class="izgara">' +
+      '<label class="t genis alan"><span>Program adı</span><input data-pd="ad" value="' + esc(pr.ad) + '" maxlength="40" style="font-size:22px"></label>' +
+      gunler +
+      (pr.gunler.length < 7 ? '<button type="button" class="btn cerceve genis" data-act="pd-gunekle">' + IK.arti.replace('<svg', '<svg width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4"') + 'Gün ekle</button>' : '') +
+      planHacim({ hacim: an.hacim, hacimHedef: an.hacimHedef }) +
+      (an.uyari.length ? '<div class="t genis"><span class="k">Dikkat</span><ul class="madde">' + an.uyari.map((u) => '<li>' + esc(u) + '</li>').join('') + '</ul></div>' : '') +
+      yorum +
+      '<button type="button" class="btn siyah genis" data-act="pd-yorum"' + (pYorumYuk ? ' disabled' : '') + '>' + (pYorumYuk ? 'Yorumlanıyor…' : (pr.yorum ? 'Yeniden yorumlat' : 'Yapay zekâya yorumlat')) + IK.ok + '</button>' +
+      '</div>' +
+      '<button class="btn ana buyuk-btn" data-act="pd-kaydet">Programı kaydet' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
+      '<button class="metin-btn" data-act="pd-vazgec" style="align-self:center;color:var(--ikincil)">Değişiklikleri at</button>';
+  }
+  function ekranProgramEkle(gi) {
+    const pr = ptaslakAl(); const g = pr.gunler[gi];
+    if (!g) { location.hash = '#/program'; return ''; }
+    pSecGun = gi;
+    const ekip = S.profil && K.ORTAM[S.profil.ortam] ? K.ORTAM[S.profil.ortam].ekipman : null;
+    const q = pAra.trim().toLocaleLowerCase('tr');
+    const bol = PBOLGE.find((b) => b[0] === pBolge);
+    const var_ = new Set(g.hareketler.map((x) => x.id));
+    const liste = Object.keys(K.HAREKET).map((id) => K.HAREKET[id])
+      .filter((h) => !bol || bol[2].indexOf(h.kalip) >= 0)
+      .filter((h) => !q || h.ad.toLocaleLowerCase('tr').indexOf(q) >= 0 || D.HAREKET[h.id].kas.toLocaleLowerCase('tr').indexOf(q) >= 0)
+      .sort((a, b) => { const u = (h) => (ekip && !h.ekipman.every((e) => ekip.indexOf(e) >= 0) ? 1 : 0); return u(a) - u(b) || a.seviye - b.seviye; });
+    const satir = (h) => {
+      const uygunDegil = ekip && !h.ekipman.every((e) => ekip.indexOf(e) >= 0);
+      const sakat = (S.profil.sakatlik || []).some((b) => (h.kontra || []).indexOf(b) >= 0);
+      return '<button type="button" class="pd-sec" data-act="pd-ekle" data-id="' + h.id + '"' + (var_.has(h.id) ? ' disabled' : '') + '><span class="yigin"><b>' + esc(h.ad) + '</b><span class="ik">' + esc(D.HAREKET[h.id].kas) + ' · ' + h.ekipman.map((e) => K.EKIPMAN[e]).join(', ') + '</span>' +
+        (uygunDegil || sakat ? '<span class="pd-not">' + [uygunDegil ? 'ortamında ekipmanı yok' : '', sakat ? 'sakatlık bölgeni zorlayabilir' : ''].filter(Boolean).join(' · ') + '</span>' : '') + '</span>' +
+        (var_.has(h.id) ? '<span class="ik">ekli</span>' : IK.arti.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:var(--kobalt);stroke-width:2.4;flex:none"')) + '</button>';
+    };
+    return ust(geri('#/program'), '<span class="alt">' + esc(g.ad) + ' · hareket ekle</span>') +
+      '<h1 class="baslik">Hareket seç<span class="nokta">.</span></h1>' +
+      '<label class="t alan"><span>Ara</span><input id="pdAra" type="search" value="' + esc(pAra) + '" placeholder="Squat, göğüs, dambıl…" autocomplete="off" style="font-size:20px"></label>' +
+      '<div class="yatay" role="group" aria-label="Bölge">' + '<button class="hap" data-act="pd-bolge" data-deger="" aria-pressed="' + (!pBolge) + '">Hepsi</button>' + PBOLGE.map((b) => '<button class="hap" data-act="pd-bolge" data-deger="' + b[0] + '" aria-pressed="' + (pBolge === b[0]) + '">' + b[1] + '</button>').join('') + '</div>' +
+      '<div class="t" style="padding:4px 12px" id="pdListe">' + (liste.length ? liste.map(satir).join('') : '<p class="ik" style="padding:12px 4px">Bu aramada hareket yok.</p>') + '</div>';
   }
 
   function ekranPlan() {
@@ -357,6 +478,8 @@
       antr = '<a class="t kobalt genis ana-kutu h150" href="#/antrenman" style="min-height:210px"><div class="k satir"><span>Devam eden antrenman</span><span class="num">' + Math.round((Date.now() - S.seans.baslangic) / 60000) + ' dk</span></div><span class="dev">' + esc(sg ? sg.ad : 'Antrenman') + '<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Devam et' + IK.ok + '</span></a>';
     } else if (g.antrenman) {
       antr = '<a class="t koyu genis ana-kutu h150" href="#/antrenman" style="min-height:190px"><span class="k">Bugün tamamlandı</span><span class="dev">' + esc(g.antrenman.ad) + '<span style="color:var(--mavi-gece)">.</span></span><span class="ik num">' + g.antrenman.set + ' set · ' + sayi(g.antrenman.hacim) + ' kg hacim · ' + g.antrenman.dk + ' dk</span></a>';
+    } else if (bugunku && !bugunku.hareketler.length) {
+      antr = '<a class="t kobalt genis ana-kutu h150" href="#/program" style="min-height:190px"><span class="k">Programın</span><span class="dev">Programını yaz<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
     } else if (bugunku) {
       antr = '<a class="t kobalt genis ana-kutu h150" href="#/antrenman" style="min-height:230px"><div class="k satir num"><span>Bugünün antrenmanı</span><span>' + bugunku.hareketler.length + ' hareket</span></div><span class="dev">' + esc(bugunku.ad) + '<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
     } else {
@@ -375,6 +498,7 @@
       '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' +
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
       rekorKutu +
+      '<a class="t koyu genis koc-kutu" href="#/koc"><span class="k">Koç · yapay zekâ</span><b style="font-size:20px;letter-spacing:-.02em">Bir yerin mi ağrıyor, keyfin mi yok?</b><span class="ik" style="color:var(--koyu-ikincil)">Koça danış, programına göre cevap versin.</span></a>' +
       '<div class="t genis tum"><span class="k">Öğün ekle</span><div class="haplar"><a class="hap" href="#/ekle/foto">' + IK.kamera.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2"') + 'Fotoğrafla</a><a class="hap" href="#/ekle/ara">Listeden</a><a class="hap" href="#/ekle/barkod">Barkod</a><a class="hap" href="#/ekle/elle">Elle</a></div></div>' +
       '</div>';
   }
@@ -386,6 +510,7 @@
     if (!S.profil) return ekranKarsilama();
     if (S.seans) return ekranSeans();
     const pr = S.program;
+    if (!pr.gunler.some((g) => g.hareketler.length)) return ust(logo, '<span class="alt">' + esc(pr.ad) + '</span>') + '<h1 class="baslik">Antrenman<span class="nokta">.</span></h1><div class="t kobalt"><span class="k">Programın boş</span><span style="font-size:18px;font-weight:700;line-height:1.4">Günlerini ve hareketlerini seç, set ve tekrarlarını yaz. İstersen yapay zekâ yorumlasın.</span></div><a class="btn ana buyuk-btn" href="#/program">Programımı yaz' + IK.ok + '</a>';
     const bugunku = bugunkuGun();
     const sg = pr.gunler.find((x) => x.id === secilenGun) || bugunku || pr.gunler[0];
     const bitti = gun().antrenman;
@@ -404,7 +529,8 @@
             '</div></div>' : '') + '</div>';
       }).join('') + '</div></div></div>' +
       (bitti ? '<div class="t limon"><span class="k">Bugün ' + esc(bitti.ad) + ' tamamlandı</span><span style="font-weight:700">İstersen yine de yeni bir antrenman başlatabilirsin.</span></div>' : '') +
-      '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>';
+      '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>' +
+      '<a class="metin-btn" href="#/program" style="align-self:center;color:var(--murekkep)">' + (pr.ozel ? 'Programımı düzenle' : 'Programı düzenle ya da kendi programını yaz') + '</a>';
   }
 
   // hareket görseli: kullanıcının cinsiyetine göre (yoksa diğeri); başlangıç ve bitiş üst üste, yavaşça geçiş yapar
@@ -443,6 +569,7 @@
               '<button class="tik" data-act="tik" data-h="' + x.id + '" data-i="' + i + '" aria-pressed="' + (y.ok ? 'true' : 'false') + '" aria-label="' + (i + 1) + '. seti ' + (y.ok ? 'geri al' : 'tamamla') + '">' + IK.tik + '</button></div>';
           }).join('') + '</div></section>';
       }).join('') + '</div>' +
+      '<a class="t koyu" href="#/koc" style="flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><span style="font-weight:700">Bir yerin mi ağrıdı? Koça danış</span>' + IK.ok.replace('<svg', '<svg width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>' +
       '<button class="btn siyah buyuk-btn" data-act="bitir">Antrenmanı bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
       '<button class="metin-btn" data-act="iptal" style="align-self:center;color:var(--ikincil)">' + (iptalOnay ? 'Emin misin? Kaydetmeden çıkmak için tekrar bas' : 'Kaydetmeden çık') + '</button>';
   }
@@ -628,6 +755,7 @@
       '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(p.kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
       '<div class="t limon h130"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></div>' +
       '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
+      '<a class="btn siyah genis" href="#/program">' + (S.program && S.program.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle · kendi programımı yaz') + '</a>' +
       '<a class="btn cerceve genis" href="#/kurulum">Bilgilerimi güncelle, programı yeniden kur</a>' +
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       (hesap && hesap.rol === 'admin' ? '<a class="t koyu genis" href="#/yonetim"><span class="k">Yalnızca sen görürsün</span><b style="font-size:20px">Yönetim</b><span style="opacity:.8">Bekleme listesi, görüşler, hatalar, kullanıcılar.</span></a>' : '') +
@@ -652,6 +780,7 @@
     else if (!parca.length) { html = ekranBugun(); sekme = 'bugun'; }
     else if (parca[0] === 'kurulum') html = ekranKurulum();
     else if (parca[0] === 'plan') { html = ekranPlan(); sekme = 'profil'; }
+    else if (parca[0] === 'program') { html = parca[1] === 'ekle' ? ekranProgramEkle(+parca[2] || 0) : ekranProgramDuzen(); sekme = 'antrenman'; }
     else if (parca[0] === 'antrenman') { html = ekranAntrenman(); sekme = 'antrenman'; }
     else if (parca[0] === 'beslenme') { html = ekranBeslenme(); sekme = 'beslenme'; }
     else if (parca[0] === 'ekle') { html = ekranEkle(parca[1] || 'foto'); sekme = 'beslenme'; }
@@ -659,6 +788,7 @@
     else if (parca[0] === 'ilerleme') { html = ekranIlerleme(); sekme = 'ilerleme'; }
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
+    else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
@@ -831,6 +961,45 @@
       toast(el.dataset.durum === 'onayli' ? 'Onaylandı. Artık bu e-postayla kayıt olabilir.' : 'Reddedildi.');
       yon.veri = null; render();
     },
+    'pd-set'(el) { const x = ptaslak.gunler[+el.dataset.g].hareketler[+el.dataset.i]; x.set = Math.max(1, Math.min(10, x.set + (+el.dataset.yon))); render(); },
+    'pd-tasi'(el) { const l = ptaslak.gunler[+el.dataset.g].hareketler; const i = +el.dataset.i; const j = i + (+el.dataset.yon); if (j < 0 || j >= l.length) return; const t = l[i]; l[i] = l[j]; l[j] = t; render(); },
+    'pd-sil'(el) { ptaslak.gunler[+el.dataset.g].hareketler.splice(+el.dataset.i, 1); render(); },
+    'pd-gunsil'(el) { const g = ptaslak.gunler[+el.dataset.g]; if (g.hareketler.length && el.dataset.onay !== '1') { el.dataset.onay = '1'; toast(g.ad + ' silinsin mi? Onaylamak için tekrar bas.'); return; } ptaslak.gunler.splice(+el.dataset.g, 1); render(); },
+    'pd-hafta'(el) { ptaslak.gunler[+el.dataset.g].hafta = +el.dataset.h; ptaslak.gunler.sort((a, b) => a.hafta - b.hafta); render(); },
+    'pd-gunekle'() { const bos = [0, 1, 2, 3, 4, 5, 6].find((h) => !ptaslak.gunler.some((g) => g.hafta === h)); if (bos == null) return; ptaslak.gunler.push({ id: 'ozel-' + kimlik(), gid: 'ozel', ad: 'Gün ' + String.fromCharCode(65 + ptaslak.gunler.length), hafta: bos, bolge: 'ozel', hareketler: [] }); ptaslak.gunler.sort((a, b) => a.hafta - b.hafta); render(); },
+    'pd-bolge'(el) { pBolge = el.dataset.deger; render(); },
+    'pd-ekle'(el) {
+      const x = M.ozelHareket(S.profil, el.dataset.id); if (!x) return;
+      const g = ptaslak.gunler[pSecGun]; g.hareketler.push(x);
+      if (!g.hareketler.some((y) => y.isinma) && x.blok === 'ana' && K.HAREKET[x.id].artis > 0) x.isinma = true;
+      toast(D.HAREKET[x.id].ad + ' eklendi.'); git('#/program');
+    },
+    async 'pd-yorum'() {
+      const pr = ptaslak; if (!pr.gunler.some((g) => g.hareketler.length)) { toast('Önce birkaç hareket ekle.'); return; }
+      if (!hesap) { toast('Yapay zekâ yorumu için giriş yapmalısın.'); return; }
+      pYorumYuk = true; render();
+      try {
+        const ozet = { ad: pr.ad, gunler: pr.gunler.map((g) => ({ ad: g.ad, gun: GUN_AD[g.hafta], hareketler: g.hareketler.map((x) => D.HAREKET[x.id].ad + ' ' + x.set + 'x' + x.tekrar + (x.birim !== 'tekrar' ? ' ' + BIRIM[x.birim].toLowerCase() : '')) })) };
+        const p = S.profil; const profil = { cinsiyet: p.cinsiyet === 'k' ? 'kadın' : 'erkek', yas: p.yas, hedef: p.hedef, deneyim: p.deneyim, ortam: p.ortam, spor: p.spor, sakatlik: (p.sakatlik || []).map((b) => (K.SAKATLIK.find((x) => x[0] === b) || [b, b])[1]) };
+        const r = await fetch('/api/comeback/koc', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tur: 'program', program: ozet, profil, analiz: M.ozelAnaliz(pr.gunler, p).uyari }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) toast(j.hata || 'Yorum alınamadı.'); else { pr.yorum = { ozet: j.ozet || [], oneriler: j.oneriler || [], zaman: Date.now() }; }
+      } catch (e) { toast('Bağlantı kurulamadı.'); }
+      pYorumYuk = false; render();
+    },
+    'pd-kaydet'() {
+      const pr = ptaslak;
+      pr.gunler = pr.gunler.filter((g) => g.hareketler.length);
+      if (!pr.gunler.length) { toast('En az bir güne hareket ekle.'); ptaslak.gunler.length || ptaslak.gunler.push(bosOzelProgram(1).gunler[0]); render(); return; }
+      pr.gunler.forEach((g) => { g.dk = M.ozelAnaliz([g], S.profil).dk[0]; });
+      const an = M.ozelAnaliz(pr.gunler, S.profil); pr.hacim = an.hacim; pr.hacimHedef = an.hacimHedef;
+      pr.ozel = true; pr.ad = String(pr.ad || 'Kendi programım').trim().slice(0, 40) || 'Kendi programım';
+      if (S.seans) S.seans = null;
+      S.program = pr; S.profil.gun = pr.gunler.length; ptaslak = null; kaydet(true); toast('Programın kaydedildi.'); git('#/antrenman');
+    },
+    'pd-vazgec'() { ptaslak = null; git(S.program && S.program.gunler.some((g) => g.hareketler.length) ? '#/antrenman' : '#/profil'); },
+    'koc-hizli'(el) { kocGonder(el.dataset.metin); },
+    'koc-temizle'() { S.koc = []; kocAcil = false; kaydet(); render(); },
     'gorus-tur'(el) { gorusTur = el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); },
     'sil-ac'() { silAcik = true; render(); const i = document.querySelector('[data-form="hesap-sil"] input'); if (i) i.focus(); },
     'sil-kapat'() { silAcik = false; render(); },
@@ -853,6 +1022,23 @@
       document.getElementById('markaBtn').disabled = aramaQ.trim().length < 2;
       return;
     }
+    if (el.id === 'pdAra') {
+      pAra = el.value; const yer = document.getElementById('pdListe'); const pos = el.selectionStart;
+      const tmp = document.createElement('div'); tmp.innerHTML = ekranProgramEkle(pSecGun); const yeni = tmp.querySelector('#pdListe'); if (yer && yeni) yer.innerHTML = yeni.innerHTML;
+      try { el.setSelectionRange(pos, pos); } catch (er) { /* yok */ }
+      return;
+    }
+    if (el.dataset && el.dataset.pd && ptaslak) {
+      const g = ptaslak.gunler[+el.dataset.g];
+      if (el.dataset.pd === 'ad') ptaslak.ad = el.value;
+      else if (el.dataset.pd === 'gunad') g.ad = el.value.slice(0, 24);
+      else if (el.dataset.pd === 'tekrar') {
+        const x = g.hareketler[+el.dataset.i]; const c = M.tekrarCoz(el.value, x.birim);
+        el.classList.toggle('hatali', !c);
+        if (c) { x.alt = c.alt; x.ust = c.ust; x.tekrar = c.tekrar; }
+      }
+      return;
+    }
     if (!el.dataset || !el.dataset.in) return;
     if (el.dataset.in === 'kg' || el.dataset.in === 'tekrar') {
       S.seans.setler[el.dataset.h][+el.dataset.i][el.dataset.in] = el.value; kaydet(); return;
@@ -867,6 +1053,9 @@
   document.addEventListener('change', (e) => {
     if (e.target.dataset && e.target.dataset.in === 'foto' && e.target.files[0]) fotoAnaliz(e.target.files[0]);
   });
+  document.addEventListener('keydown', (e) => {
+    if (e.target && e.target.id === 'kocMetin' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); }
+  });
   document.addEventListener('submit', (e) => {
     const f = e.target; if (!f.dataset.form) return;
     e.preventDefault();
@@ -874,6 +1063,7 @@
     if (f.dataset.form === 'kurulum') return kurulumKaydet(f, v);
     if (f.dataset.form === 'kayit' || f.dataset.form === 'giris') return hesapFormu(f.dataset.form, f, v);
     if (f.dataset.form === 'gorus') return gorusGonder(v);
+    if (f.dataset.form === 'koc') return kocGonder(v.metin);
     if (f.dataset.form === 'bekleme') return beklemeGonder(v);
     if (f.dataset.form === 'hesap-sil') return hesapSil(v);
     if (f.dataset.form === 'ara') { if (aramaQ.trim().length >= 2) markaAra(aramaQ); return; }
@@ -966,9 +1156,17 @@
     const hata = document.getElementById('kurulumHata');
     const sorun = !(p.yas >= 18 && p.yas <= 90) ? (p.yas > 0 && p.yas < 18 ? 'COMEBACK. 18 yaş ve üstü içindir.' : 'Yaşını 18–90 arasında gir.') : !v.yetiskin ? '18 yaşından büyük olduğunu onayla.' : !(p.boy >= 120 && p.boy <= 230) ? 'Boyunu santimetre olarak gir (120–230).' : !(p.kilo >= 30 && p.kilo <= 250) ? 'Kilonu 30–250 kg arasında gir.' : '';
     if (sorun) { hata.textContent = sorun; hata.hidden = false; hata.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
-    S.profil = p; S.hedef = hedefHesapla(p); S.program = programOlustur(p);
+    const kendim = secili('yazan') === 'ben';
+    const eskiOzel = S.program && S.program.ozel ? S.program : null;
+    S.profil = p; S.hedef = hedefHesapla(p);
     const k = tarihKey(); if (!S.kilo.some((x) => x.tarih === k)) S.kilo.push({ tarih: k, kg: p.kilo });
-    S.seans = null; kaydet(true); git('#/plan');
+    S.seans = null;
+    if (kendim) {
+      if (!eskiOzel) S.program = bosOzelProgram(p.gun);
+      kaydet(true); ptaslak = null; git('#/program'); return;
+    }
+    S.program = programOlustur(p);
+    kaydet(true); git('#/plan');
   }
 
   /* ---------- ağ: ürün araması, barkod, fotoğraf ---------- */
