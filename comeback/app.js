@@ -691,6 +691,7 @@
         '<label class="t alan"><span>Kalori, kcal</span><input name="k" inputmode="numeric" placeholder="450"></label>' +
         '<label class="t alan"><span>Miktar, g</span><input name="g" inputmode="numeric" placeholder="250"></label>' +
         '<div class="t genis"><span class="k">Biliyorsan makrolar (g)</span><div class="form-satir" style="grid-template-columns:repeat(3,minmax(0,1fr))"><label class="mini"><span>Protein</span><input name="p" inputmode="decimal"></label><label class="mini"><span>Karb.</span><input name="kh" inputmode="decimal"></label><label class="mini"><span>Yağ</span><input name="y" inputmode="decimal"></label></div></div>' +
+        '<label class="t genis onay"><input type="checkbox" name="kaydet"><span>Ürünlerime kaydet: bir dahaki sefere aramada çıksın (miktarı girersen 100 g değerine çeviririz).</span></label>' +
         '<p class="hata genis" id="elleHata" role="alert" hidden></p>' +
         '<button class="btn ana buyuk-btn genis" type="submit">Ekle' + IK.ok + '</button></form>';
     }
@@ -705,7 +706,8 @@
   const kucuk = (s) => s.toLocaleLowerCase('tr-TR');
   function yerelListe(q) {
     const s = kucuk(q.trim());
-    const l = (s ? D.YEMEK.filter((y) => kucuk(y.ad).indexOf(s) >= 0) : D.YEMEK.slice(0, 8)).slice(0, 12);
+    const hepsi = (S.urunlerim || []).concat(D.YEMEK);
+    const l = (s ? hepsi.filter((y) => kucuk(y.ad).indexOf(s) >= 0) : (S.urunlerim || []).slice(0, 6).concat(D.YEMEK.slice(0, 8))).slice(0, 14);
     if (!l.length) return '<div><span class="ik">Listemizde yok. Marketteki ürünlerde arayabilir ya da elle girebilirsin.</span></div>';
     return l.map((y) => '<button data-act="yerel-sec" data-ad="' + esc(y.ad) + '" style="border:none;background:none;text-align:left;width:100%;padding:0"><div class="ad"><b>' + esc(y.ad) + '</b><span class="ik num">' + y.birim + ' (' + y.g + ' g) · ' + sayi((y.k * y.g) / 100) + ' kcal</span></div><span class="yuvarlak" aria-hidden="true">+</span></button>').join('');
   }
@@ -987,7 +989,7 @@
     },
     'ogun-sil'(el) { const g = gun(); g.ogun = g.ogun.filter((o) => o.id !== el.dataset.id); kaydet(true); render(); },
     'yerel-sec'(el) {
-      const y = D.YEMEK.find((x) => x.ad === el.dataset.ad); if (!y) return;
+      const y = (S.urunlerim || []).concat(D.YEMEK).find((x) => x.ad === el.dataset.ad); if (!y) return;
       taslak = Object.assign({}, y, { secilenG: y.g, kaynak: 'liste', donus: '#/ekle/ara' }); git('#/porsiyon');
     },
     'marka-ara'() { markaAra(aramaQ); },
@@ -1152,6 +1154,10 @@
       const ad = String(v.ad || '').trim(); const k = oku(v.k);
       if (!ad || !(k >= 0)) { hata.textContent = 'Ad ve kalori gerekli.'; hata.hidden = false; return; }
       gun().ogun.push({ id: kimlik(), ad: ad.slice(0, 60), g: oku(v.g) || 0, k, p: oku(v.p) || 0, kh: oku(v.kh) || 0, y: oku(v.y) || 0, ogun: ogunTuru(), saat: saat(), kaynak: 'elle' });
+      if (v.kaydet) {
+        const g = oku(v.g) > 0 ? oku(v.g) : 100; const c = 100 / g; const r1 = (x) => Math.round((oku(x) || 0) * c * 10) / 10;
+        S.urunlerim = [{ ad: ad.slice(0, 60), k: Math.round(k * c), p: r1(v.p), kh: r1(v.kh), y: r1(v.y), g, birim: oku(v.g) > 0 ? '1 porsiyon' : '100 g', ozel: true }].concat((S.urunlerim || []).filter((x) => x.ad !== ad.slice(0, 60))).slice(0, 60);
+      }
       olay('ogun_elle');
       kaydet(true); toast(ad + ' eklendi.'); git('#/beslenme');
     }
