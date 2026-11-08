@@ -9,7 +9,7 @@
     gogus: 'Göğüs', sirt_kanat: 'Kanat (lat)', sirt_orta: 'Orta sırt', omuz_on: 'Ön omuz', omuz_yan: 'Yan omuz', omuz_arka: 'Arka omuz',
     rotator: 'Rotator manşet', biceps: 'Ön kol (biceps)', triceps: 'Arka kol (triceps)', onkol: 'Önkol ve kavrama', on_bacak: 'Ön bacak',
     arka_bacak: 'Arka bacak', kalca: 'Kalça', kalca_yan: 'Yan kalça', adduktor: 'İç bacak (adduktor)', baldir: 'Baldır',
-    karin: 'Karın', yan_karin: 'Yan karın', bel: 'Bel (erektör)', boyun: 'Boyun'
+    karin: 'Karın', yan_karin: 'Yan karın', bel: 'Bel (erektör)', boyun: 'Boyun', trapez: 'Trapez'
   };
   // Hacim analizinde takip edilen ana kas grupları ve kalıp → üst/alt gövde
   const ANA_KAS = ['gogus', 'sirt_kanat', 'sirt_orta', 'omuz_yan', 'omuz_arka', 'biceps', 'triceps', 'on_bacak', 'arka_bacak', 'kalca', 'baldir'];
@@ -117,7 +117,7 @@
     ['sl_rdl_bw', 'Tek bacak RDL (vücut)', 'tek_bacak', 'arka_bacak,kalca', '', 'vucut', 1, 'b', 0, '', 'Denge için duvara parmak ucuyla dokunabilirsin.'],
     ['lateral_lunge', 'Yana lunge', 'tek_bacak', 'adduktor,on_bacak,kalca', '', 'vucut', 1, 'b', 0, 'diz', 'Bir yana geniş adım, diğer bacak düz kalsın.'],
     // izole bacak
-    ['legcurl', 'Leg curl', 'hamstring_izo', 'arka_bacak', '', 'makine', 1, 'i', 2.5, '', 'Kalça pedden kalkmasın, yavaş indir.'],
+    ['legcurl', 'Yatarak leg curl', 'hamstring_izo', 'arka_bacak', '', 'makine', 1, 'i', 2.5, '', 'Kalça pedden kalkmasın, yavaş indir.'],
     ['nordic', 'Nordic hamstring', 'hamstring_izo', 'arka_bacak', '', 'vucut', 2, 'i', 0, '', 'Ayak bileklerini sabitlet, olabildiğince yavaş öne düş; ellerle karşıla.'],
     ['slider_curl', 'Havluyla kaydırmalı leg curl', 'hamstring_izo', 'arka_bacak', 'kalca', 'vucut', 1, 'i', 0, '', 'Topuklar havluda, kalça yukarıda; topukları kalçaya çek.'],
     ['legext', 'Leg extension', 'quad_izo', 'on_bacak', '', 'makine', 1, 'i', 2.5, 'diz', 'Tepede bir saniye dur, yavaş indir.'],
@@ -161,7 +161,71 @@
     ['rower', 'Kürek makinesi interval', 'kardiyo', '', '', 'makine', 1, 'k', 0, 'bel', 'Bacakla it, sonra kolla çek.'],
     ['run_interval', 'Koşu interval', 'kardiyo', '', '', 'alan', 1, 'k', 0, 'diz', '1 dk tempolu, 1 dk yürüyüş.'],
     ['burpee', 'Burpee interval', 'kardiyo', '', '', 'vucut', 2, 'k', 0, 'diz', '30 sn çalış, 30 sn dinlen.'],
-    ['shadow_box', 'Gölge boksu interval', 'kardiyo', '', '', 'vucut', 1, 'k', 0, '', '3 dk tur, 1 dk dinlenme.']
+    ['shadow_box', 'Gölge boksu interval', 'kardiyo', '', '', 'vucut', 1, 'k', 0, '', '3 dk tur, 1 dk dinlenme.'],
+    // --- ek hareketler (makine, kablo, kettlebell, bant, dışarı) ---
+    ['smith_bench', 'Smith makinede bench press', 'yatay_itme', 'gogus', 'omuz_on,triceps', 'makine,bench', 1, 'b', 2.5, 'omuz', 'Bar raylı; göğüs ortasına insin, kürek kemikleri sıkı.'],
+    ['pec_deck', 'Pec deck (kelebek makinesi)', 'yatay_itme', 'gogus', 'omuz_on', 'makine', 1, 'i', 2.5, 'omuz', 'Dirsekler hafif bükük, kolları göğsün önünde birleştir, yavaş aç.'],
+    ['cable_fly', 'Kablo crossover (göğüs)', 'yatay_itme', 'gogus', 'omuz_on', 'kablo', 1, 'i', 2.5, 'omuz', 'Bir adım öne çık, kolları yay çizerek göğsün önünde buluştur.'],
+    ['db_fly', 'Dambıl fly', 'yatay_itme', 'gogus', 'omuz_on', 'dambil,bench', 1, 'i', 1, 'omuz', 'Dirsekler hafif bükük; göğüste gerilim hissedince dur, aşağı zorlama.'],
+    ['band_chest_press', 'Bant göğüs press', 'yatay_itme', 'gogus', 'triceps', 'bant', 1, 'b', 0, '', 'Bandı sırtından geçir ya da arkaya sabitle, kolları öne it.'],
+    ['machine_incline', 'Makinede eğimli göğüs press', 'egimli_itme', 'gogus,omuz_on', 'triceps', 'makine', 1, 'b', 5, '', 'Tutamaklar üst göğüs hizasında, sırt pedde.'],
+    ['smith_incline', 'Smith makinede eğimli press', 'egimli_itme', 'gogus,omuz_on', 'triceps', 'makine,bench', 1, 'b', 2.5, 'omuz', 'Sehpa 30 derece; bar köprücük kemiğinin altına insin.'],
+    ['arnold', 'Arnold press', 'dikey_itme', 'omuz_on,omuz_yan', 'triceps', 'dambil', 2, 'b', 2, 'omuz', 'Avuçlar sana dönük başla, iterken dışa çevir.'],
+    ['kb_press', 'Kettlebell omuz press', 'dikey_itme', 'omuz_on,omuz_yan', 'triceps,karin', 'kettlebell', 1, 'b', 4, 'omuz', 'Kettlebell ön kolunun dışında dursun, bilek düz.'],
+    ['band_ohp', 'Bant omuz press', 'dikey_itme', 'omuz_on,omuz_yan', 'triceps', 'bant', 1, 'b', 0, 'omuz', 'Bandın üstüne bas, kolları baş üstüne it.'],
+    ['machine_lateral', 'Makinede yana açış (lateral raise makinesi)', 'yan_omuz', 'omuz_yan', '', 'makine', 1, 'i', 2.5, '', 'Dirsekler pedde, omuz hizasına kadar kaldır, yavaş indir.'],
+    ['cable_upright', 'Kablo upright row', 'yan_omuz', 'omuz_yan', 'omuz_on,trapez', 'kablo', 2, 'i', 2.5, 'omuz', 'Dirsekleri omuz hizasına kadar kaldır, daha yukarı zorlama.'],
+    ['rear_delt_machine', 'Makinede ters kelebek (arka omuz)', 'arka_omuz', 'omuz_arka', 'sirt_orta', 'makine', 1, 'i', 2.5, '', 'Göğüs pedde, kolları yana aç; kürek kemiklerini fazla sıkma.'],
+    ['cable_rear_fly', 'Kablo ters açış', 'arka_omuz', 'omuz_arka', 'sirt_orta', 'kablo', 1, 'i', 1, '', 'Kabloları çaprazla, kolları yana ve geriye aç.'],
+    ['rope_pushdown', 'İp ile pushdown', 'triceps', 'triceps', '', 'kablo', 1, 'i', 2.5, '', 'Altta ipi iki yana aç, dirsekler gövdede sabit.'],
+    ['cable_oh_ext', 'Kablo baş üstü triceps', 'triceps', 'triceps', '', 'kablo', 1, 'i', 2.5, 'omuz', 'Kabloya sırtını dön, dirsekler kulak hizasında sabit.'],
+    ['machine_triceps', 'Makinede triceps (dips makinesi)', 'triceps', 'triceps', 'gogus', 'makine', 1, 'i', 5, '', 'Omuzlar aşağıda, tutamakları aşağı it.'],
+    ['close_bench', 'Dar tutuş bench press', 'triceps', 'triceps,gogus', 'omuz_on', 'barbell,bench', 2, 'b', 2.5, 'omuz', 'Eller omuz genişliğinde, dirsekler gövdeye yakın.'],
+    ['db_kickback', 'Dambıl kickback', 'triceps', 'triceps', '', 'dambil', 1, 'i', 1, '', 'Gövde öne eğik, üst kol sabit; kolu geriye düzleştir.'],
+    ['tbar', 'T-bar row', 'yatay_cekme', 'sirt_orta,sirt_kanat', 'biceps,omuz_arka', 'barbell', 2, 'b', 2.5, 'bel', 'Bel düz, göğüs açık; tutamağı karnına çek.'],
+    ['kb_row', 'Kettlebell row', 'yatay_cekme', 'sirt_kanat,sirt_orta', 'biceps', 'kettlebell', 1, 'b', 4, '', 'Bir el destekte, dirseği beline doğru çek.'],
+    ['machine_pulldown', 'Makinede pulldown', 'dikey_cekme', 'sirt_kanat', 'biceps', 'makine', 1, 'b', 5, '', 'Dizler pedde sabit, dirsekleri aşağı ve geriye çek.'],
+    ['close_lat', 'Dar tutuş (V-bar) pulldown', 'dikey_cekme', 'sirt_kanat', 'biceps,sirt_orta', 'kablo', 1, 'b', 2.5, '', 'V-barı göğsünün üstüne çek, gövde hafif geride.'],
+    ['assisted_machine', 'Makine destekli barfiks', 'dikey_cekme', 'sirt_kanat', 'biceps', 'makine', 1, 'b', 5, '', 'Destek ağırlığını azalttıkça zorlaşır; çene bara kadar.'],
+    ['straight_pulldown', 'Düz kol kablo pulldown', 'dikey_cekme', 'sirt_kanat', '', 'kablo', 1, 'i', 2.5, '', 'Kollar neredeyse düz, barı kalçana doğru indir.'],
+    ['db_shrug', 'Dambıl shrug', 'trapez', 'trapez', 'onkol', 'dambil', 1, 'i', 2, 'boyun', 'Omuzları kulaklara doğru kaldır, tepede bir saniye dur.'],
+    ['bb_shrug', 'Barbell shrug', 'trapez', 'trapez', 'onkol', 'barbell', 1, 'i', 2.5, 'boyun', 'Kollar düz, yalnızca omuzlar yukarı aşağı.'],
+    ['preacher', 'Preacher curl (Scott sehpası)', 'biceps', 'biceps', '', 'dambil,bench', 1, 'i', 1, '', 'Üst kol pedde sabit, kolu tam açmadan önce yavaşla.'],
+    ['machine_curl', 'Makinede biceps curl', 'biceps', 'biceps', '', 'makine', 1, 'i', 2.5, '', 'Dirsekler pedde, yavaş indir.'],
+    ['incline_curl', 'Eğimli sehpada dambıl curl', 'biceps', 'biceps', '', 'dambil,bench', 1, 'i', 1, '', 'Kollar gövdenin gerisinde sarkık başlasın.'],
+    ['rope_hammer', 'İp ile hammer curl', 'biceps', 'biceps,onkol', '', 'kablo', 1, 'i', 2.5, '', 'Avuçlar birbirine dönük, dirsekler sabit.'],
+    ['smith_squat', 'Smith makinede squat', 'diz', 'on_bacak,kalca', '', 'makine', 1, 'b', 5, 'diz', 'Ayaklar barın biraz önünde, kontrollü in.'],
+    ['kb_goblet', 'Kettlebell goblet squat', 'diz', 'on_bacak,kalca', 'karin', 'kettlebell', 1, 'b', 4, 'diz', 'Kettlebell göğsünde, dirsekler dizlerin içinden geçsin.'],
+    ['band_squat', 'Bantlı squat', 'diz', 'on_bacak,kalca', '', 'bant', 1, 'b', 0, 'diz', 'Bandın üstüne bas, tutamaklar omuzda.'],
+    ['sumo_deadlift', 'Sumo deadlift', 'kalca', 'kalca,arka_bacak,adduktor', 'bel,on_bacak', 'barbell', 2, 'b', 5, 'bel', 'Geniş duruş, eller bacakların içinde; göğüs dik.'],
+    ['good_morning', 'Good morning', 'kalca', 'arka_bacak,kalca', 'bel', 'barbell', 2, 'b', 2.5, 'bel', 'Hafif ağırlık; dizler hafif bükük, kalçayı geriye it.'],
+    ['kb_deadlift', 'Kettlebell deadlift', 'kalca', 'kalca,arka_bacak', 'bel', 'kettlebell', 1, 'b', 4, 'bel', 'Kettlebell ayaklarının arasında, bel düz.'],
+    ['hipthrust_machine', 'Makinede hip thrust', 'kalca', 'kalca', 'arka_bacak', 'makine', 1, 'b', 5, '', 'Kemer kalça kemiğinde; tepede sık.'],
+    ['cable_pullthrough', 'Kablo pull-through', 'kalca', 'kalca,arka_bacak', '', 'kablo', 1, 'b', 2.5, '', 'Kabloya sırtını dön, kalçadan menteşe yap ve öne it.'],
+    ['glute_kickback', 'Kablo glute kickback', 'kalca', 'kalca', '', 'kablo', 1, 'i', 2.5, '', 'Bel kıpırdamasın, bacağı kalçadan geriye it.'],
+    ['glute_machine', 'Makinede glute kickback', 'kalca', 'kalca', '', 'makine', 1, 'i', 5, '', 'Gövde sabit, kalçayı tepede bir saniye sık.'],
+    ['seated_legcurl', 'Oturarak leg curl', 'hamstring_izo', 'arka_bacak', '', 'makine', 1, 'i', 2.5, '', 'Uyluk pedi sıkı, topuğu altına doğru çek.'],
+    ['legpress_calf', 'Leg press makinesinde calf', 'baldir', 'baldir', '', 'makine', 1, 'i', 5, '', 'Yalnızca parmak uçları platformda, tam aç ve kapat.'],
+    ['machine_calf', 'Makinede ayakta calf raise', 'baldir', 'baldir', '', 'makine', 1, 'i', 5, '', 'Omuzlar pedde, tam aşağı in, tepede dur.'],
+    ['adductor_machine', 'Adduktor makinesi (iç bacak)', 'adduktor', 'adduktor', '', 'makine', 1, 'i', 5, '', 'Bacakları kontrollü birleştir, yavaş aç.'],
+    ['abductor_machine', 'Abduktor makinesi (dış kalça)', 'abduktor', 'kalca_yan', '', 'makine', 1, 'i', 5, '', 'Gövde hafif öne, bacakları dışa aç.'],
+    ['cable_abduction', 'Kablo yana bacak açma', 'abduktor', 'kalca_yan', '', 'kablo', 1, 'i', 1, '', 'Ayak bileğine bağla, bacağı yana aç, gövde dik.'],
+    ['crunch', 'Mekik (crunch)', 'core_anti_ext', 'karin', '', 'vucut', 1, 'i', 0, 'boyun', 'Bel yerde, kürek kemiklerini kaldır; boynu çekme.'],
+    ['leg_raise', 'Yerde bacak kaldırma', 'core_anti_ext', 'karin', '', 'vucut', 1, 'i', 0, 'bel', 'Bel yere yapışık kalacak kadar indir.'],
+    ['cable_crunch', 'Kablo crunch', 'core_anti_ext', 'karin', '', 'kablo', 1, 'i', 2.5, '', 'Dizlerin üstünde, gövdeyi karınla aşağı kıvır.'],
+    ['ab_machine', 'Makinede karın (crunch makinesi)', 'core_anti_ext', 'karin', '', 'makine', 1, 'i', 5, '', 'Hareket karından gelsin, kollarla çekme.'],
+    ['russian_twist', 'Russian twist', 'core_rot', 'yan_karin', 'karin', 'vucut', 1, 'i', 0, 'bel', 'Gövde hafif geride, omuzları iki yana çevir.'],
+    ['mountain_climber', 'Mountain climber', 'kardiyo', '', '', 'vucut', 1, 'k', 0, 'bilek', '30 sn hızlı, 30 sn dinlen.'],
+    ['jumping_jack', 'Jumping jack', 'kardiyo', '', '', 'vucut', 1, 'k', 0, 'diz', '40 sn çalış, 20 sn dinlen.'],
+    ['treadmill', 'Koşu bandı', 'kardiyo', '', '', 'makine', 1, 'k', 0, 'diz', 'Tempolu koşu ya da 1 dk hızlı, 1 dk yavaş.'],
+    ['incline_walk', 'Eğimli yürüyüş (koşu bandı)', 'kardiyo', '', '', 'makine', 1, 'k', 0, '', 'Eğim 8–12, tutamaklara tutunmadan tempolu yürü.'],
+    ['elliptical', 'Eliptik bisiklet', 'kardiyo', '', '', 'makine', 1, 'k', 0, '', 'Eklem dostu; konuşabileceğin tempoda başla.'],
+    ['stair', 'Merdiven makinesi', 'kardiyo', '', '', 'makine', 2, 'k', 0, 'diz', 'Dik dur, tutamaklara yaslanma.'],
+    ['brisk_walk', 'Tempolu yürüyüş', 'kardiyo', '', '', 'alan', 1, 'k', 0, '', 'Konuşabilirsin ama şarkı söyleyemezsin temposu.'],
+    ['stair_run', 'Merdiven koşusu', 'kardiyo', '', '', 'alan', 2, 'k', 0, 'diz', 'Yukarı koş, aşağı yürüyerek in.'],
+    ['hill_sprint', 'Yokuş koşusu', 'surat', 'on_bacak,kalca', 'baldir', 'alan', 2, 'k', 0, 'diz', '10–15 sn yokuş yukarı hızlı, yürüyerek in.'],
+    ['park_pushup', 'Bankta eğimli şınav', 'yatay_itme', 'gogus', 'triceps', 'kutu', 1, 'b', 0, '', 'Eller parktaki bankın kenarında, gövde tek çizgi.'],
+    ['bar_leg_raise', 'Barda bacak kaldırma', 'core_anti_ext', 'karin', 'onkol', 'barfiks', 3, 'i', 0, '', 'Bacaklar düz, ayaklar bara doğru; sallanma.']
   ];
 
   // Gün şablonları: "kalıp:rol". Roller: ana, yard (yardımcı), izo (izolasyon), core
@@ -210,7 +274,7 @@
       kaynak: ['kosu']
     },
     yuzme: {
-      ad: 'Yüzme', basla: [], onleme: ['ext_rot', 'band_pullapart'], vurgu: ['dikey_cekme:yard', 'core_anti_ext:core'], kacin: ['ohp', 'db_ohp', 'machine_shoulder', 'pike_pushup', 'hs_pushup', 'dips', 'skull'],
+      ad: 'Yüzme', basla: [], onleme: ['ext_rot', 'band_pullapart'], vurgu: ['dikey_cekme:yard', 'core_anti_ext:core'], kacin: ['ohp', 'db_ohp', 'machine_shoulder', 'pike_pushup', 'hs_pushup', 'dips', 'skull', 'arnold', 'kb_press', 'band_ohp'],
       not: 'Omuz sağlığı öncelikli: dış rotasyon ve kürek kemiği kasları, güçlü kanat kası ve gövde. Ağır baş üstü itmeler sınırlı.'
     },
     dovus: {
@@ -238,9 +302,12 @@
   };
 
   const HAREKET = {};
-  H.forEach((r) => {
+  // "ek hareketler" bölümündekiler otomatik programa girmez (mevcut programlar değişmesin); kendi programını yazarken ve "değiştir" listesinde çıkar
+  const EK_BAS = H.findIndex((r) => r[0] === 'smith_bench');
+  H.forEach((r, i) => {
     const s = (x) => (x ? x.split(',') : []);
     HAREKET[r[0]] = { id: r[0], ad: r[1], kalip: r[2], birincil: s(r[3]), ikincil: s(r[4]), ekipman: s(r[5]), seviye: r[6], tip: r[7], artis: r[8], kontra: s(r[9]), ipucu: r[10] };
+    if (EK_BAS >= 0 && i >= EK_BAS) HAREKET[r[0]].ek = true;
   });
 
   // Ek sakatlık bölgeleri: bu bölgede ağrısı olanın programına bu hareketler girmez (yerine aynı kalıptan güvenli olan gelir)

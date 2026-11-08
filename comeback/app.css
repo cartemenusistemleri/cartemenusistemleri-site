@@ -347,6 +347,22 @@ fieldset.t>legend+*{clear:both}
 .pd-sec .yigin{gap:2px;min-width:0}
 .pd-sec b{font-size:16px}
 .pd-not{font-size:12px;font-weight:700;color:#8A5A00}
+.pd-filtre{display:flex;flex-direction:column;gap:8px}
+.pd-filtre .hap{background:var(--kutu)}
+.pd-filtre .hap[aria-pressed="true"]{background:var(--kobalt);color:#fff}
+.pd-sonuc{padding:0 4px;min-height:32px}
+.pd-ekle-ik{display:inline-flex;align-items:center;gap:8px;flex:none}
+.pd-adet{font-size:12px;font-weight:800;color:var(--kobalt);background:color-mix(in srgb,var(--kobalt) 12%,transparent);padding:3px 8px;border-radius:10px}
+.pd-sec:active{background:color-mix(in srgb,var(--kobalt) 6%,transparent)}
+.pd-bitti{position:sticky;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:5;box-shadow:0 10px 30px -10px rgba(22,22,26,.45)}
+@media (min-width:1024px){.pd-bitti{bottom:16px}}
+.pd-gun{scroll-margin-top:12px}
+.off-btn{align-self:center;color:var(--ikincil);grid-column:1/-1}
+.off-kutu{gap:8px}
+.off-kutu .haplar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kadi-alan{display:flex;align-items:center;gap:6px;background:var(--zemin);border-radius:14px;padding:0 6px 0 12px;min-height:52px}
+.kadi-alan>span{font-weight:800;color:var(--ikincil);font-size:20px}
+.kadi-alan input{flex:1;min-width:0;border:0;background:transparent;min-height:48px;outline:none}
 
 /* koç */
 .koc-kutu{gap:6px}

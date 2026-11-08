@@ -9,7 +9,7 @@
   const { HAREKET, GUN, BOLUNME, BOLUNME_VUCUT, SPOR, ORTAM, ANA_KAS, KAS } = K;
 
   const ALT = ['diz', 'kalca', 'tek_bacak', 'hamstring_izo', 'quad_izo', 'baldir', 'adduktor', 'abduktor', 'plyo_dikey', 'plyo_yatay', 'plyo_inis', 'surat', 'ceviklik'];
-  const UST = ['yatay_itme', 'egimli_itme', 'dikey_itme', 'dips', 'triceps', 'yan_omuz', 'arka_omuz', 'rotator', 'yatay_cekme', 'dikey_cekme', 'biceps', 'plyo_ust', 'boyun', 'kavrama'];
+  const UST = ['yatay_itme', 'egimli_itme', 'dikey_itme', 'dips', 'triceps', 'yan_omuz', 'arka_omuz', 'rotator', 'yatay_cekme', 'dikey_cekme', 'biceps', 'plyo_ust', 'boyun', 'kavrama', 'trapez'];
   const bolgeOf = (kalip) => (ALT.indexOf(kalip) >= 0 ? 'alt' : UST.indexOf(kalip) >= 0 ? 'ust' : 'notr');
   const gunAlir = (gunBolge, kalip) => { const b = bolgeOf(kalip); return gunBolge === 'tum' || b === 'notr' || b === gunBolge; };
   const SEVIYE = { baslangic: 1, orta: 2, ileri: 3 };
@@ -44,8 +44,8 @@
       spor.kacin.indexOf(h.id) < 0 &&
       !kullanilan.has(h.id);
   }
-  function adaylar(kalip, p, kullanilan) {
-    return Object.keys(HAREKET).map((id) => HAREKET[id]).filter((h) => h.kalip === kalip && uygun(h, p, kullanilan));
+  function adaylar(kalip, p, kullanilan, hepsi) {
+    return Object.keys(HAREKET).map((id) => HAREKET[id]).filter((h) => h.kalip === kalip && (hepsi || !h.ek) && uygun(h, p, kullanilan));
   }
   // belirli bir hareket uygun değilse aynı kalıptan uygun olanı seç
   function belirliYaDaYedek(id, p, kullanilan) {
@@ -287,7 +287,7 @@
     const p = Object.assign({ ortam: 'salon', sakatlik: [], spor: 'fitness' }, p0);
     const h0 = HAREKET[x.id]; if (!h0) return [];
     const kul = new Set((gunIdleri || []).filter((id) => id !== x.id)); kul.add(x.id);
-    const ayni = adaylar(h0.kalip, p, kul);
+    const ayni = adaylar(h0.kalip, p, kul, true);
     const kas = Object.keys(HAREKET).map((id) => HAREKET[id]).filter((h) => h.kalip !== h0.kalip && h.tip === h0.tip && h.birincil[0] === h0.birincil[0] && uygun(h, p, kul));
     return ayni.concat(kas).slice(0, 6).map((h) => h.id);
   }

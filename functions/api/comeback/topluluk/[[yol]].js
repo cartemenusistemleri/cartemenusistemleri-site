@@ -19,6 +19,11 @@
 //   GET  meydan/<id>                → { meydan, sira }
 //   POST meydan/<id>/ilerleme { deger }
 //   POST meydan/<id>/ayril
+// Program paylaşımı (kullanıcı adıyla):
+//   GET  kisi?ad=<kullanici_adi>    → { ad }  (gönder demeden önce kim olduğunu göster)
+//   POST paylas { kime, program, not }
+//   GET  paylasim                   → { liste }  (sana gelen, bekleyen)
+//   POST paylasim/<id>/yanit { kabul }
 // Yönetim (admin): GET sikayetler · POST moderasyon { tur, id, gizli }
 
 const json = (v, d = 200) => new Response(JSON.stringify(v), { status: d, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
@@ -55,6 +60,56 @@ export async function onRequest(ctx) {
   const admin = kim.rol === 'admin';
   const simdi = Date.now();
   try {
+    /* ---------- program paylaşımı ---------- */
+    const kadiTemiz = (v) => String(v || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').slice(0, 20);
+    if (p[0] === 'kisi' && m === 'GET') {
+      if (!(await sinir(db, 'kisi:' + kim.id, 60, 3600))) return hata('Çok fazla arama. Biraz sonra tekrar dene.', 429);
+      const k = await db.prepare('SELECT id, ad, kullanici_adi FROM kullanicilar WHERE kullanici_adi = ?').bind(kadiTemiz(url.searchParams.get('ad'))).first();
+      if (!k) return hata('Bu kullanıcı adında kimse yok.', 404);
+      return json({ ad: gorunen(k.ad), kadi: k.kullanici_adi, ben: k.id === kim.id });
+    }
+    if (p[0] === 'paylas' && m === 'POST') {
+      const g = await govde(req); if (!g || !g.program || !Array.isArray(g.program.gunler)) return hata('Geçersiz istek.', 400);
+      const alici = await db.prepare('SELECT id FROM kullanicilar WHERE kullanici_adi = ?').bind(kadiTemiz(g.kime)).first();
+      if (!alici) return hata('Bu kullanıcı adında kimse yok.', 404);
+      if (alici.id === kim.id) return hata('Kendine program gönderemezsin.', 400);
+      if (!(await sinir(db, 'paylas:' + kim.id, 20, 86400))) return hata('Bugün çok fazla program gönderdin. Yarın tekrar dene.', 429);
+      const n = (v, a, b) => Math.max(a, Math.min(b, Math.round(Number(v) || 0)));
+      const BIR = ['tekrar', 'sn', 'dk', 'm'];
+      const pr = {
+        ad: temiz(g.program.ad, 40) || 'Paylaşılan program', ozel: true,
+        gunler: g.program.gunler.slice(0, 7).map((d, i) => ({
+          ad: temiz(d.ad, 24) || 'Gün ' + (i + 1), hafta: n(d.hafta, 0, 6),
+          hareketler: (Array.isArray(d.hareketler) ? d.hareketler : []).slice(0, 30).filter((x) => x && /^[a-z0-9_]{2,40}$/.test(String(x.id))).map((x) => ({
+            id: String(x.id), set: n(x.set, 1, 10), tekrar: temiz(x.tekrar, 9), birim: BIR.indexOf(x.birim) >= 0 ? x.birim : 'tekrar',
+            alt: n(x.alt, 0, 999), ust: n(x.ust, 0, 999), dinlenme: n(x.dinlenme, 0, 600), blok: temiz(x.blok, 12), rir: temiz(x.rir, 20), not: temiz(x.not, 60), isinma: !!x.isinma
+          }))
+        })).filter((d) => d.hareketler.length)
+      };
+      if (!pr.gunler.length) return hata('Programda hareket yok.', 400);
+      const not = temiz(g.not, 200);
+      if (YASAK.test(not)) return hata('Notunda uygun olmayan bir ifade var.', 400);
+      const eng = await db.prepare('SELECT 1 FROM engel WHERE kullanici_id = ? AND engellenen_id = ?').bind(alici.id, kim.id).first();
+      if (!eng) {
+        await db.batch([
+          db.prepare("DELETE FROM paylasim WHERE gonderen_id = ? AND alici_id = ? AND durum = 'bekliyor'").bind(kim.id, alici.id),
+          db.prepare("INSERT INTO paylasim (gonderen_id, alici_id, json, not_, durum, zaman) VALUES (?, ?, ?, ?, 'bekliyor', ?)").bind(kim.id, alici.id, JSON.stringify(pr), not, simdi)
+        ]);
+      }
+      return json({ ok: true }, 201);
+    }
+    if (p[0] === 'paylasim' && !p[1] && m === 'GET') {
+      const r = await db.prepare("SELECT s.id, s.json, s.not_, s.zaman, k.ad, k.kullanici_adi FROM paylasim s JOIN kullanicilar k ON k.id = s.gonderen_id WHERE s.alici_id = ? AND s.durum = 'bekliyor' AND s.gonderen_id NOT IN (SELECT engellenen_id FROM engel WHERE kullanici_id = ?) ORDER BY s.zaman DESC LIMIT 10").bind(kim.id, kim.id).all();
+      const liste = [];
+      (r.results || []).forEach((x) => { try { liste.push({ id: x.id, program: JSON.parse(x.json), not: x.not_ || '', zaman: x.zaman, gonderen: gorunen(x.ad), kadi: x.kullanici_adi }); } catch (e) { /* bozuk */ } });
+      return json({ liste });
+    }
+    if (p[0] === 'paylasim' && p[1] && p[2] === 'yanit' && m === 'POST') {
+      const g = await govde(req) || {};
+      await db.prepare("UPDATE paylasim SET durum = ? WHERE id = ? AND alici_id = ? AND durum = 'bekliyor'").bind(g.kabul ? 'kabul' : 'ret', Number(p[1]) || 0, kim.id).run();
+      return json({ ok: true });
+    }
+
     /* ---------- hoca mesajları ---------- */
     if (p[0] === 'mesaj-ozet' && m === 'GET') {
       const r = await db.prepare('SELECT COUNT(*) n FROM mesajlar WHERE (koc_id = ? OR ogrenci_id = ?) AND gonderen_id != ? AND okundu = 0').bind(kim.id, kim.id, kim.id).first();
