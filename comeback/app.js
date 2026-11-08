@@ -343,7 +343,8 @@
   function ekranKoc() {
     if (!S.profil) return ekranKarsilama();
     const l = S.koc || [];
-    const balon = (m) => '<div class="koc-balon ' + (m.rol === 'koc' ? 'koc' : 'ben') + '">' + esc(m.metin).replace(/\n/g, '<br>') + '</div>';
+    const bicim = (t) => esc(t).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/^\s*[-*•]\s+/gm, '• ').replace(/^#+\s*/gm, '').replace(/\n/g, '<br>');
+    const balon = (m) => '<div class="koc-balon ' + (m.rol === 'koc' ? 'koc' : 'ben') + '">' + (m.rol === 'koc' ? bicim(m.metin) : esc(m.metin).replace(/\n/g, '<br>')) + '</div>';
     return ust(geri('#/'), '<span class="alt">Koç · yapay zekâ</span>') +
       '<h1 class="baslik">Koça danış<span class="nokta">.</span></h1>' +
       '<div class="t koyu" style="gap:6px"><span style="font-size:15px;line-height:1.5">Sakatlık, ağrı, yorgunluk, program ya da beslenme: aklına takılanı yaz. Programını ve son antrenmanlarını bilerek cevap verir.</span><span class="ik" style="color:var(--koyu-ikincil)">Doktor değildir, teşhis koymaz. Göğüs ağrısı, nefes darlığı, bayılma gibi durumlarda antrenmanı bırak ve 112\'yi ara.</span></div>' +

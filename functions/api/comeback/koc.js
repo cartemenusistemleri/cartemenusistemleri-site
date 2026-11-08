@@ -11,7 +11,7 @@ const json = (veri, durum = 200) => new Response(JSON.stringify(veri), {
 const kisa = (v, n) => String(v == null ? '' : v).slice(0, n);
 
 // Acil belirtiler: modelden bağımsız olarak uygulama da uyarı gösterir
-const ACIL = /(göğs[üu]m(de)? ağr|gogsum agri|göğüs ağrı|nefes alam|nefesim daral|bayıl|bayil|kalbim (çok )?(hızlı|hizli|çarp)|çarpıntı|uyuşma|uyusma|karıncalan|felç|konuşamı|kemik (çık|kır)|kırıldı|kirildi|kafamı çarp|bilincimi|kan kus|intihar|kendimi öldür|kendime zarar|yaşamak istemiyorum)/i;
+const ACIL = /(g[öo]ğ[üu]s\S*\s+(ağr|agr|bask|sıkış|sikis|yan)|g[öo]ğs[üu]m\S*\s*(ağr|agr|bask|sıkış|sikis|yan)|nefes\s*(darl|alam|al[ıi]nam|kesil)|bay[ıi]l|kalbim\s*(çok\s*)?(h[ıi]zl|çarp|carp|tekl)|çarp[ıi]nt|carpint|uyuşma|uyusma|karıncalan|karincalan|felç|konuşam|konusam|kemi(k|ğ)\S*\s*(çık|cik|kır|kir)|k[ıi]r[ıi]ld|kafam[ıi]\s*(çarp|vur)|bilincim|kan\s*kus|idrar\S*\s*(koyu|kahve|kola)|intihar|kendimi\s*öldür|kendime\s*zarar|yaşamak\s*istemiyorum|ölmek\s*istiyorum)/i;
 
 const SISTEM_SOHBET = [
   'Sen COMEBACK. uygulamasının antrenman ve beslenme koçusun. Türkçe, sıcak ama kısa ve net konuş; en fazla 6-8 cümle, gerekirse kısa maddeler.',
@@ -23,7 +23,8 @@ const SISTEM_SOHBET = [
   'Aşırı kalori kısıtlama, kusma, müshil, aşırı egzersizle telafi gibi yeme bozukluğu işaretleri görürsen kalori/diyet sayısı verme; nazikçe bir uzmana (doktor, diyetisyen, psikolog) yönlendir.',
   'Steroid, yasaklı madde ya da tehlikeli kilo verme yöntemleri hakkında yönlendirme yapma.',
   'Uygulamanın özelliklerini önerebilirsin: "Bu hareket bende yok" ile hareket değiştirme, programı düzenleme, dinlenme günü, Görüş bildir.',
-  'Cevabın sonunda gerekmedikçe uyarı tekrarlama; tıbbi uyarıyı yalnızca sağlıkla ilgili konularda tek cümleyle ekle.'
+  'Cevabın sonunda gerekmedikçe uyarı tekrarlama; tıbbi uyarıyı yalnızca sağlıkla ilgili konularda tek cümleyle ekle.',
+  'Biçim: Markdown kullanma (yıldız, diyez, tablo yok). Düz metin yaz; madde gerekiyorsa satır başına "• " koy.'
 ].join('\n');
 
 const SISTEM_PROGRAM = [
