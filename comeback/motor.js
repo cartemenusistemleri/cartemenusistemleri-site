@@ -116,6 +116,18 @@
     return Math.round(sn / 60);
   }
 
+  /* ---------- odak bölge: haftada 2 gün ek hareket ---------- */
+  const ODAK = {
+    gogus: { ad: 'Göğüs', slot: ['yatay_itme:yard', 'egimli_itme:yard'] },
+    sirt: { ad: 'Sırt', slot: ['yatay_cekme:yard', 'dikey_cekme:yard'] },
+    omuz: { ad: 'Omuz', slot: ['yan_omuz:izo', 'arka_omuz:izo'] },
+    kol: { ad: 'Kol', slot: ['biceps:izo', 'triceps:izo'] },
+    bacak: { ad: 'Bacak', slot: ['quad_izo:izo', 'hamstring_izo:izo'] },
+    kalca: { ad: 'Kalça', slot: ['kalca:yard', 'tek_bacak:yard'] },
+    baldir: { ad: 'Baldır', slot: ['baldir:izo', 'baldir:izo'] },
+    karin: { ad: 'Karın', slot: ['core_anti_ext:core', 'core_lat:core'] }
+  };
+
   /* ---------- program ---------- */
   function programOlustur(p0) {
     const p = Object.assign({ ortam: 'salon', sure: 60, sezon: 'disi', sakatlik: [], spor: 'fitness' }, p0);
@@ -155,6 +167,19 @@
     spor.vurgu.forEach((s) => {
       const [k, r] = s.split(':'); let n = 0;
       gunler.forEach((g) => { if (n < 2 && gunAlir(g.bolge, k) && !g.hareketler.some((x) => HAREKET[x.id].kalip === k)) { if (secVeEkle(g, k, r, 'vurgu')) n++; } });
+    });
+    // 4b) odak bölgeler (en fazla 2): haftada 2 gün, uygun güne birer ek hareket
+    const odaklar = (p.odak || []).filter((o) => ODAK[o]).slice(0, 2);
+    odaklar.forEach((o) => {
+      let n = 0; const verilen = new Set();
+      ODAK[o].slot.forEach((s) => {
+        const [k, r] = s.split(':');
+        const uygunGun = gunler.filter((g) => gunAlir(g.bolge, k));
+        const bos = uygunGun.filter((g) => !verilen.has(g));
+        const g = (bos.length ? bos : uygunGun).sort((a, c) => a.hareketler.length - c.hareketler.length)[0];
+        if (g && secVeEkle(g, k, r, 'odak')) { n++; verilen.add(g); }
+      });
+      if (!n) notlar.push(ODAK[o].ad + ' için seçtiğin ortamda uygun ek hareket bulamadık.');
     });
     // 5) sakatlık önleme (her biri haftada 2 kez)
     spor.onleme.forEach((id) => {
@@ -243,6 +268,7 @@
     if (sezonIci) notlar.push('Sezon içindesin: setler azaltıldı, izolasyon çıkarıldı. Amaç kazanılan kuvveti korumak; maçtan önceki 48 saatte ağır bacak çalışması yapma.');
     if (spor.not) notlar.push(spor.not);
     if (p.hedef === 'yag' || p.hedef === 'kondisyon') notlar.push('Kuvvete ek olarak haftada 150–300 dk orta tempolu yürüyüş, bisiklet ya da yüzme önerilir (DSÖ).');
+    if (odaklar.length) notlar.push('Odak: ' + odaklar.map((o) => ODAK[o].ad.toLowerCase()).join(' ve ') + ' için haftada 2 gün ek hareket koyduk (programda "odak" olarak işaretli).');
     if (p.saglik) notlar.unshift('Sağlık sorularından en az birine "evet" dedin: programa başlamadan önce doktorundan onay al.');
 
     const kurallar = [
@@ -272,6 +298,6 @@
     return d;
   }
 
-  kok.CB_MOTOR = { hedefHesapla, programOlustur, bolgeOf, SEVIYE, alternatifler, degistir };
+  kok.CB_MOTOR = { hedefHesapla, programOlustur, bolgeOf, SEVIYE, alternatifler, degistir, ODAK };
   if (typeof module !== 'undefined' && module.exports) module.exports = kok.CB_MOTOR;
 })(typeof window !== 'undefined' ? window : globalThis);
