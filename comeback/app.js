@@ -972,10 +972,10 @@
 
   async function kucult(file) {
     const img = await createImageBitmap(file);
-    const s = Math.min(1, 1024 / Math.max(img.width, img.height));
+    const s = Math.min(1, 800 / Math.max(img.width, img.height)); // 800 px: daha az görsel jetonu, daha hızlı analiz
     const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    return c.toDataURL('image/jpeg', 0.82);
+    return c.toDataURL('image/jpeg', 0.78);
   }
   async function fotoAnaliz(file) {
     let resim;
