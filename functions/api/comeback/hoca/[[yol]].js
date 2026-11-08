@@ -56,7 +56,7 @@ export async function onRequest(ctx) {
       const h = await db.prepare("SELECT k.id, k.ad FROM hoca_ogrenci ho JOIN kullanicilar k ON k.id = ho.koc_id WHERE ho.ogrenci_id = ? AND ho.durum = 'aktif' ORDER BY ho.zaman DESC").bind(kim.id).first();
       const a = await db.prepare("SELECT a.id, a.json, a.not_, a.zaman, k.ad hoca FROM atanan a JOIN kullanicilar k ON k.id = a.koc_id WHERE a.ogrenci_id = ? AND a.durum = 'bekliyor' ORDER BY a.zaman DESC").bind(kim.id).first();
       let atanan = null; if (a) { try { atanan = { id: a.id, program: JSON.parse(a.json), not: a.not_ || '', hoca: a.hoca, zaman: a.zaman }; } catch (e) { /* bozuk */ } }
-      return json({ hoca: h ? { ad: h.ad } : null, atanan });
+      return json({ hoca: h ? { id: h.id, ad: h.ad } : null, atanan });
     }
     if (p[0] === 'baglan' && m === 'POST') {
       const g = await govde(req); const kod = String((g && g.kod) || '').trim().toUpperCase();

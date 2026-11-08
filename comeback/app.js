@@ -262,8 +262,8 @@
   async function yonetimYukle() {
     if (yon.yukleniyor) return; yon.yukleniyor = true;
     try {
-      const [o, b, g, h, hc] = await Promise.all(['ozet', 'bekleme', 'gorusler', 'hatalar', 'hocalar'].map((x) => istek('yonetim/' + x)));
-      yon.veri = o.ok ? { ozet: o.j, bekleme: b.j.liste || [], gorusler: g.j.liste || [], hatalar: h.j.liste || [], hocalar: hc.j.liste || [] } : { hata: o.j.hata || 'Yüklenemedi.' };
+      const [o, b, g, h, hc, sk] = await Promise.all(['ozet', 'bekleme', 'gorusler', 'hatalar', 'hocalar'].map((x) => istek('yonetim/' + x)).concat([tistek('sikayetler')]));
+      yon.veri = o.ok ? { ozet: o.j, bekleme: b.j.liste || [], gorusler: g.j.liste || [], hatalar: h.j.liste || [], hocalar: hc.j.liste || [], sikayet: sk.j.liste || [] } : { hata: o.j.hata || 'Yüklenemedi.' };
     } catch (e) { yon.veri = { hata: 'Bağlantı kurulamadı.' }; }
     yon.yukleniyor = false; if (location.hash.indexOf('#/yonetim') === 0) render();
   }
@@ -277,12 +277,13 @@
     const kutu = (k, n, ek) => '<div class="t' + (ek ? ' ' + ek : '') + '"><span class="k">' + k + '</span><span class="dev num" style="font-size:40px">' + n + '</span></div>';
     const DUR = { bekliyor: 'Bekliyor', onayli: 'Onaylı', reddedildi: 'Reddedildi' };
     const HED = { yag: 'Kilo vermek', kas: 'Kas', guc: 'Güç', spor: 'Spor', donus: 'Geri dönüş' };
-    const sekmeler = [['bekleme', 'Bekleme listesi · ' + o.bekleyen], ['gorusler', 'Görüşler · ' + V.gorusler.length], ['hatalar', 'Hatalar · ' + V.hatalar.length], ['hocalar', 'Hocalar · ' + V.hocalar.length]];
+    const sekmeler = [['bekleme', 'Bekleme listesi · ' + o.bekleyen], ['gorusler', 'Görüşler · ' + V.gorusler.length], ['hatalar', 'Hatalar · ' + V.hatalar.length], ['hocalar', 'Hocalar · ' + V.hocalar.length], ['sikayet', 'Şikâyetler · ' + V.sikayet.length]];
     let govde = '';
     if (yon.sekme === 'bekleme') govde = V.bekleme.length ? V.bekleme.map((x) => '<div class="yon-satir"><div class="yigin"><b>' + esc(x.ad || '—') + '</b><span class="ik">' + esc(x.eposta) + '</span><span class="ik">' + [HED[x.hedef] || x.hedef, x.kaynak, tarih(x.zaman)].filter(Boolean).map(esc).join(' · ') + (x.kayitli ? ' · <b>hesap açtı</b>' : '') + '</span></div><div class="yon-is"><span class="etiket">' + DUR[x.durum] + '</span>' +
       (x.durum !== 'onayli' ? '<button class="btn ana kucuk" data-act="yon-onay" data-eposta="' + esc(x.eposta) + '" data-durum="onayli">Onayla</button>' : '') +
       (x.durum === 'bekliyor' ? '<button class="btn cerceve kucuk" data-act="yon-onay" data-eposta="' + esc(x.eposta) + '" data-durum="reddedildi">Reddet</button>' : '') + '</div></div>').join('') : '<p class="ik">Henüz başvuru yok.</p>';
     else if (yon.sekme === 'gorusler') govde = V.gorusler.length ? V.gorusler.map((x) => '<div class="yon-satir"><div class="yigin"><span class="ik">' + esc([x.tur, x.ad || 'isimsiz', x.ekran, tarih(x.zaman)].filter(Boolean).join(' · ')) + '</span><span style="white-space:pre-wrap;line-height:1.5">' + esc(x.metin) + '</span></div></div>').join('') : '<p class="ik">Henüz görüş yok.</p>';
+    else if (yon.sekme === 'sikayet') govde = V.sikayet.length ? V.sikayet.map((x) => '<div class="yon-satir"><div class="yigin"><span class="ik">' + (x.tur === 'konu' ? 'Konu' : 'Cevap') + ' · ' + x.adet + ' şikâyet' + (x.gizli ? ' · şu an gizli' : '') + '</span><span style="line-height:1.45;word-break:break-word">' + esc(x.metin || '(silinmiş)') + '</span></div><div class="yon-is"><button class="btn cerceve kucuk" data-act="yon-mod" data-tur="' + x.tur + '" data-id="' + x.hedef_id + '" data-gizli="1">Gizle</button><button class="btn ana kucuk" data-act="yon-mod" data-tur="' + x.tur + '" data-id="' + x.hedef_id + '" data-gizli="0">Sorun yok</button></div></div>').join('') : '<p class="ik">Açık şikâyet yok.</p>';
     else if (yon.sekme === 'hocalar') govde = '<form data-form="yon-hoca" class="satir" style="gap:8px;padding:10px 0"><input name="eposta" type="email" placeholder="Hocanın e-postası" aria-label="Hoca yapılacak kişinin e-postası" style="flex:1;min-width:0;border:0;background:var(--zemin);border-radius:14px;min-height:44px;padding:0 12px;font-size:16px"><button class="btn ana kucuk" type="submit">Hoca yap</button></form><p class="ik" style="padding-bottom:8px">Kişi önce hesap açmış olmalı. Hoca olunca Profil\'inde Hoca paneli çıkar.</p>' +
       (V.hocalar.length ? V.hocalar.map((x) => '<div class="yon-satir"><div class="yigin"><b>' + esc(x.ad) + '</b><span class="ik">' + esc(x.eposta) + ' · ' + x.ogrenci + ' öğrenci</span></div><div class="yon-is"><button class="btn cerceve kucuk" data-act="yon-rol" data-eposta="' + esc(x.eposta) + '" data-rol="uye">Hocalığı kaldır</button></div></div>').join('') : '<p class="ik">Henüz hoca yok.</p>');
     else govde = V.hatalar.length ? V.hatalar.map((x) => '<div class="yon-satir"><div class="yigin"><b style="font-size:14px;word-break:break-word">' + esc(x.mesaj) + '</b><span class="ik" style="word-break:break-all">' + esc([x.yer, x.ekran, 'sürüm ' + x.surum].filter(Boolean).join(' · ')) + '</span><span class="ik">' + x.adet + ' kez · ' + x.kisi + ' kişi · son ' + tarih(x.son) + '</span></div></div>').join('') : '<p class="ik">Hata kaydı yok.</p>';
@@ -383,7 +384,7 @@
   const hocaMi = () => hesap && (hesap.rol === 'koc' || hesap.rol === 'admin');
   function hocaKutu() {
     if (!hesap) return '';
-    if (hocaDurum && hocaDurum.hoca) return '<div class="t h130"><span class="k">Hocam</span><b style="font-size:19px">' + esc(hocaDurum.hoca.ad) + '</b><span class="ik">Programını ve antrenmanlarını görebiliyor.</span><button class="metin-btn kucuk-metin" data-act="hoca-ayril" style="align-self:flex-start;color:var(--ikincil)">Hocamdan ayrıl</button></div>';
+    if (hocaDurum && hocaDurum.hoca) return '<div class="t h130"><span class="k">Hocam</span><b style="font-size:19px">' + esc(hocaDurum.hoca.ad) + '</b><span class="ik">Programını ve antrenmanlarını görebiliyor.</span><a class="btn siyah" href="#/mesaj/' + encodeURIComponent(hocaDurum.hoca.id) + '" style="min-height:40px;align-self:flex-start">Mesaj yaz</a><button class="metin-btn kucuk-metin" data-act="hoca-ayril" style="align-self:flex-start;color:var(--ikincil)">Hocamdan ayrıl</button></div>';
     return '<form class="t h130" data-form="hoca-baglan" novalidate style="gap:8px"><span class="k">Hocam</span><input name="kod" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Hoca kodu" aria-label="Hocanın 6 haneli kodu" style="border:0;background:var(--zemin);border-radius:14px;min-height:44px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;width:100%"><label class="onay-mini"><input type="checkbox" name="riza"><span>Hocam programımı, antrenmanlarımı, kilomu ve kalori özetimi görebilir.</span></label><button class="btn siyah" type="submit" style="min-height:40px">Bağlan</button></form>';
   }
   function atananBant() {
@@ -437,9 +438,105 @@
       '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Son antrenmanlar</span><div class="liste">' + (o.antrenmanlar.length ? o.antrenmanlar.slice(0, 8).map((a) => '<div><div class="ad"><b>' + esc(a.ad) + '</b><span class="ik">' + esc(a.tarih) + '</span></div><span class="num ik" style="font-weight:700">' + a.set + ' set · ' + sayi(a.hacim) + ' kg · ' + a.dk + ' dk</span></div>').join('') : '<div><span class="ik">Henüz antrenman kaydı yok.</span></div>') + '</div></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Programı</span>' + (hp.ogr.bekleyen ? '<span class="etiket">Gönderdiğin program onay bekliyor</span>' : '') + '</div>' + (o.program ? '<b style="font-size:18px">' + esc(o.program.ad) + '</b>' + o.program.gunler.map((g) => '<span class="ik"><b style="color:var(--murekkep)">' + GUN_KISA[g.hafta] + ' ' + esc(g.ad) + ':</b> ' + g.hareketler.map((x) => esc((D.HAREKET[x.id] || { ad: x.id }).ad) + ' ' + x.set + '×' + esc(x.tekrar)).join(', ') + '</span>').join('') : '<span class="ik">Programı yok.</span>') + '</div>' +
       '</div>' +
+      '<a class="btn siyah" href="#/mesaj/' + encodeURIComponent(hp.ogr.ogrenci.id) + '">Mesaj yaz</a>' +
       '<button class="btn ana buyuk-btn" data-act="hp-program" data-bos="0">' + (o.program ? 'Programını düzenleyip gönder' : 'Program yaz ve gönder') + IK.ok + '</button>' +
       (o.program ? '<button class="btn cerceve" data-act="hp-program" data-bos="1">Sıfırdan program yaz</button>' : '') +
       '<button class="metin-btn" data-act="hp-cikar" style="align-self:center;color:var(--ikincil)">Öğrenciyi listeden çıkar</button>';
+  }
+
+  /* ---------- topluluk: forum, meydan okuma, hoca mesajları ---------- */
+  const TAPI = '/api/comeback/topluluk/';
+  async function tistek(yol, yontem, veri) {
+    const r = await fetch(TAPI + yol, { method: yontem || 'GET', credentials: 'same-origin', headers: veri ? { 'content-type': 'application/json' } : {}, body: veri ? JSON.stringify(veri) : undefined });
+    const j = await r.json().catch(() => ({})); return { ok: r.ok, j };
+  }
+  const FKAT = [['genel', 'Genel'], ['antrenman', 'Antrenman'], ['beslenme', 'Beslenme'], ['motivasyon', 'Motivasyon'], ['sakatlik', 'Sakatlık ve toparlanma']];
+  const MTUR = [['antrenman', 'Antrenman sayısı', 'antrenman'], ['set', 'Toplam set', 'set'], ['su', 'Su', 'L'], ['kayit', 'Öğün kaydı yapılan gün', 'gün'], ['seri', 'Gün serisi', 'gün']];
+  let tp = { sekme: 'forum', kat: '', liste: null, konu: null, konuId: null, meydanlar: null, meydan: null, meydanId: null, yuk: false, mesaj: null, mesajId: null, menu: null };
+  const zamanOnce = (z) => { const d = Math.round((Date.now() - z) / 60000); return d < 1 ? 'şimdi' : d < 60 ? d + ' dk önce' : d < 1440 ? Math.round(d / 60) + ' sa önce' : Math.round(d / 1440) + ' gün önce'; };
+  async function tpYukle(ne, id) {
+    if (tp.yuk) return; tp.yuk = true;
+    try {
+      if (ne === 'forum') { const r = await tistek('forum' + (tp.kat ? '?kategori=' + tp.kat : '')); tp.liste = r.ok ? r.j.liste : []; }
+      else if (ne === 'konu') { const r = await tistek('forum/' + id); tp.konu = r.ok ? r.j : { hata: r.j.hata || 'Bulunamadı.' }; tp.konuId = id; }
+      else if (ne === 'meydanlar') { const r = await tistek('meydan'); tp.meydanlar = r.ok ? r.j.liste : []; }
+      else if (ne === 'meydan') {
+        const r0 = await tistek('meydan/' + id);
+        if (r0.ok) { const md = r0.j.meydan; const d = meydanIlerleme(md); await tistek('meydan/' + id + '/ilerleme', 'POST', { deger: d }); const r = await tistek('meydan/' + id); tp.meydan = r.ok ? r.j : r0.j; } else tp.meydan = { hata: r0.j.hata || 'Bulunamadı.' };
+        tp.meydanId = id;
+      } else if (ne === 'mesaj') { const r = await tistek('mesaj/' + encodeURIComponent(id)); tp.mesaj = r.ok ? r.j : { hata: r.j.hata || 'Açılamadı.' }; tp.mesajId = id; }
+    } catch (e) { /* çevrimdışı */ if (ne === 'forum') tp.liste = []; if (ne === 'meydanlar') tp.meydanlar = []; }
+    tp.yuk = false; render();
+  }
+  // meydan okuma ilerlemesi: kullanıcının kendi kayıtlarından, tarih aralığında
+  function meydanIlerleme(md) {
+    const gunler = Object.keys(S.gunluk).filter((k) => k >= md.baslangic && k <= md.bitis);
+    if (md.tur === 'antrenman') return gunler.filter((k) => S.gunluk[k].antrenman).length;
+    if (md.tur === 'set') return gunler.reduce((a, k) => a + (S.gunluk[k].antrenman ? S.gunluk[k].antrenman.set : 0), 0);
+    if (md.tur === 'su') return Math.round(gunler.reduce((a, k) => a + (S.gunluk[k].su || 0), 0) / 100) / 10;
+    if (md.tur === 'kayit') return gunler.filter((k) => S.gunluk[k].ogun.length).length;
+    if (md.tur === 'seri') { let en = 0, n = 0; const d = new Date(md.baslangic); const son = new Date(Math.min(new Date(md.bitis), new Date(tarihKey()))); while (d <= son) { const k = tarihKey(d); const g = S.gunluk[k]; if (g && (g.ogun.length || g.antrenman)) { n++; en = Math.max(en, n); } else n = 0; d.setDate(d.getDate() + 1); } return en; }
+    return 0;
+  }
+  const menuDugme = (tur, id, yazarId, benim) => '<button class="pd-ikon" data-act="tp-menu" data-tur="' + tur + '" data-id="' + id + '" aria-label="Seçenekler" aria-expanded="' + (tp.menu === tur + id) + '"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>' +
+    (tp.menu === tur + id ? '<div class="tp-menu">' + (benim || (hesap && hesap.rol === 'admin') ? '<button data-act="tp-sil" data-tur="' + tur + '" data-id="' + id + '">Sil</button>' : '') + (!benim ? '<button data-act="tp-sikayet" data-tur="' + tur + '" data-id="' + id + '">Şikâyet et</button><button data-act="tp-engel" data-k="' + esc(yazarId) + '">Bu kişiyi engelle</button>' : '') + '</div>' : '');
+  function ekranTopluluk(alt, id) {
+    if (!S.profil) return ekranKarsilama();
+    if (!hesap) return ust(geri('#/profil')) + '<div class="t"><b>Topluluk için giriş yapmalısın.</b></div>';
+    const sekmeler = '<div class="yatay">' + [['forum', 'Forum'], ['meydan', 'Meydan okuma']].map((x) => '<a class="hap" href="#/topluluk' + (x[0] === 'meydan' ? '/meydan' : '') + '" aria-pressed="' + ((alt === 'meydan' || alt === 'meydan-yeni') === (x[0] === 'meydan')) + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '</div>';
+    if (alt === 'yeni') return ust(geri('#/topluluk'), '<span class="alt">Yeni konu</span>') + '<h1 class="baslik">Konu aç<span class="nokta">.</span></h1>' +
+      '<form data-form="tp-konu" class="izgara" novalidate><div class="t genis"><span class="k">Kategori</span><div class="haplar">' + FKAT.map((k, i) => '<button type="button" class="hap" data-act="hap" data-grup="fkat" data-deger="' + k[0] + '" aria-pressed="' + (i === 0) + '">' + k[1] + '</button>').join('') + '</div></div>' +
+      '<label class="t genis alan"><span>Başlık</span><input name="baslik" maxlength="120" required placeholder="İlk ayımda neler öğrendim" style="font-size:20px"></label>' +
+      '<label class="t genis alan"><span>Ne anlatmak istiyorsun?</span><textarea name="metin" rows="6" maxlength="4000" required style="font:inherit;font-size:17px;line-height:1.5;border:0;background:transparent;resize:vertical;outline:none;width:100%"></textarea></label>' +
+      '<p class="ik genis" style="padding:0 4px">Saygılı ol; kişisel bilgi, reklam ve tıbbi iddia paylaşma. Kurallara uymayan yazılar şikâyetle gizlenir.</p>' +
+      '<button class="btn ana buyuk-btn genis" type="submit">Yayınla' + IK.ok + '</button></form>';
+    if (alt === 'konu') {
+      if (!tp.konu || tp.konuId !== id) { tp.konu = null; tpYukle('konu', id); return ust(geri('#/topluluk')) + '<p class="ik" style="padding:20px 4px">Yükleniyor…</p>'; }
+      if (tp.konu.hata) return ust(geri('#/topluluk')) + '<div class="t"><span>' + esc(tp.konu.hata) + '</span></div>';
+      const k = tp.konu.konu;
+      return ust(geri('#/topluluk'), '<span class="alt">' + esc((FKAT.find((x) => x[0] === k.kategori) || ['', ''])[1]) + '</span>') +
+        '<article class="t" style="gap:10px">' + (k.gizli ? '<span class="etiket">Gizlendi (şikâyet)</span>' : '') + '<div class="satir" style="align-items:flex-start"><h1 style="font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1.1">' + esc(k.baslik) + '</h1><div class="tp-menu-kap">' + menuDugme('konu', k.id, k.yazarId, k.benim) + '</div></div><span class="ik">' + esc(k.yazar) + ' · ' + zamanOnce(k.zaman) + '</span><p style="white-space:pre-wrap;line-height:1.55">' + esc(k.metin) + '</p></article>' +
+        tp.konu.cevaplar.map((c) => '<div class="t tp-cevap"><div class="satir"><span class="ik"><b style="color:var(--murekkep)">' + esc(c.yazar) + '</b> · ' + zamanOnce(c.zaman) + (c.gizli ? ' · gizli' : '') + '</span><div class="tp-menu-kap">' + menuDugme('cevap', c.id, c.yazarId, c.benim) + '</div></div><p style="white-space:pre-wrap;line-height:1.5">' + esc(c.metin) + '</p></div>').join('') +
+        '<form data-form="tp-cevap" class="koc-yaz" novalidate><label class="gizli" for="tpCevap">Cevabın</label><textarea id="tpCevap" name="metin" rows="1" maxlength="3000" placeholder="Cevap yaz"></textarea><button class="btn ana" type="submit" aria-label="Gönder">' + IK.ok + '</button></form>';
+    }
+    if (alt === 'meydan-yeni') return ust(geri('#/topluluk/meydan'), '<span class="alt">Meydan okuma</span>') + '<h1 class="baslik">Meydan oku<span class="nokta">.</span></h1>' +
+      '<form data-form="tp-meydan" class="izgara" novalidate><label class="t genis alan"><span>Adı</span><input name="ad" maxlength="60" required placeholder="Kasımda 12 antrenman" style="font-size:20px"></label>' +
+      '<div class="t genis"><span class="k">Ne yarışıyoruz?</span><div class="haplar">' + MTUR.map((x, i) => '<button type="button" class="hap" data-act="hap" data-grup="mtur" data-deger="' + x[0] + '" aria-pressed="' + (i === 0) + '">' + x[1] + '</button>').join('') + '</div></div>' +
+      '<label class="t alan"><span>Hedef</span><input name="hedef" inputmode="numeric" placeholder="12" style="font-size:22px"></label><label class="t alan"><span>Süre, gün</span><input name="gun" inputmode="numeric" placeholder="30" style="font-size:22px"></label>' +
+      '<button class="btn ana buyuk-btn genis" type="submit">Oluştur, kodu paylaş' + IK.ok + '</button></form>';
+    if (alt === 'meydan' && id) {
+      if (!tp.meydan || tp.meydanId !== id) { tp.meydan = null; tpYukle('meydan', id); return ust(geri('#/topluluk/meydan')) + '<p class="ik" style="padding:20px 4px">Yükleniyor…</p>'; }
+      if (tp.meydan.hata) return ust(geri('#/topluluk/meydan')) + '<div class="t"><span>' + esc(tp.meydan.hata) + '</span></div>';
+      const md = tp.meydan.meydan; const tur = MTUR.find((x) => x[0] === md.tur) || ['', md.turAd, ''];
+      return ust(geri('#/topluluk/meydan'), '<span class="alt">Kod ' + esc(md.kod) + '</span>') + '<h1 class="baslik">' + esc(md.ad) + '<span class="nokta">.</span></h1>' +
+        '<div class="t kobalt" style="gap:4px"><span class="k">' + esc(tur[1]) + ' · hedef ' + md.hedef + ' ' + tur[2] + '</span><span style="opacity:.85">' + esc(md.baslangic) + ' – ' + esc(md.bitis) + ' · ilerlemen kendi kayıtlarından otomatik hesaplanır</span><div class="satir" style="gap:8px;justify-content:flex-start;margin-top:6px"><button class="btn beyaz" data-act="tp-meydan-paylas" data-kod="' + esc(md.kod) + '" data-ad="' + esc(md.ad) + '" style="min-height:40px">Arkadaşını davet et</button></div></div>' +
+        '<div class="t" style="padding:8px 16px"><span class="k" style="padding-top:6px">Sıralama</span>' + tp.meydan.sira.map((x, i) => '<div class="tp-sira' + (x.ben ? ' ben' : '') + '"><span class="num">' + (i + 1) + '</span><b>' + esc(x.ad) + (x.ben ? ' (sen)' : '') + '</b><div class="cubuk"><span style="width:' + yuzde(x.ilerleme, md.hedef) + '%"></span></div><span class="num">' + sayi(x.ilerleme, 1) + '</span></div>').join('') + '</div>' +
+        '<button class="metin-btn" data-act="tp-meydan-ayril" style="align-self:center;color:var(--ikincil)">Meydan okumadan ayrıl</button>';
+    }
+    if (alt === 'meydan') {
+      if (!tp.meydanlar) { tpYukle('meydanlar'); }
+      return ust(logo, '<span class="alt">Topluluk</span>') + '<h1 class="baslik">Topluluk<span class="nokta">.</span></h1>' + sekmeler +
+        '<form data-form="tp-katil" class="t" novalidate style="flex-direction:row;gap:8px;align-items:center"><input name="kod" maxlength="6" placeholder="Davet kodu" aria-label="Meydan okuma davet kodu" style="flex:1;min-width:0;border:0;background:var(--zemin);border-radius:14px;min-height:46px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:.1em;text-transform:uppercase"><button class="btn siyah" type="submit" style="min-height:46px">Katıl</button></form>' +
+        '<a class="btn ana buyuk-btn" href="#/topluluk/meydan-yeni">Meydan okuma oluştur' + IK.ok + '</a>' +
+        (!tp.meydanlar ? '<p class="ik">Yükleniyor…</p>' : tp.meydanlar.length ? tp.meydanlar.map((x) => '<a class="t" href="#/topluluk/meydan/' + x.id + '" style="gap:4px"><div class="satir"><b style="font-size:18px">' + esc(x.ad) + '</b><span class="etiket">' + x.kisi + ' kişi</span></div><span class="ik">' + esc(x.turAd) + ' · ' + sayi(x.ilerleme, 1) + ' / ' + x.hedef + ' · bitiş ' + esc(x.bitis) + '</span><div class="cubuk"><span style="width:' + yuzde(x.ilerleme, x.hedef) + '%"></span></div></a>').join('') : '<div class="t bos"><b>Henüz bir meydan okumada değilsin.</b><span class="ik">Bir tane oluştur ya da arkadaşının kodunu yaz.</span></div>');
+    }
+    // forum listesi
+    if (!tp.liste) tpYukle('forum');
+    return ust(logo, '<span class="alt">Topluluk</span>') + '<h1 class="baslik">Topluluk<span class="nokta">.</span></h1>' + sekmeler +
+      '<div class="yatay">' + [['', 'Hepsi']].concat(FKAT).map((k) => '<button class="hap" data-act="tp-kat" data-deger="' + k[0] + '" aria-pressed="' + (tp.kat === k[0]) + '">' + k[1] + '</button>').join('') + '</div>' +
+      '<a class="btn ana buyuk-btn" href="#/topluluk/yeni">Konu aç' + IK.ok + '</a>' +
+      (!tp.liste ? '<p class="ik">Yükleniyor…</p>' : tp.liste.length ? tp.liste.map((x) => '<a class="t tp-konu" href="#/topluluk/konu/' + x.id + '"><span class="ik">' + esc((FKAT.find((k) => k[0] === x.kategori) || ['', ''])[1]) + ' · ' + esc(x.yazar) + ' · ' + zamanOnce(x.son) + '</span><b>' + esc(x.baslik) + '</b><span class="ik" style="color:var(--ikincil)">' + esc(x.ozet) + '</span><span class="etiket">' + x.cevap + ' cevap</span></a>').join('') : '<div class="t bos"><b>İlk konuyu sen aç.</b><span class="ik">Soru sor, ilerlemeni paylaş, motivasyon ver.</span></div>');
+  }
+  function ekranMesaj(id) {
+    if (!hesap) { location.hash = '#/'; return ''; }
+    if (!tp.mesaj || tp.mesajId !== id) { tp.mesaj = null; tpYukle('mesaj', id); return ust(geri('#/profil')) + '<p class="ik" style="padding:20px 4px">Yükleniyor…</p>'; }
+    if (tp.mesaj.hata) return ust(geri('#/profil')) + '<div class="t"><span>' + esc(tp.mesaj.hata) + '</span></div>';
+    const k = tp.mesaj.karsi;
+    return ust(geri(k.hoca ? '#/profil' : '#/hoca/' + encodeURIComponent(id)), '<button class="ikon-btn" data-act="tp-mesaj-yenile" aria-label="Yenile" style="background:#fff">' + IK.degis + '</button>') +
+      '<h1 class="baslik">' + esc(k.ad) + '<span class="nokta">.</span></h1>' +
+      '<p class="ik" style="padding:0 4px">' + (k.hoca ? 'Hocanla yazışma. Form videosu için videonu Drive ya da Instagram bağlantısı olarak gönderebilirsin.' : 'Öğrencinle yazışma.') + '</p>' +
+      '<div class="koc-akis" id="kocAkis">' + (tp.mesaj.liste.length ? tp.mesaj.liste.map((x) => '<div class="koc-balon ' + (x.ben ? 'ben' : 'koc') + '">' + esc(x.metin).replace(/\n/g, '<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline">bağlantıyı aç</a>') + '<span class="mesaj-zaman">' + zamanOnce(x.zaman) + '</span></div>').join('') : '<p class="ik">Henüz mesaj yok. İlk mesajı sen yaz.</p>') + '</div>' +
+      '<form data-form="tp-mesaj" class="koc-yaz" novalidate><label class="gizli" for="kocMetin">Mesajın</label><textarea id="kocMetin" name="metin" rows="1" maxlength="2000" placeholder="Mesaj yaz"></textarea><button class="btn ana" type="submit" aria-label="Gönder">' + IK.ok + '</button></form>';
   }
 
   /* ---------- koç (yapay zekâ) ---------- */
@@ -1064,7 +1161,7 @@
       '<a class="t kobalt genis" href="#/gorus"><span class="k">Deneme sürümü</span><b style="font-size:20px">Görüş bildir</b><span class="ik" style="color:inherit;opacity:.8">Hata, öneri, beğendiğin bir şey: bize yaz.</span></a>' +
       hocaKutu() +
       (hocaMi() ? '<a class="t kobalt h130" href="#/hoca"><span class="k">Hoca paneli</span><b style="font-size:19px">Öğrencilerim</b><span style="opacity:.85">Kod, programlar, antrenmanlar.</span></a>' : '') +
-      '<div class="t bos h130"><span class="k">Topluluk</span><b>Forum ve meydan okumalar</b><span class="ik">Yakında açılıyor.</span></div>' +
+      '<a class="t limon h130" href="#/topluluk"><span class="k">Topluluk</span><b style="font-size:19px">Forum ve meydan okuma</b><span class="ik" style="color:#3E4410">Sor, paylaş, arkadaşınla yarış.</span></a>' +
       '</div>' +
       (hesap ? (silAcik ? '<form data-form="hesap-sil" class="t genis" novalidate style="gap:10px"><span class="k" style="color:var(--hata)">Hesabı kalıcı sil</span><span style="font-size:14px;line-height:1.5">Hesabın, programın, öğün ve antrenman kayıtların ile sağlık verilerin sunucudan kalıcı olarak silinir. Bu geri alınamaz.</span>' + sifreAlani('sifre', 'current-password', 'Onay için şifren') + '<p class="hata" id="formHata" role="alert" hidden></p><div class="satir" style="flex-direction:row;gap:8px"><button type="button" class="btn cerceve" data-act="sil-kapat" style="flex:1">Vazgeç</button><button class="btn" id="formBtn" type="submit" style="flex:1;background:var(--hata);color:#fff">Kalıcı sil</button></div></form>' : '<button class="metin-btn" data-act="sil-ac" style="align-self:center;color:var(--ikincil)">Hesabımı sil</button>') : '') +
       '<button class="metin-btn" data-act="sifirla" style="align-self:center;color:var(--hata)">' + (sifirOnay ? 'Emin misin? Bütün kayıtlar silinecek, tekrar bas' : 'Bu cihazdaki verileri sıfırla') + '</button>';
@@ -1091,6 +1188,8 @@
     else if (parca[0] === 'ilerleme') { html = ekranIlerleme(); sekme = 'ilerleme'; }
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
+    else if (parca[0] === 'topluluk') { html = ekranTopluluk(parca[1] || '', parca[2] ? decodeURIComponent(parca[2]) : null); sekme = 'profil'; }
+    else if (parca[0] === 'mesaj') { html = ekranMesaj(decodeURIComponent(parca[1] || '')); sekme = 'profil'; }
     else if (parca[0] === 'olcu') { html = ekranOlcu(); sekme = 'ilerleme'; }
     else if (parca[0] === 'rapor') { html = ekranRapor(); sekme = 'ilerleme'; }
     else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
@@ -1313,6 +1412,7 @@
       toast('Çıkış yapıldı.'); git('#/');
     },
     'bekleme-hedef'(el) { beklemeHedef = el.getAttribute('aria-pressed') === 'true' ? '' : el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.deger === beklemeHedef))); },
+    async 'yon-mod'(el) { const r = await tistek('moderasyon', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, gizli: el.dataset.gizli === '1' }); toast(r.ok ? 'Kaydedildi.' : 'Olmadı.'); yon.veri = null; render(); },
     async 'yon-rol'(el) { const r = await istek('yonetim/rol', 'POST', { eposta: el.dataset.eposta, rol: el.dataset.rol }); toast(r.ok ? 'Güncellendi.' : (r.j.hata || 'Olmadı.')); yon.veri = null; render(); },
     'yon-sekme'(el) { yon.sekme = el.dataset.deger; render(); },
     'yon-yenile'() { yon.veri = null; render(); },
@@ -1399,6 +1499,14 @@
       if (kabul) { S.program = a.program; S.program.ozel = true; S.profil.gun = a.program.gunler.length; S.seans = null; kaydet(true); toast('Hocanın programı artık senin programın.'); }
       hocaDurum.atanan = null; git(kabul ? '#/antrenman' : '#/');
     },
+    'tp-kat'(el) { tp.kat = el.dataset.deger; tp.liste = null; render(); },
+    'tp-menu'(el) { const k = el.dataset.tur + el.dataset.id; tp.menu = tp.menu === k ? null : k; render(); },
+    async 'tp-sikayet'(el) { const r = await tistek('sikayet', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, neden: 'uygunsuz' }); tp.menu = null; toast(r.ok ? 'Şikâyetin alındı. İnceleyeceğiz.' : (r.j.hata || 'Olmadı.')); render(); },
+    async 'tp-engel'(el) { const r = await tistek('engel', 'POST', { kullanici: el.dataset.k }); tp.menu = null; if (r.ok) { toast('Engellendi. Yazılarını artık görmeyeceksin.'); tp.konu = null; tp.liste = null; } render(); },
+    async 'tp-sil'(el) { const r = await tistek('sil', 'POST', { tur: el.dataset.tur, id: +el.dataset.id }); tp.menu = null; if (!r.ok) { toast(r.j.hata || 'Silinemedi.'); return; } toast('Silindi.'); tp.liste = null; if (el.dataset.tur === 'konu') { tp.konu = null; git('#/topluluk'); } else { tp.konu = null; render(); } },
+    async 'tp-meydan-paylas'(el) { const t = 'COMEBACK. uygulamasında "' + el.dataset.ad + '" meydan okumasına katıl: Topluluk → Meydan okuma → kod ' + el.dataset.kod; try { if (navigator.share) { await navigator.share({ text: t }); return; } } catch (e) { if (e.name === 'AbortError') return; } try { await navigator.clipboard.writeText(t); toast('Kopyalandı.'); } catch (e) { toast(t); } },
+    async 'tp-meydan-ayril'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; } await tistek('meydan/' + tp.meydanId + '/ayril', 'POST'); tp.meydanlar = null; tp.meydan = null; git('#/topluluk/meydan'); },
+    'tp-mesaj-yenile'() { tp.mesaj = null; render(); },
     'gorus-tur'(el) { gorusTur = el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); },
     'sil-ac'() { silAcik = true; render(); const i = document.querySelector('[data-form="hesap-sil"] input'); if (i) i.focus(); },
     'sil-kapat'() { silAcik = false; render(); },
@@ -1470,6 +1578,30 @@
     if (f.dataset.form === 'kayit' || f.dataset.form === 'giris') return hesapFormu(f.dataset.form, f, v);
     if (f.dataset.form === 'gorus') return gorusGonder(v);
     if (f.dataset.form === 'koc') return kocGonder(v.metin);
+    if (f.dataset.form === 'tp-konu') {
+      const kat = (f.querySelector('[data-grup="fkat"][aria-pressed="true"]') || {}).dataset; const btn = f.querySelector('[type=submit]'); btn.disabled = true;
+      tistek('forum', 'POST', { kategori: kat ? kat.deger : 'genel', baslik: v.baslik, metin: v.metin }).then((r) => { btn.disabled = false; if (!r.ok) { toast(r.j.hata || 'Yayınlanamadı.'); return; } tp.liste = null; git('#/topluluk/konu/' + r.j.id); });
+      return;
+    }
+    if (f.dataset.form === 'tp-cevap') {
+      const metin = String(v.metin || '').trim(); if (!metin) return;
+      tistek('forum/' + tp.konuId, 'POST', { metin }).then((r) => { if (!r.ok) { toast(r.j.hata || 'Gönderilemedi.'); return; } tp.konu = null; render(); });
+      return;
+    }
+    if (f.dataset.form === 'tp-meydan') {
+      const tur = (f.querySelector('[data-grup="mtur"][aria-pressed="true"]') || {}).dataset;
+      tistek('meydan', 'POST', { ad: v.ad, tur: tur ? tur.deger : 'antrenman', hedef: v.hedef || 12, gun: v.gun || 30 }).then((r) => { if (!r.ok) { toast(r.j.hata || 'Oluşturulamadı.'); return; } tp.meydanlar = null; toast('Hazır. Kod: ' + r.j.kod); git('#/topluluk/meydan/' + r.j.id); });
+      return;
+    }
+    if (f.dataset.form === 'tp-katil') {
+      tistek('meydan/katil', 'POST', { kod: String(v.kod || '').trim() }).then((r) => { if (!r.ok) { toast(r.j.hata || 'Katılınamadı.'); return; } tp.meydanlar = null; toast(r.j.ad + ' meydan okumasına katıldın.'); git('#/topluluk/meydan/' + r.j.id); });
+      return;
+    }
+    if (f.dataset.form === 'tp-mesaj') {
+      const metin = String(v.metin || '').trim(); if (!metin) return;
+      tistek('mesaj/' + encodeURIComponent(tp.mesajId), 'POST', { metin }).then((r) => { if (!r.ok) { toast(r.j.hata || 'Gönderilemedi.'); return; } tp.mesaj = null; render(); setTimeout(kocKaydir, 400); });
+      return;
+    }
     if (f.dataset.form === 'yon-hoca') { istek('yonetim/rol', 'POST', { eposta: String(v.eposta || '').trim(), rol: 'koc' }).then((r) => { toast(r.ok ? 'Artık hoca.' : (r.j.hata || 'Olmadı.')); if (r.ok) { yon.veri = null; render(); } }); return; }
     if (f.dataset.form === 'hoca-baglan') {
       if (!v.riza) { toast('Hocanın verilerini görmesine onay vermelisin.'); return; }

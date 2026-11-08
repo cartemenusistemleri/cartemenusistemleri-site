@@ -423,3 +423,18 @@ fieldset.t>legend+*{clear:both}
 .rutin li::marker{font-weight:800;color:var(--kobalt)}
 .rutin b{display:block;font-size:15px}
 .rutin span{font-size:13px;color:var(--ikincil)}
+
+/* topluluk */
+.tp-konu{gap:5px}
+.tp-konu b{font-size:18px;letter-spacing:-.01em;line-height:1.25}
+.tp-konu .etiket{margin-top:2px}
+.tp-menu-kap{position:relative;flex:none}
+.tp-menu{position:absolute;right:0;top:40px;z-index:5;background:var(--kutu);border-radius:16px;box-shadow:0 12px 30px -10px rgba(22,22,26,.35);padding:6px;display:flex;flex-direction:column;min-width:170px}
+.tp-menu button{border:0;background:transparent;text-align:left;padding:10px 12px;border-radius:10px;font-weight:700;font-size:14px}
+.tp-menu button:hover{background:var(--zemin)}
+.tp-cevap{gap:6px}
+.tp-sira{display:grid;grid-template-columns:22px 1fr 70px 44px;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--cizgi);font-size:15px}
+.tp-sira.ben b{color:var(--kobalt)}
+.tp-sira .cubuk{margin:0}
+.tp-sira span:last-child{text-align:right;font-weight:800}
+.mesaj-zaman{display:block;font-size:11px;opacity:.6;margin-top:4px}
