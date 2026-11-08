@@ -202,6 +202,19 @@ export async function onRequest(ctx) {
           .bind(eposta, durum, Date.now(), durum === 'onayli' ? Date.now() : null).run();
         return json({ ok: true });
       }
+      if (alt === 'rol' && m === 'POST') {
+        const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+        const eposta = String(g.eposta || '').trim().toLowerCase(); const rol = g.rol === 'koc' ? 'koc' : 'uye';
+        const k = await db.prepare('SELECT id, rol FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
+        if (!k) return hata('Bu e-postayla hesap yok. Önce hesap açmalı.', 404);
+        if (k.rol === 'admin') return hata('Yönetici rolü değiştirilemez.', 400);
+        await db.prepare('UPDATE kullanicilar SET rol = ? WHERE id = ?').bind(rol, k.id).run();
+        return json({ ok: true, rol });
+      }
+      if (alt === 'hocalar' && m === 'GET') {
+        const r = await db.prepare("SELECT k.ad, k.eposta, (SELECT COUNT(*) FROM hoca_ogrenci ho WHERE ho.koc_id = k.id AND ho.durum = 'aktif') ogrenci FROM kullanicilar k WHERE k.rol = 'koc' ORDER BY k.ad").all();
+        return json({ liste: r.results || [] });
+      }
       if (alt === 'gorusler' && m === 'GET') {
         const r = await db.prepare('SELECT g.id, g.tur, g.metin, g.ekran, g.zaman, k.ad, k.eposta FROM gorusler g LEFT JOIN kullanicilar k ON k.id = g.kullanici_id ORDER BY g.zaman DESC LIMIT 200').all();
         return json({ liste: r.results || [] });

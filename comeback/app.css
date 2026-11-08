@@ -387,3 +387,7 @@ fieldset.t>legend+*{clear:both}
 .rozet b{font-size:14px}
 .rozet span{font-size:12px;color:var(--ikincil);line-height:1.35}
 @media(min-width:760px){.rozetler{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* hoca */
+.onay-mini{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.4;color:var(--ikincil)}
+.onay-mini input{margin:2px 0 0;flex:none;width:16px;height:16px}

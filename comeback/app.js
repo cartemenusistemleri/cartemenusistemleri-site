@@ -111,7 +111,7 @@
   async function hesapYukle() {
     try {
       const r = await istek('ben');
-      if (r.ok) { hesap = r.j.kullanici; await veriCek(); }
+      if (r.ok) { hesap = r.j.kullanici; await veriCek(); hocaYukle(); }
       else if (r.durum >= 500) cevrimdisi = true;
     } catch (e) { cevrimdisi = true; }
   }
@@ -262,8 +262,8 @@
   async function yonetimYukle() {
     if (yon.yukleniyor) return; yon.yukleniyor = true;
     try {
-      const [o, b, g, h] = await Promise.all(['ozet', 'bekleme', 'gorusler', 'hatalar'].map((x) => istek('yonetim/' + x)));
-      yon.veri = o.ok ? { ozet: o.j, bekleme: b.j.liste || [], gorusler: g.j.liste || [], hatalar: h.j.liste || [] } : { hata: o.j.hata || 'Yüklenemedi.' };
+      const [o, b, g, h, hc] = await Promise.all(['ozet', 'bekleme', 'gorusler', 'hatalar', 'hocalar'].map((x) => istek('yonetim/' + x)));
+      yon.veri = o.ok ? { ozet: o.j, bekleme: b.j.liste || [], gorusler: g.j.liste || [], hatalar: h.j.liste || [], hocalar: hc.j.liste || [] } : { hata: o.j.hata || 'Yüklenemedi.' };
     } catch (e) { yon.veri = { hata: 'Bağlantı kurulamadı.' }; }
     yon.yukleniyor = false; if (location.hash.indexOf('#/yonetim') === 0) render();
   }
@@ -277,12 +277,14 @@
     const kutu = (k, n, ek) => '<div class="t' + (ek ? ' ' + ek : '') + '"><span class="k">' + k + '</span><span class="dev num" style="font-size:40px">' + n + '</span></div>';
     const DUR = { bekliyor: 'Bekliyor', onayli: 'Onaylı', reddedildi: 'Reddedildi' };
     const HED = { yag: 'Kilo vermek', kas: 'Kas', guc: 'Güç', spor: 'Spor', donus: 'Geri dönüş' };
-    const sekmeler = [['bekleme', 'Bekleme listesi · ' + o.bekleyen], ['gorusler', 'Görüşler · ' + V.gorusler.length], ['hatalar', 'Hatalar · ' + V.hatalar.length]];
+    const sekmeler = [['bekleme', 'Bekleme listesi · ' + o.bekleyen], ['gorusler', 'Görüşler · ' + V.gorusler.length], ['hatalar', 'Hatalar · ' + V.hatalar.length], ['hocalar', 'Hocalar · ' + V.hocalar.length]];
     let govde = '';
     if (yon.sekme === 'bekleme') govde = V.bekleme.length ? V.bekleme.map((x) => '<div class="yon-satir"><div class="yigin"><b>' + esc(x.ad || '—') + '</b><span class="ik">' + esc(x.eposta) + '</span><span class="ik">' + [HED[x.hedef] || x.hedef, x.kaynak, tarih(x.zaman)].filter(Boolean).map(esc).join(' · ') + (x.kayitli ? ' · <b>hesap açtı</b>' : '') + '</span></div><div class="yon-is"><span class="etiket">' + DUR[x.durum] + '</span>' +
       (x.durum !== 'onayli' ? '<button class="btn ana kucuk" data-act="yon-onay" data-eposta="' + esc(x.eposta) + '" data-durum="onayli">Onayla</button>' : '') +
       (x.durum === 'bekliyor' ? '<button class="btn cerceve kucuk" data-act="yon-onay" data-eposta="' + esc(x.eposta) + '" data-durum="reddedildi">Reddet</button>' : '') + '</div></div>').join('') : '<p class="ik">Henüz başvuru yok.</p>';
     else if (yon.sekme === 'gorusler') govde = V.gorusler.length ? V.gorusler.map((x) => '<div class="yon-satir"><div class="yigin"><span class="ik">' + esc([x.tur, x.ad || 'isimsiz', x.ekran, tarih(x.zaman)].filter(Boolean).join(' · ')) + '</span><span style="white-space:pre-wrap;line-height:1.5">' + esc(x.metin) + '</span></div></div>').join('') : '<p class="ik">Henüz görüş yok.</p>';
+    else if (yon.sekme === 'hocalar') govde = '<form data-form="yon-hoca" class="satir" style="gap:8px;padding:10px 0"><input name="eposta" type="email" placeholder="Hocanın e-postası" aria-label="Hoca yapılacak kişinin e-postası" style="flex:1;min-width:0;border:0;background:var(--zemin);border-radius:14px;min-height:44px;padding:0 12px;font-size:16px"><button class="btn ana kucuk" type="submit">Hoca yap</button></form><p class="ik" style="padding-bottom:8px">Kişi önce hesap açmış olmalı. Hoca olunca Profil\'inde Hoca paneli çıkar.</p>' +
+      (V.hocalar.length ? V.hocalar.map((x) => '<div class="yon-satir"><div class="yigin"><b>' + esc(x.ad) + '</b><span class="ik">' + esc(x.eposta) + ' · ' + x.ogrenci + ' öğrenci</span></div><div class="yon-is"><button class="btn cerceve kucuk" data-act="yon-rol" data-eposta="' + esc(x.eposta) + '" data-rol="uye">Hocalığı kaldır</button></div></div>').join('') : '<p class="ik">Henüz hoca yok.</p>');
     else govde = V.hatalar.length ? V.hatalar.map((x) => '<div class="yon-satir"><div class="yigin"><b style="font-size:14px;word-break:break-word">' + esc(x.mesaj) + '</b><span class="ik" style="word-break:break-all">' + esc([x.yer, x.ekran, 'sürüm ' + x.surum].filter(Boolean).join(' · ')) + '</span><span class="ik">' + x.adet + ' kez · ' + x.kisi + ' kişi · son ' + tarih(x.son) + '</span></div></div>').join('') : '<p class="ik">Hata kaydı yok.</p>';
     return ust(geri('#/profil'), '<button class="ikon-btn" data-act="yon-yenile" aria-label="Yenile" style="background:#fff">' + IK.degis + '</button>') +
       '<h1 class="baslik">Yönetim<span class="nokta">.</span></h1>' +
@@ -370,6 +372,76 @@
     return '<div class="t genis tum"><div class="satir"><span class="k">Haftalık set, kas başına</span><span class="ik">çizgi: ' + alt + ' set</span></div><div class="hacim">' + satir + '</div><span class="ik">Ana kas için set 1, destek kas için 0,5 sayıldı. Kas kazanımı için haftada 10–20 set önerilir.</span></div>';
   }
 
+  /* ---------- hoca: öğrenci tarafı + hoca paneli ---------- */
+  const HAPI = '/api/comeback/hoca/';
+  async function histek(yol, yontem, veri) {
+    const r = await fetch(HAPI + yol, { method: yontem || 'GET', credentials: 'same-origin', headers: veri ? { 'content-type': 'application/json' } : {}, body: veri ? JSON.stringify(veri) : undefined });
+    const j = await r.json().catch(() => ({})); return { ok: r.ok, j };
+  }
+  let hocaDurum = null; // { hoca, atanan }
+  async function hocaYukle() { try { const r = await histek('benim'); if (r.ok) { hocaDurum = r.j; render(); } } catch (e) { /* yok */ } }
+  const hocaMi = () => hesap && (hesap.rol === 'koc' || hesap.rol === 'admin');
+  function hocaKutu() {
+    if (!hesap) return '';
+    if (hocaDurum && hocaDurum.hoca) return '<div class="t h130"><span class="k">Hocam</span><b style="font-size:19px">' + esc(hocaDurum.hoca.ad) + '</b><span class="ik">Programını ve antrenmanlarını görebiliyor.</span><button class="metin-btn kucuk-metin" data-act="hoca-ayril" style="align-self:flex-start;color:var(--ikincil)">Hocamdan ayrıl</button></div>';
+    return '<form class="t h130" data-form="hoca-baglan" novalidate style="gap:8px"><span class="k">Hocam</span><input name="kod" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Hoca kodu" aria-label="Hocanın 6 haneli kodu" style="border:0;background:var(--zemin);border-radius:14px;min-height:44px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;width:100%"><label class="onay-mini"><input type="checkbox" name="riza"><span>Hocam programımı, antrenmanlarımı, kilomu ve kalori özetimi görebilir.</span></label><button class="btn siyah" type="submit" style="min-height:40px">Bağlan</button></form>';
+  }
+  function atananBant() {
+    const a = hocaDurum && hocaDurum.atanan; if (!a) return '';
+    return '<a class="t limon genis" href="#/hoca-program" style="gap:4px"><span class="k">Hocan ' + esc(a.hoca) + ' sana program gönderdi</span><b style="font-size:20px">' + esc(a.program.ad || 'Yeni program') + '</b><span class="ik" style="color:#3E4410">Bak, beğenirsen kabul et.</span></a>';
+  }
+  function ekranHocaProgram() {
+    const a = hocaDurum && hocaDurum.atanan; if (!a) { location.hash = '#/'; return ''; }
+    const pr = a.program;
+    return ust(geri('#/'), '<span class="alt">Hocandan · ' + esc(a.hoca) + '</span>') +
+      '<h1 class="baslik">' + esc(pr.ad || 'Yeni program') + '<span class="nokta">.</span></h1>' +
+      (a.not ? '<div class="t koyu"><span class="k">Hocanın notu</span><span style="line-height:1.5">' + esc(a.not) + '</span></div>' : '') +
+      pr.gunler.map((g) => '<div class="t"><div class="satir"><b style="font-size:18px">' + esc(g.ad) + '</b><span class="ik">' + GUN_AD[g.hafta] + '</span></div><div class="liste">' + g.hareketler.map((x) => '<div><div class="ad"><b>' + esc((D.HAREKET[x.id] || { ad: x.id }).ad) + '</b></div><span class="num" style="font-weight:800;font-size:14px">' + x.set + ' × ' + esc(x.tekrar) + '</span></div>').join('') + '</div></div>').join('') +
+      '<div class="uyari">Kabul edersen şu anki programının yerine bu geçer. Geçmiş antrenmanların ve rekorların silinmez.</div>' +
+      '<button class="btn ana buyuk-btn" data-act="atanan" data-kabul="1">Kabul et, bununla çalışacağım' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
+      '<button class="metin-btn" data-act="atanan" data-kabul="0" style="align-self:center;color:var(--ikincil)">Şimdilik istemiyorum</button>';
+  }
+  // hoca paneli
+  let hp = { kod: null, liste: null, ogr: null, ogrId: null, yuk: false };
+  async function hpYukle(id) {
+    if (hp.yuk) return; hp.yuk = true;
+    try {
+      if (id) { const r = await histek('ogrenci/' + encodeURIComponent(id)); hp.ogr = r.ok ? r.j : { hata: r.j.hata || 'Yüklenemedi.' }; hp.ogrId = id; }
+      else { const [k, l] = await Promise.all([histek('kod'), histek('ogrenciler')]); hp.kod = k.j.kod || null; hp.liste = l.ok ? l.j.liste : []; }
+    } catch (e) { if (id) hp.ogr = { hata: 'Bağlantı kurulamadı.' }; else hp.liste = []; }
+    hp.yuk = false; render();
+  }
+  const HEDEF_AD = { kas: 'Kas', yag: 'Yağ yakımı', guc: 'Güç', kondisyon: 'Kondisyon' };
+  function ekranHoca(id) {
+    if (!hocaMi()) { location.hash = '#/profil'; return ''; }
+    if (id) return ekranHocaOgrenci(id);
+    if (!hp.liste) { hpYukle(); return ust(geri('#/profil'), '<span class="alt">Hoca paneli</span>') + '<h1 class="baslik">Öğrencilerim<span class="nokta">.</span></h1><p class="ik" style="padding:0 4px">Yükleniyor…</p>'; }
+    return ust(geri('#/profil'), '<button class="ikon-btn" data-act="hp-yenile" aria-label="Yenile" style="background:#fff">' + IK.degis + '</button>') +
+      '<h1 class="baslik">Öğrencilerim<span class="nokta">.</span></h1>' +
+      '<div class="izgara"><div class="t kobalt genis" style="gap:6px"><span class="k">Davet kodun</span><span class="dev num" style="font-size:52px;letter-spacing:.06em">' + esc(hp.kod || '—') + '</span><span style="opacity:.85;font-size:14px;line-height:1.45">Öğrencin uygulamada Profil → Hocam alanına bu kodu yazınca sana bağlanır.</span>' +
+      '<div class="satir" style="gap:8px;justify-content:flex-start"><button class="btn beyaz" data-act="hp-kod-paylas" style="min-height:42px">Paylaş</button><button class="metin-btn" data-act="hp-kod-yenile" style="color:#fff;opacity:.85">Kodu yenile</button></div></div>' +
+      (hp.liste.length ? hp.liste.map((o) => '<a class="t genis" href="#/hoca/' + encodeURIComponent(o.id) + '" style="gap:4px"><div class="satir"><b style="font-size:19px">' + esc(o.ad) + '</b><span class="etiket">' + o.haftalik + ' / ' + (o.gun || '?') + ' bu hafta</span></div><span class="ik">' + esc([HEDEF_AD[o.hedef] || '', o.kilo ? sayi(o.kilo, 1) + ' kg' : '', o.program || ''].filter(Boolean).join(' · ')) + '</span><span class="ik">Son antrenman: ' + (o.son_antrenman ? esc(o.son_antrenman.tarih + ' · ' + o.son_antrenman.ad) : 'henüz yok') + '</span></a>').join('') : '<div class="t bos genis"><b>Henüz öğrencin yok.</b><span class="ik">Kodunu öğrencilerinle paylaş.</span></div>') +
+      '</div>';
+  }
+  function ekranHocaOgrenci(id) {
+    if (!hp.ogr || hp.ogrId !== id) { hp.ogr = null; hpYukle(id); return ust(geri('#/hoca'), '<span class="alt">Öğrenci</span>') + '<p class="ik" style="padding:20px 4px">Yükleniyor…</p>'; }
+    if (hp.ogr.hata) return ust(geri('#/hoca')) + '<div class="t"><span>' + esc(hp.ogr.hata) + '</span></div>';
+    const o = hp.ogr.ozet; const pr = o.profil;
+    const sakat = (pr.sakatlik || []).map((b) => (K.SAKATLIK.find((x) => x[0] === b) || [b, b])[1]).join(', ');
+    return ust(geri('#/hoca'), '<span class="alt">Öğrenci</span>') +
+      '<h1 class="baslik">' + esc(hp.ogr.ogrenci.ad) + '<span class="nokta">.</span></h1>' +
+      '<div class="izgara">' +
+      '<div class="t kobalt genis"><span class="k">Bilgiler</span><span style="font-weight:700;line-height:1.5">' + esc([pr.cinsiyet === 'k' ? 'Kadın' : 'Erkek', pr.yas ? pr.yas + ' yaş' : '', pr.boy ? pr.boy + ' cm' : '', HEDEF_AD[pr.hedef] || '', { baslangic: 'yeni başlayan', orta: 'orta seviye', ileri: 'ileri seviye' }[pr.deneyim] || '', pr.gun ? 'haftada ' + pr.gun + ' gün' : '', (K.ORTAM[pr.ortam] || {}).ad || ''].filter(Boolean).join(' · ')) + '</span>' + (sakat ? '<span style="opacity:.85">Dikkat: ' + esc(sakat) + '</span>' : '') + '</div>' +
+      '<div class="t h130"><span class="k">Kilo</span><span class="orta num">' + (o.kilo.length ? sayi(o.kilo[o.kilo.length - 1].kg, 1) : '—') + '<span class="ik"> kg</span></span><span class="ik">' + (o.kilo.length >= 2 ? (o.kilo[o.kilo.length - 1].kg - o.kilo[0].kg >= 0 ? '+' : '') + sayi(o.kilo[o.kilo.length - 1].kg - o.kilo[0].kg, 1) + ' kg (' + o.kilo.length + ' tartı)' : 'tek kayıt') + '</span></div>' +
+      '<div class="t limon h130"><span class="k">Kalori (14 gün ort.)</span><span class="orta num">' + (o.ortKcal14 ? sayi(o.ortKcal14) : '—') + '</span><span class="k">' + (o.hedef ? 'hedef ' + sayi(o.hedef.kcal) + ' · ' : '') + o.kayitliGun14 + ' gün kayıt</span></div>' +
+      '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Son antrenmanlar</span><div class="liste">' + (o.antrenmanlar.length ? o.antrenmanlar.slice(0, 8).map((a) => '<div><div class="ad"><b>' + esc(a.ad) + '</b><span class="ik">' + esc(a.tarih) + '</span></div><span class="num ik" style="font-weight:700">' + a.set + ' set · ' + sayi(a.hacim) + ' kg · ' + a.dk + ' dk</span></div>').join('') : '<div><span class="ik">Henüz antrenman kaydı yok.</span></div>') + '</div></div>' +
+      '<div class="t genis"><div class="satir"><span class="k">Programı</span>' + (hp.ogr.bekleyen ? '<span class="etiket">Gönderdiğin program onay bekliyor</span>' : '') + '</div>' + (o.program ? '<b style="font-size:18px">' + esc(o.program.ad) + '</b>' + o.program.gunler.map((g) => '<span class="ik"><b style="color:var(--murekkep)">' + GUN_KISA[g.hafta] + ' ' + esc(g.ad) + ':</b> ' + g.hareketler.map((x) => esc((D.HAREKET[x.id] || { ad: x.id }).ad) + ' ' + x.set + '×' + esc(x.tekrar)).join(', ') + '</span>').join('') : '<span class="ik">Programı yok.</span>') + '</div>' +
+      '</div>' +
+      '<button class="btn ana buyuk-btn" data-act="hp-program" data-bos="0">' + (o.program ? 'Programını düzenleyip gönder' : 'Program yaz ve gönder') + IK.ok + '</button>' +
+      (o.program ? '<button class="btn cerceve" data-act="hp-program" data-bos="1">Sıfırdan program yaz</button>' : '') +
+      '<button class="metin-btn" data-act="hp-cikar" style="align-self:center;color:var(--ikincil)">Öğrenciyi listeden çıkar</button>';
+  }
+
   /* ---------- koç (yapay zekâ) ---------- */
   let kocYuk = false; let kocAcil = false;
   const KOC_HIZLI = ['Dizimde ağrı var, antrenmana devam edeyim mi?', 'Bugün çok yorgun ve isteksizim.', 'Bu hareketi yaparken belimde zorlanma hissettim.', 'Antrenmandan önce ve sonra ne yemeliyim?'];
@@ -417,6 +489,8 @@
   function kocKaydir() { const a = document.getElementById('kocAkis'); if (a && a.lastElementChild) a.lastElementChild.scrollIntoView({ block: 'end', behavior: azHareket ? 'auto' : 'smooth' }); }
 
   /* ---------- kendi programım: düzenleyici ---------- */
+  let pHoca = null; // { id, ad, profil } öğrenci için program yazılıyorsa
+  const pProfil = () => (pHoca ? Object.assign({ hedef: 'kas', deneyim: 'orta', sakatlik: [] }, pHoca.profil) : S.profil);
   let ptaslak = null; let pSecGun = 0; let pAra = ''; let pBolge = ''; let pYorumYuk = false;
   const PBOLGE = [['gogus', 'Göğüs', ['yatay_itme', 'egimli_itme', 'dips']], ['sirt', 'Sırt', ['yatay_cekme', 'dikey_cekme']], ['omuz', 'Omuz', ['dikey_itme', 'yan_omuz', 'arka_omuz', 'rotator']], ['kol', 'Kol', ['biceps', 'triceps']], ['bacak', 'Bacak', ['diz', 'tek_bacak', 'quad_izo', 'hamstring_izo', 'adduktor', 'abduktor', 'baldir']], ['kalca', 'Kalça', ['kalca']], ['karin', 'Karın', ['core_anti_ext', 'core_anti_rot', 'core_lat', 'core_rot', 'tasima', 'kavrama', 'boyun']], ['kondisyon', 'Kondisyon', ['kardiyo', 'surat', 'ceviklik', 'plyo_dikey', 'plyo_inis', 'plyo_yatay', 'plyo_ust']]];
   const VARSAYILAN_GUN = { 1: [2], 2: [0, 3], 3: [0, 2, 4], 4: [0, 1, 3, 4], 5: [0, 1, 2, 4, 5], 6: [0, 1, 2, 3, 4, 5] };
@@ -432,9 +506,9 @@
     return ptaslak;
   }
   function ekranProgramDuzen() {
-    if (!S.profil) return ekranKarsilama();
+    if (!S.profil && !pHoca) return ekranKarsilama();
     const pr = ptaslakAl();
-    const an = M.ozelAnaliz(pr.gunler, S.profil);
+    const an = M.ozelAnaliz(pr.gunler, pProfil());
     const gunler = pr.gunler.map((g, gi) => {
       const satirlar = g.hareketler.map((x, i) => {
         const h = D.HAREKET[x.id] || { ad: x.id, kas: '' };
@@ -452,8 +526,9 @@
     }).join('');
     const yorum = pr.yorum ? '<div class="t genis koyu"><span class="k">Yapay zekâ yorumu</span>' + pr.yorum.ozet.map((x) => '<p style="font-size:15px;line-height:1.5">' + esc(x) + '</p>').join('') +
       (pr.yorum.oneriler && pr.yorum.oneriler.length ? '<ul class="madde" style="color:var(--koyu-yazi)">' + pr.yorum.oneriler.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '<span class="ik" style="color:var(--koyu-ikincil)">Genel bilgidir, tıbbi tavsiye değildir.</span></div>' : '';
-    return ust(geri(S.program && S.program.gunler.some((g) => g.hareketler.length) ? '#/antrenman' : '#/profil'), '<span class="alt">' + (pr.ozel ? 'Kendi programın' : 'Programı düzenle') + '</span>') +
-      '<h1 class="baslik">Programın<span class="nokta">.</span></h1>' +
+    return ust(geri(pHoca ? '#/hoca/' + encodeURIComponent(pHoca.id) : S.program && S.program.gunler.some((g) => g.hareketler.length) ? '#/antrenman' : '#/profil'), '<span class="alt">' + (pHoca ? esc(pHoca.ad) + ' için' : pr.ozel ? 'Kendi programın' : 'Programı düzenle') + '</span>') +
+      '<h1 class="baslik">' + (pHoca ? esc(pHoca.ad) + '\'in programı' : 'Programın') + '<span class="nokta">.</span></h1>' +
+      (pHoca ? '<label class="t genis alan"><span>Öğrencine not · isteğe bağlı</span><input data-pd="not" value="' + esc(pr.hocaNotu || '') + '" maxlength="300" placeholder="İlk hafta yükleri hafif tut." style="font-size:17px"></label>' : '') +
       '<div class="izgara">' +
       '<label class="t genis alan"><span>Program adı</span><input data-pd="ad" value="' + esc(pr.ad) + '" maxlength="40" style="font-size:22px"></label>' +
       gunler +
@@ -463,14 +538,15 @@
       yorum +
       '<button type="button" class="btn siyah genis" data-act="pd-yorum"' + (pYorumYuk ? ' disabled' : '') + '>' + (pYorumYuk ? 'Yorumlanıyor…' : (pr.yorum ? 'Yeniden yorumlat' : 'Yapay zekâya yorumlat')) + IK.ok + '</button>' +
       '</div>' +
-      '<button class="btn ana buyuk-btn" data-act="pd-kaydet">Programı kaydet' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
+      '<button class="btn ana buyuk-btn" data-act="pd-kaydet">' + (pHoca ? 'Öğrencime gönder' : 'Programı kaydet') + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
       '<button class="metin-btn" data-act="pd-vazgec" style="align-self:center;color:var(--ikincil)">Değişiklikleri at</button>';
   }
   function ekranProgramEkle(gi) {
     const pr = ptaslakAl(); const g = pr.gunler[gi];
     if (!g) { location.hash = '#/program'; return ''; }
     pSecGun = gi;
-    const ekip = S.profil && K.ORTAM[S.profil.ortam] ? K.ORTAM[S.profil.ortam].ekipman : null;
+    const PP = pProfil() || {};
+    const ekip = K.ORTAM[PP.ortam] ? K.ORTAM[PP.ortam].ekipman : null;
     const q = pAra.trim().toLocaleLowerCase('tr');
     const bol = PBOLGE.find((b) => b[0] === pBolge);
     const var_ = new Set(g.hareketler.map((x) => x.id));
@@ -480,7 +556,7 @@
       .sort((a, b) => { const u = (h) => (ekip && !h.ekipman.every((e) => ekip.indexOf(e) >= 0) ? 1 : 0); return u(a) - u(b) || a.seviye - b.seviye; });
     const satir = (h) => {
       const uygunDegil = ekip && !h.ekipman.every((e) => ekip.indexOf(e) >= 0);
-      const sakat = (S.profil.sakatlik || []).some((b) => (h.kontra || []).indexOf(b) >= 0);
+      const sakat = (PP.sakatlik || []).some((b) => (h.kontra || []).indexOf(b) >= 0);
       return '<button type="button" class="pd-sec" data-act="pd-ekle" data-id="' + h.id + '"' + (var_.has(h.id) ? ' disabled' : '') + '><span class="yigin"><b>' + esc(h.ad) + '</b><span class="ik">' + esc(D.HAREKET[h.id].kas) + ' · ' + h.ekipman.map((e) => K.EKIPMAN[e]).join(', ') + '</span>' +
         (uygunDegil || sakat ? '<span class="pd-not">' + [uygunDegil ? 'ortamında ekipmanı yok' : '', sakat ? 'sakatlık bölgeni zorlayabilir' : ''].filter(Boolean).join(' · ') + '</span>' : '') + '</span>' +
         (var_.has(h.id) ? '<span class="ik">ekli</span>' : IK.arti.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:var(--kobalt);stroke-width:2.4;flex:none"')) + '</button>';
@@ -542,7 +618,7 @@
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + antr +
+      '<div class="izgara">' + atananBant() + antr +
       '<a class="t limon h150" href="#/beslenme"><span class="k">' + (kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(Math.abs(kalan)) + '">' + sayi(Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
       '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' +
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
@@ -875,7 +951,8 @@
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       (hesap && hesap.rol === 'admin' ? '<a class="t koyu genis" href="#/yonetim"><span class="k">Yalnızca sen görürsün</span><b style="font-size:20px">Yönetim</b><span style="opacity:.8">Bekleme listesi, görüşler, hatalar, kullanıcılar.</span></a>' : '') +
       '<a class="t kobalt genis" href="#/gorus"><span class="k">Deneme sürümü</span><b style="font-size:20px">Görüş bildir</b><span class="ik" style="color:inherit;opacity:.8">Hata, öneri, beğendiğin bir şey: bize yaz.</span></a>' +
-      '<div class="t bos h130"><span class="k">Hocam</span><b>Hoca bağlantısı</b><span class="ik">Yakında: davet koduyla hocana bağlan.</span></div>' +
+      hocaKutu() +
+      (hocaMi() ? '<a class="t kobalt h130" href="#/hoca"><span class="k">Hoca paneli</span><b style="font-size:19px">Öğrencilerim</b><span style="opacity:.85">Kod, programlar, antrenmanlar.</span></a>' : '') +
       '<div class="t bos h130"><span class="k">Topluluk</span><b>Forum ve meydan okumalar</b><span class="ik">Yakında açılıyor.</span></div>' +
       '</div>' +
       (hesap ? (silAcik ? '<form data-form="hesap-sil" class="t genis" novalidate style="gap:10px"><span class="k" style="color:var(--hata)">Hesabı kalıcı sil</span><span style="font-size:14px;line-height:1.5">Hesabın, programın, öğün ve antrenman kayıtların ile sağlık verilerin sunucudan kalıcı olarak silinir. Bu geri alınamaz.</span>' + sifreAlani('sifre', 'current-password', 'Onay için şifren') + '<p class="hata" id="formHata" role="alert" hidden></p><div class="satir" style="flex-direction:row;gap:8px"><button type="button" class="btn cerceve" data-act="sil-kapat" style="flex:1">Vazgeç</button><button class="btn" id="formBtn" type="submit" style="flex:1;background:var(--hata);color:#fff">Kalıcı sil</button></div></form>' : '<button class="metin-btn" data-act="sil-ac" style="align-self:center;color:var(--ikincil)">Hesabımı sil</button>') : '') +
@@ -904,6 +981,8 @@
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
     else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
+    else if (parca[0] === 'hoca') { html = ekranHoca(parca[1] ? decodeURIComponent(parca[1]) : null); sekme = 'profil'; }
+    else if (parca[0] === 'hoca-program') { html = ekranHocaProgram(); sekme = 'bugun'; }
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
@@ -1118,6 +1197,7 @@
       toast('Çıkış yapıldı.'); git('#/');
     },
     'bekleme-hedef'(el) { beklemeHedef = el.getAttribute('aria-pressed') === 'true' ? '' : el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.deger === beklemeHedef))); },
+    async 'yon-rol'(el) { const r = await istek('yonetim/rol', 'POST', { eposta: el.dataset.eposta, rol: el.dataset.rol }); toast(r.ok ? 'Güncellendi.' : (r.j.hata || 'Olmadı.')); yon.veri = null; render(); },
     'yon-sekme'(el) { yon.sekme = el.dataset.deger; render(); },
     'yon-yenile'() { yon.veri = null; render(); },
     async 'yon-onay'(el) {
@@ -1135,7 +1215,7 @@
     'pd-gunekle'() { const bos = [0, 1, 2, 3, 4, 5, 6].find((h) => !ptaslak.gunler.some((g) => g.hafta === h)); if (bos == null) return; ptaslak.gunler.push({ id: 'ozel-' + kimlik(), gid: 'ozel', ad: 'Gün ' + String.fromCharCode(65 + ptaslak.gunler.length), hafta: bos, bolge: 'ozel', hareketler: [] }); ptaslak.gunler.sort((a, b) => a.hafta - b.hafta); render(); },
     'pd-bolge'(el) { pBolge = el.dataset.deger; render(); },
     'pd-ekle'(el) {
-      const x = M.ozelHareket(S.profil, el.dataset.id); if (!x) return;
+      const x = M.ozelHareket(pProfil(), el.dataset.id); if (!x) return;
       const g = ptaslak.gunler[pSecGun]; g.hareketler.push(x);
       if (!g.hareketler.some((y) => y.isinma) && x.blok === 'ana' && K.HAREKET[x.id].artis > 0) x.isinma = true;
       toast(D.HAREKET[x.id].ad + ' eklendi.'); git('#/program');
@@ -1146,7 +1226,7 @@
       pYorumYuk = true; render();
       try {
         const ozet = { ad: pr.ad, gunler: pr.gunler.map((g) => ({ ad: g.ad, gun: GUN_AD[g.hafta], hareketler: g.hareketler.map((x) => D.HAREKET[x.id].ad + ' ' + x.set + 'x' + x.tekrar + (x.birim !== 'tekrar' ? ' ' + BIRIM[x.birim].toLowerCase() : '')) })) };
-        const p = S.profil; const profil = { cinsiyet: p.cinsiyet === 'k' ? 'kadın' : 'erkek', yas: p.yas, hedef: p.hedef, deneyim: p.deneyim, ortam: p.ortam, spor: p.spor, sakatlik: (p.sakatlik || []).map((b) => (K.SAKATLIK.find((x) => x[0] === b) || [b, b])[1]) };
+        const p = pProfil(); const profil = { cinsiyet: p.cinsiyet === 'k' ? 'kadın' : 'erkek', yas: p.yas, hedef: p.hedef, deneyim: p.deneyim, ortam: p.ortam, spor: p.spor, sakatlik: (p.sakatlik || []).map((b) => (K.SAKATLIK.find((x) => x[0] === b) || [b, b])[1]) };
         const r = await fetch('/api/comeback/koc', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tur: 'program', program: ozet, profil, analiz: M.ozelAnaliz(pr.gunler, p).uyari }) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) toast(j.hata || 'Yorum alınamadı.'); else { olay('program_yorum'); pr.yorum = { ozet: j.ozet || [], oneriler: j.oneriler || [], zaman: Date.now() }; }
@@ -1157,15 +1237,52 @@
       const pr = ptaslak;
       pr.gunler = pr.gunler.filter((g) => g.hareketler.length);
       if (!pr.gunler.length) { toast('En az bir güne hareket ekle.'); ptaslak.gunler.length || ptaslak.gunler.push(bosOzelProgram(1).gunler[0]); render(); return; }
-      pr.gunler.forEach((g) => { g.dk = M.ozelAnaliz([g], S.profil).dk[0]; });
-      const an = M.ozelAnaliz(pr.gunler, S.profil); pr.hacim = an.hacim; pr.hacimHedef = an.hacimHedef;
+      pr.gunler.forEach((g) => { g.dk = M.ozelAnaliz([g], pProfil()).dk[0]; });
+      const an = M.ozelAnaliz(pr.gunler, pProfil()); pr.hacim = an.hacim; pr.hacimHedef = an.hacimHedef;
       pr.ozel = true; pr.ad = String(pr.ad || 'Kendi programım').trim().slice(0, 40) || 'Kendi programım';
+      if (pHoca) {
+        const hedefId = pHoca.id; const not = pr.hocaNotu || ''; delete pr.hocaNotu; delete pr.yorum; pr.hocadan = hesap.ad;
+        histek('ogrenci/' + encodeURIComponent(hedefId) + '/program', 'POST', { program: pr, not }).then((r) => {
+          if (!r.ok) { toast(r.j.hata || 'Gönderilemedi.'); return; }
+          toast('Program öğrencine gönderildi. Kabul edince onun programı olur.'); pHoca = null; ptaslak = null; hp.ogr = null; git('#/hoca/' + encodeURIComponent(hedefId));
+        }).catch(() => toast('Bağlantı kurulamadı.'));
+        return;
+      }
       if (S.seans) S.seans = null;
       olay('program_ozel'); S.program = pr; S.profil.gun = pr.gunler.length; ptaslak = null; kaydet(true); toast('Programın kaydedildi.'); git('#/antrenman');
     },
-    'pd-vazgec'() { ptaslak = null; git(S.program && S.program.gunler.some((g) => g.hareketler.length) ? '#/antrenman' : '#/profil'); },
+    'pd-vazgec'() { if (pHoca) { const id = pHoca.id; pHoca = null; ptaslak = null; git('#/hoca/' + encodeURIComponent(id)); return; } ptaslak = null; git(S.program && S.program.gunler.some((g) => g.hareketler.length) ? '#/antrenman' : '#/profil'); },
     'koc-hizli'(el) { kocGonder(el.dataset.metin); },
     'koc-temizle'() { S.koc = []; kocAcil = false; kaydet(); render(); },
+    'hp-program'(el) {
+      const o = hp.ogr; if (!o) return;
+      pHoca = { id: o.ogrenci.id, ad: o.ogrenci.ad, profil: o.ozet.profil };
+      const kaynak = el.dataset.bos === '1' || !o.ozet.program ? bosOzelProgram(o.ozet.profil.gun || 3) : JSON.parse(JSON.stringify(o.ozet.program));
+      kaynak.gunler.forEach((g) => { g.id = g.id || 'ozel-' + kimlik(); g.gid = g.gid || 'ozel'; g.bolge = g.bolge || 'ozel'; g.hareketler.forEach((x) => { x.sure = x.birim && x.birim !== 'tekrar'; }); });
+      kaynak.ad = kaynak.ad || (pHoca.ad + ' programı'); kaynak.ozel = true;
+      ptaslak = kaynak; git('#/program');
+    },
+    'hp-yenile'() { hp.liste = null; render(); },
+    async 'hp-kod-yenile'() { const r = await histek('kod', 'POST'); if (r.ok) { hp.kod = r.j.kod; toast('Yeni kod hazır. Eski kod artık çalışmaz.'); render(); } },
+    async 'hp-kod-paylas'() {
+      const metin = 'COMEBACK. uygulamasında Profil → Hocam alanına şu kodu yaz: ' + hp.kod;
+      try { if (navigator.share) { await navigator.share({ text: metin }); return; } } catch (e) { if (e.name === 'AbortError') return; }
+      try { await navigator.clipboard.writeText(metin); toast('Kopyalandı.'); } catch (e) { toast(metin); }
+    },
+    async 'hp-cikar'(el) {
+      if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; }
+      const r = await histek('ogrenci/' + encodeURIComponent(hp.ogrId) + '/cikar', 'POST'); if (r.ok) { hp.liste = null; hp.ogr = null; toast('Öğrenci listeden çıkarıldı.'); git('#/hoca'); }
+    },
+    async 'hoca-ayril'(el) {
+      if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; }
+      const r = await histek('ayril', 'POST'); if (r.ok) { hocaDurum = { hoca: null, atanan: null }; toast('Hocandan ayrıldın. Artık verilerini göremez.'); render(); }
+    },
+    async atanan(el) {
+      const a = hocaDurum && hocaDurum.atanan; if (!a) return; const kabul = el.dataset.kabul === '1';
+      const r = await histek('atanan/' + a.id + '/yanit', 'POST', { kabul }); if (!r.ok) { toast('Kaydedilemedi.'); return; }
+      if (kabul) { S.program = a.program; S.program.ozel = true; S.profil.gun = a.program.gunler.length; S.seans = null; kaydet(true); toast('Hocanın programı artık senin programın.'); }
+      hocaDurum.atanan = null; git(kabul ? '#/antrenman' : '#/');
+    },
     'gorus-tur'(el) { gorusTur = el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); },
     'sil-ac'() { silAcik = true; render(); const i = document.querySelector('[data-form="hesap-sil"] input'); if (i) i.focus(); },
     'sil-kapat'() { silAcik = false; render(); },
@@ -1197,6 +1314,7 @@
     if (el.dataset && el.dataset.pd && ptaslak) {
       const g = ptaslak.gunler[+el.dataset.g];
       if (el.dataset.pd === 'ad') ptaslak.ad = el.value;
+      else if (el.dataset.pd === 'not') ptaslak.hocaNotu = el.value.slice(0, 300);
       else if (el.dataset.pd === 'gunad') g.ad = el.value.slice(0, 24);
       else if (el.dataset.pd === 'tekrar') {
         const x = g.hareketler[+el.dataset.i]; const c = M.tekrarCoz(el.value, x.birim);
@@ -1230,6 +1348,15 @@
     if (f.dataset.form === 'kayit' || f.dataset.form === 'giris') return hesapFormu(f.dataset.form, f, v);
     if (f.dataset.form === 'gorus') return gorusGonder(v);
     if (f.dataset.form === 'koc') return kocGonder(v.metin);
+    if (f.dataset.form === 'yon-hoca') { istek('yonetim/rol', 'POST', { eposta: String(v.eposta || '').trim(), rol: 'koc' }).then((r) => { toast(r.ok ? 'Artık hoca.' : (r.j.hata || 'Olmadı.')); if (r.ok) { yon.veri = null; render(); } }); return; }
+    if (f.dataset.form === 'hoca-baglan') {
+      if (!v.riza) { toast('Hocanın verilerini görmesine onay vermelisin.'); return; }
+      histek('baglan', 'POST', { kod: String(v.kod || '').trim().toUpperCase(), riza: true }).then((r) => {
+        if (!r.ok) { toast(r.j.hata || 'Bağlanılamadı.'); return; }
+        toast('Hocan ' + r.j.hoca.ad + ' ile bağlandın.'); hocaYukle();
+      }).catch(() => toast('Bağlantı kurulamadı.'));
+      return;
+    }
     if (f.dataset.form === 'bekleme') return beklemeGonder(v);
     if (f.dataset.form === 'hesap-sil') return hesapSil(v);
     if (f.dataset.form === 'ara') { if (aramaQ.trim().length >= 2) markaAra(aramaQ); return; }
