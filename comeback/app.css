@@ -10,7 +10,9 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+a,button,label,summary,[data-act]{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus:not(:focus-visible){outline:none}
 body{margin:0;background:var(--zemin);color:var(--murekkep);font:400 16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
 ::selection{background:var(--kobalt);color:#fff}
 :focus-visible{outline:2px solid var(--kobalt);outline-offset:2px;border-radius:8px}
@@ -101,8 +103,8 @@ a.t:active,button.t:active{transform:scale(.985)}
 .alan>span{font-size:12px;font-weight:700;color:var(--ikincil)}
 .alan input,.alan select{width:100%;min-width:0;border:none;background:transparent;padding:0;outline:none;font-size:30px;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .alan select{font-size:20px;letter-spacing:-.01em;appearance:none}
-.t:focus-within{box-shadow:0 0 0 2px var(--kobalt)}
-.t.koyu:focus-within,.t.kobalt:focus-within,.t.limon:focus-within{box-shadow:none}
+.t:has(input:focus,textarea:focus,select:focus){box-shadow:0 0 0 2px var(--kobalt)}
+.t.koyu:has(input:focus,textarea:focus),.t.kobalt:has(input:focus,textarea:focus),.t.limon:has(input:focus,textarea:focus),.t:has(input[type=checkbox]:focus),.t:has(input[type=file]:focus){box-shadow:none}
 .giris{width:100%;min-height:52px;border-radius:16px;border:1.5px solid var(--cizgi);background:#fff;padding:0 16px;font-size:16px;outline:none}
 .giris:focus{border-color:var(--kobalt)}
 .form-satir{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
