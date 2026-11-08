@@ -1,5 +1,7 @@
 // COMEBACK. — hesap ve veri eşitleme
-//   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza }
+//   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza, saglikRiza }
+//   POST /api/comeback/hesap/sil     { sifre }  → hesap ve bütün kayıtlar kalıcı silinir
+//   POST /api/comeback/hesap/gorus   { tur, metin, ekran }  (girişsiz de olur)
 //   POST /api/comeback/hesap/giris   { eposta, sifre }
 //   POST /api/comeback/hesap/cikis
 //   GET  /api/comeback/hesap/ben     → { kullanici }
@@ -88,12 +90,13 @@ export async function onRequest(ctx) {
       if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
       if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
       if (g.riza !== true) return hata('Verilerinin hesabında saklanmasına onay vermelisin.', 400);
+      if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza vermelisin.', 400);
       if (!(await sinir(db, 'kayit:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
       const var_ = await db.prepare('SELECT id FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
       if (var_) return hata('Bu e-postayla zaten bir hesap var. Giriş yapmayı dene.', 409);
       const id = crypto.randomUUID(); const tuz = hex(rastgele(16)); const simdi = Date.now();
-      await db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-        .bind(id, eposta, ad, await sifreHash(sifre, tuz), tuz, 'uye', simdi, simdi).run();
+      await db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, saglik_onay, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(id, eposta, ad, await sifreHash(sifre, tuz), tuz, 'uye', simdi, simdi, simdi).run();
       const token = await oturumAc(db, id);
       return json({ kullanici: { id, ad, eposta, rol: 'uye' } }, 201, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
     }
@@ -117,8 +120,34 @@ export async function onRequest(ctx) {
     }
 
     const kim = await kimDir(db, req);
+
+    if (yol === 'gorus' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const metin = String(g.metin || '').trim().slice(0, 2000);
+      if (metin.length < 3) return hata('Birkaç kelime yaz.', 400);
+      const tur = ['oneri', 'hata', 'begeni', 'diger'].includes(g.tur) ? g.tur : 'diger';
+      if (!(await sinir(db, 'gorus:' + (kim ? kim.id : ip), 20, 3600))) return hata('Çok fazla mesaj gönderildi. Biraz sonra tekrar dene.', 429);
+      await db.prepare('INSERT INTO gorusler (kullanici_id, tur, metin, ekran, cihaz, zaman) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(kim ? kim.id : null, tur, metin, String(g.ekran || '').slice(0, 60), String(req.headers.get('user-agent') || '').slice(0, 200), Date.now()).run();
+      return json({ ok: true }, 201);
+    }
+
     if (yol === 'ben' && m === 'GET') return kim ? json({ kullanici: kim }) : hata('Giriş yapılmamış.', 401);
     if (!kim) return hata('Giriş yapılmamış.', 401);
+
+    if (yol === 'sil' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      if (!(await sinir(db, 'sil:' + kim.id, 5, 900))) return hata('Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
+      const k = await db.prepare('SELECT sifre_hash, tuz FROM kullanicilar WHERE id = ?').bind(kim.id).first();
+      if (!k || !esit(await sifreHash(String(g.sifre || ''), k.tuz), k.sifre_hash)) return hata('Şifre hatalı.', 401);
+      await db.batch([
+        db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(kim.id),
+        db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(kim.id),
+        db.prepare('UPDATE gorusler SET kullanici_id = NULL WHERE kullanici_id = ?').bind(kim.id),
+        db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(kim.id)
+      ]);
+      return json({ ok: true }, 200, { 'set-cookie': cerezYaz('', 0) });
+    }
 
     if (yol === 'veri' && m === 'GET') {
       const v = await db.prepare('SELECT json, guncelleme FROM veriler WHERE kullanici_id = ?').bind(kim.id).first();
