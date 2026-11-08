@@ -72,6 +72,7 @@ async function govde(req) {
   if (!(req.headers.get('content-type') || '').includes('application/json')) return null;
   try { return await req.json(); } catch (e) { return null; }
 }
+const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas']);
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
 export async function onRequest(ctx) {
@@ -138,6 +139,15 @@ export async function onRequest(ctx) {
 
     const kim = await kimDir(db, req);
 
+    if (yol === 'olay' && m === 'POST') {
+      // kişisel veri olmadan günlük özellik sayaçları
+      const g = await govde(req); const olay = String((g && g.olay) || '');
+      if (!/^[a-z_]{2,30}$/.test(olay) || !OLAYLAR.has(olay)) return hata('Geçersiz.', 400);
+      if (!(await sinir(db, 'olay:' + (kim ? kim.id : ip), 200, 3600))) return json({ ok: true });
+      await db.prepare('INSERT INTO sayac (gun, olay, adet) VALUES (?, ?, 1) ON CONFLICT(gun, olay) DO UPDATE SET adet = adet + 1').bind(new Date().toISOString().slice(0, 10), olay).run();
+      return json({ ok: true });
+    }
+
     if (yol === 'hata' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       if (!(await sinir(db, 'hata:' + (kim ? kim.id : ip), 30, 3600))) return json({ ok: true });
@@ -160,8 +170,24 @@ export async function onRequest(ctx) {
           bekleyen: await say("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor'"),
           onayli: await say("SELECT COUNT(*) n FROM bekleme WHERE durum = 'onayli'"),
           gorus: await say('SELECT COUNT(*) n FROM gorusler WHERE zaman > ?', hafta),
-          hata: await say('SELECT COUNT(*) n FROM hatalar WHERE zaman > ?', hafta)
+          hata: await say('SELECT COUNT(*) n FROM hatalar WHERE zaman > ?', hafta),
+          // ikinci hafta dönüşü: 7–28 gün önce kayıt olanlardan, kayıttan 7 gün sonra hâlâ veri yazanlar
+          donusAday: await say('SELECT COUNT(*) n FROM kullanicilar WHERE olusturma < ? AND olusturma > ?', hafta, Date.now() - 28 * 864e5),
+          donus: await say('SELECT COUNT(*) n FROM kullanicilar k JOIN veriler v ON v.kullanici_id = k.id WHERE k.olusturma < ? AND k.olusturma > ? AND v.guncelleme > k.olusturma + 7 * 86400000', hafta, Date.now() - 28 * 864e5),
+          olaylar: ((await db.prepare('SELECT olay, SUM(adet) adet FROM sayac WHERE gun >= ? GROUP BY olay ORDER BY adet DESC').bind(new Date(hafta).toISOString().slice(0, 10)).all()).results || [])
         });
+      }
+      if (alt === 'yedek' && m === 'GET') {
+        // yönetici için tam dışa aktarma (şifre özetleri ve oturumlar hariç)
+        const t = async (sql) => (await db.prepare(sql).all()).results || [];
+        const veri = {
+          zaman: new Date().toISOString(),
+          kullanicilar: await t('SELECT id, eposta, ad, rol, onay_zamani, saglik_onay, olusturma FROM kullanicilar'),
+          veriler: await t('SELECT kullanici_id, json, guncelleme FROM veriler'),
+          bekleme: await t('SELECT * FROM bekleme'), gorusler: await t('SELECT * FROM gorusler'), sayac: await t('SELECT * FROM sayac'),
+          sablonlar: await t('SELECT * FROM sablonlar')
+        };
+        return new Response(JSON.stringify(veri), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'content-disposition': 'attachment; filename="comeback-yedek-' + veri.zaman.slice(0, 10) + '.json"' } });
       }
       if (alt === 'bekleme' && m === 'GET') {
         const r = await db.prepare('SELECT b.eposta, b.ad, b.hedef, b.kaynak, b.durum, b.zaman, b.onay_zamani, (SELECT 1 FROM kullanicilar k WHERE k.eposta = b.eposta) kayitli FROM bekleme b ORDER BY CASE b.durum WHEN \'bekliyor\' THEN 0 ELSE 1 END, b.zaman DESC LIMIT 500').all();
