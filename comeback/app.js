@@ -149,6 +149,46 @@
   }
   const e1rm = (kg, t) => kg * (1 + t / 30);
 
+  /* ---------- geri dönüş modu, rozetler ---------- */
+  function sonAntrenmanAra() {
+    const l = Object.keys(S.gunluk).filter((k) => S.gunluk[k].antrenman && k < tarihKey()).sort();
+    if (!l.length) return null;
+    return Math.round((new Date(tarihKey()) - new Date(l[l.length - 1])) / 864e5);
+  }
+  // ara uzadıkça yükü düşür: 10–20 gün %90, 21–41 gün %80, 42+ gün %70 (detraining araştırmalarına göre ihtiyatlı)
+  const donusOran = (ara) => (ara == null || ara < 10 ? 1 : ara < 21 ? 0.9 : ara < 42 ? 0.8 : 0.7);
+  const ROZET = [
+    ['ilk', 'İlk adım', 'İlk antrenmanını bitirdin', (o) => o.antr >= 1],
+    ['a10', '10 antrenman', 'On antrenman tamam', (o) => o.antr >= 10],
+    ['a25', '25 antrenman', 'Artık alışkanlık', (o) => o.antr >= 25],
+    ['a50', '50 antrenman', 'Yarım yüz', (o) => o.antr >= 50],
+    ['s7', '7 gün seri', 'Bir hafta hiç bırakmadın', (o) => o.seri >= 7],
+    ['s30', '30 gün seri', 'Bir ay boyunca her gün', (o) => o.seri >= 30],
+    ['r1', 'İlk rekor', 'Kendini geçtin', (o) => o.rekor >= 1],
+    ['r10', '10 rekor', 'On harekette rekor', (o) => o.rekor >= 10],
+    ['donus', 'Geri döndün', 'Uzun aradan sonra yeniden başladın', (o) => o.donus],
+    ['hafta', 'Tam hafta', 'Haftalık hedefini tutturdun', (o) => o.tamHafta],
+    ['beslenme', 'Kayıtçı', '7 gün öğünlerini yazdın', (o) => o.ogunGun >= 7]
+  ];
+  function rozetDurum() {
+    const gunler = Object.keys(S.gunluk);
+    const haftaBas = new Date(); haftaBas.setDate(haftaBas.getDate() - haftaGunu()); const hb = tarihKey(haftaBas);
+    const o = {
+      antr: gunler.filter((k) => S.gunluk[k].antrenman).length, seri: Math.max(seri(), S.enIyiSeri || 0),
+      rekor: Object.keys(S.rekor).length, donus: !!S.donusYapildi,
+      tamHafta: !!(S.profil && gunler.filter((k) => k >= hb && S.gunluk[k].antrenman).length >= S.profil.gun) || !!S.tamHaftaOldu,
+      ogunGun: gunler.filter((k) => S.gunluk[k].ogun.length).length
+    };
+    if (o.seri > (S.enIyiSeri || 0)) S.enIyiSeri = o.seri;
+    if (o.tamHafta) S.tamHaftaOldu = true;
+    return ROZET.map((r) => ({ id: r[0], ad: r[1], acik: r[2], var: r[3](o) }));
+  }
+  function yeniRozetler() {
+    const once = new Set(S.rozetler || []); const simdi = rozetDurum().filter((r) => r.var);
+    S.rozetler = simdi.map((r) => r.id);
+    return simdi.filter((r) => !once.has(r.id));
+  }
+
   function seri() {
     let n = 0; const d = new Date();
     const dolu = (k) => { const g = S.gunluk[k]; return g && (g.ogun.length || g.antrenman); };
@@ -496,6 +536,8 @@
     const rekorKutu = ana
       ? '<a class="t h150" href="#/ilerleme"><span class="k">' + esc(D.HAREKET[ana].ad) + ' rekoru</span><span class="orta num">' + sayi(S.rekor[ana].kg, 1) + '<span class="ik" style="font-weight:600"> kg × ' + S.rekor[ana].tekrar + '</span></span><span class="ik">' + esc(S.rekor[ana].tarih) + '</span></a>'
       : '<a class="t h150" href="#/ilerleme"><span class="k">Kilo</span><span class="orta num">' + sayi(S.kilo.length ? S.kilo[S.kilo.length - 1].kg : S.profil.kilo, 1) + '<span class="ik" style="font-weight:600"> kg</span></span><span class="ik">Tart, ekle, gelişimi gör</span></a>';
+    const ara = S.seans ? null : sonAntrenmanAra();
+    if (ara != null && ara >= 10 && !g.antrenman && antr.indexOf('Bugünün antrenmanı') >= 0) antr = antr.replace('<span class="btn beyaz"', '<span class="ik" style="color:rgba(255,255,255,.85)">' + ara + ' gün aradan sonra yükleri biraz hafifletiyoruz. Bıraktığın yerden.</span><span class="btn beyaz"');
     const sa = new Date().getHours();
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
@@ -560,6 +602,7 @@
     const toplamSet = Object.values(s.setler).reduce((a, l) => a + l.length, 0);
     return ust('<a class="ikon-btn" href="#/" aria-label="Ana sayfa">' + IK.geri + '</a>', '<span class="alt num">' + tamam + ' / ' + toplamSet + ' set · ' + dk + ' dk</span>') +
       '<h1 class="baslik">' + esc(sg.ad) + '<span class="nokta">.</span></h1>' +
+      (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Bıraktığın yerden.</span><span style="font-weight:600;line-height:1.45">' + s.donus.ara + ' gün ara verdin. Sakatlanmadan dönmen için bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yere döneriz.</span></div>' : '') +
       '<div class="seans-izgara">' + sg.hareketler.map((x) => {
         const hr = D.HAREKET[x.id]; const l = s.setler[x.id]; const once = S.son[x.id];
         const aktifIdx = l.findIndex((y) => !y.ok);
@@ -767,8 +810,40 @@
       '<div class="t kobalt h150"><span class="k">Bu hafta</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + S.profil.gun + '</span></span><span class="k">antrenman</span></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
+      '<div class="t genis"><div class="satir"><span class="k">Rozetler</span><span class="ik num">' + rozetDurum().filter((r) => r.var).length + ' / ' + ROZET.length + '</span></div><div class="rozetler">' + rozetDurum().map((r) => '<div class="rozet' + (r.var ? ' var' : '') + '"><i aria-hidden="true">' + (r.var ? IK.tik : '') + '</i><b>' + esc(r.ad) + '</b><span>' + esc(r.acik) + '</span></div>').join('') + '</div></div>' +
+      '<button class="t kobalt genis" data-act="paylas" style="flex-direction:row;align-items:center;justify-content:space-between;border:0;text-align:left;cursor:pointer"><span class="yigin"><span class="k">Haftalık kartın</span><b style="font-size:19px">Bu haftanı paylaş</b><span style="opacity:.8;font-size:14px">Instagram hikâyesine hazır görsel</span></span>' + IK.ok.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</button>' +
       '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Rekorların</span><div class="liste">' + (rekorlar.length ? rekorlar.slice(0, 8).map((h) => '<div><div class="ad"><b>' + esc(D.HAREKET[h].ad) + '</b><span class="ik">' + esc(S.rekor[h].tarih) + '</span></div><b class="num">' + sayi(S.rekor[h].kg, 1) + ' kg × ' + S.rekor[h].tekrar + '</b></div>').join('') : '<div><span class="ik">İlk antrenmanını bitirince rekorların burada görünür.</span></div>') + '</div></div>' +
       '</div>';
+  }
+
+  /* haftalık paylaşım kartı: 1080×1920, bento */
+  function haftaKarti() {
+    const W = 1080, H = 1920; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    const F = getComputedStyle(document.body).fontFamily;
+    const haftaBas = new Date(); haftaBas.setDate(haftaBas.getDate() - haftaGunu()); const hb = tarihKey(haftaBas);
+    const gunler = Object.keys(S.gunluk).filter((k) => k >= hb).sort();
+    const antr = gunler.filter((k) => S.gunluk[k].antrenman).map((k) => S.gunluk[k].antrenman);
+    const set = antr.reduce((a, y) => a + y.set, 0), hacim = antr.reduce((a, y) => a + y.hacim, 0), dk = antr.reduce((a, y) => a + y.dk, 0);
+    const rekor = Object.keys(S.rekor).filter((h) => { const t = S.rekor[h].tarih; return gunler.some((k) => new Date(k).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) === t); }).length;
+    const kutu = (X, Y, w, h, renk) => { x.fillStyle = renk; x.beginPath(); x.roundRect(X, Y, w, h, 56); x.fill(); };
+    const yaz = (t, X, Y, boyut, kalinlik, renk, ls) => { x.fillStyle = renk; x.font = kalinlik + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; x.fillText(t, X, Y); };
+    x.fillStyle = '#ECECE8'; x.fillRect(0, 0, W, H);
+    yaz('COMEBACK', 80, 160, 64, 900, '#16161A', -3); const lw = x.measureText('COMEBACK').width; yaz('.', 80 + lw + 2, 160, 64, 900, '#2E4BFF', 0);
+    const bitis = new Date(haftaBas); bitis.setDate(bitis.getDate() + 6);
+    yaz(haftaBas.getDate() + ' ' + AY[haftaBas.getMonth()] + ' – ' + bitis.getDate() + ' ' + AY[bitis.getMonth()], 80, 230, 36, 700, '#5F5D57');
+    yaz('Bu haftam', 80, 400, 150, 900, '#16161A', -7); yaz('.', 80 + x.measureText('Bu haftam').width + 2, 400, 150, 900, '#2E4BFF', 0);
+    kutu(60, 470, 960, 470, '#2E4BFF');
+    yaz('Antrenman', 120, 560, 40, 700, 'rgba(255,255,255,.8)');
+    yaz(String(antr.length), 120, 840, 280, 900, '#FFFFFF', -12);
+    yaz('/ ' + (S.profil ? S.profil.gun : antr.length) + ' gün', 120 + x.measureText(String(antr.length)).width + 30, 840, 64, 800, 'rgba(255,255,255,.75)', 0);
+    kutu(60, 970, 470, 360, '#D9F05A'); yaz('Set', 110, 1050, 36, 700, '#3E4410'); yaz(sayi(set), 110, 1250, 150, 900, '#16161A', -6);
+    kutu(550, 970, 470, 360, '#16161A'); yaz('Seri', 600, 1050, 36, 700, '#B9B6AE'); yaz(String(seri()), 600, 1250, 150, 900, '#F3F1EC', -6); yaz('gün', 600 + x.measureText(String(seri())).width + 16, 1250, 48, 800, '#6E86FF', 0);
+    kutu(60, 1360, 960, 300, '#FFFFFF');
+    yaz('Toplam hacim', 120, 1440, 36, 700, '#5F5D57'); yaz(sayi(hacim) + ' kg', 120, 1580, 110, 900, '#16161A', -5);
+    yaz((rekor ? rekor + ' rekor · ' : '') + dk + ' dk', 640, 1440, 36, 700, '#2E4BFF');
+    yaz('Bıraktığın yerden başla.', 80, 1790, 44, 800, '#16161A', -1);
+    yaz('comeback.com.tr', 80, 1850, 32, 700, '#5F5D57');
+    return c;
   }
 
   /* --- profil --- */
@@ -904,12 +979,14 @@
     basla(el) {
       const g = S.program.gunler.find((x) => x.id === el.dataset.id);
       const setler = {};
+      const ara = sonAntrenmanAra(); const oran = donusOran(ara);
+      const yuvarla = (kg) => Math.max(0, Math.round((kg * oran) / 2.5) * 2.5);
       g.hareketler.forEach((x) => {
-        const hk = hedefKilo(x.id);
+        let hk = hedefKilo(x.id); if (hk && oran < 1) hk = yuvarla(S.son[x.id] ? Math.max.apply(null, S.son[x.id].setler.map((y) => y.kg || 0)) : hk);
         const b = birimOf(x);
         setler[x.id] = Array.from({ length: x.set }, () => ({ kg: hk ? String(hk).replace('.', ',') : '', tekrar: String(b === 'dk' || b === 'sn' ? x.ust || parseInt(x.tekrar, 10) : x.alt), ok: false }));
       });
-      S.seans = { gunId: g.id, tarih: tarihKey(), baslangic: Date.now(), setler };
+      S.seans = { gunId: g.id, tarih: tarihKey(), baslangic: Date.now(), setler, donus: oran < 1 ? { ara, oran } : null };
       kaydet(true); render(); window.scrollTo(0, 0);
     },
     tik(el) {
@@ -948,10 +1025,22 @@
       });
       if (!set) { toast('Önce en az bir seti tamamla.'); return; }
       gun(s.tarih).antrenman = { ad: g.ad, set, hacim: Math.round(hacim), dk: Math.max(1, Math.round((Date.now() - s.baslangic) / 60000)) };
+      if (s.donus) S.donusYapildi = true;
+      const yeniR = yeniRozetler();
       olay('antrenman_bitti');
       S.seans = null; dinlenme = null; kaydet(true);
-      toast(yeni ? 'Antrenman kaydedildi. ' + yeni + ' yeni rekor!' : 'Antrenman kaydedildi. Bir sonrakinde görüşürüz.');
+      toast(yeniR.length ? 'Yeni rozet: ' + yeniR.map((r) => r.ad).join(', ') + '!' : yeni ? 'Antrenman kaydedildi. ' + yeni + ' yeni rekor!' : 'Antrenman kaydedildi. Bir sonrakinde görüşürüz.');
       git('#/');
+    },
+    async paylas() {
+      const c = haftaKarti(); olay('paylas');
+      const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+      const dosya = new File([blob], 'comeback-hafta.png', { type: 'image/png' });
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [dosya] })) { await navigator.share({ files: [dosya], title: 'COMEBACK. haftam' }); return; }
+      } catch (e) { if (e && e.name === 'AbortError') return; }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'comeback-hafta.png'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000); toast('Görsel indirildi.');
     },
     su(el) { const g = gun(); g.su = Math.max(0, (g.su || 0) + (+el.dataset.ml)); if (+el.dataset.ml > 0) olay('su'); kaydet(); render(); },
     dunden(el) {

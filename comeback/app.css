@@ -376,3 +376,14 @@ fieldset.t>legend+*{clear:both}
 .oneri b{font-size:17px;letter-spacing:-.01em}
 .oneri-tarif{font-size:14px;line-height:1.5;color:var(--koyu-ikincil)}
 .kucuk-btn{min-height:36px !important;padding:0 14px;font-size:13px;border-radius:18px}
+
+/* rozetler */
+.rozetler{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rozet{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:18px;background:var(--zemin);opacity:.55}
+.rozet.var{opacity:1;background:var(--kobalt-acik)}
+.rozet i{width:26px;height:26px;border-radius:50%;background:var(--cizgi);display:inline-flex;align-items:center;justify-content:center;margin-bottom:4px}
+.rozet.var i{background:var(--kobalt)}
+.rozet i svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.rozet b{font-size:14px}
+.rozet span{font-size:12px;color:var(--ikincil);line-height:1.35}
+@media(min-width:760px){.rozetler{grid-template-columns:repeat(3,minmax(0,1fr))}}
