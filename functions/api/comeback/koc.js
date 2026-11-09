@@ -54,11 +54,14 @@ async function sinir(ctx, anahtar, limit) {
 }
 
 async function claude(env, sistem, mesajlar, maxTok) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
+  // Bu işlerde modelin "düşünme" adımı gereksiz: jeton sınırını yiyip cevabı boş ya da yarım bırakıyordu.
+  const iste = (ek) => fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': env.COMEBACK_AI_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: env.COMEBACK_KOC_MODEL || env.COMEBACK_AI_MODEL || 'claude-haiku-5-5', max_tokens: maxTok, system: sistem, messages: mesajlar })
+    body: JSON.stringify(Object.assign({ model: env.COMEBACK_KOC_MODEL || env.COMEBACK_AI_MODEL || 'claude-haiku-5-5', max_tokens: maxTok, system: sistem, messages: mesajlar }, ek))
   });
+  let r = await iste({ thinking: { type: 'disabled' } });
+  if (r.status === 400) r = await iste({ max_tokens: maxTok + 4000 }); // model düşünmeyi kapatmaya izin vermiyorsa daha geniş sınırla dene
   if (!r.ok) throw new Error('model ' + r.status);
   const v = await r.json();
   const metin = (v.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('').trim();
@@ -94,7 +97,7 @@ function kocKimlik(k) {
 }
 
 export async function onRequestPost(ctx) {
-  try { return await isle(ctx); } catch (e) { return json({ hata: 'Beklenmeyen bir sorun oldu. Biraz sonra tekrar dene.', kod: String(e && e.message || e).slice(0, 160) }, 500); }
+  try { return await isle(ctx); } catch (e) { return json({ hata: 'Beklenmeyen bir sorun oldu. Biraz sonra tekrar dene.' }, 500); }
 }
 async function isle(ctx) {
   const { request, env } = ctx;
@@ -124,7 +127,7 @@ async function isle(ctx) {
     let metin;
     let yd = ''; try { const c0 = (await claude(env, 'Sen Türk mutfağını iyi bilen bir spor diyetisyenisin. Gerçekçi porsiyon ve besin değerleri ver. Aşırı kısıtlayıcı öneri verme.', [{ role: 'user', content: istem }], 1000)); metin = c0.metin; yd = c0.durum; } catch (e) { return json({ hata: 'Öneri şu an alınamıyor.' }, 422); }
     const s = jsonOku(metin);
-    if (!s || !Array.isArray(s.liste) || !s.liste.length) return json({ hata: 'Öneri okunamadı, tekrar dene.', kod: kisa(metin, 300) + ' … ' + kisa(metin.slice(-200), 200) + ' [' + metin.length + '] ' + yd }, 422);
+    if (!s || !Array.isArray(s.liste) || !s.liste.length) return json({ hata: 'Öneri okunamadı, tekrar dene.' }, 422);
     const n = (v, u) => { const x = Number(v); return isFinite(x) && x >= 0 ? Math.min(u, Math.round(x)) : 0; };
     const liste = (Array.isArray(s.liste) ? s.liste : []).slice(0, 3).map((x) => ({ ad: kisa(x.ad, 60).replace(/[<>]/g, ''), g: n(x.g, 1500) || 300, k: n(x.k, 2500), p: n(x.p, 200), kh: n(x.kh, 400), y: n(x.y, 200), tarif: kisa(x.tarif, 280).replace(/[<>]/g, '') })).filter((x) => x.k > 0);
     return json({ liste });
