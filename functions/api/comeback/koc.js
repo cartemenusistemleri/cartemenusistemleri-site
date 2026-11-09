@@ -94,6 +94,9 @@ function kocKimlik(k) {
 }
 
 export async function onRequestPost(ctx) {
+  try { return await isle(ctx); } catch (e) { return json({ hata: 'Beklenmeyen bir sorun oldu. Biraz sonra tekrar dene.', kod: String(e && e.message || e).slice(0, 160) }, 500); }
+}
+async function isle(ctx) {
   const { request, env } = ctx;
   if (!env.COMEBACK_AI_KEY) return json({ hata: 'Koç yakında açılıyor.' }, 503);
   const uid = await kullanici(env, request);
