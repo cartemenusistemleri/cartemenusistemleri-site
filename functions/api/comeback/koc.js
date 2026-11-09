@@ -62,7 +62,7 @@ async function claude(env, sistem, mesajlar, maxTok) {
   if (!r.ok) throw new Error('model ' + r.status);
   const v = await r.json();
   const metin = (v.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('').trim();
-  return { metin, kesik: v.stop_reason === 'max_tokens' };
+  return { metin, kesik: v.stop_reason === 'max_tokens', durum: v.stop_reason + ':' + (v.content || []).map((c) => c.type).join(',') };
 }
 // sınıra takılıp yarıda kalan düz metni son tam cümlede bitir
 function cumledeBitir(t) {
@@ -122,9 +122,9 @@ async function isle(ctx) {
       'Türk mutfağından, evde kolay yapılan ya da kolay bulunan 3 farklı öneri ver. Her biri kalan kaloriyi aşmasın, proteini yüksek olsun, bugün yediklerini tekrar etmesin. ' +
       'Yalnızca geçerli JSON döndür: {"liste":[{"ad":"kısa ad ve porsiyon","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"tarif":"tek kısa cümle"}]}' + ' Açıklama, markdown ya da kod bloğu yazma; ilk karakter { olsun.';
     let metin;
-    try { metin = (await claude(env, 'Sen Türk mutfağını iyi bilen bir spor diyetisyenisin. Gerçekçi porsiyon ve besin değerleri ver. Aşırı kısıtlayıcı öneri verme.', [{ role: 'user', content: istem }], 1000)).metin; } catch (e) { return json({ hata: 'Öneri şu an alınamıyor.' }, 422); }
+    let yd = ''; try { const c0 = (await claude(env, 'Sen Türk mutfağını iyi bilen bir spor diyetisyenisin. Gerçekçi porsiyon ve besin değerleri ver. Aşırı kısıtlayıcı öneri verme.', [{ role: 'user', content: istem }], 1000)); metin = c0.metin; yd = c0.durum; } catch (e) { return json({ hata: 'Öneri şu an alınamıyor.' }, 422); }
     const s = jsonOku(metin);
-    if (!s || !Array.isArray(s.liste) || !s.liste.length) return json({ hata: 'Öneri okunamadı, tekrar dene.', kod: kisa(metin, 300) + ' … ' + kisa(metin.slice(-200), 200) + ' [' + metin.length + ']' }, 422);
+    if (!s || !Array.isArray(s.liste) || !s.liste.length) return json({ hata: 'Öneri okunamadı, tekrar dene.', kod: kisa(metin, 300) + ' … ' + kisa(metin.slice(-200), 200) + ' [' + metin.length + '] ' + yd }, 422);
     const n = (v, u) => { const x = Number(v); return isFinite(x) && x >= 0 ? Math.min(u, Math.round(x)) : 0; };
     const liste = (Array.isArray(s.liste) ? s.liste : []).slice(0, 3).map((x) => ({ ad: kisa(x.ad, 60).replace(/[<>]/g, ''), g: n(x.g, 1500) || 300, k: n(x.k, 2500), p: n(x.p, 200), kh: n(x.kh, 400), y: n(x.y, 200), tarif: kisa(x.tarif, 280).replace(/[<>]/g, '') })).filter((x) => x.k > 0);
     return json({ liste });
