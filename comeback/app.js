@@ -1101,7 +1101,8 @@
     if (!S.profil) return ekranKarsilama();
     const bas = ust(geri('#/beslenme', 'Beslenmeye dön'), '<span class="alt">' + OGUN_AD[ogunTuru()] + ' · ' + saat() + '</span>') + '<h1 class="baslik">Öğün ekle<span class="nokta">.</span></h1>' + ekleSekme(yol);
     if (yol === 'ara') {
-      return bas + '<form data-form="ara" class="t" role="search"><label class="alan"><span>Yemek ya da ürün adı</span><input name="q" id="araQ" autocomplete="off" placeholder="ör. tavuk, ayran, Ülker" style="font-size:24px" value="' + esc(aramaQ) + '"></label></form>' +
+      return bas + '<form data-form="ara" class="t" role="search"><label class="alan"><span>Yemek ya da ürün adı</span><input name="q" id="araQ" autocomplete="off" placeholder="ör. domates, tavuk, ayran" style="font-size:24px" value="' + esc(aramaQ) + '"></label></form>' +
+        yemKatHaplar() +
         '<div class="t" style="padding:4px 16px"><div class="liste" id="yerelListe">' + yerelListe(aramaQ) + '</div></div>' +
         '<button class="btn cerceve" data-act="marka-ara"' + (aramaQ.trim().length < 2 ? ' disabled' : '') + ' id="markaBtn">' + IK.ara + 'Marketteki ürünlerde ara</button>' +
         '<div id="markaSonuc">' + markaListe() + '</div>' +
@@ -1133,12 +1134,40 @@
   }
   let aramaQ = '';
   const kucuk = (s) => s.toLocaleLowerCase('tr-TR');
+  let yemKat = '';
+  const yemAra = {};
+  const yAra = (y) => yemAra[y.ad] || (yemAra[y.ad] = ' ' + normal(y.ad + ' ' + (y.es || '') + ' ' + (y.marka || '')).replace(/\s+/g, ' ') + ' ');
+  // son 10 günde yediklerin: ada göre tekil, en yeni önce
+  function sonYenenler() {
+    const l = []; const gor = {};
+    Object.keys(S.gunluk || {}).sort().reverse().slice(0, 10).forEach((k) => (S.gunluk[k].ogun || []).slice().reverse().forEach((o) => {
+      if (gor[o.ad] || !(o.g > 0) || o.kaynak === 'foto') return; gor[o.ad] = 1;
+      const ana = (S.urunlerim || []).concat(D.YEMEK).find((y) => y.ad === o.ad);
+      l.push(ana || { ad: o.ad, k: (o.k / o.g) * 100, p: (o.p / o.g) * 100, kh: (o.kh / o.g) * 100, y: (o.y / o.g) * 100, g: Math.round(o.g), birim: 'son yediğin' });
+    }));
+    return l.slice(0, 8);
+  }
+  const yemSatir = (y) => '<button data-act="yerel-sec" data-ad="' + esc(y.ad) + '" style="border:none;background:none;text-align:left;width:100%;padding:0"><div class="ad"><b>' + esc(y.ad) + '</b><span class="ik num">' + esc(y.birim || '1 porsiyon') + ' (' + Math.round(y.g) + ' g) · ' + sayi((y.k * y.g) / 100) + ' kcal</span></div><span class="yuvarlak" aria-hidden="true">+</span></button>';
   function yerelListe(q) {
-    const s = kucuk(q.trim());
+    const sozcuk = normal(q).split(' ').filter(Boolean);
     const hepsi = (S.urunlerim || []).concat(D.YEMEK);
-    const l = (s ? hepsi.filter((y) => kucuk(y.ad).indexOf(s) >= 0) : (S.urunlerim || []).slice(0, 6).concat(D.YEMEK.slice(0, 8))).slice(0, 14);
-    if (!l.length) return '<div><span class="ik">Listemizde yok. Marketteki ürünlerde arayabilir ya da elle girebilirsin.</span></div>';
-    return l.map((y) => '<button data-act="yerel-sec" data-ad="' + esc(y.ad) + '" style="border:none;background:none;text-align:left;width:100%;padding:0"><div class="ad"><b>' + esc(y.ad) + '</b><span class="ik num">' + y.birim + ' (' + y.g + ' g) · ' + sayi((y.k * y.g) / 100) + ' kcal</span></div><span class="yuvarlak" aria-hidden="true">+</span></button>').join('');
+    if (sozcuk.length) {
+      const puan = (y) => { const m = yAra(y); if (!sozcuk.every((w) => m.indexOf(w) >= 0)) return -1; const a = ' ' + normal(y.ad); return (a.indexOf(' ' + sozcuk[0]) === 0 ? 3 : 0) + (a.indexOf(' ' + sozcuk[0]) >= 0 ? 2 : 0) + (a.indexOf(sozcuk[0]) >= 0 ? 1 : 0); };
+      const l = hepsi.map((y) => [y, puan(y)]).filter((x) => x[1] >= 0).sort((a, b) => b[1] - a[1] || a[0].ad.length - b[0].ad.length).slice(0, 40).map((x) => x[0]);
+      if (!l.length) return '<div><span class="ik">Listemizde yok. Marketteki ürünlerde arayabilir ya da "Elle" sekmesinden ekleyebilirsin.</span></div>';
+      return l.map(yemSatir).join('');
+    }
+    if (yemKat) {
+      const l = (yemKat === 'benim' ? S.urunlerim || [] : D.YEMEK.filter((y) => y.kat === yemKat)).slice().sort((a, b) => a.ad.localeCompare(b.ad, 'tr'));
+      return l.length ? l.map(yemSatir).join('') : '<div><span class="ik">Burada henüz bir şey yok.</span></div>';
+    }
+    const son = sonYenenler();
+    return (son.length ? '<div class="yem-baslik"><span class="k">Son yediklerin</span></div>' + son.map(yemSatir).join('') : '') +
+      ((S.urunlerim || []).length ? '<div class="yem-baslik"><span class="k">Ürünlerim</span></div>' + S.urunlerim.slice(0, 6).map(yemSatir).join('') : '') +
+      (!son.length && !(S.urunlerim || []).length ? '<div><span class="ik">Yukarıdan bir kategori seç ya da adını yaz: domates, tavuk, ayran…</span></div>' : '');
+  }
+  function yemKatHaplar() {
+    return '<div class="yatay yem-kat" role="group" aria-label="Kategori">' + [['', 'Önerilen']].concat((S.urunlerim || []).length ? [['benim', 'Ürünlerim']] : [], D.YEMEK_KAT).map((k) => '<button class="hap" data-act="yem-kat" data-deger="' + k[0] + '" aria-pressed="' + (yemKat === k[0]) + '">' + k[1] + '</button>').join('') + '</div>';
   }
   function markaListe() {
     if (!aramaSonuc) return '';
@@ -1161,6 +1190,8 @@
     const u = taslak; const g = u.secilenG || u.g || 100;
     const k = (u.k * g) / 100;
     const hizli = [u.g, 50, 100, 150, 200, 250].filter((x, i, a) => x && a.indexOf(x) === i).sort((a, b) => a - b);
+    const bm = /^(\d+)\s+(.+)$/.exec(u.birim || ''); const tekG = bm ? u.g / +bm[1] : null;
+    const katlar = bm && tekG ? [[0.5, '½'], [1, '1'], [2, '2'], [3, '3']].map((x) => [Math.round(tekG * x[0]), x[1] + ' ' + bm[2]]).filter((x) => x[0] > 0) : [];
     return ust(geri(taslak.donus || '#/ekle/ara'), '<span class="alt">Porsiyon</span>') +
       '<h1 class="baslik" style="font-size:32px">' + esc(u.ad) + '<span class="nokta">.</span></h1>' +
       (u.marka ? '<p class="not">' + esc(u.marka) + '</p>' : '') +
@@ -1168,6 +1199,7 @@
       '<div class="t limon h130"><span class="k">Bu porsiyon</span><span class="buyuk num" id="porK">' + sayi(k) + '</span><span class="k">kcal</span></div>' +
       '<div class="t h130 num" id="porM"><div class="satir"><span>Protein</span><b style="color:var(--kobalt)">' + sayi((u.p * g) / 100, 1) + ' g</b></div><div class="satir"><span>Karb.</span><b>' + sayi((u.kh * g) / 100, 1) + ' g</b></div><div class="satir"><span>Yağ</span><b>' + sayi((u.y * g) / 100, 1) + ' g</b></div></div>' +
       '<label class="t genis alan"><span>Miktar, gram' + (u.birim ? ' · ' + esc(u.birim) + ' = ' + u.g + ' g' : '') + '</span><input id="porG" data-in="porsiyon" inputmode="numeric" value="' + g + '"></label>' +
+      (katlar.length ? '<div class="t genis"><span class="k">Kaç tane?</span><div class="haplar">' + katlar.map((x) => '<button class="hap siyah" data-act="por-hizli" data-g="' + x[0] + '" aria-pressed="' + (x[0] === g) + '">' + esc(x[1]) + '</button>').join('') + '</div></div>' : '') +
       '<div class="t genis"><span class="k">Hızlı seç</span><div class="haplar">' + hizli.map((x) => '<button class="hap" data-act="por-hizli" data-g="' + x + '" aria-pressed="' + (x === g) + '">' + x + ' g</button>').join('') + '</div></div>' +
       '<fieldset class="t genis"><legend>Öğün</legend><div class="haplar">' + Object.keys(OGUN_AD).map((t) => '<button type="button" class="hap siyah" data-act="hap" data-grup="ogun" data-deger="' + t + '" aria-pressed="' + (t === (u.ogun || ogunTuru())) + '">' + OGUN_AD[t] + '</button>').join('') + '</div></fieldset>' +
       '</div>' +
@@ -1572,8 +1604,13 @@
       kaydet(true); toast(x.ad + ' eklendi.'); render();
     },
     'ogun-sil'(el) { const g = gun(); g.ogun = g.ogun.filter((o) => o.id !== el.dataset.id); kaydet(true); render(); },
+    'yem-kat'(el) {
+      yemKat = el.dataset.deger; aramaQ = ''; const i = document.getElementById('araQ'); if (i) i.value = '';
+      const yx = (document.querySelector('.yem-kat') || {}).scrollLeft || 0; const sY = window.scrollY; render(); window.scrollTo(0, sY);
+      const r = document.querySelector('.yem-kat'); if (r) r.scrollLeft = yx;
+    },
     'yerel-sec'(el) {
-      const y = (S.urunlerim || []).concat(D.YEMEK).find((x) => x.ad === el.dataset.ad); if (!y) return;
+      const y = (S.urunlerim || []).concat(D.YEMEK).find((x) => x.ad === el.dataset.ad) || sonYenenler().find((x) => x.ad === el.dataset.ad); if (!y) return;
       taslak = Object.assign({}, y, { secilenG: y.g, kaynak: 'liste', donus: '#/ekle/ara' }); git('#/porsiyon');
     },
     'marka-ara'() { markaAra(aramaQ); },

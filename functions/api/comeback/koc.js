@@ -117,9 +117,9 @@ export async function onRequestPost(ctx) {
     const kK = Math.max(150, Math.min(1500, Number(g.kalan_kcal) || 500)); const kP = Math.max(0, Math.min(120, Number(g.kalan_protein) || 30));
     const istem = 'Öğün: ' + kisa(g.ogun, 20) + '. Kalan kalori yaklaşık ' + kK + ' kcal, kalan protein ' + kP + ' g. Hedef: ' + kisa(g.hedef, 12) + '. Bugün yedikleri: ' + kisa((g.bugun || []).join(', '), 400) + '.\n' +
       'Türk mutfağından, evde kolay yapılan ya da kolay bulunan 3 farklı öneri ver. Her biri kalan kaloriyi aşmasın, proteini yüksek olsun, bugün yediklerini tekrar etmesin. ' +
-      'Yalnızca geçerli JSON döndür: {"liste":[{"ad":"kısa ad ve porsiyon","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"tarif":"en fazla 2 cümle hazırlanışı"}]}';
+      'Yalnızca geçerli JSON döndür: {"liste":[{"ad":"kısa ad ve porsiyon","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"tarif":"tek kısa cümle"}]}' + ' Açıklama, markdown ya da kod bloğu yazma; ilk karakter { olsun.';
     let metin;
-    try { metin = (await claude(env, 'Sen Türk mutfağını iyi bilen bir spor diyetisyenisin. Gerçekçi porsiyon ve besin değerleri ver. Aşırı kısıtlayıcı öneri verme.', [{ role: 'user', content: istem }], 1800)).metin; } catch (e) { return json({ hata: 'Öneri şu an alınamıyor.' }, 502); }
+    try { metin = (await claude(env, 'Sen Türk mutfağını iyi bilen bir spor diyetisyenisin. Gerçekçi porsiyon ve besin değerleri ver. Aşırı kısıtlayıcı öneri verme.', [{ role: 'user', content: istem }], 1000)).metin; } catch (e) { return json({ hata: 'Öneri şu an alınamıyor.' }, 502); }
     const s = jsonOku(metin);
     if (!s || !Array.isArray(s.liste) || !s.liste.length) return json({ hata: 'Öneri okunamadı, tekrar dene.' }, 502);
     const n = (v, u) => { const x = Number(v); return isFinite(x) && x >= 0 ? Math.min(u, Math.round(x)) : 0; };

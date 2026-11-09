@@ -476,3 +476,6 @@ fieldset.t>legend+*{clear:both}
 .koc-kart[aria-pressed="true"] .koc-tarz,.koc-kart[aria-pressed="true"] .ik{color:rgba(255,255,255,.85)}
 .koc-kart:active{transform:scale(.98)}
 .koc-ad input{font-size:18px}
+.yem-kat .hap{background:var(--kutu)}
+.yem-kat .hap[aria-pressed="true"]{background:var(--kobalt);color:#fff}
+.liste>.yem-baslik{min-height:0;padding:14px 0 4px;border-bottom:0}
