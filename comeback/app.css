@@ -459,3 +459,20 @@ fieldset.t>legend+*{clear:both}
 .ekle-kutu{gap:10px}
 .ekle-kutu .rutin b{color:var(--koyu-yazi)}
 .ekle-kutu .rutin span{color:var(--koyu-ikincil)}
+/* ek set */
+.set-ek{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:6px 2px 4px}
+.set-ek .metin-btn{font-size:14px;min-height:40px}
+.set.ek .no{color:var(--kobalt);font-weight:800}
+/* bilgileri güncelle */
+.kurulum-tus{display:flex;flex-direction:column;gap:10px}
+.kurulum-tus .ik{text-align:center}
+/* koç seçimi */
+.koc-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.koc-kart{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px;border-radius:18px;border:0;background:var(--zemin);color:var(--murekkep);font:inherit;cursor:pointer;min-height:132px}
+.koc-kart b{font-size:22px;letter-spacing:-.03em;font-weight:900}
+.koc-kart .koc-tarz{font-size:13px;font-weight:800;color:var(--kobalt)}
+.koc-kart .ik{font-size:13px;line-height:1.35}
+.koc-kart[aria-pressed="true"]{background:var(--kobalt);color:#fff}
+.koc-kart[aria-pressed="true"] .koc-tarz,.koc-kart[aria-pressed="true"] .ik{color:rgba(255,255,255,.85)}
+.koc-kart:active{transform:scale(.98)}
+.koc-ad input{font-size:18px}
