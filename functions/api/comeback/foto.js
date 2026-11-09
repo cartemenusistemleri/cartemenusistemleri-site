@@ -68,8 +68,8 @@ export async function onRequestPost(ctx) {
         ] }]
       })
     });
-  } catch (e) { return json({ hata: 'Analiz servisine ulaşılamadı.' }, 502); }
-  if (!yanit.ok) return json({ hata: 'Analiz şu an yapılamıyor. Biraz sonra tekrar dene.' }, 502);
+  } catch (e) { return json({ hata: 'Analiz servisine ulaşılamadı.' }, 422); }
+  if (!yanit.ok) return json({ hata: 'Analiz şu an yapılamıyor. Biraz sonra tekrar dene.' }, 422);
 
   const veri = await yanit.json().catch(() => null);
   const metin = veri && Array.isArray(veri.content) ? veri.content.filter((c) => c.type === 'text').map((c) => c.text).join('') : '';
