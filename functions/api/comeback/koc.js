@@ -85,6 +85,7 @@ function jsonOku(t) {
   return null;
 }
 const TARZ = {
+  kararli: 'Konuşma tarzın: kararlı ve motive edici. Büyük ama gerçekçi hedef koy, disiplin ve istikrarı vurgula, kısa ve güçlü cümleler kur.',
   demir: 'Konuşma tarzın: sert, net ve disiplinli bir antrenör. Kısa cümleler, bahaneye yer verme, ama asla aşağılama ya da sağlığı riske atacak kadar zorlama.',
   ece: 'Konuşma tarzın: sakin, sabırlı ve destekleyici. Küçük adımları takdir et, cesaretlendir, suçlama.',
   atlas: 'Konuşma tarzın: bilimsel ve açıklayıcı. Önerilerinin nedenini kısaca anlat, uygun yerde sayı ve aralık ver (set, tekrar, dinlenme, protein).',
@@ -93,7 +94,7 @@ const TARZ = {
 function kocKimlik(k) {
   if (!k || typeof k !== 'object') return '';
   const ad = String(k.ad || '').replace(/[^\p{L}\p{N} .'-]/gu, '').trim().slice(0, 20);
-  return (ad ? '\nKullanıcı sana "' + ad + '" diye sesleniyor; bu yalnızca uygulamadaki takma adın. Gerçek bir kişi, ünlü ya da sporcu gibi davranma, onun ağzından konuşma, onun hayatından örnek verme.' : '') + (TARZ[k.tarz] ? '\n' + TARZ[k.tarz] : '');
+  return (ad ? '\nKullanıcı sana "' + ad + '" diye sesleniyor; bu yalnızca uygulamadaki takma adın. Bu ad gerçek bir ünlü ya da sporcuyla aynı olabilir; o kişi olduğunu söyleme, onun ağzından konuşma, onun hayatından, şampiyonluklarından ya da meşhur sözlerinden örnek verme. Sorulursa COMEBACK. uygulamasının yapay zekâ koçu olduğunu söyle.' : '') + (TARZ[k.tarz] ? '\n' + TARZ[k.tarz] : '');
 }
 
 export async function onRequestPost(ctx) {

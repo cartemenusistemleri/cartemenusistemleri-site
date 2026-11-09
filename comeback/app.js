@@ -671,15 +671,17 @@
     };
   }
   const KOCLAR = [
-    ['demir', 'Demir', 'Sert ve net', 'Lafı dolandırmaz, bahaneye yer vermez, seni zorlar.'],
-    ['ece', 'Ece', 'Sakin ve destekleyici', 'Sabırlı, küçük adımları takdir eder, cesaret verir.'],
-    ['atlas', 'Atlas', 'Bilimsel', 'Nedenini anlatır, set, tekrar ve sayılarla konuşur.'],
-    ['kuzey', 'Kuzey', 'Enerjik ve esprili', 'Motive eder, şakalaşır, ama bilgi net kalır.']
+    ['kararli', 'Arnold', 'Kararlı ve motive edici', 'Büyük hedef koydurur, disiplini ve istikrarı öne çıkarır.'],
+    ['kuzey', 'Ronnie', 'Enerjik ve coşkulu', 'Gaz verir, şakalaşır, her seti kutlar; bilgi yine net.'],
+    ['ece', 'Chris', 'Sakin ve destekleyici', 'Sabırlı, küçük adımları takdir eder, sakatlıkta temkinli.'],
+    ['atlas', 'Jay', 'Bilimsel', 'Nedenini anlatır, set, tekrar ve sayılarla konuşur.'],
+    ['demir', 'Dorian', 'Sert ve net', 'Lafı dolandırmaz, bahaneye yer vermez, seni zorlar.']
   ];
+  (function () { const eski = { Demir: 'Dorian', Ece: 'Chris', Atlas: 'Jay', Kuzey: 'Ronnie' }; if (S.kocSec && eski[S.kocSec.ad]) S.kocSec.ad = eski[S.kocSec.ad]; })();
   let kocSecAcik = false; let kocTaslak = null;
   const kocAdi = () => (S.kocSec ? S.kocSec.ad : 'Koç');
   function kocSecici() {
-    const t = kocTaslak || S.kocSec || { tarz: 'atlas', ad: 'Atlas' };
+    const t = kocTaslak || S.kocSec || { tarz: 'kararli', ad: 'Arnold' };
     return '<div class="t genis koc-sec" style="gap:12px"><span class="k">Koçunu seç</span>' +
       '<div class="koc-liste">' + KOCLAR.map((k) => '<button type="button" class="koc-kart" data-act="koc-tarz" data-tarz="' + k[0] + '" aria-pressed="' + (t.tarz === k[0]) + '"><b>' + k[1] + '</b><span class="koc-tarz">' + k[2] + '</span><span class="ik">' + k[3] + '</span></button>').join('') + '</div>' +
       '<label class="mini koc-ad"><span>İstersen kendi koyduğun bir isim</span><input id="kocAd" maxlength="20" value="' + esc(t.ad) + '" placeholder="Koçunun adı" autocomplete="off"></label>' +
@@ -696,7 +698,7 @@
     const l = S.koc || [];
     const bicim = (t) => esc(t).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/^\s*[-*•]\s+/gm, '• ').replace(/^#+\s*/gm, '').replace(/\n/g, '<br>');
     const balon = (m) => '<div class="koc-balon ' + (m.rol === 'koc' ? 'koc' : 'ben') + '">' + (m.rol === 'koc' ? bicim(m.metin) : esc(m.metin).replace(/\n/g, '<br>')) + '</div>';
-    const kk = KOCLAR.find((k) => k[0] === S.kocSec.tarz) || KOCLAR[2];
+    const kk = KOCLAR.find((k) => k[0] === S.kocSec.tarz) || KOCLAR[0];
     return ust(geri('#/'), '<button class="metin-btn kucuk-metin" data-act="koc-degis">Koçunu değiştir</button>') +
       '<h1 class="baslik">Koç ' + esc(kocAdi()) + '<span class="nokta">.</span></h1>' +
       '<span class="ik" style="margin-top:-6px">' + kk[2] + ' · yapay zekâ</span>' +
@@ -1732,12 +1734,12 @@
     },
     'koc-tarz'(el) {
       const k = KOCLAR.find((x) => x[0] === el.dataset.tarz); const inp = document.getElementById('kocAd');
-      const onceki = kocTaslak || S.kocSec || { tarz: 'atlas', ad: 'Atlas' }; const eskiVarsayilan = KOCLAR.some((x) => x[1] === (inp ? inp.value.trim() : onceki.ad));
+      const onceki = kocTaslak || S.kocSec || { tarz: 'kararli', ad: 'Arnold' }; const eskiVarsayilan = KOCLAR.some((x) => x[1] === (inp ? inp.value.trim() : onceki.ad));
       kocTaslak = { tarz: k[0], ad: eskiVarsayilan || !inp || !inp.value.trim() ? k[1] : inp.value.trim() }; render();
     },
     'koc-kaydet'() {
-      const t = kocTaslak || S.kocSec || { tarz: 'atlas', ad: 'Atlas' }; const inp = document.getElementById('kocAd');
-      const ad = (inp && inp.value.trim()) || (KOCLAR.find((x) => x[0] === t.tarz) || KOCLAR[2])[1];
+      const t = kocTaslak || S.kocSec || { tarz: 'kararli', ad: 'Arnold' }; const inp = document.getElementById('kocAd');
+      const ad = (inp && inp.value.trim()) || (KOCLAR.find((x) => x[0] === t.tarz) || KOCLAR[0])[1];
       S.kocSec = { tarz: t.tarz, ad: ad.slice(0, 20) }; kocTaslak = null; kocSecAcik = false; kaydet(true); render();
       toast('Koçun artık ' + S.kocSec.ad + '.');
     },

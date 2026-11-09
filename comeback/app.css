@@ -479,3 +479,4 @@ fieldset.t>legend+*{clear:both}
 .yem-kat .hap{background:var(--kutu)}
 .yem-kat .hap[aria-pressed="true"]{background:var(--kobalt);color:#fff}
 .liste>.yem-baslik{min-height:0;padding:14px 0 4px;border-bottom:0}
+.koc-kart:last-child:nth-child(odd){grid-column:1/-1;min-height:0}
