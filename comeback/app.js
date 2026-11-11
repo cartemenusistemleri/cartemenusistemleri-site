@@ -135,7 +135,7 @@
   async function hesapYukle() {
     try {
       const r = await istek('ben');
-      if (r.ok) { hesap = r.j.kullanici; await veriCek(); if (hesap.rol === 'demo' && !S.profil) { demoDoldur(); kaydet(true); } hocaYukle(); paylasimYukle(); }
+      if (r.ok) { hesap = r.j.kullanici; await veriCek(); if (hesap.rol === 'demo' && !S.profil) { demoDoldur(); kaydet(true); } hocaYukle(); paylasimYukle(); if (S.profil) skorGonder(); }
       else if (r.durum >= 500) cevrimdisi = true;
     } catch (e) { cevrimdisi = true; }
   }
@@ -337,7 +337,7 @@
       '<h1 class="baslik">Yönetim<span class="nokta">.</span></h1>' +
       '<div class="izgara">' + kutu('Kullanıcı', o.kullanici, 'kobalt') + kutu('Son 7 gün aktif', o.aktif) + kutu('Yeni (7 gün)', o.yeniKullanici) + kutu('Bekleyen', o.bekleyen, o.bekleyen ? 'limon' : '') +
       '<div class="t genis"><span class="k">İkinci hafta dönüşü</span><span class="orta num">' + (o.donusAday ? Math.round(o.donus / o.donusAday * 100) + '%' : '—') + '</span><span class="ik">' + (o.donusAday ? o.donusAday + ' kişiden ' + o.donus + ' kişi kayıttan 1 hafta sonra hâlâ kullanıyor' : 'Hesap açalı en az 1 hafta olan kullanıcı yok') + '</span></div>' +
-      '<div class="t genis"><span class="k">Son 7 günde ne kullanıldı</span>' + ((o.olaylar || []).length ? (o.olaylar || []).map((x) => '<div class="satir num"><span>' + esc(({ antrenman_bitti: 'Antrenman bitirildi', ogun_foto: 'Fotoğrafla öğün', ogun_barkod: 'Barkodla öğün', ogun_liste: 'Listeden öğün', ogun_elle: 'Elle öğün', koc_mesaj: 'Koç mesajı', program_ozel: 'Kendi programını kaydetti', program_yorum: 'Program yorumu', kurulum: 'Kurulum', su: 'Su', paylas: 'Paylaşım' })[x.olay] || x.olay) + '</span><b>' + x.adet + '</b></div>').join('') : '<span class="ik">Henüz kayıt yok.</span>') + '</div>' +
+      '<div class="t genis"><span class="k">Son 7 günde ne kullanıldı</span>' + ((o.olaylar || []).length ? (o.olaylar || []).map((x) => '<div class="satir num"><span>' + esc(({ antrenman_bitti: 'Antrenman bitirildi', ogun_foto: 'Fotoğrafla öğün', ogun_barkod: 'Barkodla öğün', ogun_liste: 'Listeden öğün', ogun_elle: 'Elle öğün', koc_mesaj: 'Koç mesajı', program_ozel: 'Kendi programını kaydetti', program_yorum: 'Program yorumu', kurulum: 'Kurulum', su: 'Su', paylas: 'Haftalık kart paylaşımı', off_gun: 'Off gün aldı', program_paylas: 'Program gönderdi', program_al: 'Gelen programı aldı', program_kur: 'Yapay zekâya program kurdurdu', antrenman_his: 'Antrenman sonu notu', takviye: 'Takviye işaretledi', siralama: 'Sıralamaya katıldı' })[x.olay] || x.olay) + '</span><b>' + x.adet + '</b></div>').join('') : '<span class="ik">Henüz kayıt yok.</span>') + '</div>' +
       '<a class="t genis" href="/api/comeback/hesap/yonetim/yedek" download style="flex-direction:row;justify-content:space-between;align-items:center"><span><b>Yedeği indir</b><br><span class="ik">Tüm kullanıcı verisi (şifreler hariç), JSON. Veritabanı ayrıca 7 gün geriye otomatik geri yüklenebilir.</span></span>' + IK.ok + '</a>' +
       '</div>' +
       '<div class="yatay" role="tablist">' + sekmeler.map((x) => '<button class="hap" role="tab" data-act="yon-sekme" data-deger="' + x[0] + '" aria-pressed="' + (yon.sekme === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
@@ -1472,6 +1472,7 @@
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Rozetler</span><span class="ik num">' + rozetDurum().filter((r) => r.var).length + ' / ' + ROZET.length + '</span></div><div class="rozetler">' + rozetDurum().map((r) => '<div class="rozet' + (r.var ? ' var' : '') + '">' + rozetSvg(r.id, r.var) + '<b>' + esc(r.ad) + '</b><span>' + (r.var ? esc(r.acik) : 'Kilitli · ' + esc(r.acik)) + '</span></div>').join('') + '</div></div>' +
+      '<a class="t kobalt genis sira-kart" href="#/siralama" style="flex-direction:row;align-items:center;justify-content:space-between"><span class="yigin"><span class="k">Bütün üyeler arasında</span><b style="font-size:20px">Haftalık ve aylık sıralama</b><span style="opacity:.85;font-size:14px">Hacim, set, antrenman</span></span>' + IK.ok.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>' +
       '<a class="t h130" href="#/olcu"><span class="k">Ölçüler</span><b style="font-size:19px">' + ((S.olcu || []).length ? 'Bel ' + sayi(S.olcu[S.olcu.length - 1].bel || 0, 1) + ' cm' : 'Bel, göğüs, kol…') + '</b><span class="ik">İlk ölçüme göre fark</span></a>' +
       '<a class="t koyu h130" href="#/rapor"><span class="k">Aylık rapor</span><b style="font-size:19px">' + AY[new Date().getMonth()] + '</b><span class="ik" style="color:var(--koyu-ikincil)">Ayın özeti</span></a>' +
       '<button class="t kobalt genis" data-act="paylas" style="flex-direction:row;align-items:center;justify-content:space-between;border:0;text-align:left;cursor:pointer"><span class="yigin"><span class="k">Haftalık kartın</span><b style="font-size:19px">Bu haftanı paylaş</b><span style="opacity:.8;font-size:14px">Instagram hikâyesine hazır görsel</span></span>' + IK.ok.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</button>' +
@@ -1480,7 +1481,17 @@
   }
 
   /* ---------- vücut ölçüleri ve fotoğraflar (fotoğraflar yalnızca bu cihazda, IndexedDB) ---------- */
-  const OLCU = [['bel', 'Bel'], ['gogus', 'Göğüs'], ['kalca', 'Kalça'], ['kol', 'Kol'], ['bacak', 'Bacak (uyluk)'], ['yag', 'Yağ oranı']];
+  // ölçüler: [anahtar, ad, sol anahtarı (çiftse)]
+  const OLCU_GRUP = [
+    ['Gövde', [['boyun', 'Boyun'], ['omuz', 'Omuz çevresi'], ['gogus', 'Göğüs'], ['bel', 'Bel'], ['karin', 'Karın'], ['kalca', 'Kalça']]],
+    ['Kollar', [['sag_kol', 'Pazu', 'sol_kol'], ['sag_onkol', 'Ön kol', 'sol_onkol']]],
+    ['Bacaklar', [['sag_uyluk', 'Uyluk', 'sol_uyluk'], ['sag_baldir', 'Baldır', 'sol_baldir']]],
+    ['Diğer', [['yag', 'Yağ oranı']]]
+  ];
+  const OLCU_ESKI = [['kol', 'Kol'], ['bacak', 'Uyluk']];
+  const OLCU_HEPSI = [].concat.apply([], OLCU_GRUP.map((g) => [].concat.apply([], g[1].map((o) => o[2] ? [[o[0], o[1] + ' sağ'], [o[2], o[1] + ' sol']] : [[o[0], o[1]]])))).concat(OLCU_ESKI);
+  const OLCU = OLCU_HEPSI;
+  const OLCU_NASIL = [['Boyun', 'gırtlağın hemen altından'], ['Omuz', 'iki omuzun en geniş yerinden, kollar yanda'], ['Göğüs', 'meme ucu hizasından, nefesi verdikten sonra'], ['Bel', 'en ince yerinden ya da göbeğin 2 cm üstünden'], ['Karın', 'göbek deliği hizasından'], ['Kalça', 'kalçanın en çıkık yerinden'], ['Pazu', 'kol gevşek ve yanda, en kalın yerinden; kasılı ölçüyorsan hep kasılı ölç'], ['Ön kol', 'dirseğin hemen altındaki en kalın yerden'], ['Uyluk', 'kasık ile diz arasının en kalın yerinden'], ['Baldır', 'ayakta, en kalın yerinden']];
   const FOTO_ACI = [['on', 'Önden'], ['yan', 'Yandan'], ['arka', 'Arkadan']];
   function fotoDb() {
     return new Promise((ok, red) => { const r = indexedDB.open('comeback-foto', 1); r.onupgradeneeded = () => r.result.createObjectStore('foto'); r.onsuccess = () => ok(r.result); r.onerror = () => red(r.error); });
@@ -1512,16 +1523,90 @@
   function ekranOlcu() {
     if (!S.profil) return ekranKarsilama();
     const l = (S.olcu || []).slice().sort((a, b) => (a.tarih < b.tarih ? -1 : 1));
-    const ilk = l[0], son = l[l.length - 1];
-    const fark = (k) => { if (!ilk || !son || ilk === son || ilk[k] == null || son[k] == null) return ''; const d = son[k] - ilk[k]; return '<span class="olcu-fark ' + (d < 0 ? 'eksi' : d > 0 ? 'arti' : '') + '">' + (d > 0 ? '+' : '') + sayi(d, 1) + '</span>'; };
+    const son = l[l.length - 1];
+    const ilkOf = (k) => l.find((x) => x[k] != null);
+    const sonOf = (k) => { for (let i = l.length - 1; i >= 0; i--) if (l[i][k] != null) return l[i]; return null; };
+    const deger = (k) => { const x = sonOf(k); return x ? x[k] : null; };
+    const fark = (k) => { const a = ilkOf(k); const z = sonOf(k); if (!a || !z || a === z) return ''; const son = z; const d = son[k] - a[k]; return '<span class="olcu-fark ' + (d < 0 ? 'eksi' : d > 0 ? 'arti' : '') + '">' + (d > 0 ? '+' : '') + sayi(d, 1) + '</span>'; };
     const tarihOf = (a) => { const d = new Date(a.slice(0, 10)); return d.getDate() + ' ' + AY[d.getMonth()] + ' ' + d.getFullYear(); };
+    const birim = (k) => (k === 'yag' ? ' %' : ' cm');
+    const kutu = (k, ad) => '<div><span class="ik">' + ad + '</span><b class="num">' + sayi(deger(k), 1) + '<small>' + birim(k) + '</small></b>' + fark(k) + '</div>';
+    const ozet = son ? OLCU_GRUP.map((g) => {
+      const satir = g[1].map((o) => {
+        if (o[2]) { // sağ/sol çifti
+          const sg = deger(o[0]), sl = deger(o[2]); if (sg == null && sl == null) return '';
+          const fk = sg != null && sl != null ? Math.abs(sg - sl) : null;
+          return '<div class="olcu-cift"><span class="k">' + o[1] + '</span><div class="olcu-izgara">' + (sg != null ? kutu(o[0], 'Sağ') : '') + (sl != null ? kutu(o[2], 'Sol') : '') + '</div>' + (fk != null ? '<span class="ik num">Sağ–sol farkı ' + sayi(fk, 1) + ' cm' + (fk >= 1.5 ? ' · zayıf tarafa tek taraflı hareket eklemeyi düşün' : '') + '</span>' : '') + '</div>';
+        }
+        return deger(o[0]) != null ? kutu(o[0], o[1]) : '';
+      }).filter(Boolean);
+      if (!satir.length) return '';
+      return '<div class="olcu-grup"><span class="k">' + g[0] + '</span><div class="olcu-izgara">' + satir.filter((x) => x.indexOf('olcu-cift') < 0).join('') + '</div>' + satir.filter((x) => x.indexOf('olcu-cift') >= 0).join('') + '</div>';
+    }).join('') : '';
+    const girdi = (k, ad) => '<label class="mini"><span>' + ad + '</span><input name="' + k + '" inputmode="decimal" placeholder="' + (deger(k) != null ? sayi(deger(k), 1) : '—') + '"></label>';
+    const eski = son && OLCU_ESKI.some((o) => son[o[0]] != null) ? '<span class="ik">Eski kayıtların: ' + OLCU_ESKI.filter((o) => son[o[0]] != null).map((o) => o[1] + ' ' + sayi(son[o[0]], 1) + ' cm').join(' · ') + '</span>' : '';
     return ust(geri('#/ilerleme'), '<span class="alt">Vücut</span>') +
       '<h1 class="baslik">Ölçüler<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      (son ? '<div class="t genis"><div class="satir"><span class="k">Son ölçüm · ' + esc(tarihOf(son.tarih)) + '</span>' + (l.length > 1 ? '<span class="ik">ilk ölçüme göre</span>' : '') + '</div><div class="olcu-izgara">' + OLCU.filter((o) => son[o[0]] != null).map((o) => '<div><span class="ik">' + o[1] + '</span><b class="num">' + sayi(son[o[0]], 1) + '<small>' + (o[0] === 'yag' ? ' %' : ' cm') + '</small></b>' + fark(o[0]) + '</div>').join('') + '</div></div>' : '') +
-      '<form data-form="olcu" class="t genis" novalidate style="gap:10px"><span class="k">Bugünkü ölçülerin · cm</span><div class="olcu-form">' + OLCU.map((o) => '<label class="mini"><span>' + o[1] + (o[0] === 'yag' ? ', %' : '') + '</span><input name="' + o[0] + '" inputmode="decimal" placeholder="' + (son && son[o[0]] != null ? sayi(son[o[0]], 1) : '—') + '"></label>').join('') + '</div><span class="ik">Mezurayı sabah, aç karnına ve hep aynı yerden tut: bel göbek hizasından, kol en kalın yerinden.</span><button class="btn siyah" type="submit">Kaydet</button></form>' +
+      (son ? '<div class="t genis"><div class="satir"><span class="k">Son ölçüm · ' + esc(tarihOf(son.tarih)) + '</span>' + (l.length > 1 ? '<span class="ik">ilk ölçüme göre</span>' : '') + '</div>' + ozet + eski + '</div>' : '') +
+      (l.length > 1 ? olcuGecmis(l) : '') +
+      '<form data-form="olcu" class="t genis" novalidate style="gap:12px"><span class="k">Bugünkü ölçülerin · cm</span>' +
+      OLCU_GRUP.map((g) => '<fieldset class="olcu-fs"><legend>' + g[0] + '</legend><div class="olcu-form' + (g[1].some((o) => o[2]) ? ' cift' : '') + '">' + g[1].map((o) => o[2] ? girdi(o[0], o[1] + ' · sağ') + girdi(o[2], o[1] + ' · sol') : girdi(o[0], o[1] + (o[0] === 'yag' ? ', %' : ''))).join('') + '</div></fieldset>').join('') +
+      '<details class="olcu-nasil"><summary>Nasıl ölçülür?</summary><ul>' + OLCU_NASIL.map((x) => '<li><b>' + x[0] + ':</b> ' + x[1] + '</li>').join('') + '</ul></details>' +
+      '<span class="ik">Hepsini girmen gerekmez; ölçtüklerini yaz. Sabah, aç karnına ve hep aynı yerden ölç.</span><button class="btn siyah" type="submit">Kaydet</button></form>' +
       '</div>';
   }
+  function olcuGecmis(l) {
+    const anahtar = OLCU_HEPSI.filter((o) => l.filter((x) => x[o[0]] != null).length >= 2);
+    if (!anahtar.length) return '';
+    const sec = anahtar.find((o) => o[0] === olcuSec) || anahtar[0];
+    const nok = l.filter((x) => x[sec[0]] != null).slice(-12);
+    const deg = nok.map((x) => x[sec[0]]); const mn = Math.min.apply(null, deg), mx = Math.max.apply(null, deg); const ar = mx - mn || 1;
+    const W = 320, H = 110;
+    const pts = nok.map((x, i) => [12 + (i * (W - 24)) / Math.max(1, nok.length - 1), 14 + (H - 34) * (1 - (x[sec[0]] - mn) / ar)]);
+    return '<div class="t genis"><div class="satir"><span class="k">Gelişim</span><span class="ik num">' + nok.length + ' ölçüm</span></div>' +
+      '<div class="yatay olcu-sec">' + anahtar.map((o) => '<button class="hap" data-act="olcu-sec" data-deger="' + o[0] + '" aria-pressed="' + (o[0] === sec[0]) + '">' + o[1] + '</button>').join('') + '</div>' +
+      '<svg class="olcu-grafik" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(sec[1]) + ' gelişimi"><polyline points="' + pts.map((p) => p.join(',')).join(' ') + '"/>' + pts.map((p, i) => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (i === pts.length - 1 ? 4.5 : 3) + '"/>').join('') +
+      '<text x="12" y="' + (H - 4) + '">' + sayi(deg[0], 1) + '</text><text x="' + (W - 12) + '" y="' + (H - 4) + '" text-anchor="end">' + sayi(deg[deg.length - 1], 1) + (sec[0] === 'yag' ? ' %' : ' cm') + '</text></svg></div>';
+  }
+  let olcuSec = 'bel';
+
+  /* ---------- sıralama ---------- */
+  let sira = { donem: 'hafta', olcut: 'hacim', veri: null, yuk: false };
+  function haftaAyOzet() {
+    const bas = new Date(); bas.setDate(bas.getDate() - haftaGunu()); const hb = tarihKey(bas); const ay = tarihKey().slice(0, 7);
+    const t = (f) => Object.keys(S.gunluk).filter(f).map((k) => S.gunluk[k].antrenman).filter(Boolean).reduce((a, x) => ({ hacim: a.hacim + (x.hacim || 0), set: a.set + (x.set || 0), antr: a.antr + 1 }), { hacim: 0, set: 0, antr: 0 });
+    return { hafta: t((k) => k >= hb), ay: t((k) => k.indexOf(ay) === 0) };
+  }
+  async function skorGonder() { if (!hesap) return; try { await tistek('siralama/skor', 'POST', haftaAyOzet()); } catch (e) { /* yok */ } }
+  async function siraYukle() {
+    sira.yuk = true;
+    try { const r = await tistek('siralama?donem=' + sira.donem + '&olcut=' + sira.olcut); sira.veri = r.ok ? r.j : { hata: r.j.hata || 'Yüklenemedi.' }; } catch (e) { sira.veri = { hata: 'Bağlantı kurulamadı.' }; }
+    sira.yuk = false; if (location.hash.indexOf('#/siralama') === 0) render();
+  }
+  function ekranSiralama() {
+    if (!S.profil) return ekranKarsilama();
+    if (!hesap) return ust(geri('#/ilerleme')) + '<h1 class="baslik">Sıralama<span class="nokta">.</span></h1><div class="t"><span>Sıralamayı görmek için giriş yap.</span></div>';
+    if (!sira.veri && !sira.yuk) siraYukle();
+    const V = sira.veri; const ben = haftaAyOzet()[sira.donem];
+    const OLC = [['hacim', 'Hacim'], ['set', 'Set'], ['antr', 'Antrenman']];
+    const deg = (x) => sira.olcut === 'hacim' ? sayi(x.hacim) + ' kg' : sira.olcut === 'set' ? x.set + ' set' : x.antr + ' antrenman';
+    const govde = !V ? '<p class="ik" style="padding:12px 4px">Yükleniyor…</p>' : V.hata ? '<p class="ik" style="padding:12px 4px">' + esc(V.hata) + '</p>' :
+      (V.liste.length ? '<div class="liste sira-liste">' + V.liste.map((x) => '<div class="' + (x.ben ? 'ben' : '') + '"><span class="sira-no num' + (x.sira <= 3 ? ' ust' + x.sira : '') + '">' + x.sira + '</span><div class="ad"><b>' + esc(x.ad) + (x.ben ? ' · sen' : '') + '</b><span class="ik num">' + [sayi(x.hacim) + ' kg', x.set + ' set', x.antr + ' antrenman'].join(' · ') + '</span></div><b class="num">' + deg(x) + '</b></div>').join('') + '</div>' : '<p class="ik" style="padding:12px 4px">' + (sira.donem === 'hafta' ? 'Bu hafta' : 'Bu ay') + ' henüz kimse sıralamada değil. İlk sen ol.</p>');
+    return ust(geri('#/ilerleme'), '<span class="alt">Bütün üyeler</span>') +
+      '<h1 class="baslik">Sıralama<span class="nokta">.</span></h1>' +
+      '<div class="izgara">' +
+      (V && !V.hata && !V.katildi ? '<div class="t kobalt genis" style="gap:8px"><span class="k">Katılmak senin elinde</span><b style="font-size:20px;line-height:1.25">Sıralamada görünmek ister misin?</b><span style="opacity:.9;line-height:1.45">Katılırsan adın ve soyadının baş harfi (ör. ' + esc(gorunenAd()) + ') ile haftalık ve aylık hacmin, set ve antrenman sayın diğer üyelere görünür. İstediğin zaman çıkabilirsin.</span><button class="btn" data-act="sira-katil" data-acik="1" style="background:#fff;color:var(--kobalt);align-self:flex-start">Sıralamaya katıl</button></div>' : '') +
+      '<div class="t limon h130"><span class="k">' + (sira.donem === 'hafta' ? 'Bu haftan' : 'Bu ayın') + '</span><span class="orta num">' + sayi(ben.hacim) + '<span class="ik" style="color:inherit"> kg</span></span><span class="k num">' + ben.set + ' set · ' + ben.antr + ' antrenman</span></div>' +
+      '<div class="t koyu h130"><span class="k">Sıran</span><span class="orta num">' + (V && V.benim ? V.benim.sira + '<span style="font-size:18px;color:var(--koyu-ikincil)"> / ' + V.toplam + '</span>' : '—') + '</span><span class="k" style="color:var(--koyu-ikincil)">' + (V && V.katildi ? (V.benim ? OLC.find((o) => o[0] === sira.olcut)[1].toLocaleLowerCase('tr') + ' sıralaması' : 'antrenman bitirince görünürsün') : 'katılmadın') + '</span></div>' +
+      '<div class="yatay genis" role="group" aria-label="Dönem">' + [['hafta', 'Bu hafta'], ['ay', 'Bu ay']].map((d) => '<button class="hap" data-act="sira-sec" data-tur="donem" data-deger="' + d[0] + '" aria-pressed="' + (sira.donem === d[0]) + '">' + d[1] + '</button>').join('') + '</div>' +
+      '<div class="yatay genis sira-olcut" role="group" aria-label="Ölçüt">' + OLC.map((o) => '<button class="hap" data-act="sira-sec" data-tur="olcut" data-deger="' + o[0] + '" aria-pressed="' + (sira.olcut === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' +
+      '<div class="t genis" style="padding:6px 16px">' + govde + '</div>' +
+      (V && V.katildi ? '<button class="metin-btn genis" data-act="sira-katil" data-acik="0" style="color:var(--ikincil)">Sıralamadan çık</button>' : '') +
+      '<p class="not genis">Hafta pazartesi başlar. Hacim = kilo × tekrar (ısınma setleri hariç). Ağır kaldıranlar hacimde öne geçer; set ve antrenman sekmeleri herkese eşit şans verir.</p>' +
+      '</div>';
+  }
+  const gorunenAd = () => { const p = String((hesap && hesap.ad) || '').trim().split(/\s+/); return p.length > 1 ? p[0] + ' ' + p[p.length - 1][0].toLocaleUpperCase('tr') + '.' : p[0] || 'Ad S.'; };
 
   /* ---------- aylık rapor ---------- */
   let raporAy = 0; // 0 bu ay, 1 geçen ay…
@@ -1663,6 +1748,7 @@
     else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
     else if (parca[0] === 'hoca') { html = ekranHoca(parca[1] ? decodeURIComponent(parca[1]) : null); sekme = 'profil'; }
     else if (parca[0] === 'hoca-program') { html = ekranHocaProgram(); sekme = 'bugun'; }
+    else if (parca[0] === 'siralama') { html = ekranSiralama(); sekme = 'ilerleme'; }
     else if (parca[0] === 'bitti') { html = ekranBitti(); sekme = 'antrenman'; }
     else if (parca[0] === 'takviye') { html = ekranTakviye(); sekme = 'beslenme'; }
     else if (parca[0] === 'paylas') { html = ekranPaylas(); sekme = 'antrenman'; }
@@ -1809,7 +1895,7 @@
       if (s.donus) S.donusYapildi = true;
       const yeniR = yeniRozetler();
       olay('antrenman_bitti');
-      S.seans = null; dinlenme = null; S.sonSeans.rekor = yeni; kaydet(true);
+      S.seans = null; dinlenme = null; S.sonSeans.rekor = yeni; kaydet(true); skorGonder();
       toast(yeniR.length ? 'Yeni rozet: ' + yeniR.map((r) => r.ad).join(', ') + '!' : yeni ? 'Antrenman kaydedildi. ' + yeni + ' yeni rekor!' : 'Antrenman kaydedildi.');
       git('#/bitti');
     },
@@ -1919,6 +2005,14 @@
       if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Kaydedilemedi.'); return; }
       toast(el.dataset.durum === 'onayli' ? 'Onaylandı. Artık bu e-postayla kayıt olabilir.' : 'Reddedildi.');
       yon.veri = null; render();
+    },
+    'olcu-sec'(el) { olcuSec = el.dataset.deger; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'sira-sec'(el) { sira[el.dataset.tur] = el.dataset.deger; sira.veri = null; render(); },
+    async 'sira-katil'(el) {
+      const acik = el.dataset.acik === '1';
+      const r = await tistek('siralama/katil', 'POST', { acik }); if (!r.ok) { toast(r.j.hata || 'Kaydedilemedi.'); return; }
+      if (acik) { olay('siralama'); await skorGonder(); toast('Sıralamaya katıldın.'); } else toast('Sıralamadan çıktın; skorların silindi.');
+      sira.veri = null; render();
     },
     fb(el) {
       const t = fbTaslak || (fbTaslak = { zor: 0, iyi: [], agri: [], not: '' }); const g = el.dataset.grup, d = el.dataset.deger;
@@ -2317,7 +2411,7 @@
     if (f.dataset.form === 'barkod') return barkodBul(String(v.kod || '').replace(/\D/g, ''));
     if (f.dataset.form === 'olcu') {
       const o = { tarih: tarihKey() }; let n = 0;
-      OLCU.forEach((x) => { const d = oku(v[x[0]]); if (d > 0 && d < (x[0] === 'yag' ? 70 : 250)) { o[x[0]] = d; n++; } });
+      OLCU.forEach((x) => { if (v[x[0]] == null) return; const d = oku(v[x[0]]); if (d > 0 && d < (x[0] === 'yag' ? 70 : 250)) { o[x[0]] = d; n++; } });
       if (!n) { toast('En az bir ölçü gir.'); return; }
       const once = (S.olcu || []).find((x) => x.tarih === o.tarih);
       S.olcu = (S.olcu || []).filter((x) => x.tarih !== o.tarih).concat(Object.assign({}, once || {}, o));

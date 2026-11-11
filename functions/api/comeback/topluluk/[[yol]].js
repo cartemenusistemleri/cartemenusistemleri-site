@@ -24,6 +24,7 @@
 //   POST paylas { kime, program, not }
 //   GET  paylasim                   → { liste }  (sana gelen, bekleyen)
 //   POST paylasim/<id>/yanit { kabul }
+// Sıralama: GET siralama?donem=hafta|ay&olcut=hacim|set|antr · POST siralama/katil { acik } · POST siralama/skor { hafta, ay }
 // Yönetim (admin): GET sikayetler · POST moderasyon { tur, id, gizli }
 
 const json = (v, d = 200) => new Response(JSON.stringify(v), { status: d, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
@@ -60,6 +61,37 @@ export async function onRequest(ctx) {
   const admin = kim.rol === 'admin';
   const simdi = Date.now();
   try {
+    /* ---------- sıralama (haftalık / aylık hacim, set, antrenman) ---------- */
+    // dönem anahtarları Türkiye saatine göre: H<pazartesi tarihi>, A<yıl-ay>
+    const tr = new Date(Date.now() + 3 * 3600e3);
+    const ayK = 'A' + tr.toISOString().slice(0, 7);
+    const pzt = new Date(tr); pzt.setUTCDate(pzt.getUTCDate() - ((pzt.getUTCDay() + 6) % 7)); const haftaK = 'H' + pzt.toISOString().slice(0, 10);
+    if (p[0] === 'siralama' && !p[1] && m === 'GET') {
+      const donem = url.searchParams.get('donem') === 'ay' ? ayK : haftaK;
+      const olc = { hacim: 'hacim', set: 'set_', antr: 'antr' }[url.searchParams.get('olcut')] || 'hacim';
+      const r = await db.prepare('SELECT s.kullanici_id id, s.hacim, s.set_, s.antr, k.ad FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.' + olc + ' > 0 ORDER BY s.' + olc + ' DESC, s.guncelleme ASC LIMIT 200').bind(donem).all();
+      const l = (r.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, set: x.set_, antr: x.antr, ben: x.id === kim.id }));
+      const ben = await db.prepare('SELECT siralama FROM kullanicilar WHERE id = ?').bind(kim.id).first();
+      return json({ liste: l.slice(0, 50), benim: l.find((x) => x.ben) || null, toplam: l.length, katildi: !!(ben && ben.siralama), donem });
+    }
+    if (p[0] === 'siralama' && p[1] === 'katil' && m === 'POST') {
+      const g = await govde(req) || {};
+      await db.prepare('UPDATE kullanicilar SET siralama = ? WHERE id = ?').bind(g.acik ? 1 : 0, kim.id).run();
+      if (!g.acik) await db.prepare('DELETE FROM skor WHERE kullanici_id = ?').bind(kim.id).run();
+      return json({ ok: true, katildi: !!g.acik });
+    }
+    if (p[0] === 'siralama' && p[1] === 'skor' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const ben = await db.prepare('SELECT siralama FROM kullanicilar WHERE id = ?').bind(kim.id).first();
+      if (!ben || !ben.siralama) return json({ ok: true, katildi: false });
+      if (!(await sinir(db, 'skor:' + kim.id, 120, 3600))) return hata('Çok sık güncelleme.', 429);
+      const n = (v, ust) => Math.max(0, Math.min(ust, Math.round(Number(v) || 0)));
+      const yaz = (k, d, c) => db.prepare('INSERT INTO skor (kullanici_id, donem, hacim, set_, antr, guncelleme) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(kullanici_id, donem) DO UPDATE SET hacim = excluded.hacim, set_ = excluded.set_, antr = excluded.antr, guncelleme = excluded.guncelleme')
+        .bind(kim.id, k, n(d && d.hacim, 300000 * c), n(d && d.set, 400 * c), n(d && d.antr, 14 * c), simdi);
+      await db.batch([yaz(haftaK, g.hafta, 1), yaz(ayK, g.ay, 5)]);
+      return json({ ok: true, katildi: true });
+    }
+
     /* ---------- program paylaşımı ---------- */
     const kadiTemiz = (v) => String(v || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').slice(0, 20);
     if (p[0] === 'kisi' && m === 'GET') {
