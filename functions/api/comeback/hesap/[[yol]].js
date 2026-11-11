@@ -212,6 +212,29 @@ export async function onRequest(ctx) {
         await db.prepare('UPDATE kullanicilar SET rol = ? WHERE id = ?').bind(rol, k.id).run();
         return json({ ok: true, rol });
       }
+      // Demo hesabı: Google Play / App Store incelemesi ya da yardım alınan geliştiriciler için. Şifreyi yönetici belirler.
+      if (alt === 'demo' && m === 'GET') {
+        const r = await db.prepare("SELECT k.ad, k.eposta, k.olusturma, (SELECT guncelleme FROM veriler v WHERE v.kullanici_id = k.id) son FROM kullanicilar k WHERE k.rol = 'demo' ORDER BY k.olusturma DESC").all();
+        return json({ liste: r.results || [] });
+      }
+      if (alt === 'demo' && m === 'POST') {
+        const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+        const eposta = String(g.eposta || '').trim().toLowerCase(); const sifre = String(g.sifre || '');
+        const ad = String(g.ad || 'Demo Kullanıcı').trim().replace(/[<>]/g, '').slice(0, 40) || 'Demo Kullanıcı';
+        if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta yaz.', 400);
+        const k = await db.prepare('SELECT id, rol FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
+        if (k && k.rol !== 'demo') return hata('Bu e-posta gerçek bir hesaba ait; demo yapılamaz.', 409);
+        if (g.sifirla && k) { await db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(k.id).run(); return json({ ok: true, sifirlandi: true }); }
+        if (g.sil && k) {
+          await db.batch([db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(k.id), db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(k.id), db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(k.id)]);
+          return json({ ok: true, silindi: true });
+        }
+        if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
+        const tuz = hex(rastgele(16)); const simdi = Date.now(); const hs = await sifreHash(sifre, tuz);
+        if (k) await db.prepare('UPDATE kullanicilar SET sifre_hash = ?, tuz = ?, ad = ? WHERE id = ?').bind(hs, tuz, ad, k.id).run();
+        else await db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, saglik_onay, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), eposta, ad, hs, tuz, 'demo', simdi, simdi, simdi).run();
+        return json({ ok: true, yeni: !k });
+      }
       if (alt === 'hocalar' && m === 'GET') {
         const r = await db.prepare("SELECT k.ad, k.eposta, (SELECT COUNT(*) FROM hoca_ogrenci ho WHERE ho.koc_id = k.id AND ho.durum = 'aktif') ogrenci FROM kullanicilar k WHERE k.rol = 'koc' ORDER BY k.ad").all();
         return json({ liste: r.results || [] });
