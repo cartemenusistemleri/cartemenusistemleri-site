@@ -909,7 +909,10 @@
       const r = await fetch('/api/comeback/koc', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tur: 'bplan', gun: bpTaslak.gun, ogun: bpTaslak.ogun, not: bpTaslak.not, hedef: { kcal: h.kcal, protein: h.protein, karb: h.karb, yag: h.yag, amac: S.profil.hedef }, yemekler }) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !Array.isArray(j.gunler)) toast(j.hata || 'Program hazırlanamadı.');
-      else { S.bplan = { ad: j.ad, not: j.not, gunler: j.gunler, baslangic: tarihKey(), ogun: bpTaslak.ogun }; bpSec = null; olay('bplan'); kaydet(true); toast('Beslenme programın hazır.'); }
+      else {
+        // her günü kalori hedefine oranla (±%15 içinde) ölçekle, gramları 5'e yuvarla
+        j.gunler.forEach((d) => { const t = d.ogunler.reduce((a2, o) => a2 + bpOgunToplam(o).k, 0); if (!t) return; const f = Math.max(0.85, Math.min(1.15, h.kcal / t)); d.ogunler.forEach((o) => o.kalemler.forEach((x) => { x.g = Math.max(5, Math.round((x.g * f) / 5) * 5); })); });
+        S.bplan = { ad: j.ad, not: j.not, gunler: j.gunler, baslangic: tarihKey(), ogun: bpTaslak.ogun }; bpSec = null; olay('bplan'); kaydet(true); toast('Beslenme programın hazır.'); }
     } catch (e) { toast('Bağlantı kurulamadı.'); }
     bpYuk = false; render(); window.scrollTo(0, 0);
   }
