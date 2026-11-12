@@ -597,3 +597,6 @@ fieldset.t>legend+*{clear:both}
 .bp-ogun.yapildi b{color:var(--ikincil);text-decoration:line-through}
 .bp-makro{flex-direction:row;flex-wrap:wrap;gap:6px 18px}
 .bp-ogun-kart{gap:6px}
+.jam-rozetler{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.jam-rozetler i{font-style:normal;font-size:11px;font-weight:800;padding:2px 7px;border-radius:8px;background:#DDF247;color:#16161A}
+.gd-satir{display:flex;width:100%;text-align:left;border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer}

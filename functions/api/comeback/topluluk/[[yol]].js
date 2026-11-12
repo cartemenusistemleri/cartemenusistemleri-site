@@ -97,7 +97,7 @@ export async function onRequest(ctx) {
       }
       if (p[2] === 'durum' && m === 'POST') {
         const g = await govde(req) || {};
-        const d = { hareket: temiz(g.hareket, 50), set: Math.max(0, Math.min(99, Math.round(Number(g.set) || 0))), toplam: Math.max(0, Math.min(200, Math.round(Number(g.toplam) || 0))), dinlenme: Math.max(0, Math.min(900, Math.round(Number(g.dinlenme) || 0))), bitti: !!g.bitti, tepki: temiz(g.tepki, 12) };
+        const d = { hareket: temiz(g.hareket, 50), set: Math.max(0, Math.min(99, Math.round(Number(g.set) || 0))), toplam: Math.max(0, Math.min(200, Math.round(Number(g.toplam) || 0))), dinlenme: Math.max(0, Math.min(900, Math.round(Number(g.dinlenme) || 0))), bitti: !!g.bitti, tepki: temiz(g.tepki, 12), hacim: Math.max(0, Math.min(200000, Math.round(Number(g.hacim) || 0))), rekor: Math.max(0, Math.min(50, Math.round(Number(g.rekor) || 0))), sure: Math.max(0, Math.min(600, Math.round(Number(g.sure) || 0))) };
         await db.prepare('UPDATE jam_uye SET durum = ?, guncelleme = ? WHERE kod = ? AND kullanici_id = ?').bind(JSON.stringify(d), simdi, kod, kim.id).run();
         return json({ ok: true });
       }

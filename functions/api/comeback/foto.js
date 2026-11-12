@@ -18,7 +18,8 @@ const ISTEM = [
   '2) Porsiyonu tabak, kase, çatal, kaşık, bardak, ekmek dilimi gibi tanıdık nesnelere göre ölç. Standart tabak 26 cm, kase 300-350 ml, çay bardağı 100 ml, su bardağı 200 ml, ekmek dilimi ~30 g, bir kepçe çorba ~250 g, bir porsiyon pilav ~150 g.',
   '3) Görünmeyen kaloriyi unutma: sulu yemeklerde ve kızartmalarda yağ, salata sosu, tereyağı, şeker. Yağlı görünüyorsa yağı ayrıca hesaba kat (ayrı kalem yapma, o yemeğe ekle).',
   '4) Besin değerlerini pişmiş hâline göre ver; değerler porsiyonun toplamı olsun (100 g başına değil). k ≈ 4*p + 4*kh + 9*y ile tutarlı olsun.',
-  'Kullanıcı bir not yazdıysa (ne yediği, miktar) onu fotoğraftan üstün tut.',
+  'PAKETLİ ÜRÜN: Fotoğrafta paketli bir ürün varsa (bisküvi, yoğurt, protein bar, içecek…) önce besin değeri tablosunu ara. Tablo görünüyorsa değerleri birebir oku (100 g ya da porsiyon başına yazanı, porsiyona göre çevir), emin: yuksek. Tablo yoksa marka ve ürün adını oku, o ürünün bilinen değerlerini kullan; adı ürünün tam adı olsun (ör. "Ülker Çikolatalı Gofret"). Paket boyutunu (g/ml) yazıdan oku, kullanıcı aksini yazmadıysa bir paket yediğini varsay.',
+  'Kullanıcı bir not yazdıysa (ne yediği, miktar, "yarısını yedim" gibi) onu fotoğraftan üstün tut.',
   'Yalnızca şu biçimde geçerli JSON döndür, başka hiçbir şey yazma, ilk karakter { olsun:',
   '{"kalemler":[{"ad":"Türkçe kısa ad","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"emin":"yuksek|orta|dusuk"}]}',
   'Tabakta görünen her ayrı yiyeceği ayrı kalem yap, en fazla 8 kalem. Fotoğrafta yiyecek yoksa {"kalemler":[]} döndür.'
