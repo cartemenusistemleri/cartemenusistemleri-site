@@ -385,7 +385,7 @@
     const p = S.profil || { ad: hesap ? hesap.ad : '', cinsiyet: 'e', yas: '', boy: '', kilo: '', hedef: 'kas', spor: 'fitness', deneyim: 'orta', gun: 4, sakatlik: [], odak: [], ortam: 'salon', sure: 60, sezon: 'disi', saglik: false };
     const hap = (grup, deger, yazi, secili, coklu) => '<button type="button" class="hap' + (coklu ? ' siyah' : '') + '" data-act="hap" data-grup="' + grup + '" data-deger="' + deger + '"' + (coklu ? ' data-coklu="1"' : '') + ' aria-pressed="' + (secili ? 'true' : 'false') + '">' + yazi + '</button>';
     const tekli = (grup, liste, secili) => liste.map((x) => hap(grup, x[0], x[1], x[0] === secili)).join('');
-    return ust(S.profil ? geri('#/profil') : logo, '<span class="alt">' + (S.profil ? 'Bilgilerim' : 'Program kurulumu') + '</span>') +
+    return ust(S.profil ? geri('#/profilim') : logo, '<span class="alt">' + (S.profil ? 'Bilgilerim' : 'Program kurulumu') + '</span>') +
       '<h1 class="baslik">' + (S.profil ? 'Bilgilerini güncelle' : 'Seni tanıyalım') + '<span class="nokta">.</span></h1>' +
       '<form data-form="kurulum" class="izgara" novalidate>' +
       '<label class="t genis alan"><span>Adın</span><input name="ad" autocomplete="given-name" maxlength="30" value="' + esc(p.ad) + '" placeholder="Deniz" style="font-size:24px"></label>' +
@@ -1911,32 +1911,91 @@
       '<button class="btn ana buyuk-btn genis" type="submit" id="formBtn">Gönder' + IK.ok + '</button>' +
       '</form>';
   }
+  // Menü (alt çubukta COMEBACK.) — uygulamanın her köşesine buradan gidilir
+  const MIK = {
+    program: '<path d="M4 6h16M4 12h10M4 18h7"/><path d="M17 15l2 2 3-4"/>',
+    plan: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+    jam: '<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M3 19c.8-3 2.8-4.5 5-4.5S12.2 16 13 19M11 19c.8-3 2.8-4.5 5-4.5S20.2 16 21 19"/>',
+    gonder: '<path d="M4 12l16-8-6 16-3-6z"/><path d="M11 14l9-10"/>',
+    hedef: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".5"/>',
+    bplan: '<path d="M7 3v8M5 3v4a2 2 0 0 0 4 0V3M7 11v10M16 3c-2 2-2 6 0 8v10"/>',
+    takviye: '<rect x="4" y="9" width="16" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.2 8.6l5.6 7.8"/>',
+    topluluk: '<path d="M4 5h16v10H9l-5 4z"/>',
+    siralama: '<path d="M8 21V11M12 21V5M16 21v-7"/>',
+    ogrenci: '<path d="M3 9l9-4 9 4-9 4z"/><path d="M7 11v4c0 1.5 2.5 3 5 3s5-1.5 5-3v-4"/>',
+    gorus: '<path d="M4 5h16v11H8l-4 4z"/><path d="M8 10h8"/>',
+    yonetim: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
+    gizlilik: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    kisi: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+    ses: '<path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 9a4 4 0 0 1 0 6"/>',
+    veri: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>'
+  };
+  const OK_SAG = '<svg class="mn-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  function mSatir(href, ik, baslik, alt, renk) {
+    return '<a class="mn-satir" href="' + href + '"' + (href.indexOf('http') === 0 || href.indexOf('.html') > 0 ? ' target="_blank" rel="noopener"' : '') + '><span class="mn-ik' + (renk ? ' ' + renk : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + MIK[ik] + '</svg></span><span class="mn-yazi"><b>' + baslik + '</b>' + (alt ? '<span>' + alt + '</span>' : '') + '</span>' + OK_SAG + '</a>';
+  }
+  function mGrup(ad, satirlar) {
+    const ic = satirlar.filter(Boolean).join(''); if (!ic) return '';
+    return '<section class="mn-grup genis" aria-label="' + ad + '"><h2 class="mn-baslik">' + ad + '</h2><div class="mn-kutu">' + ic + '</div></section>';
+  }
   function ekranProfil() {
+    if (!S.profil) return ekranKarsilama();
+    const p = S.profil; const tk = S.takviye || [];
+    const bas = esc(((p.ad || hesap && hesap.ad || 'C').trim()[0] || 'C').toLocaleUpperCase('tr'));
+    const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
+    return ust(logo) + '<h1 class="baslik">Menü<span class="nokta">.</span></h1>' +
+      '<div class="izgara">' +
+      '<a class="t genis mn-profil" href="#/profilim"><span class="mn-avatar" aria-hidden="true">' + bas + '</span><span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · bilgiler, hedef, hesap</span></span>' + OK_SAG + '</a>' +
+      '<a class="t limon h130" href="#/hedef"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></a>' +
+      '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
+      mGrup('Antrenman', [
+        mSatir('#/program', 'program', S.program && S.program.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle', 'Hareket ekle, çıkar, günleri değiştir'),
+        mSatir('#/plan', 'plan', 'Program ayrıntıları', 'Günler, setler, ilerleme kuralı'),
+        mSatir('#/jam', 'jam', 'Ortak antrenman', 'Arkadaşınla aynı anda, Jam ile'),
+        mSatir('#/paylas', 'gonder', 'Program gönder', 'Arkadaşına programını yolla')
+      ]) +
+      (hocaMi() ? mGrup('Hoca paneli', [mSatir('#/hoca', 'ogrenci', 'Öğrencilerim', 'Kod, programlar, antrenmanlar', 'kobalt')]) : '') +
+      mGrup('Beslenme', [
+        mSatir('#/hedef', 'hedef', 'Günlük hedef', sayi(S.hedef.kcal) + ' kcal · ' + S.hedef.protein + ' g protein'),
+        mSatir('#/bplan', 'bplan', 'Beslenme programı', S.bplan ? esc(S.bplan.ad) : 'Yapay zekâ ile hazırla'),
+        mSatir('#/takviye', 'takviye', 'Takviyeler', tk.length ? tk.map((x) => esc(x.ad)).slice(0, 3).join(', ') : 'Takviye takibini aç')
+      ]) +
+      mGrup('Topluluk', [
+        hesap ? mSatir('#/topluluk', 'topluluk', 'Forum ve meydan okuma', 'Sor, paylaş, arkadaşınla yarış', 'limon') : '',
+        hesap ? mSatir('#/siralama', 'siralama', 'Sıralama', 'Haftalık ve aylık hacim tablosu') : ''
+      ]) +
+      hocaKutu().replace('class="t h130"', 'class="t genis"') +
+      ekleKutu(true) +
+      mGrup('COMEBACK.', [
+        mSatir('#/gorus', 'gorus', 'Görüş bildir', 'Hata, öneri, beğendiğin bir şey'),
+        hesap && hesap.rol === 'admin' ? mSatir('#/yonetim', 'yonetim', 'Yönetim', 'Yalnızca sen görürsün', 'koyu') : '',
+        mSatir('gizlilik.html', 'gizlilik', 'Gizlilik', 'Hangi veriyi neden saklıyoruz')
+      ]) +
+      '</div>';
+  }
+  // Profilim: kişisel bilgiler, hesap; silme ve sıfırlama en altta kapalı bölümde
+  let veriAcik = false;
+  function ekranProfilim() {
     if (!S.profil) return ekranKarsilama();
     const p = S.profil;
     const ad = { kas: 'Kas kazanmak', yag: 'Yağ yakmak', guc: 'Güçlenmek', kondisyon: 'Kondisyon' }[p.hedef];
     const spor = { fitness: 'Fitness', futbol: 'Futbol', basketbol: 'Basketbol', kosu: 'Koşu', yuzme: 'Yüzme', dovus: 'Dövüş sporları' }[p.spor];
-    return ust(logo) + '<h1 class="baslik">' + esc(p.ad || 'Profil') + '<span class="nokta">.</span></h1>' +
+    const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
+    const veri = !veriAcik ? '<button class="mn-satir mn-dugme" data-act="veri-ac" aria-expanded="false"><span class="mn-ik"><svg viewBox="0 0 24 24" aria-hidden="true">' + MIK.veri + '</svg></span><span class="mn-yazi"><b>Hesap ve veriler</b><span>Hesabı silme, cihazı sıfırlama</span></span>' + OK_SAG + '</button>'
+      : '<div class="t genis" style="gap:12px"><div class="satir" style="flex-direction:row;align-items:center"><span class="k">Hesap ve veriler</span><button class="metin-btn kucuk-metin" data-act="veri-kapat" aria-expanded="true" style="color:var(--ikincil)">Kapat</button></div>' +
+        (hesap ? (silAcik ? '<form data-form="hesap-sil" novalidate style="display:flex;flex-direction:column;gap:10px"><span class="k" style="color:var(--hata)">Hesabı kalıcı sil</span><span style="font-size:14px;line-height:1.5">Hesabın, programın, öğün ve antrenman kayıtların ile sağlık verilerin sunucudan kalıcı olarak silinir. Bu geri alınamaz.</span>' + sifreAlani('sifre', 'current-password', 'Onay için şifren') + '<p class="hata" id="formHata" role="alert" hidden></p><div class="satir" style="flex-direction:row;gap:8px"><button type="button" class="btn cerceve" data-act="sil-kapat" style="flex:1">Vazgeç</button><button class="btn" id="formBtn" type="submit" style="flex:1;background:var(--hata);color:#fff">Kalıcı sil</button></div></form>'
+          : '<div class="yigin" style="gap:4px"><b>Hesabımı sil</b><span class="ik">Hesabın ve sunucudaki bütün kayıtların kalıcı olarak silinir.</span><button class="btn cerceve" data-act="sil-ac" style="align-self:flex-start;min-height:40px;color:var(--hata)">Hesabımı sil</button></div>') : '') +
+        '<div class="yigin" style="gap:4px;border-top:1px solid var(--zemin);padding-top:12px"><b>Bu cihazdaki verileri sıfırla</b><span class="ik">' + (hesap ? 'Programın ve bütün kayıtların sıfırlanır, hesabın da bu boş hâliyle eşitlenir. Hesabın açık kalır, baştan kurulum yaparsın.' : 'Bu telefondaki bütün kayıtlar silinir.') + '</span><button class="btn cerceve" data-act="sifirla" style="align-self:flex-start;min-height:40px;color:var(--hata)">' + (sifirOnay ? 'Emin misin? Tekrar bas' : 'Verileri sıfırla') + '</button></div></div>';
+    return ust(geri('#/profil')) + '<h1 class="baslik">' + esc(p.ad || 'Profilim') + '<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(p.kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
-      '<a class="t limon h130" href="#/hedef"><span class="k">Günlük hedef · değiştir</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></a>' +
-      '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
-      '<a class="btn siyah genis" href="#/program">' + (S.program && S.program.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle · kendi programımı yaz') + '</a>' +
-      '<a class="btn ana genis" href="#/hedef">Hedefimi değiştir · kas, yağ yakma, gün, odak</a>' +
-      '<a class="btn cerceve genis" href="#/kurulum">Tüm bilgilerimi güncelle</a>' +
-      ekleKutu(true) +
-      '<div class="t genis" style="gap:10px"><span class="k">Dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div><span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık.</span></div>' +
-      '<a class="t genis ayar-satir" href="#/takviye"><span class="yigin"><span class="k">Takviyeler</span><b>' + ((S.takviye || []).length ? (S.takviye || []).map((x) => esc(x.ad)).slice(0, 3).join(', ') : 'Takviye takibini aç') + '</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>' +
-      (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
-      (hesap && hesap.rol === 'admin' ? '<a class="t koyu genis" href="#/yonetim"><span class="k">Yalnızca sen görürsün</span><b style="font-size:20px">Yönetim</b><span style="opacity:.8">Bekleme listesi, görüşler, hatalar, kullanıcılar.</span></a>' : '') +
-      '<a class="t kobalt genis" href="#/gorus"><span class="k">Deneme sürümü</span><b style="font-size:20px">Görüş bildir</b><span class="ik" style="color:inherit;opacity:.8">Hata, öneri, beğendiğin bir şey: bize yaz.</span></a>' +
+      '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
+      '<a class="btn ana genis" href="#/kurulum">Bilgilerimi güncelle · kilo, boy, yaş, spor</a>' +
+      '<a class="btn cerceve genis" href="#/hedef">Hedefimi değiştir · kas, yağ yakma, gün, odak</a>' +
       kadiKutu() +
-      hocaKutu() +
-      (hocaMi() ? '<a class="t kobalt h130" href="#/hoca"><span class="k">Hoca paneli</span><b style="font-size:19px">Öğrencilerim</b><span style="opacity:.85">Kod, programlar, antrenmanlar.</span></a>' : '') +
-      '<a class="t limon h130" href="#/topluluk"><span class="k">Topluluk</span><b style="font-size:19px">Forum ve meydan okuma</b><span class="ik" style="color:#3E4410">Sor, paylaş, arkadaşınla yarış.</span></a>' +
-      '</div>' +
-      (hesap ? (silAcik ? '<form data-form="hesap-sil" class="t genis" novalidate style="gap:10px"><span class="k" style="color:var(--hata)">Hesabı kalıcı sil</span><span style="font-size:14px;line-height:1.5">Hesabın, programın, öğün ve antrenman kayıtların ile sağlık verilerin sunucudan kalıcı olarak silinir. Bu geri alınamaz.</span>' + sifreAlani('sifre', 'current-password', 'Onay için şifren') + '<p class="hata" id="formHata" role="alert" hidden></p><div class="satir" style="flex-direction:row;gap:8px"><button type="button" class="btn cerceve" data-act="sil-kapat" style="flex:1">Vazgeç</button><button class="btn" id="formBtn" type="submit" style="flex:1;background:var(--hata);color:#fff">Kalıcı sil</button></div></form>' : '<button class="metin-btn" data-act="sil-ac" style="align-self:center;color:var(--ikincil)">Hesabımı sil</button>') : '') +
-      '<button class="metin-btn" data-act="sifirla" style="align-self:center;color:var(--hata)">' + (sifirOnay ? 'Emin misin? Bütün kayıtlar silinecek, tekrar bas' : 'Bu cihazdaki verileri sıfırla') + '</button>';
+      '<div class="t genis" style="gap:10px"><span class="k">Dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div><span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık.</span></div>' +
+      (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
+      '<div class="genis" style="display:flex;flex-direction:column;margin-top:18px">' + (veriAcik ? veri : '<div class="mn-kutu">' + veri + '</div>') + '</div>' +
+      '</div>';
   }
 
   /* ---------- yönlendirme ---------- */
@@ -1959,6 +2018,7 @@
     else if (parca[0] === 'porsiyon') { html = ekranPorsiyon(); sekme = 'beslenme'; }
     else if (parca[0] === 'ilerleme') { html = ekranIlerleme(); sekme = 'ilerleme'; }
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
+    else if (parca[0] === 'profilim') { if (sonRota !== 'profilim') { veriAcik = false; silAcik = false; sifirOnay = false; } html = ekranProfilim(); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
     else if (parca[0] === 'topluluk') { html = ekranTopluluk(parca[1] || '', parca[2] ? decodeURIComponent(parca[2]) : null); sekme = 'profil'; }
     else if (parca[0] === 'mesaj') { html = ekranMesaj(decodeURIComponent(parca[1] || '')); sekme = 'profil'; }
@@ -2559,6 +2619,8 @@
     async 'tp-meydan-ayril'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; } await tistek('meydan/' + tp.meydanId + '/ayril', 'POST'); tp.meydanlar = null; tp.meydan = null; git('#/topluluk/meydan'); },
     'tp-mesaj-yenile'() { tp.mesaj = null; render(); },
     'gorus-tur'(el) { gorusTur = el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); },
+    'veri-ac'() { veriAcik = true; render(); },
+    'veri-kapat'() { veriAcik = false; silAcik = false; sifirOnay = false; render(); },
     'sil-ac'() { silAcik = true; render(); const i = document.querySelector('[data-form="hesap-sil"] input'); if (i) i.focus(); },
     'sil-kapat'() { silAcik = false; render(); },
     sifirla() {
