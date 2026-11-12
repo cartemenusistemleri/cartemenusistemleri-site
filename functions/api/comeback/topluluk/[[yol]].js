@@ -92,7 +92,8 @@ export async function onRequest(ctx) {
       if (!uyeMi) return hata('Önce bu ortak antrenmana katıl.', 403);
       if (!p[2] && m === 'GET') {
         const u = await db.prepare('SELECT kullanici_id, ad, durum, guncelleme FROM jam_uye WHERE kod = ? ORDER BY guncelleme DESC').bind(kod).all();
-        return json({ kod, ad: j.ad, sahip: j.sahip_id === kim.id, bitis: j.bitis, program: j.program ? JSON.parse(j.program) : null,
+        return json({ kod, ad: j.ad, sahip: j.sahip_id === kim.id, bitis: j.bitis, program: j.program ? JSON.parse(j.program) : null, ortak: !!j.ortak,
+          dinlenme: j.dinlenme_bitis ? { id: j.dinlenme_bitis, kalan: Math.max(0, Math.round((j.dinlenme_bitis - simdi) / 1000)), sn: j.dinlenme_sn, kim: j.dinlenme_kim } : null,
           uyeler: (u.results || []).map((x) => { let d = {}; try { d = JSON.parse(x.durum || '{}'); } catch (e) { /* bozuk */ } return { ad: x.ad, ben: x.kullanici_id === kim.id, durum: d, once: Math.round((simdi - x.guncelleme) / 1000) }; }) });
       }
       if (p[2] === 'durum' && m === 'POST') {
@@ -100,6 +101,21 @@ export async function onRequest(ctx) {
         const d = { hareket: temiz(g.hareket, 50), set: Math.max(0, Math.min(99, Math.round(Number(g.set) || 0))), toplam: Math.max(0, Math.min(200, Math.round(Number(g.toplam) || 0))), dinlenme: Math.max(0, Math.min(900, Math.round(Number(g.dinlenme) || 0))), bitti: !!g.bitti, tepki: temiz(g.tepki, 12), hacim: Math.max(0, Math.min(200000, Math.round(Number(g.hacim) || 0))), rekor: Math.max(0, Math.min(50, Math.round(Number(g.rekor) || 0))), sure: Math.max(0, Math.min(600, Math.round(Number(g.sure) || 0))) };
         await db.prepare('UPDATE jam_uye SET durum = ?, guncelleme = ? WHERE kod = ? AND kullanici_id = ?').bind(JSON.stringify(d), simdi, kod, kim.id).run();
         return json({ ok: true });
+      }
+      // ortak dinlenme: biri seti bitirince herkesin sayacı aynı bitiş anına ayarlanır
+      if (p[2] === 'dinlen' && m === 'POST') {
+        const g = await govde(req) || {};
+        if (!j.ortak) return json({ ok: true, ortak: false });
+        const sn = Math.max(0, Math.min(900, Math.round(Number(g.sn) || 0)));
+        const bitis = g.iptal ? simdi : simdi + sn * 1000;
+        await db.prepare('UPDATE jam SET dinlenme_bitis = ?, dinlenme_sn = ?, dinlenme_kim = ? WHERE kod = ?').bind(bitis, g.iptal ? 0 : (Number(g.toplam) > 0 ? Math.min(900, Math.round(Number(g.toplam))) : sn), gorunen(kim.ad), kod).run();
+        return json({ ok: true, id: bitis });
+      }
+      if (p[2] === 'ortak' && m === 'POST') {
+        if (j.sahip_id !== kim.id) return hata('Bunu yalnızca Jam\'i açan kişi değiştirebilir.', 403);
+        const g = await govde(req) || {};
+        await db.prepare('UPDATE jam SET ortak = ? WHERE kod = ?').bind(g.acik ? 1 : 0, kod).run();
+        return json({ ok: true, ortak: !!g.acik });
       }
       if (p[2] === 'ayril' && m === 'POST') {
         await db.prepare('DELETE FROM jam_uye WHERE kod = ? AND kullanici_id = ?').bind(kod, kim.id).run();

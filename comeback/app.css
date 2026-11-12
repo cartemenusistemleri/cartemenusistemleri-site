@@ -600,3 +600,4 @@ fieldset.t>legend+*{clear:both}
 .jam-rozetler{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
 .jam-rozetler i{font-style:normal;font-size:11px;font-weight:800;padding:2px 7px;border-radius:8px;background:#DDF247;color:#16161A}
 .gd-satir{display:flex;width:100%;text-align:left;border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer}
+.jam-ortak input{width:24px;height:24px;accent-color:var(--kobalt);flex:none}

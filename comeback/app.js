@@ -813,7 +813,7 @@
   let jamV = null; let jamKodGir = ''; let jamYuk = false; let jamZaman = null; let jamPaylas = true;
   async function jamCek() {
     if (!S.jam) return;
-    try { const r = await tistek('jam/' + S.jam.kod); if (r.ok) { jamV = r.j; if (S.sonSeans && S.sonSeans.jam === S.jam.kod) jamKaydet(); } else if (r.j && /süresi doldu|yok/.test(r.j.hata || '')) { S.jam = null; jamV = null; kaydet(); } } catch (e) { /* çevrimdışı */ }
+    try { const r = await tistek('jam/' + S.jam.kod); if (r.ok) { jamV = r.j; jamDinlenmeUygula(); if (S.sonSeans && S.sonSeans.jam === S.jam.kod) jamKaydet(); } else if (r.j && /süresi doldu|yok/.test(r.j.hata || '')) { S.jam = null; jamV = null; kaydet(); } } catch (e) { /* çevrimdışı */ }
     const h = location.hash; if (h.indexOf('#/bitti') === 0) { const sY = window.scrollY; render(); window.scrollTo(0, sY); return; }
     if (h.indexOf('#/jam') === 0 || (S.seans && (h === '#/' || h === '' || h.indexOf('#/antrenman') === 0))) jamCiz();
   }
@@ -829,6 +829,22 @@
     if (ozet) Object.assign(v, ozet);
     return tistek('jam/' + S.jam.kod + '/durum', 'POST', v).catch(() => {});
   }
+  // ortak dinlenme
+  let jamSonDinlenme = 0;
+  function jamOrtakMi() { return !!(S.jam && jamV && jamV.ortak); }
+  function jamDinlen(sn, iptal) {
+    if (!jamOrtakMi() || !S.seans) return;
+    tistek('jam/' + S.jam.kod + '/dinlen', 'POST', iptal ? { iptal: true } : { sn, toplam: dinlenme ? dinlenme.toplam : sn }).then((r) => { if (r.ok && r.j.id) { jamSonDinlenme = r.j.id; if (dinlenme && !iptal) dinlenme.id = r.j.id; } }).catch(() => {});
+  }
+  function jamDinlenmeUygula() {
+    const d = jamV && jamV.ortak && jamV.dinlenme; if (!d || !S.seans) return;
+    if (d.id === jamSonDinlenme) return;
+    const ilk = !jamSonDinlenme; jamSonDinlenme = d.id;
+    if (d.kalan > 1) {
+      const hedef = Date.now() + d.kalan * 1000;
+      if (!dinlenme || Math.abs(dinlenme.bitis - hedef) > 2500) { dinlenmeBaslat(d.kalan, { id: d.id, toplam: d.sn || d.kalan }); if (!ilk || d.kalan > 5) toast(d.kim + ' seti bitirdi · dinlenme ' + d.kalan + ' sn'); }
+    } else if (!ilk && dinlenme && dinlenme.bitis - Date.now() > 2000) { dinlenme = null; dinlenmeCiz(); toast(d.kim + ' dinlenmeyi bitirdi. Sıra sende.'); }
+  }
   function jamTablo(uyeler, baslik) {
     const l = (uyeler || []).slice().sort((a, b) => (b.durum.hacim || 0) - (a.durum.hacim || 0) || (b.durum.set || 0) - (a.durum.set || 0));
     if (!l.length) return '';
@@ -838,11 +854,15 @@
       l.map((x, i) => '<div class="' + (x.ben ? 'ben' : '') + '"><span class="sira-no num' + (i < 3 && (x.durum.hacim || 0) > 0 ? ' ust' + (i + 1) : '') + '">' + (i + 1) + '</span><div class="ad"><b>' + esc(x.ad) + (x.ben ? ' · sen' : '') + '</b><span class="ik num">' + (x.durum.set || 0) + ' set' + (x.durum.sure ? ' · ' + x.durum.sure + ' dk' : '') + (x.durum.rekor ? ' · ' + x.durum.rekor + ' rekor' : '') + (x.durum.bitti ? '' : ' · devam ediyor') + '</span>' +
         '<span class="jam-rozetler">' + ((x.durum.hacim || 0) === mH ? '<i>En çok kaldıran</i>' : '') + ((x.durum.set || 0) === mS && l.length > 1 ? '<i>En çok set</i>' : '') + ((x.durum.rekor || 0) === mR ? '<i>Rekor avcısı</i>' : '') + '</span></div><b class="num">' + sayi(x.durum.hacim || 0) + ' kg</b></div>').join('') + '</div></div>';
   }
-  function jamBaslatZaman() { if (jamZaman) return; jamZaman = setInterval(() => { if (!S.jam) { clearInterval(jamZaman); jamZaman = null; return; } if (document.visibilityState === 'visible') { jamDurumGonder(); jamCek(); } }, 6000); }
+  let jamSayac = 0;
+  function jamBaslatZaman() { if (jamZaman) return; jamZaman = setInterval(() => { if (!S.jam) { clearInterval(jamZaman); jamZaman = null; return; } if (document.visibilityState !== 'visible') return; jamSayac++; const hizli = S.seans && jamOrtakMi(); if (hizli || jamSayac % 2 === 0) { if (jamSayac % 2 === 0) jamDurumGonder(); jamCek(); } }, 3000); }
   function jamSerit() {
     if (!S.jam) return '';
     const u = (jamV && jamV.uyeler) || [];
-    return '<div id="jamSerit" class="t genis jam-serit"><div class="satir"><span class="k">Jam · ' + esc(S.jam.kod) + ' · ' + u.length + ' kişi</span><a class="metin-btn kucuk-metin" href="#/jam" style="color:#fff">Aç</a></div>' +
+    const say = {}; u.forEach((x) => { if (x.durum.hareket && !x.durum.bitti) say[x.durum.hareket] = (say[x.durum.hareket] || 0) + 1; });
+    const grup = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
+    return '<div id="jamSerit" class="t genis jam-serit"><div class="satir"><span class="k">Jam · ' + esc(S.jam.kod) + ' · ' + u.length + ' kişi' + (jamOrtakMi() ? ' · ortak dinlenme' : '') + '</span><a class="metin-btn kucuk-metin" href="#/jam" style="color:#fff">Aç</a></div>' +
+      (grup && u.length > 1 ? '<span style="font-weight:700">Grup şu an: ' + esc(grup) + '</span>' : '') +
       (u.length ? '<div class="jam-uyeler">' + u.map((x) => '<div class="jam-uye' + (x.ben ? ' ben' : '') + '"><b>' + esc(x.ad) + (x.ben ? ' · sen' : '') + '</b><span>' + (x.durum.bitti ? 'Bitirdi' : x.durum.hareket ? esc(x.durum.hareket) + ' · ' + x.durum.set + '/' + x.durum.toplam + ' set' : x.once > 600 ? 'Bağlantı yok' : 'Hazırlanıyor') + (x.durum.dinlenme ? ' · dinleniyor ' + x.durum.dinlenme + ' sn' : '') + '</span></div>').join('') + '</div>' : '<span class="ik" style="color:rgba(255,255,255,.75)">Arkadaşların katılınca burada görünür.</span>') + '</div>';
   }
   function ekranJam() {
@@ -868,10 +888,11 @@
       '<h1 class="baslik">Jam<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       '<div class="t limon genis jam-kod"><span class="k">Kod · arkadaşına gönder</span><b class="num">' + esc(S.jam.kod) + '</b><div class="haplar"><button class="btn siyah kucuk" data-act="jam-kopya">Kodu kopyala</button></div><span class="ik" style="color:#3E4410">4 saat açık kalır · en fazla 8 kişi</span></div>' +
+      (!S.seans && prog && prog.hareketler && prog.hareketler.length ? '<div class="t genis" style="gap:8px"><span class="k">Paylaşılan antrenman · ' + esc(prog.ad || '') + '</span><div class="liste">' + prog.hareketler.map((x) => '<div><div class="ad"><b>' + esc((D.HAREKET[x.id] || { ad: x.id }).ad) + '</b></div><span class="num" style="font-weight:800;font-size:14px">' + x.set + ' × ' + esc(x.tekrar) + '</span></div>').join('') + '</div>' +
+        (!S.seans ? '<button class="btn ana buyuk-btn" data-act="jam-basla">Bu antrenmanı birlikte yap' + IK.ok + '</button>' : '') + '</div>' : '') +
       jamSerit() +
+      (V ? '<label class="t genis ayar-satir jam-ortak"><span class="yigin"><span class="k">Ortak dinlenme</span><b>Biri seti bitirince herkesin sayacı birlikte başlasın</b><span class="ik">' + (V.sahip ? 'Aynı antrenmanı birlikte yapıyorsanız açık kalsın.' : 'Bunu Jam\'i açan kişi değiştirebilir.') + '</span></span><input type="checkbox" data-act="jam-ortak"' + (V.ortak ? ' checked' : '') + (V.sahip ? '' : ' disabled') + ' aria-label="Ortak dinlenme"></label>' : '') +
       (V && V.uyeler && V.uyeler.some((x) => (x.durum.hacim || 0) > 0) ? jamTablo(V.uyeler) : '') +
-      (prog && prog.hareketler && prog.hareketler.length ? '<div class="t genis" style="gap:8px"><span class="k">Paylaşılan antrenman · ' + esc(prog.ad || '') + '</span><div class="liste">' + prog.hareketler.map((x) => '<div><div class="ad"><b>' + esc((D.HAREKET[x.id] || { ad: x.id }).ad) + '</b></div><span class="num" style="font-weight:800;font-size:14px">' + x.set + ' × ' + esc(x.tekrar) + '</span></div>').join('') + '</div>' +
-        (!S.seans ? '<button class="btn ana" data-act="jam-basla">Bu antrenmanı yap</button>' : '') + '</div>' : '') +
       (!S.seans && bugunku ? '<button class="btn genis ' + (prog ? 'cerceve' : 'ana') + '" data-act="basla" data-id="' + bugunku.id + '">Kendi antrenmanımı (' + esc(bugunku.ad) + ') başlat</button>' : '') +
       (S.seans ? '<a class="btn ana" href="#/antrenman">Antrenmana dön</a>' : '') +
       '<button class="metin-btn genis" data-act="jam-ayril" style="color:var(--ikincil)">' + (V && V.sahip ? 'Jam\'i kapat' : 'Jam\'den ayrıl') + '</button>' +
@@ -1444,9 +1465,9 @@
 
   /* dinlenme sayacı */
   let dinlenme = null; let dinlenmeZaman = null;
-  function dinlenmeBaslat(sn) {
+  function dinlenmeBaslat(sn, kaynak) {
     if (!sn) return;
-    dinlenme = { bitis: Date.now() + sn * 1000, toplam: sn };
+    dinlenme = { bitis: Date.now() + sn * 1000, toplam: kaynak && kaynak.toplam ? kaynak.toplam : sn, id: kaynak ? kaynak.id : null };
     clearInterval(dinlenmeZaman);
     dinlenmeZaman = setInterval(dinlenmeCiz, 1000);
     dinlenmeCiz();
@@ -2055,13 +2076,13 @@
       const sY = window.scrollY; render(); window.scrollTo(0, sY);
       if (y.ok) {
         if (sonraki && sonraki.tur === 'drop') { dinlenme = null; dinlenmeCiz(); toast('Drop set: kiloyu düşür, hemen devam.'); }
-        else if (sonraki) dinlenmeBaslat(y.tur === 'isinma' ? Math.min(60, dz.dinlenme || 60) : dz.dinlenme);
+        else if (sonraki) { const sn = y.tur === 'isinma' ? Math.min(60, dz.dinlenme || 60) : dz.dinlenme; dinlenmeBaslat(sn); jamDinlen(sn); }
         const b = document.querySelector('[data-act="tik"][data-h="' + el.dataset.h + '"][data-i="' + el.dataset.i + '"]');
         if (b && b.animate && !azHareket) b.animate([{ transform: 'scale(.82)' }, { transform: 'scale(1.06)', offset: 0.6 }, { transform: 'scale(1)' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' });
       } else { dinlenme = null; dinlenmeCiz(); }
     },
-    'dinlenme-ek'() { if (dinlenme) { dinlenme.bitis += 30000; dinlenme.toplam += 30; dinlenmeCiz(); } },
-    'dinlenme-atla'() { dinlenme = null; dinlenmeCiz(); },
+    'dinlenme-ek'() { if (dinlenme) { dinlenme.bitis += 30000; dinlenme.toplam += 30; dinlenmeCiz(); jamDinlen(Math.round((dinlenme.bitis - Date.now()) / 1000)); } },
+    'dinlenme-atla'() { const vardi = !!dinlenme; dinlenme = null; dinlenmeCiz(); if (vardi) jamDinlen(0, true); },
     iptal() {
       if (!iptalOnay) { iptalOnay = true; const sY = window.scrollY; render(); window.scrollTo(0, sY); return; }
       S.seans = null; iptalOnay = false; dinlenme = null; kaydet(true); git('#/antrenman');
@@ -2382,6 +2403,7 @@
     'off-ac'() { offAcik = !offAcik; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'jam-gecmis'(el) { jamGecmisSec = jamGecmisSec === +el.dataset.i ? null : +el.dataset.i; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     async 'jam-yenile'() { await jamCek(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    async 'jam-ortak'(el) { if (!S.jam) return; const r = await tistek('jam/' + S.jam.kod + '/ortak', 'POST', { acik: el.checked }); if (!r.ok) { toast(r.j.hata || 'Değiştirilemedi.'); el.checked = !el.checked; return; } if (jamV) jamV.ortak = el.checked; toast(el.checked ? 'Dinlenme süreleri artık ortak.' : 'Herkes kendi dinlenme süresini kullanıyor.'); },
     'jam-paylas'(el) { jamPaylas = el.checked; },
     async 'jam-olustur'() {
       const b = bugunkuGun(); jamYuk = true; render();
@@ -2393,7 +2415,8 @@
       const i = document.getElementById('jamKod'); const kod = (i ? i.value : jamKodGir).toUpperCase().replace(/[^A-Z0-9]/g, '');
       if (kod.length !== 5) { toast('Kod 5 karakter.'); return; }
       const r = await tistek('jam/' + kod + '/katil', 'POST', {}); if (!r.ok) { toast(r.j.hata || 'Katılamadın.'); return; }
-      S.jam = { kod }; kaydet(); olay('jam'); jamV = null; await jamCek(); jamBaslatZaman(); render(); toast('Jam\'e katıldın.');
+      S.jam = { kod }; kaydet(); olay('jam'); jamV = null; await jamCek(); jamBaslatZaman(); render();
+      toast(r.j.program && r.j.program.hareketler && r.j.program.hareketler.length && !S.seans ? 'Jam\'e katıldın. Ortak antrenman hazır: "Bu antrenmanı birlikte yap"a bas.' : 'Jam\'e katıldın.');
     },
     'jam-basla'() {
       const pr = jamV && jamV.program; if (!pr || !pr.hareketler) return;
