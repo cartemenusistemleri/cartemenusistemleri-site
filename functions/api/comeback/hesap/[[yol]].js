@@ -55,10 +55,10 @@ async function oturumAc(db, kullaniciId) {
 }
 async function kimDir(db, req) {
   const token = cerezOku(req); if (!token) return null;
-  const s = await db.prepare('SELECT k.id, k.ad, k.eposta, k.rol, k.kullanici_adi, o.bitis FROM oturumlar o JOIN kullanicilar k ON k.id = o.kullanici_id WHERE o.token_hash = ?')
+  const s = await db.prepare('SELECT k.id, k.ad, k.eposta, k.rol, k.kullanici_adi, k.foto_v, o.bitis FROM oturumlar o JOIN kullanicilar k ON k.id = o.kullanici_id WHERE o.token_hash = ?')
     .bind(await ozet(token)).first();
   if (!s || s.bitis < Date.now()) return null;
-  return { id: s.id, ad: s.ad, eposta: s.eposta, rol: s.rol, kadi: s.kullanici_adi || null };
+  return { id: s.id, ad: s.ad, eposta: s.eposta, rol: s.rol, kadi: s.kullanici_adi || null, foto: s.foto_v || 0 };
 }
 // basit sınır: anahtar başına pencere içinde en fazla n deneme
 async function sinir(db, anahtar, n, pencereSn) {
@@ -275,6 +275,19 @@ export async function onRequest(ctx) {
     if (yol === 'ben' && m === 'GET') return kim ? json({ kullanici: kim }) : hata('Giriş yapılmamış.', 401);
     if (!kim) return hata('Giriş yapılmamış.', 401);
 
+    // Profil resmi: istemci 192×192 JPEG'e küçültüp data URL olarak yollar
+    if (yol === 'foto' && m === 'POST') {
+      const g = await govde(req); const f = String(g && g.foto || '');
+      if (!/^data:image\/(jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f) || f.length > 60000) return hata('Resim okunamadı ya da çok büyük.', 400);
+      if (!(await sinir(db, 'foto:' + kim.id, 20, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
+      const v = Date.now();
+      await db.prepare('UPDATE kullanicilar SET foto = ?, foto_v = ? WHERE id = ?').bind(f, v, kim.id).run();
+      return json({ foto: v });
+    }
+    if (yol === 'foto' && m === 'DELETE') {
+      await db.prepare('UPDATE kullanicilar SET foto = NULL, foto_v = 0 WHERE id = ?').bind(kim.id).run();
+      return json({ foto: 0 });
+    }
     if (yol === 'kullanici-adi' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const ad = String(g.ad || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c');
