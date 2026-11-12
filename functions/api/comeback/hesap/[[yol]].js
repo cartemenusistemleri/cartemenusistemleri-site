@@ -73,7 +73,7 @@ async function govde(req) {
   if (!(req.headers.get('content-type') || '').includes('application/json')) return null;
   try { return await req.json(); } catch (e) { return null; }
 }
-const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama']);
+const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis']);
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
 export async function onRequest(ctx) {
@@ -175,7 +175,9 @@ export async function onRequest(ctx) {
           // ikinci hafta dönüşü: 7–28 gün önce kayıt olanlardan, kayıttan 7 gün sonra hâlâ veri yazanlar
           donusAday: await say('SELECT COUNT(*) n FROM kullanicilar WHERE olusturma < ? AND olusturma > ?', hafta, Date.now() - 28 * 864e5),
           donus: await say('SELECT COUNT(*) n FROM kullanicilar k JOIN veriler v ON v.kullanici_id = k.id WHERE k.olusturma < ? AND k.olusturma > ? AND v.guncelleme > k.olusturma + 7 * 86400000', hafta, Date.now() - 28 * 864e5),
-          olaylar: ((await db.prepare('SELECT olay, SUM(adet) adet FROM sayac WHERE gun >= ? GROUP BY olay ORDER BY adet DESC').bind(new Date(hafta).toISOString().slice(0, 10)).all()).results || [])
+          olaylar: ((await db.prepare('SELECT olay, SUM(adet) adet FROM sayac WHERE gun >= ? GROUP BY olay ORDER BY adet DESC').bind(new Date(hafta).toISOString().slice(0, 10)).all()).results || []),
+          aiOy: ((await db.prepare('SELECT tur, SUM(CASE WHEN oy > 0 THEN 1 ELSE 0 END) iyi, SUM(CASE WHEN oy < 0 THEN 1 ELSE 0 END) kotu FROM ai_oy WHERE zaman > ? GROUP BY tur').bind(Date.now() - 30 * 864e5).all()).results || []),
+          aiKotu: ((await db.prepare('SELECT tur, ornek, zaman FROM ai_oy WHERE oy < 0 AND zaman > ? ORDER BY zaman DESC LIMIT 15').bind(Date.now() - 30 * 864e5).all()).results || [])
         });
       }
       if (alt === 'yedek' && m === 'GET') {
@@ -250,6 +252,15 @@ export async function onRequest(ctx) {
       return hata('Bulunamadı.', 404);
     }
 
+    // yapay zekâ cevabına oy: yararlı (+1) / değil (-1); örnek olarak yalnızca cevabın başı saklanır
+    if (yol === 'ai-oy' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const tur = String(g.tur || ''); if (['koc', 'yorum', 'yemek', 'foto', 'kur', 'bplan'].indexOf(tur) < 0) return hata('Geçersiz.', 400);
+      if (!(await sinir(db, 'aioy:' + kim.id, 80, 3600))) return hata('Çok fazla oy.', 429);
+      await db.prepare('INSERT INTO ai_oy (kullanici_id, tur, oy, ornek, zaman) VALUES (?, ?, ?, ?, ?)').bind(kim.id, tur, Number(g.oy) > 0 ? 1 : -1, String(g.ornek || '').replace(/[<>]/g, '').slice(0, 300), Date.now()).run();
+      return json({ ok: true });
+    }
+
     if (yol === 'gorus' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const metin = String(g.metin || '').trim().slice(0, 2000);
@@ -285,6 +296,8 @@ export async function onRequest(ctx) {
         db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(kim.id),
         db.prepare('DELETE FROM paylasim WHERE gonderen_id = ? OR alici_id = ?').bind(kim.id, kim.id),
         db.prepare('DELETE FROM skor WHERE kullanici_id = ?').bind(kim.id),
+        db.prepare('UPDATE ai_oy SET kullanici_id = NULL WHERE kullanici_id = ?').bind(kim.id),
+        db.prepare('DELETE FROM jam_uye WHERE kullanici_id = ?').bind(kim.id),
         db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(kim.id),
         db.prepare('UPDATE gorusler SET kullanici_id = NULL WHERE kullanici_id = ?').bind(kim.id),
         db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(kim.id)

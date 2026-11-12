@@ -24,6 +24,7 @@
 //   POST paylas { kime, program, not }
 //   GET  paylasim                   → { liste }  (sana gelen, bekleyen)
 //   POST paylasim/<id>/yanit { kabul }
+// Ortak antrenman: POST jam/olustur { ad, program } → { kod } · POST jam/<kod>/katil · GET jam/<kod> · POST jam/<kod>/durum · POST jam/<kod>/ayril
 // Sıralama: GET siralama?donem=hafta|ay&olcut=hacim|set|antr · POST siralama/katil { acik } · POST siralama/skor { hafta, ay }
 // Yönetim (admin): GET sikayetler · POST moderasyon { tur, id, gizli }
 
@@ -61,6 +62,53 @@ export async function onRequest(ctx) {
   const admin = kim.rol === 'admin';
   const simdi = Date.now();
   try {
+    /* ---------- ortak antrenman (jam) ---------- */
+    // kod ile katılınır; herkes kendi ilerlemesini (hareket, set) yazar, diğerleri birkaç saniyede bir okur
+    if (p[0] === 'jam') {
+      const kodOk = (k) => /^[A-Z0-9]{5}$/.test(k);
+      if (p[1] === 'olustur' && m === 'POST') {
+        const g = await govde(req) || {};
+        if (!(await sinir(db, 'jam:' + kim.id, 20, 86400))) return hata('Bugün çok fazla ortak antrenman açtın.', 429);
+        const harf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let kod = '';
+        for (let d = 0; d < 5; d++) { kod = Array.from(crypto.getRandomValues(new Uint8Array(5))).map((b) => harf[b % harf.length]).join(''); if (!(await db.prepare('SELECT 1 FROM jam WHERE kod = ?').bind(kod).first())) break; }
+        const program = g.program && Array.isArray(g.program.hareketler) ? JSON.stringify({ ad: temiz(g.program.ad, 30), hareketler: g.program.hareketler.slice(0, 20).filter((x) => x && /^[a-z0-9_]{2,40}$/.test(String(x.id))).map((x) => ({ id: String(x.id), set: Math.max(1, Math.min(10, Math.round(Number(x.set) || 3))), tekrar: temiz(x.tekrar, 9), birim: ['tekrar', 'sn', 'dk', 'm'].indexOf(x.birim) >= 0 ? x.birim : 'tekrar', alt: Math.round(Number(x.alt) || 0), ust: Math.round(Number(x.ust) || 0), dinlenme: Math.max(0, Math.min(600, Math.round(Number(x.dinlenme) || 90))) })) }) : null;
+        await db.batch([
+          db.prepare("DELETE FROM jam WHERE bitis < ?").bind(simdi),
+          db.prepare('INSERT INTO jam (kod, sahip_id, ad, program, olusturma, bitis) VALUES (?, ?, ?, ?, ?, ?)').bind(kod, kim.id, temiz(g.ad, 30) || 'Ortak antrenman', program, simdi, simdi + 4 * 3600e3),
+          db.prepare('INSERT OR REPLACE INTO jam_uye (kod, kullanici_id, ad, durum, guncelleme) VALUES (?, ?, ?, ?, ?)').bind(kod, kim.id, gorunen(kim.ad), '{}', simdi)
+        ]);
+        return json({ kod }, 201);
+      }
+      const kod = String(p[1] || '').toUpperCase(); if (!kodOk(kod)) return hata('Kod 5 karakter olmalı.', 400);
+      const j = await db.prepare('SELECT * FROM jam WHERE kod = ? AND bitis > ?').bind(kod, simdi).first();
+      if (!j) return hata('Bu kodla açık bir ortak antrenman yok ya da süresi doldu.', 404);
+      const uyeMi = await db.prepare('SELECT 1 FROM jam_uye WHERE kod = ? AND kullanici_id = ?').bind(kod, kim.id).first();
+      if (p[2] === 'katil' && m === 'POST') {
+        const say = await db.prepare('SELECT COUNT(*) n FROM jam_uye WHERE kod = ?').bind(kod).first();
+        if (!uyeMi && say && say.n >= 8) return hata('Bu ortak antrenman dolu (en fazla 8 kişi).', 409);
+        await db.prepare('INSERT OR REPLACE INTO jam_uye (kod, kullanici_id, ad, durum, guncelleme) VALUES (?, ?, ?, ?, ?)').bind(kod, kim.id, gorunen(kim.ad), '{}', simdi).run();
+        return json({ ok: true, ad: j.ad, program: j.program ? JSON.parse(j.program) : null });
+      }
+      if (!uyeMi) return hata('Önce bu ortak antrenmana katıl.', 403);
+      if (!p[2] && m === 'GET') {
+        const u = await db.prepare('SELECT kullanici_id, ad, durum, guncelleme FROM jam_uye WHERE kod = ? ORDER BY guncelleme DESC').bind(kod).all();
+        return json({ kod, ad: j.ad, sahip: j.sahip_id === kim.id, bitis: j.bitis, program: j.program ? JSON.parse(j.program) : null,
+          uyeler: (u.results || []).map((x) => { let d = {}; try { d = JSON.parse(x.durum || '{}'); } catch (e) { /* bozuk */ } return { ad: x.ad, ben: x.kullanici_id === kim.id, durum: d, once: Math.round((simdi - x.guncelleme) / 1000) }; }) });
+      }
+      if (p[2] === 'durum' && m === 'POST') {
+        const g = await govde(req) || {};
+        const d = { hareket: temiz(g.hareket, 50), set: Math.max(0, Math.min(99, Math.round(Number(g.set) || 0))), toplam: Math.max(0, Math.min(200, Math.round(Number(g.toplam) || 0))), dinlenme: Math.max(0, Math.min(900, Math.round(Number(g.dinlenme) || 0))), bitti: !!g.bitti, tepki: temiz(g.tepki, 12) };
+        await db.prepare('UPDATE jam_uye SET durum = ?, guncelleme = ? WHERE kod = ? AND kullanici_id = ?').bind(JSON.stringify(d), simdi, kod, kim.id).run();
+        return json({ ok: true });
+      }
+      if (p[2] === 'ayril' && m === 'POST') {
+        await db.prepare('DELETE FROM jam_uye WHERE kod = ? AND kullanici_id = ?').bind(kod, kim.id).run();
+        if (j.sahip_id === kim.id) await db.prepare('UPDATE jam SET bitis = ? WHERE kod = ?').bind(simdi, kod).run();
+        return json({ ok: true });
+      }
+      return hata('Bulunamadı.', 404);
+    }
+
     /* ---------- sıralama (haftalık / aylık hacim, set, antrenman) ---------- */
     // dönem anahtarları Türkiye saatine göre: H<pazartesi tarihi>, A<yıl-ay>
     const tr = new Date(Date.now() + 3 * 3600e3);

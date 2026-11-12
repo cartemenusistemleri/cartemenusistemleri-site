@@ -560,3 +560,40 @@ fieldset.t>legend+*{clear:both}
 .sira-no.ust3{background:#16161A;color:#fff}
 .olcu-form.cift{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sira-olcut .hap[aria-pressed="true"]{background:var(--kobalt);color:#fff}
+/* yapay zekâ oyu */
+.ai-oy{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ikincil);margin-top:2px}
+.ai-oy span{margin-right:4px}
+.ai-oy button{width:34px;height:34px;border-radius:17px;border:0;background:transparent;color:inherit;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ai-oy button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ai-oy button[aria-pressed="true"]{background:var(--kobalt);color:#fff}
+.ai-oy.koyu{color:var(--koyu-ikincil)}
+.koc-akis .ai-oy{align-self:flex-start;margin:-4px 0 4px 4px}
+/* takviye formu */
+.tk-form{display:flex;flex-direction:column;gap:10px}
+.tk-doz{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.liste>.tk-duzen-satir{display:block;padding:12px 0}
+/* foto */
+.foto-secim{display:flex;gap:8px;flex-wrap:wrap}
+.foto-secim .btn{position:relative;overflow:hidden;cursor:pointer}
+.gizli-dosya{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+/* gün değiştir */
+.off-satir{display:flex;flex-wrap:wrap;gap:4px 18px;justify-content:center;grid-column:1/-1}
+.gd-liste{display:flex;flex-direction:column}
+.gd-liste button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:0;background:none;padding:12px 0;border-bottom:1px solid var(--zemin);font:inherit;color:inherit;cursor:pointer}
+.gd-liste button:last-child{border-bottom:0}
+/* jam */
+.jam-serit{background:var(--kobalt);color:#fff;gap:10px}
+.jam-serit .k{color:rgba(255,255,255,.85)}
+.jam-uyeler{display:flex;flex-direction:column;gap:6px}
+.jam-uye{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.12)}
+.jam-uye.ben{background:rgba(255,255,255,.22)}
+.jam-uye span{font-size:13px;opacity:.9}
+.jam-kod b{font-size:44px;font-weight:900;letter-spacing:.14em;line-height:1}
+/* beslenme programı */
+.bp-kutu{gap:8px}
+.bp-ogun{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--zemin)}
+.bp-ogun .yigin{min-width:0}
+.bp-ogun .ik{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56vw}
+.bp-ogun.yapildi b{color:var(--ikincil);text-decoration:line-through}
+.bp-makro{flex-direction:row;flex-wrap:wrap;gap:6px 18px}
+.bp-ogun-kart{gap:6px}

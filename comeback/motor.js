@@ -27,11 +27,17 @@
       kcal = Math.max(kcal, tdee - enCokAcik, p.cinsiyet === 'k' ? 1300 : 1600, bmr * 1.05);
     }
     kcal = Math.round(kcal / 10) * 10;
-    const protein = Math.round(p.kilo * ({ kas: 1.8, yag: 2.2, guc: 1.8, kondisyon: 1.6 })[p.hedef]);
+    // protein: araştırmalar ~1,6 g/kg üstünde ek fayda görmüyor (Morton 2018); fazla kilolularda boya göre BKİ 25 ağırlığı esas alınır
+    const refKg = Math.min(p.kilo, Math.round(25 * Math.pow(p.boy / 100, 2)));
+    const PSEV = { dusuk: 1.2, orta: 1.6, yuksek: 2.0 };
+    const varsayilan = ({ kas: 1.6, yag: 1.8, guc: 1.6, kondisyon: 1.4 })[p.hedef] || 1.6;
+    let protein = Math.round(refKg * (PSEV[p.protSeviye] || varsayilan));
+    if (p.protSeviye === 'ozel' && p.protG > 0) protein = Math.round(Math.max(40, Math.min(300, p.protG)));
     const yag = Math.round(Math.max(p.kilo * 0.8, (kcal * 0.25) / 9));
     const karb = Math.max(0, Math.round((kcal - protein * 4 - yag * 9) / 4));
+    const protKg = Math.round((protein / p.kilo) * 10) / 10;
     const haftalikKg = Math.round((((kcal - tdee) * 7) / 7700) * 100) / 100;
-    return { bmr: Math.round(bmr), tdee: Math.round(tdee), kcal, protein, yag, karb, haftalikKg };
+    return { bmr: Math.round(bmr), tdee: Math.round(tdee), kcal, protein, yag, karb, haftalikKg, protKg, refKg };
   }
 
   /* ---------- hareket seçimi ---------- */
