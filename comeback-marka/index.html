@@ -22,11 +22,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&display=swap" rel="stylesheet">
 <style>
-/* Düzen: uygulamanın kendi dili — gri zemin, beyaz ve renkli kutular, gerçek ekran görüntüleri; her özellik bir telefonla birlikte anlatılır */
+/* Düzen: uygulamanın kendi dili. Özellikler masaüstünde yapışkan bir telefonla anlatılır: yazı kaydıkça telefondaki ekran değişir. Telefonda her özellik kendi telefonuyla alt alta. */
 :root{
   --zemin:#ECECE8;--kutu:#fff;--murekkep:#16161A;--ikincil:#5F5D57;--cizgi:#DEDDD7;
   --kobalt:#2E4BFF;--kobalt-koyu:#1F36D6;--limon:#D9F05A;--koyu:#16161A;--koyu-yazi:#F3F1EC;--koyu-ikincil:#B9B6AE;--mavi-gece:#6E86FF;
-  --r:28px;--ease:cubic-bezier(.23,1,.32,1);
+  --r:28px;--ease:cubic-bezier(.23,1,.32,1);--ease-io:cubic-bezier(.77,0,.175,1);
   --font:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
   --gen:1200px;
 }
@@ -46,71 +46,118 @@ p{margin:0;text-wrap:pretty}
 
 /* üst çubuk */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:rgba(236,236,232,.86)}
-.ust{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(236,236,232,.82);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s ease}
+.ust{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(236,236,232,.8);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s ease}
 .ust.kaydi{border-bottom-color:var(--cizgi)}
-.ust .ic{display:flex;align-items:center;gap:20px;height:68px}
+.ust .ic{display:flex;align-items:center;gap:16px;height:68px}
 .logo{font-weight:900;font-size:22px;letter-spacing:-.04em;text-decoration:none;white-space:nowrap}
-.ust nav{display:flex;gap:4px;margin-left:auto}
+.ust nav{display:flex;gap:2px;margin-left:auto}
 .ust nav a{text-decoration:none;font-weight:600;font-size:15px;padding:8px 12px;border-radius:999px;color:var(--ikincil);transition:color .15s ease,background .15s ease}
 .ust nav a:hover{color:var(--murekkep);background:rgba(22,22,26,.05)}
-.dil{display:flex;background:var(--kutu);border-radius:999px;padding:3px;gap:2px}
-.dil button{font:inherit;font-size:13px;font-weight:800;border:0;background:none;padding:6px 10px;border-radius:999px;cursor:pointer;color:var(--ikincil)}
-.dil button[aria-pressed="true"]{background:var(--murekkep);color:#fff}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:999px;border:0;font:inherit;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer;white-space:nowrap;transition:transform .16s var(--ease),background .2s ease}
+/* dil seçici: bayrakla */
+.dil{position:relative}
+.dil-btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 12px 0 8px;border-radius:999px;border:0;background:var(--kutu);font:inherit;font-size:14px;font-weight:800;cursor:pointer;color:var(--murekkep);transition:transform .16s var(--ease)}
+.dil-btn:active{transform:scale(.97)}
+.bayrak{width:26px;height:26px;border-radius:50%;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(22,22,26,.08)}
+.bayrak svg{width:100%;height:100%;display:block}
+.dil-btn .ok{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--ease)}
+.dil.acik .dil-btn .ok{transform:rotate(180deg)}
+.dil-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:184px;background:var(--kutu);border-radius:20px;padding:6px;box-shadow:0 18px 40px -14px rgba(22,22,26,.3),0 2px 6px rgba(22,22,26,.06);transform-origin:top right;transform:scale(.96);opacity:0;visibility:hidden;transition:transform .18s var(--ease),opacity .18s var(--ease),visibility 0s .18s}
+.dil.acik .dil-menu{transform:none;opacity:1;visibility:visible;transition:transform .18s var(--ease),opacity .18s var(--ease)}
+.dil-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:0 12px;border:0;border-radius:14px;background:none;font:inherit;font-size:15px;font-weight:700;cursor:pointer;color:var(--murekkep);text-align:left}
+.dil-menu button:hover{background:var(--zemin)}
+.dil-menu button[aria-checked="true"]::after{content:"";margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--kobalt)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:999px;border:0;font:inherit;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer;white-space:nowrap;transition:transform .16s var(--ease),background .2s ease,box-shadow .2s ease}
 .btn:active{transform:scale(.97)}
-.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.btn.ana{background:var(--kobalt);color:#fff}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s var(--ease)}
+.btn:hover svg{transform:translateX(3px)}
+.btn.ana{background:var(--kobalt);color:#fff;box-shadow:0 10px 24px -12px rgba(46,75,255,.8)}
 .btn.ana:hover{background:var(--kobalt-koyu)}
 .btn.siyah{background:var(--murekkep);color:#fff}
 .btn.cerceve{background:transparent;box-shadow:inset 0 0 0 2px var(--murekkep);color:var(--murekkep)}
 .btn.beyaz{background:#fff;color:var(--murekkep)}
 .btn.kucuk{min-height:42px;padding:0 18px;font-size:15px}
 @media (max-width:900px){.ust nav{display:none}.ust .dil{margin-left:auto}}
-@media (max-width:480px){.ust .ic{gap:12px}.ust .btn.kucuk{display:none}}
+@media (max-width:480px){.ust .ic{gap:10px}.ust .btn.kucuk{display:none}.dil-btn span.kod{display:none}}
 
 /* giriş */
-.giris{padding:48px 0 40px}
+.giris{padding:48px 0 32px;overflow:hidden}
 .giris .ic{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
 .giris h1{font-size:clamp(56px,9vw,124px);font-weight:900;letter-spacing:-.055em;line-height:.9}
+.giris h1 .sat{display:block;overflow:hidden;padding-bottom:.04em;margin-bottom:-.04em}
+.giris h1 .sat>span{display:block;animation:satir .9s var(--ease) both}
+.giris h1 .sat:nth-child(2)>span{animation-delay:.08s}
+.giris h1 .sat:nth-child(3)>span{animation-delay:.16s}
+@keyframes satir{from{transform:translateY(105%)}to{transform:none}}
 .giris .alt{font-size:clamp(18px,1.7vw,21px);color:var(--ikincil);max-width:34ch;margin-top:26px;line-height:1.5}
 .giris .alt b{color:var(--murekkep);font-weight:700}
 .eylem{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px;align-items:center}
-.durum{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ikincil);margin-top:18px}
-.durum i{width:8px;height:8px;border-radius:50%;background:var(--kobalt);box-shadow:0 0 0 4px rgba(46,75,255,.15)}
+.durum{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ikincil);margin-top:18px}
+.durum i{width:8px;height:8px;border-radius:50%;background:var(--kobalt);position:relative}
+.durum i::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:var(--kobalt);opacity:.3;animation:nabiz 2s var(--ease) infinite}
+@keyframes nabiz{from{transform:scale(.6);opacity:.45}to{transform:scale(2.2);opacity:0}}
 .magaza{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
 .magaza>span{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 16px 0 12px;border-radius:14px;background:var(--kutu);color:var(--ikincil);font-size:12px;font-weight:600;line-height:1.15;cursor:default;box-shadow:inset 0 0 0 1.5px var(--cizgi)}
 .magaza svg{width:22px;height:22px;fill:var(--ikincil)}
 .magaza b{display:block;font-size:15px;color:var(--murekkep)}
-.telefonlar{position:relative;height:640px}
-.tel{position:absolute;width:300px;aspect-ratio:585/1266;border-radius:44px;background:#0d0d10;padding:10px;box-shadow:0 30px 60px -20px rgba(22,22,26,.35),0 8px 20px -8px rgba(22,22,26,.25)}
-.tel img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:34px;background:var(--zemin)}
-.tel.on{right:120px;top:0;z-index:2;animation:yuksel .9s var(--ease) both}
-.tel.arka{right:0;top:70px;transform:rotate(5deg);animation:yuksel2 .9s .12s var(--ease) both}
-@keyframes yuksel{from{transform:translateY(28px)}to{transform:none}}
-@keyframes yuksel2{from{transform:translateY(40px) rotate(5deg)}to{transform:rotate(5deg)}}
+/* telefonlar */
+.telefonlar{position:relative;height:640px;perspective:1400px}
+.tel{width:300px;aspect-ratio:585/1266;border-radius:46px;background:#0d0d10;padding:9px;box-shadow:0 40px 70px -28px rgba(22,22,26,.45),0 8px 20px -8px rgba(22,22,26,.25),inset 0 0 0 1.5px #2a2a31}
+.tel img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:37px;background:var(--zemin)}
+.telefonlar .tel{position:absolute;will-change:transform}
+.telefonlar .tel.on{right:130px;top:0;z-index:2}
+.telefonlar .tel.arka{right:0;top:70px}
+.telefonlar .kat{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s var(--ease)}
+.giris-tel-on{animation:yuksel 1s .1s var(--ease) both}
+.giris-tel-arka{animation:yuksel2 1s .22s var(--ease) both}
+@keyframes yuksel{from{transform:translateY(40px) rotate(-2deg)}to{transform:none}}
+@keyframes yuksel2{from{transform:translateY(60px) rotate(9deg)}to{transform:rotate(5deg)}}
+.cip{position:absolute;z-index:3;background:var(--kutu);border-radius:18px;padding:10px 14px 10px 10px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;line-height:1.2;box-shadow:0 18px 36px -16px rgba(22,22,26,.35);white-space:nowrap;animation:suz 6s ease-in-out infinite}
+.cip span.ik{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;flex:none}
+.cip span.ik svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cip small{display:block;font-size:12px;font-weight:600;color:var(--ikincil)}
+.cip.c1{left:0;top:120px}.cip.c1 .ik{background:var(--limon)}
+.cip.c2{left:30px;bottom:110px;animation-delay:-2s}.cip.c2 .ik{background:var(--kobalt);color:#fff}
+.cip.c3{right:-6px;bottom:30px;animation-delay:-4s}.cip.c3 .ik{background:var(--murekkep);color:#fff}
+@keyframes suz{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @media (max-width:980px){
   .giris .ic{grid-template-columns:1fr}
-  .telefonlar{height:auto;display:flex;justify-content:center;gap:0;padding-top:8px}
-  .tel{position:relative;width:min(62vw,270px)}
-  .tel.on{right:auto;top:auto}
-  .tel.arka{right:auto;top:40px;margin-left:-70px;width:min(52vw,230px)}
+  .telefonlar{height:560px;max-width:440px;width:100%;margin:8px auto 0}
+  .telefonlar .tel{width:min(60vw,250px)}
+  .telefonlar .tel.on{right:auto;left:8%;top:0}
+  .telefonlar .tel.arka{right:4%;top:50px;width:min(50vw,210px)}
+  .cip.c1{left:-4px;top:auto;bottom:150px}.cip.c2{display:none}.cip.c3{right:0;bottom:20px}
 }
-@media (max-width:420px){.tel.arka{display:none}}
+@media (max-width:420px){.telefonlar{height:480px}.telefonlar .tel.on{left:4%}}
 
-/* rakam şeridi */
-.serit{padding:12px 0 8px}
-.serit .ic{display:flex;flex-wrap:wrap;gap:8px}
-.serit span{background:var(--kutu);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:600;color:var(--ikincil)}
-.serit b{color:var(--murekkep);font-variant-numeric:tabular-nums}
+/* kayan şerit */
+.serit{padding:24px 0 8px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.serit-ray{display:flex;gap:10px;width:max-content;animation:kay 40s linear infinite}
+.serit:hover .serit-ray{animation-play-state:paused}
+.serit-ray span{background:var(--kutu);border-radius:999px;padding:10px 18px;font-size:15px;font-weight:600;color:var(--ikincil);white-space:nowrap}
+.serit-ray span.v{background:var(--murekkep);color:#fff}
+.serit-ray b{color:var(--murekkep);font-variant-numeric:tabular-nums}
+.serit-ray span.v b{color:var(--limon)}
+@keyframes kay{to{transform:translateX(-50%)}}
 
-/* bölümler */
-.bolum{padding:96px 0}
+/* bölüm başlıkları */
+.bolum{padding:104px 0}
 .bolum-bas{max-width:760px;margin-bottom:48px}
 .bolum-bas h2{font-size:clamp(40px,6vw,76px);font-weight:900;letter-spacing:-.05em}
 .bolum-bas p{font-size:19px;color:var(--ikincil);margin-top:16px;max-width:56ch}
-.ozellik{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch;margin-bottom:24px}
-.ozellik.ters .oz-yazi{order:2}
-.oz-yazi{background:var(--kutu);border-radius:var(--r);padding:40px;display:flex;flex-direction:column;gap:18px}
+
+/* kaydırınca beliren (destekleyen tarayıcılarda) */
+@supports (animation-timeline: view()){
+  .belir{animation:belir linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
+  @keyframes belir{from{transform:translateY(36px);filter:blur(4px)}to{transform:none;filter:none}}
+}
+
+/* özellik hikâyesi */
+.hikaye{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start}
+.hk-metin{display:flex;flex-direction:column;gap:0}
+.ozellik{min-height:88vh;display:flex;align-items:center;padding:20px 0}
+.oz-yazi{background:var(--kutu);border-radius:var(--r);padding:40px;display:flex;flex-direction:column;gap:18px;width:100%;transition:transform .5s var(--ease),box-shadow .5s var(--ease),opacity .5s var(--ease)}
+.ozellik:not(.aktif) .oz-yazi{opacity:.55;transform:scale(.97)}
+.ozellik.aktif .oz-yazi{box-shadow:0 30px 60px -36px rgba(22,22,26,.35)}
 .oz-yazi.kobalt{background:var(--kobalt);color:#fff}
 .oz-yazi.limon{background:var(--limon)}
 .oz-yazi.koyu{background:var(--koyu);color:var(--koyu-yazi)}
@@ -121,25 +168,39 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .liste li svg{width:22px;height:22px;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;color:var(--kobalt)}
 .oz-yazi.kobalt .liste li svg,.oz-yazi.koyu .liste li svg{color:var(--limon)}
 .liste b{font-weight:800}
-.oz-gorsel{border-radius:var(--r);background:var(--kutu);display:flex;align-items:flex-end;justify-content:center;padding:40px 24px 0;overflow:hidden;min-height:520px;position:relative}
-.oz-gorsel.limon{background:var(--limon)}.oz-gorsel.kobalt{background:var(--kobalt)}.oz-gorsel.koyu{background:var(--koyu)}
-.oz-gorsel .tel{position:relative;width:min(300px,78%);border-radius:44px 44px 0 0;padding:10px 10px 0;box-shadow:0 -10px 40px -18px rgba(22,22,26,.35)}
-.oz-gorsel .tel img{border-radius:34px 34px 0 0;aspect-ratio:585/1000;height:auto}
-.oz-gorsel .not{position:absolute;left:20px;top:20px;background:var(--kutu);border-radius:16px;padding:10px 14px;font-size:14px;font-weight:700;max-width:58%;box-shadow:0 8px 24px -12px rgba(22,22,26,.3);line-height:1.35}
-.oz-gorsel .not span{display:block;font-weight:500;color:var(--ikincil);font-size:13px}
+.hk-sahne{position:sticky;top:96px;height:calc(100vh - 128px);min-height:600px;max-height:860px;border-radius:36px;background:var(--kutu);display:grid;place-items:center;overflow:hidden;transition:background .6s var(--ease)}
+.hk-sahne[data-r="kobalt"]{background:var(--kobalt)}
+.hk-sahne[data-r="limon"]{background:var(--limon)}
+.hk-sahne[data-r="koyu"]{background:var(--koyu)}
+.hk-sahne::before{content:"";position:absolute;width:140%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 60%);top:-40%;left:-20%;pointer-events:none}
+.hk-tel{position:relative;width:min(300px,62%);aspect-ratio:585/1266;border-radius:46px;background:#0d0d10;padding:9px;box-shadow:0 40px 70px -28px rgba(0,0,0,.5),inset 0 0 0 1.5px #2a2a31}
+.hk-tel .ekranlar{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;background:var(--zemin)}
+.hk-tel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;opacity:0;transform:translateY(5%) scale(1.04);filter:blur(6px);transition:opacity .55s var(--ease),transform .7s var(--ease),filter .55s var(--ease)}
+.hk-tel img.gor{opacity:1;transform:none;filter:none}
+.hk-sayac{position:absolute;left:24px;bottom:22px;display:flex;gap:6px}
+.hk-sayac i{width:22px;height:4px;border-radius:2px;background:rgba(22,22,26,.18);transition:background .3s ease,width .3s var(--ease)}
+.hk-sahne[data-r="kobalt"] .hk-sayac i,.hk-sahne[data-r="koyu"] .hk-sayac i{background:rgba(255,255,255,.25)}
+.hk-sayac i.on{width:40px;background:var(--murekkep)}
+.hk-sahne[data-r="kobalt"] .hk-sayac i.on,.hk-sahne[data-r="koyu"] .hk-sayac i.on{background:#fff}
+.oz-gorsel{display:none}
 @media (max-width:900px){
   .bolum{padding:64px 0}
-  .ozellik{grid-template-columns:1fr}
-  .ozellik.ters .oz-yazi{order:0}
+  .hikaye{grid-template-columns:1fr;gap:0}
+  .hk-sahne{display:none}
+  .ozellik{min-height:0;flex-direction:column;gap:12px;padding:0 0 28px}
+  .ozellik:not(.aktif) .oz-yazi{opacity:1;transform:none}
   .oz-yazi{padding:28px 22px}
-  .oz-gorsel{min-height:0;padding-top:64px}
+  .oz-gorsel{display:flex;width:100%;border-radius:var(--r);background:var(--kutu);justify-content:center;padding:36px 20px;overflow:hidden}
+  .oz-gorsel.kobalt{background:var(--kobalt)}.oz-gorsel.limon{background:var(--limon)}.oz-gorsel.koyu{background:var(--koyu)}
+  .oz-gorsel .tel{width:min(260px,72%)}
 }
 
 /* hocalar */
-.koyu-bant{background:var(--koyu);color:var(--koyu-yazi)}
+.koyu-bant{background:var(--koyu);color:var(--koyu-yazi);border-radius:44px 44px 0 0}
 .koyu-bant .bolum-bas p{color:var(--koyu-ikincil)}
 .ikili{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.kart{border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.kart{border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);transition:transform .3s var(--ease),background .3s ease}
+@media (hover:hover){.kart:hover{transform:translateY(-6px);background:rgba(255,255,255,.09)}.kart.vurgu:hover{background:var(--limon)}}
 .kart h3{font-size:24px;font-weight:850;letter-spacing:-.03em}
 .kart p{color:var(--koyu-ikincil);font-size:16px}
 .kart .ik{width:44px;height:44px;border-radius:14px;background:var(--kobalt);display:grid;place-items:center;margin-bottom:6px}
@@ -147,42 +208,49 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .kart.vurgu{background:var(--limon);color:var(--murekkep);border-color:transparent}
 .kart.vurgu p{color:#3C3A33}
 .kart.vurgu .ik{background:var(--murekkep)}
-@media (max-width:900px){.ikili{grid-template-columns:1fr}}
+@media (max-width:900px){.ikili{grid-template-columns:1fr}.koyu-bant{border-radius:32px 32px 0 0}}
 
 /* adımlar */
-.adimlar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:a}
-.adim{background:var(--kutu);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:10px;min-height:220px}
-.adim .no{font-size:64px;font-weight:900;letter-spacing:-.06em;line-height:.9;color:var(--kobalt);font-variant-numeric:tabular-nums}
+.adim-bant{background:var(--koyu);color:var(--koyu-yazi)}
+.adim-bant .bolum-bas p{color:var(--koyu-ikincil)}
+.adimlar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;position:relative}
+.adim{background:#202027;border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:10px;min-height:230px;position:relative;overflow:hidden}
+.adim .no{font-size:72px;font-weight:900;letter-spacing:-.06em;line-height:.9;color:var(--limon);font-variant-numeric:tabular-nums}
 .adim h3{font-size:24px;font-weight:850;letter-spacing:-.03em}
-.adim p{color:var(--ikincil);font-size:16px}
+.adim p{color:var(--koyu-ikincil);font-size:16px}
+.adim::after{content:"";position:absolute;left:28px;right:28px;bottom:0;height:3px;border-radius:2px;background:var(--kobalt);transform:scaleX(0);transform-origin:left}
+@supports (animation-timeline: view()){.adim::after{animation:cizgi linear both;animation-timeline:view();animation-range:entry 40% cover 45%}@keyframes cizgi{to{transform:scaleX(1)}}}
 @media (max-width:900px){.adimlar{grid-template-columns:1fr}.adim{min-height:0}}
 
 /* bilim */
+.bilim-bant{background:var(--koyu);padding-top:0;border-radius:0 0 44px 44px}
 .bilim{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
 .bilim .buyuk{background:var(--kobalt);color:#fff;border-radius:var(--r);padding:40px;display:flex;flex-direction:column;gap:16px}
 .bilim .buyuk h3{font-size:clamp(30px,3.4vw,44px);font-weight:900}
 .bilim .buyuk p{font-size:18px;opacity:.9;max-width:46ch}
 .bilim .yan{display:grid;gap:16px}
-.bilim .yan div{background:var(--kutu);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;gap:6px}
+.bilim .yan div{background:#202027;color:var(--koyu-yazi);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;gap:6px}
 .bilim .yan h3{font-size:21px;font-weight:850;letter-spacing:-.02em}
-.bilim .yan p{color:var(--ikincil);font-size:16px}
-@media (max-width:900px){.bilim{grid-template-columns:1fr}.bilim .buyuk{padding:28px 22px}}
+.bilim .yan p{color:var(--koyu-ikincil);font-size:16px}
+@media (max-width:900px){.bilim{grid-template-columns:1fr}.bilim .buyuk{padding:28px 22px}.bilim-bant{border-radius:0 0 32px 32px}}
 
 /* sss */
 .sss{display:grid;gap:10px;max-width:860px}
-.sss details{background:var(--kutu);border-radius:22px;padding:0 24px}
+.sss details{background:var(--kutu);border-radius:22px;padding:0 24px;transition:box-shadow .3s ease}
+.sss details[open]{box-shadow:0 18px 40px -28px rgba(22,22,26,.4)}
 .sss summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:68px;font-size:18px;font-weight:750;letter-spacing:-.01em}
 .sss summary::-webkit-details-marker{display:none}
-.sss summary::after{content:"";width:12px;height:12px;flex:none;border-right:2.5px solid var(--murekkep);border-bottom:2.5px solid var(--murekkep);transform:rotate(45deg) translate(-3px,-3px);transition:transform .2s var(--ease)}
+.sss summary::after{content:"";width:12px;height:12px;flex:none;border-right:2.5px solid var(--murekkep);border-bottom:2.5px solid var(--murekkep);transform:rotate(45deg) translate(-3px,-3px);transition:transform .25s var(--ease)}
 .sss details[open] summary::after{transform:rotate(-135deg) translate(-3px,-3px)}
 .sss details p{padding:0 0 22px;color:var(--ikincil);font-size:16px;max-width:66ch}
 
 /* son çağrı */
-.son .ic{display:flex}
-.son-kutu{background:var(--kobalt);color:#fff;border-radius:36px;padding:64px 48px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:end;width:100%}
-.son-kutu h2{font-size:clamp(44px,6.4vw,88px);font-weight:900;letter-spacing:-.055em;line-height:.92}
-.son-kutu p{font-size:18px;opacity:.9;max-width:40ch}
-.son-kutu .eylem{margin-top:22px}
+.son-kutu{background:var(--kobalt);color:#fff;border-radius:36px;padding:64px 48px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:end;width:100%;position:relative;overflow:hidden}
+.son-kutu h2{font-size:clamp(44px,6.4vw,88px);font-weight:900;letter-spacing:-.055em;line-height:.92;position:relative}
+.son-kutu p{font-size:18px;opacity:.9;max-width:40ch;position:relative}
+.son-kutu .eylem{margin-top:22px;position:relative}
+.son-kutu .dev{position:absolute;right:-2%;bottom:-18%;font-size:clamp(120px,22vw,300px);font-weight:900;letter-spacing:-.06em;line-height:1;color:rgba(255,255,255,.07);white-space:nowrap;pointer-events:none}
+@supports (animation-timeline: view()){.son-kutu .dev{animation:kaydev linear both;animation-timeline:view()}@keyframes kaydev{from{transform:translateX(20%)}to{transform:translateX(-10%)}}}
 @media (max-width:900px){.son-kutu{grid-template-columns:1fr;padding:40px 24px;border-radius:28px}}
 
 footer{padding:48px 0 calc(36px + env(safe-area-inset-bottom,0px))}
@@ -191,7 +259,11 @@ footer nav{display:flex;flex-wrap:wrap;gap:18px}
 footer a{text-decoration:none;font-weight:600}
 footer a:hover{color:var(--murekkep)}
 
-@media (prefers-reduced-motion:reduce){.tel.on,.tel.arka{animation:none}html{scroll-behavior:auto}.btn{transition:none}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  .hk-tel img{filter:none;transform:none}
+}
 </style>
 </head>
 <body>
@@ -201,13 +273,19 @@ footer a:hover{color:var(--murekkep)}
     <a class="logo" href="#" aria-label="COMEBACK. ana sayfa">COMEBACK<span class="nokta">.</span></a>
     <nav aria-label="Sayfa içi">
       <a href="#ozellikler" data-i="nav1">Özellikler</a>
-      <a href="#nasil" data-i="nav2">Nasıl çalışır</a>
       <a href="#hocalar" data-i="nav3">Hocalar</a>
+      <a href="#nasil" data-i="nav2">Nasıl çalışır</a>
       <a href="#sss" data-i="nav4">Sorular</a>
     </nav>
-    <div class="dil" role="group" aria-label="Dil / Language">
-      <button type="button" data-dil="tr" aria-pressed="true">TR</button>
-      <button type="button" data-dil="en" aria-pressed="false">EN</button>
+    <div class="dil" id="dil">
+      <button type="button" class="dil-btn" id="dilBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Dil seç / Choose language">
+        <span class="bayrak" id="dilBayrak"></span><span class="kod" id="dilKod">TR</span>
+        <svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dil-menu" role="menu" id="dilMenu">
+        <button type="button" role="menuitemradio" data-dil="tr" aria-checked="true"><span class="bayrak" data-bayrak="tr"></span>Türkçe</button>
+        <button type="button" role="menuitemradio" data-dil="en" aria-checked="false"><span class="bayrak" data-bayrak="en"></span>English</button>
+      </div>
     </div>
     <a class="btn siyah kucuk" href="/comeback/#/giris" data-app="#/giris"><span data-i="ustgir">Uygulamaya gir</span></a>
   </div>
@@ -217,7 +295,7 @@ footer a:hover{color:var(--murekkep)}
 <section class="giris">
   <div class="ic">
     <div>
-      <h1 data-i="h1">Bıraktığın<br>yerden<br>başla<span class="nokta">.</span></h1>
+      <h1><span class="sat"><span data-i="hx1">Bıraktığın</span></span><span class="sat"><span data-i="hx2">yerden</span></span><span class="sat"><span data-i="hx3">başla<span class="nokta">.</span></span></span></h1>
       <p class="alt" data-i="alt">COMEBACK. <b>sana göre programı kurar</b>, yediğini <b>fotoğraftan</b> sayar, <b>her seti</b> kaydeder. Spora ilk kez başlıyor da olsan, aradan sonra dönüyor da olsan.</p>
       <div class="eylem">
         <a class="btn ana" href="/comeback/#/basvuru" data-app="#/basvuru"><span data-i="basvur">Beta'ya başvur</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -229,153 +307,158 @@ footer a:hover{color:var(--murekkep)}
         <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.4.7-.4 1.2v17c0 .5.1.9.4 1.2l9.5-9.7zM14.2 13.1l2.9 3-11.6 6.6c-.4.2-.8.3-1.1.2zM17.5 9.3l3 1.7c1 .6 1 1.5 0 2.1l-3 1.7-3.2-3.2zM4.4 1.1c.3-.1.7 0 1.1.2l11.6 6.6-2.9 3z"/></svg><span><span data-i="yakinda2">Yakında</span><b>Google Play</b></span></span>
       </div>
     </div>
-    <div class="telefonlar" aria-hidden="true">
-      <div class="tel on"><img src="img/bugun.webp?v=1" alt="" width="585" height="1266" fetchpriority="high"></div>
-      <div class="tel arka"><img src="img/seans.webp?v=1" alt="" width="585" height="1266"></div>
+    <div class="telefonlar" id="telefonlar" aria-hidden="true">
+      <div class="kat" id="kat">
+        <div class="tel on"><div class="giris-tel-on" style="width:100%;height:100%"><img src="img/bugun.webp?v=2" data-ekr="bugun" alt="" width="585" height="1266" fetchpriority="high"></div></div>
+        <div class="tel arka giris-tel-arka"><img src="img/seans.webp?v=2" data-ekr="seans" alt="" width="585" height="1266"></div>
+      </div>
+      <div class="cip c1"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 19h16M7 15l4-4 3 3 5-6"/></svg></span><span><span data-i="cip1">Yeni rekor</span><small data-i="cip1a">Squat 85 kg × 6</small></span></div>
+      <div class="cip c2"><span class="ik"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></span><span><span data-i="cip2">Dinlenme bitti</span><small data-i="cip2a">Bir set daha</small></span></div>
+      <div class="cip c3"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span><span data-i="cip3">Mercimek çorbası</span><small data-i="cip3a">~ 180 kcal · fotoğraftan</small></span></div>
     </div>
   </div>
 </section>
 
-<div class="serit"><div class="ic">
+<div class="serit" aria-hidden="true"><div class="serit-ray" id="seritRay">
   <span data-i="s1"><b>190+</b> hareket</span>
-  <span data-i="s2"><b>369</b> Türk yemeği</span>
+  <span class="v" data-i="s2"><b>369</b> Türk yemeği</span>
   <span data-i="s3"><b>6</b> spora özel program</span>
   <span data-i="s4"><b>12</b> kas grubu rehberi</span>
-  <span data-i="s5">Salon · ev · ekipmansız · park</span>
+  <span class="v" data-i="s5">Salon · ev · ekipmansız · park</span>
+  <span data-i="s6">Futbol · basketbol · koşu · yüzme · tenis · dövüş</span>
+  <span data-i="s7"><b>4</b> ses seviyesi, <b>6</b> dinlenme sesi</span>
 </div></div>
 
 <section class="bolum" id="ozellikler">
   <div class="ic">
-    <div class="bolum-bas">
+    <div class="bolum-bas belir">
       <h2 data-i="ozb">Her şey tek uygulamada<span class="nokta">.</span></h2>
       <p data-i="ozp">Program yazdırmak, kalori uygulaması, antrenman defteri, hocanla yazışma ve arkadaşınla yarışmak. Hepsini ayrı ayrı denemene gerek yok.</p>
     </div>
-
-    <article class="ozellik">
-      <div class="oz-yazi kobalt">
-        <h3 data-i="p_b">Sana göre program<span class="nokta">.</span></h3>
-        <p data-i="p_p">Yaşın, kilon, hedefin, haftada kaç gün ayırabildiğin, nerede çalıştığın ve sakatlıkların. Program bunlara göre kurulur, her hafta seninle ilerler.</p>
-        <ul class="liste">
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_1"><b>Üç yol:</b> COMEBACK. kursun, yapay zekâya nasıl bir program istediğini anlat ya da kendin yaz.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_2"><b>Spora özel:</b> futbol, basketbol, koşu, yüzme, tenis ve dövüş sporları için güç ve sakatlık önleme hareketleri.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_3"><b>Haftalık plan:</b> pazar günü "bu hafta hangi günler geliyorsun?" diye sorar, antrenmanları o günlere dağıtır.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_4"><b>Esnek gün:</b> bugün gidemiyorsan off ver, program bir gün kayar; canın bacak istiyorsa günü değiştir.</span></li>
-        </ul>
+    <div class="hikaye">
+      <div class="hk-metin">
+        <article class="ozellik aktif" data-ekr="menu" data-r="kobalt">
+          <div class="oz-yazi kobalt">
+            <h3 data-i="p_b">Sana göre program<span class="nokta">.</span></h3>
+            <p data-i="p_p">Yaşın, kilon, hedefin, haftada kaç gün ayırabildiğin, nerede çalıştığın ve sakatlıkların. Program bunlara göre kurulur, her hafta seninle ilerler.</p>
+            <ul class="liste">
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_1"><b>Üç yol:</b> COMEBACK. kursun, yapay zekâya nasıl bir program istediğini anlat ya da kendin yaz.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_2"><b>Spora özel:</b> futbol, basketbol, koşu, yüzme, tenis ve dövüş sporları için güç ve sakatlık önleme hareketleri.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_3"><b>Haftalık plan:</b> pazar günü "bu hafta hangi günler geliyorsun?" diye sorar, antrenmanları o günlere dağıtır.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="p_4"><b>Esnek gün:</b> bugün gidemiyorsan off ver, program bir gün kayar; canın bacak istiyorsa günü değiştir.</span></li>
+            </ul>
+          </div>
+          <div class="oz-gorsel kobalt"><div class="tel"><img src="img/menu.webp?v=2" data-ekr="menu" alt="Menü ekranı" width="585" height="1266" loading="lazy"></div></div>
+        </article>
+        <article class="ozellik" data-ekr="seans" data-r="limon">
+          <div class="oz-yazi">
+            <h3 data-i="a_b">Set set antrenman<span class="nokta">.</span></h3>
+            <p data-i="a_p">Geçen seferki kilon ve tekrarın önünde, kutular dolu gelir. Sen sadece kaldırıp işaretlersin.</p>
+            <ul class="liste">
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_1"><b>Dinlenme sayacı:</b> seti bitirince başlar; 6 ses ve 4 ses seviyesi, müzik dinlerken araya girer, telefon titrer.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_2"><b>Drop set, ısınma, ek set:</b> iyi hissettiğin gün bir set daha ekle, yanlış eklediysen sil.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_3"><b>Makine doluysa:</b> hareketi atla ya da aynı kası çalıştıran başka bir hareketle değiştir.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_4"><b>Bitince:</b> ne kadar zordu, nerede iyi hissettin, ağrı var mı; bir sonraki antrenman buna göre ayarlanır.</span></li>
+            </ul>
+          </div>
+          <div class="oz-gorsel limon"><div class="tel"><img src="img/seans.webp?v=2" data-ekr="seans" alt="Antrenman ekranı" width="585" height="1266" loading="lazy"></div></div>
+        </article>
+        <article class="ozellik" data-ekr="beslenme" data-r="kobalt">
+          <div class="oz-yazi limon">
+            <h3 data-i="b_b">Fotoğrafla kalori<span class="nokta">.</span></h3>
+            <p data-i="b_p">Tabağın fotoğrafını çek, ne kadar yediğini tahmin etsin. Paketli ürünlerde etiketi okur. Türk mutfağını bilir.</p>
+            <ul class="liste">
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_1"><b>369 yemek:</b> mercimek çorbasından domatese; listeden seç, gramajı ayarla.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_2"><b>Protein senin seçimin:</b> az, orta, yüksek ya da kendi gram hedefin.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_3"><b>Beslenme programı:</b> kalori hedefine göre günlük öğün planı; yediğinde tek dokunuşla kaydeder.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_4"><b>Su ve takviye:</b> bardak bardak su, kreatinden D vitaminine takviye takibi.</span></li>
+            </ul>
+          </div>
+          <div class="oz-gorsel kobalt"><div class="tel"><img src="img/beslenme.webp?v=2" data-ekr="beslenme" alt="Beslenme ekranı" width="585" height="1266" loading="lazy"></div></div>
+        </article>
+        <article class="ozellik" data-ekr="ilerleme" data-r="limon">
+          <div class="oz-yazi koyu">
+            <h3 data-i="i_b">İlerlemeni gör<span class="nokta">.</span></h3>
+            <p data-i="i_p">Seri, kilo grafiği, rekorlar ve rozetler. Hafta hafta nereden nereye geldiğin tek ekranda.</p>
+            <ul class="liste">
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_1"><b>Vücut ölçüleri:</b> sağ ve sol kol, bacak, bel, göğüs; her biri için ayrı grafik.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_2"><b>Sıralama:</b> bu hafta bütün üyeler arasında kaçıncısın? Katılmak senin elinde.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_3"><b>Yapay zekâ koç:</b> programını yorumlar, sorularını cevaplar; kendi tarzını seçersin.</span></li>
+            </ul>
+          </div>
+          <div class="oz-gorsel limon"><div class="tel"><img src="img/ilerleme.webp?v=2" data-ekr="ilerleme" alt="İlerleme ekranı" width="585" height="1266" loading="lazy"></div></div>
+        </article>
+        <article class="ozellik" data-ekr="rehber" data-r="koyu">
+          <div class="oz-yazi">
+            <h3 data-i="t_b">Birlikte daha kolay<span class="nokta">.</span></h3>
+            <p data-i="t_p">Spor tek başına zor. Arkadaşınla aynı antrenmanı yap, forumda sor, meydan okumaya katıl.</p>
+            <ul class="liste">
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="t_1"><b>Jam:</b> arkadaşlarınla ortak antrenman; biri seti bitirince herkesin dinlenmesi birlikte başlar, sonunda kim ne kaldırdı tablosu.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="t_2"><b>Rehber:</b> her kas grubu için kısa yazılar; nasıl çalışır, haftada kaç set, en sık hatalar.</span></li>
+              <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="t_3"><b>Program gönder:</b> kullanıcı adıyla arkadaşına programını yolla.</span></li>
+            </ul>
+          </div>
+          <div class="oz-gorsel koyu"><div class="tel"><img src="img/rehber.webp?v=2" data-ekr="rehber" alt="Rehber ekranı" width="585" height="1266" loading="lazy"></div></div>
+        </article>
       </div>
-      <div class="oz-gorsel">
-        <div class="tel"><img src="img/menu.webp?v=1" alt="Menü ekranı: programı düzenle, haftalık plan, ortak antrenman" width="585" height="1266" loading="lazy"></div>
+      <div class="hk-sahne" id="sahne" data-r="kobalt" aria-hidden="true">
+        <div class="hk-tel"><div class="ekranlar">
+          <img class="gor" src="img/menu.webp?v=2" data-ekr="menu" alt="" width="585" height="1266">
+          <img src="img/seans.webp?v=2" data-ekr="seans" alt="" width="585" height="1266" loading="lazy">
+          <img src="img/beslenme.webp?v=2" data-ekr="beslenme" alt="" width="585" height="1266" loading="lazy">
+          <img src="img/ilerleme.webp?v=2" data-ekr="ilerleme" alt="" width="585" height="1266" loading="lazy">
+          <img src="img/rehber.webp?v=2" data-ekr="rehber" alt="" width="585" height="1266" loading="lazy">
+        </div></div>
+        <div class="hk-sayac"><i class="on"></i><i></i><i></i><i></i><i></i></div>
       </div>
-    </article>
-
-    <article class="ozellik ters">
-      <div class="oz-yazi">
-        <h3 data-i="a_b">Set set antrenman<span class="nokta">.</span></h3>
-        <p data-i="a_p">Geçen seferki kilon ve tekrarın önünde, kutular dolu gelir. Sen sadece kaldırıp işaretlersin.</p>
-        <ul class="liste">
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_1"><b>Dinlenme sayacı:</b> seti bitirince başlar; 6 ses ve 4 ses seviyesi, müzik dinlerken araya girer, telefon titrer.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_2"><b>Drop set, ısınma, ek set:</b> iyi hissettiğin gün bir set daha ekle, yanlış eklediysen sil.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_3"><b>Makine doluysa:</b> hareketi atla ya da aynı kası çalıştıran başka bir hareketle değiştir.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_4"><b>Bitince:</b> ne kadar zordu, nerede iyi hissettin, ağrı var mı; bir sonraki antrenman buna göre ayarlanır.</span></li>
-        </ul>
-      </div>
-      <div class="oz-gorsel kobalt">
-        <div class="not" data-i="a_not">Dinlenme 1:58<span>+30 sn ya da atla</span></div>
-        <div class="tel"><img src="img/seans.webp?v=1" alt="Antrenman ekranı: setler, kilolar ve dinlenme sayacı" width="585" height="1266" loading="lazy"></div>
-      </div>
-    </article>
-
-    <article class="ozellik">
-      <div class="oz-yazi limon">
-        <h3 data-i="b_b">Fotoğrafla kalori<span class="nokta">.</span></h3>
-        <p data-i="b_p">Tabağın fotoğrafını çek, ne kadar yediğini tahmin etsin. Paketli ürünlerde etiketi okur. Türk mutfağını bilir.</p>
-        <ul class="liste">
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_1"><b>369 yemek:</b> mercimek çorbasından domatese; listeden seç, gramajı ayarla.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_2"><b>Protein senin seçimin:</b> az, orta, yüksek ya da kendi gram hedefin.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_3"><b>Beslenme programı:</b> kalori hedefine göre günlük öğün planı; yediğinde tek dokunuşla kaydeder.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="b_4"><b>Su ve takviye:</b> bardak bardak su, kreatinden D vitaminine takviye takibi.</span></li>
-        </ul>
-      </div>
-      <div class="oz-gorsel">
-        <div class="tel"><img src="img/beslenme.webp?v=1" alt="Beslenme ekranı: kalan kalori, makrolar, fotoğrafla ekleme" width="585" height="1266" loading="lazy"></div>
-      </div>
-    </article>
-
-    <article class="ozellik ters">
-      <div class="oz-yazi koyu">
-        <h3 data-i="i_b">İlerlemeni gör<span class="nokta">.</span></h3>
-        <p data-i="i_p">Seri, kilo grafiği, rekorlar ve rozetler. Hafta hafta nereden nereye geldiğin tek ekranda.</p>
-        <ul class="liste">
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_1"><b>Vücut ölçüleri:</b> sağ ve sol kol, bacak, bel, göğüs; her biri için ayrı grafik.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_2"><b>Sıralama:</b> bu hafta bütün üyeler arasında kaçıncısın? Katılmak senin elinde.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_3"><b>Yapay zekâ koç:</b> programını yorumlar, sorularını cevaplar; kendi tarzını seçersin.</span></li>
-        </ul>
-      </div>
-      <div class="oz-gorsel limon">
-        <div class="tel"><img src="img/ilerleme.webp?v=1" alt="İlerleme ekranı: seri, kilo grafiği ve rozetler" width="585" height="1266" loading="lazy"></div>
-      </div>
-    </article>
-
-    <article class="ozellik">
-      <div class="oz-yazi">
-        <h3 data-i="t_b">Birlikte daha kolay<span class="nokta">.</span></h3>
-        <p data-i="t_p">Spor tek başına zor. Arkadaşınla aynı antrenmanı yap, forumda sor, meydan okumaya katıl.</p>
-        <ul class="liste">
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="t_1"><b>Jam:</b> arkadaşlarınla ortak antrenman; biri seti bitirince herkesin dinlenmesi birlikte başlar, sonunda kim ne kaldırdı tablosu.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="t_2"><b>Rehber:</b> her kas grubu için kısa yazılar; nasıl çalışır, haftada kaç set, en sık hatalar.</span></li>
-          <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="t_3"><b>Program gönder:</b> kullanıcı adıyla arkadaşına programını yolla.</span></li>
-        </ul>
-      </div>
-      <div class="oz-gorsel kobalt">
-        <div class="tel"><img src="img/rehber.webp?v=1" alt="Rehber ekranı: kas grubu yazıları" width="585" height="1266" loading="lazy"></div>
-      </div>
-    </article>
+    </div>
   </div>
 </section>
 
 <section class="bolum koyu-bant" id="hocalar">
   <div class="ic">
-    <div class="bolum-bas">
+    <div class="bolum-bas belir">
       <h2 data-i="h_b">Hocalar için<span class="nokta">.</span></h2>
       <p data-i="h_p">Öğrencilerini kâğıt ve mesaj yığınından kurtar. Programı bir kez yaz, antrenmanları canlı gör, aynı yerden yazış.</p>
     </div>
     <div class="ikili">
-      <div class="kart vurgu"><span class="ik"><svg viewBox="0 0 24 24"><path d="M3 9l9-4 9 4-9 4z"/><path d="M7 11v4c0 1.5 2.5 3 5 3s5-1.5 5-3v-4"/></svg></span><h3 data-i="h1b">Kodla bağlan</h3><p data-i="h1p">Öğrencin senin kodunu girer, izin verdiği kadarını görürsün: program, antrenmanlar, kilo ve kalori özeti.</p></div>
-      <div class="kart"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><path d="M17 15l2 2 3-4"/></svg></span><h3 data-i="h2b">Program gönder</h3><p data-i="h2p">Hareket kütüphanesinden programı kur, öğrencinin uygulamasına tek dokunuşla düşsün.</p></div>
-      <div class="kart"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10h8"/></svg></span><h3 data-i="h3b">Mesajlaş</h3><p data-i="h3p">Uygulama içinden öğrencinle yazış; okundu bilgisi ve yeni mesaj rozetiyle hiçbir şey kaçmaz.</p></div>
+      <div class="kart vurgu belir"><span class="ik"><svg viewBox="0 0 24 24"><path d="M3 9l9-4 9 4-9 4z"/><path d="M7 11v4c0 1.5 2.5 3 5 3s5-1.5 5-3v-4"/></svg></span><h3 data-i="h1b">Kodla bağlan</h3><p data-i="h1p">Öğrencin senin kodunu girer, izin verdiği kadarını görürsün: program, antrenmanlar, kilo ve kalori özeti.</p></div>
+      <div class="kart belir"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><path d="M17 15l2 2 3-4"/></svg></span><h3 data-i="h2b">Program gönder</h3><p data-i="h2p">Hareket kütüphanesinden programı kur, öğrencinin uygulamasına tek dokunuşla düşsün.</p></div>
+      <div class="kart belir"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10h8"/></svg></span><h3 data-i="h3b">Mesajlaş</h3><p data-i="h3p">Uygulama içinden öğrencinle yazış; okundu bilgisi ve yeni mesaj rozetiyle hiçbir şey kaçmaz.</p></div>
     </div>
   </div>
 </section>
 
-<section class="bolum" id="nasil">
+<section class="bolum adim-bant" id="nasil" style="padding-top:24px">
   <div class="ic">
-    <div class="bolum-bas">
+    <div class="bolum-bas belir">
       <h2 data-i="n_b">Üç adımda başla<span class="nokta">.</span></h2>
       <p data-i="n_p">Kapalı betada her başvuruyu tek tek onaylıyoruz. Onaylandığında beklemen gereken bir kurulum yok.</p>
     </div>
     <div class="adimlar">
-      <div class="adim"><span class="no">1</span><h3 data-i="n1b">Başvur</h3><p data-i="n1p">Bilgilerini doldur: doğum tarihin, boyun, kilon, hedefin, sporun, kaç gün gelebildiğin. 3 dakika sürer.</p></div>
-      <div class="adim"><span class="no">2</span><h3 data-i="n2b">Onay gelsin</h3><p data-i="n2p">Başvurun onaylanınca aynı e-posta ve şifreyle giriş yaparsın. Programın ve kalori hedefin hazır bekler.</p></div>
-      <div class="adim"><span class="no">3</span><h3 data-i="n3b">Antrenmana başla</h3><p data-i="n3p">Telefonunun ana ekranına ekle, uygulama gibi tam ekran çalışsın. İnternet yokken de kayıt alır.</p></div>
+      <div class="adim belir"><span class="no">1</span><h3 data-i="n1b">Başvur</h3><p data-i="n1p">Bilgilerini doldur: doğum tarihin, boyun, kilon, hedefin, sporun, kaç gün gelebildiğin. 3 dakika sürer.</p></div>
+      <div class="adim belir"><span class="no">2</span><h3 data-i="n2b">Onay gelsin</h3><p data-i="n2p">Başvurun onaylanınca aynı e-posta ve şifreyle giriş yaparsın. Programın ve kalori hedefin hazır bekler.</p></div>
+      <div class="adim belir"><span class="no">3</span><h3 data-i="n3b">Antrenmana başla</h3><p data-i="n3p">Telefonunun ana ekranına ekle, uygulama gibi tam ekran çalışsın. İnternet yokken de kayıt alır.</p></div>
     </div>
   </div>
 </section>
 
-<section class="bolum" style="padding-top:0">
+<section class="bolum bilim-bant">
   <div class="ic bilim">
-    <div class="buyuk">
+    <div class="buyuk belir">
       <h3 data-i="bl_b">Bilime dayalı, sade<span class="nokta">.</span></h3>
       <p data-i="bl_p">Set, tekrar ve dinlenme süreleri spor bilimi araştırmalarına göre ayarlanır. Haftalık set sayısı, ilerleme kuralı ve geri dönüşte yük azaltma programın içinde. Tıbbi tavsiye değildir; sağlık sorunun varsa önce doktoruna danış.</p>
     </div>
     <div class="yan">
-      <div><h3 data-i="bl1b">Verilerin senin</h3><p data-i="bl1p">Sağlık verilerin yalnızca programını hesaplamak için işlenir. Hesabını sildiğinde her şey kalıcı olarak silinir.</p></div>
-      <div><h3 data-i="bl2b">Sakatlığa saygılı</h3><p data-i="bl2p">Ağrıyan bölgeyi seçersen o bölgeyi zorlayan hareketlerin yerine güvenli olanları koyar.</p></div>
+      <div class="belir"><h3 data-i="bl1b">Verilerin senin</h3><p data-i="bl1p">Sağlık verilerin yalnızca programını hesaplamak için işlenir. Hesabını sildiğinde her şey kalıcı olarak silinir.</p></div>
+      <div class="belir"><h3 data-i="bl2b">Sakatlığa saygılı</h3><p data-i="bl2p">Ağrıyan bölgeyi seçersen o bölgeyi zorlayan hareketlerin yerine güvenli olanları koyar.</p></div>
     </div>
   </div>
 </section>
 
-<section class="bolum" id="sss" style="padding-top:0">
+<section class="bolum" id="sss">
   <div class="ic">
-    <div class="bolum-bas"><h2 data-i="q_b">Sorular<span class="nokta">.</span></h2></div>
+    <div class="bolum-bas belir"><h2 data-i="q_b">Sorular<span class="nokta">.</span></h2></div>
     <div class="sss">
       <details><summary data-i="q1">Ücretli mi?</summary><p data-i="a1">Beta süresince ücretsiz. Mağaza sürümünün fiyatını belirlediğimizde önceden haber vereceğiz.</p></details>
       <details><summary data-i="q2">iPhone ve Android'de çalışıyor mu?</summary><p data-i="a2">Evet. Şimdilik tarayıcıdan açılıyor; "Ana ekrana ekle" ile uygulama gibi tam ekran çalışır. App Store ve Google Play sürümleri yolda.</p></details>
@@ -387,15 +470,14 @@ footer a:hover{color:var(--murekkep)}
   </div>
 </section>
 
-<section class="bolum son" style="padding-top:0">
+<section class="bolum" style="padding-top:0">
   <div class="ic">
     <div class="son-kutu">
+      <span class="dev" aria-hidden="true">COMEBACK.</span>
       <div><h2 data-i="son_b">İlk denenler arasında ol<span class="nokta">.</span></h2></div>
       <div>
         <p data-i="son_p">Betada her görüşünü okuyoruz. Uygulama senin geri bildirimlerinle şekilleniyor.</p>
-        <div class="eylem">
-          <a class="btn beyaz" href="/comeback/#/basvuru" data-app="#/basvuru"><span data-i="basvur2">Beta'ya başvur</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        </div>
+        <div class="eylem"><a class="btn beyaz" href="/comeback/#/basvuru" data-app="#/basvuru"><span data-i="basvur2">Beta'ya başvur</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       </div>
     </div>
   </div>
@@ -415,21 +497,62 @@ footer a:hover{color:var(--murekkep)}
 
 <script>
 (function () {
-  // uygulama adresi: yeni alan adında app.comeback.com.tr, şimdilik /comeback/
   var APP = /(^|\.)comeback\.com\.tr$/.test(location.hostname) ? 'https://app.comeback.com.tr/' : '/comeback/';
   document.querySelectorAll('[data-app]').forEach(function (a) { a.href = APP + a.getAttribute('data-app'); });
+  var azHareket = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // üst çubuk gölgesi
   var ust = document.getElementById('ust');
   var kay = function () { ust.classList.toggle('kaydi', window.scrollY > 8); };
   window.addEventListener('scroll', kay, { passive: true }); kay();
 
+  // kayan şerit: içerik iki kez, böylece kesintisiz döner
+  var ray = document.getElementById('seritRay');
+  var kopya = function () { ray.querySelectorAll('[data-kopya]').forEach(function (x) { x.remove(); }); Array.from(ray.children).forEach(function (c) { var k = c.cloneNode(true); k.setAttribute('data-kopya', ''); k.removeAttribute('data-i'); ray.appendChild(k); }); };
+  kopya();
+
+  // giriş telefonları: fareyle hafif üç boyutlu eğim
+  var tl = document.getElementById('telefonlar'), kat = document.getElementById('kat');
+  if (!azHareket && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var hx = 0, hy = 0, x = 0, y = 0, cal = false;
+    var dongu = function () { x += (hx - x) * 0.08; y += (hy - y) * 0.08; kat.style.transform = 'rotateY(' + (x * 8).toFixed(2) + 'deg) rotateX(' + (-y * 6).toFixed(2) + 'deg)'; if (Math.abs(hx - x) > 0.001 || Math.abs(hy - y) > 0.001) requestAnimationFrame(dongu); else cal = false; };
+    window.addEventListener('pointermove', function (e) { var r = tl.getBoundingClientRect(); hx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2))); hy = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2))); if (!cal) { cal = true; requestAnimationFrame(dongu); } }, { passive: true });
+  }
+
+  // özellik hikâyesi: ortadaki yazının ekranı yapışkan telefonda görünür
+  var sahne = document.getElementById('sahne'), ozler = Array.from(document.querySelectorAll('.ozellik'));
+  var sayac = Array.from(sahne.querySelectorAll('.hk-sayac i'));
+  var goster = function (i) {
+    ozler.forEach(function (o, j) { o.classList.toggle('aktif', i === j); });
+    var ekr = ozler[i].dataset.ekr; sahne.dataset.r = ozler[i].dataset.r;
+    sahne.querySelectorAll('.ekranlar img').forEach(function (im) { im.classList.toggle('gor', im.dataset.ekr === ekr); });
+    sayac.forEach(function (s, j) { s.classList.toggle('on', j === i); });
+  };
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (l) { l.forEach(function (g) { if (g.isIntersecting) goster(ozler.indexOf(g.target)); }); }, { rootMargin: '-48% 0px -48% 0px' });
+    ozler.forEach(function (o) { io.observe(o); });
+  }
+
+  // dil: bayraklı seçici
+  var BAYRAK = {
+    tr: '<svg viewBox="0 0 30 30"><rect width="30" height="30" fill="#E30A17"/><circle cx="12.2" cy="15" r="6.2" fill="#fff"/><circle cx="13.8" cy="15" r="5" fill="#E30A17"/><path fill="#fff" d="M17.6 15l4.7-1.5-2.9 4 0-4.9 2.9 4z"/></svg>',
+    en: '<svg viewBox="0 0 30 30"><rect width="30" height="30" fill="#012169"/><path d="M-4 0L34 30M34 0L-4 30" stroke="#fff" stroke-width="6"/><path d="M-4 0L34 30M34 0L-4 30" stroke="#C8102E" stroke-width="2.4"/><path d="M15 0v30M0 15h30" stroke="#fff" stroke-width="9"/><path d="M15 0v30M0 15h30" stroke="#C8102E" stroke-width="5"/></svg>'
+  };
+  document.querySelectorAll('[data-bayrak]').forEach(function (b) { b.innerHTML = BAYRAK[b.dataset.bayrak]; });
+  var dil = document.getElementById('dil'), dilBtn = document.getElementById('dilBtn');
+  var menuKapat = function () { dil.classList.remove('acik'); dilBtn.setAttribute('aria-expanded', 'false'); };
+  dilBtn.addEventListener('click', function (e) { e.stopPropagation(); var a = !dil.classList.contains('acik'); dil.classList.toggle('acik', a); dilBtn.setAttribute('aria-expanded', String(a)); if (a) dil.querySelector('[aria-checked="true"]').focus(); });
+  document.addEventListener('click', function (e) { if (!dil.contains(e.target)) menuKapat(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && dil.classList.contains('acik')) { menuKapat(); dilBtn.focus(); } });
+
   var EN = {
     nav1: 'Features', nav2: 'How it works', nav3: 'Coaches', nav4: 'FAQ', ustgir: 'Open the app',
-    h1: 'Pick up<br>where you<br>left off<span class="nokta">.</span>',
+    hx1: 'Pick up', hx2: 'where you', hx3: 'left off<span class="nokta">.</span>',
     alt: 'COMEBACK. <b>builds a program around you</b>, counts what you eat <b>from a photo</b> and logs <b>every set</b>. Whether you are starting for the first time or coming back after a break.',
     basvur: 'Apply for the beta', basvur2: 'Apply for the beta', girisyap: 'Log in',
     durum: 'Closed beta is open · applications are approved in order', yakinda: 'Coming soon', yakinda2: 'Coming soon',
-    s1: '<b>190+</b> exercises', s2: '<b>369</b> foods', s3: '<b>6</b> sport-specific programs', s4: '<b>12</b> muscle guides', s5: 'Gym · home · no equipment · park',
+    s1: '<b>190+</b> exercises', s2: '<b>369</b> foods', s3: '<b>6</b> sport-specific programs', s4: '<b>12</b> muscle guides', s5: 'Gym · home · no equipment · park', s6: 'Football · basketball · running · swimming · tennis · combat', s7: '<b>4</b> volume levels, <b>6</b> rest sounds',
+    cip1: 'New record', cip1a: 'Squat 85 kg × 6', cip2: 'Rest is over', cip2a: 'One more set', cip3: 'Lentil soup', cip3a: '~ 180 kcal · from a photo',
     ozb: 'Everything in one app<span class="nokta">.</span>', ozp: 'A program builder, a calorie counter, a training log, chat with your coach and friendly competition. No need to try them one by one.',
     p_b: 'A program built for you<span class="nokta">.</span>', p_p: 'Your age, weight, goal, how many days you can train, where you train and any injuries. Your program is built on these and grows with you week by week.',
     p_1: '<b>Three ways:</b> let COMEBACK. build it, describe what you want to the AI, or write your own.',
@@ -476,23 +599,28 @@ footer a:hover{color:var(--murekkep)}
     son_b: 'Be one of the first<span class="nokta">.</span>', son_p: 'We read every piece of feedback during the beta. The app is shaped by what you tell us.',
     f1: 'Open the app', f2: 'Guide', f3: 'Privacy notice'
   };
+
   var TR = {};
   document.querySelectorAll('[data-i]').forEach(function (el) { TR[el.getAttribute('data-i')] = el.innerHTML; });
   var BASLIK = { tr: document.title, en: 'COMEBACK. · Pick up where you left off.' };
   var ACIK = { tr: document.querySelector('meta[name=description]').content, en: 'COMEBACK. builds your training program, counts calories from a photo and logs every set. Train with friends, chat with your coach, learn every muscle group. Closed beta is open.' };
-  function uygula(dil) {
-    var s = dil === 'en' ? EN : TR;
+  function uygula(d) {
+    var s = d === 'en' ? EN : TR;
     document.querySelectorAll('[data-i]').forEach(function (el) { var k = el.getAttribute('data-i'); if (s[k] != null) el.innerHTML = s[k]; });
-    document.documentElement.lang = dil; document.title = BASLIK[dil];
-    document.querySelector('meta[name=description]').content = ACIK[dil];
-    document.querySelectorAll('[data-dil]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.dil === dil)); });
-    try { localStorage.setItem('cb-dil', dil); } catch (e) { /* yok */ }
+    document.querySelectorAll('img[data-ekr]').forEach(function (im) { im.src = 'img/' + im.dataset.ekr + (d === 'en' ? '-en' : '') + '.webp?v=2'; });
+    document.documentElement.lang = d; document.title = BASLIK[d];
+    document.querySelector('meta[name=description]').content = ACIK[d];
+    document.getElementById('dilBayrak').innerHTML = BAYRAK[d]; document.getElementById('dilKod').textContent = d.toUpperCase();
+    document.querySelectorAll('[data-dil]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.dil === d)); });
+    kopya();
+    try { localStorage.setItem('cb-dil', d); } catch (e) { /* yok */ }
   }
   var q = new URLSearchParams(location.search).get('lang');
   var kayitli = null; try { kayitli = localStorage.getItem('cb-dil'); } catch (e) { /* yok */ }
   var ilk = q === 'en' || q === 'tr' ? q : kayitli || ((navigator.language || 'tr').toLowerCase().indexOf('tr') === 0 ? 'tr' : 'en');
+  document.getElementById('dilBayrak').innerHTML = BAYRAK.tr;
   if (ilk === 'en') uygula('en');
-  document.querySelectorAll('[data-dil]').forEach(function (b) { b.addEventListener('click', function () { uygula(b.dataset.dil); }); });
+  document.querySelectorAll('[data-dil]').forEach(function (b) { b.addEventListener('click', function () { uygula(b.dataset.dil); menuKapat(); dilBtn.focus(); }); });
 })();
 </script>
 </body>
