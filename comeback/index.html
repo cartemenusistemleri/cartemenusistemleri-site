@@ -7,14 +7,16 @@
 <meta name="theme-color" content="#ECECE8">
 <title>COMEBACK.</title>
 <meta name="description" content="COMEBACK. — sana göre program, fotoğrafla kalori, set set antrenman kaydı.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232E4BFF'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="/comeback/favicon.ico?v=4" sizes="any">
+<link rel="icon" type="image/png" sizes="96x96" href="/comeback/favicon-96.png?v=4">
+<link rel="icon" type="image/png" sizes="48x48" href="/comeback/favicon-48.png?v=4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="/comeback/app.css?v=30">
+<link rel="stylesheet" href="/comeback/app.css?v=31">
 </head>
 <body>
 <main id="app" class="app" aria-live="polite"></main>
@@ -25,13 +27,13 @@
   <a href="#/antrenman" data-tab="antrenman"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>Antrenman</a>
   <a href="#/beslenme" data-tab="beslenme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>Beslenme</a>
   <a href="#/ilerleme" data-tab="ilerleme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M7 15l4-4 3 3 5-6"/></svg>İlerleme</a>
-  <a href="#/profil" data-tab="profil" aria-label="COMEBACK. menü, profil ve ayarlar"><span class="nav-mark" aria-hidden="true">C<i>.</i></span><span aria-hidden="true">COMEBACK<i class="nav-n">.</i></span></a>
+  <a href="#/profil" data-tab="profil" aria-label="COMEBACK. menü, profil ve ayarlar"><span class="nav-mark" aria-hidden="true">C<i>.</i></span><span class="nav-etiket" aria-hidden="true">Menü</span></a>
 </nav>
 <div id="toast" class="toast" role="status" hidden></div>
 <script src="/comeback/data.js?v=8"></script>
-<script src="/comeback/kutuphane.js?v=10"></script>
+<script src="/comeback/kutuphane.js?v=11"></script>
 <script src="/comeback/motor.js?v=12"></script>
-<script src="/comeback/app.js?v=36"></script>
+<script src="/comeback/app.js?v=37"></script>
 <script>if ('serviceWorker' in navigator) addEventListener('load', () => {
   const ilk = !navigator.serviceWorker.controller; let yenilendi = false;
   // yeni sürüm devreye girince sayfayı bir kez yenile (ilk kurulumda değil)

@@ -180,6 +180,8 @@
     ['rope_pushdown', 'İp ile pushdown', 'triceps', 'triceps', '', 'kablo', 1, 'i', 2.5, '', 'Altta ipi iki yana aç, dirsekler gövdede sabit.'],
     ['cable_oh_ext', 'Kablo baş üstü triceps', 'triceps', 'triceps', '', 'kablo', 1, 'i', 2.5, 'omuz', 'Kabloya sırtını dön, dirsekler kulak hizasında sabit.'],
     ['machine_triceps', 'Makinede triceps (dips makinesi)', 'triceps', 'triceps', 'gogus', 'makine', 1, 'i', 5, '', 'Omuzlar aşağıda, tutamakları aşağı it.'],
+    ['triceps_machine', 'Triceps makinesi (oturarak extension)', 'triceps', 'triceps', '', 'makine', 1, 'i', 2.5, '', 'Üst kollar pede yaslı ve sabit; yalnızca dirsekten aç, en altta bir an sık.'],
+    ['triceps_press_machine', 'Triceps press makinesi', 'triceps', 'triceps', 'gogus', 'makine', 1, 'i', 5, '', 'Sırt pedde, dirsekler gövdeye yakın; tutamakları aşağı doğru sonuna kadar it.'],
     ['close_bench', 'Dar tutuş bench press', 'triceps', 'triceps,gogus', 'omuz_on', 'barbell,bench', 2, 'b', 2.5, 'omuz', 'Eller omuz genişliğinde, dirsekler gövdeye yakın.'],
     ['db_kickback', 'Dambıl kickback', 'triceps', 'triceps', '', 'dambil', 1, 'i', 1, '', 'Gövde öne eğik, üst kol sabit; kolu geriye düzleştir.'],
     ['tbar', 'T-bar row', 'yatay_cekme', 'sirt_orta,sirt_kanat', 'biceps,omuz_arka', 'barbell', 2, 'b', 2.5, 'bel', 'Bel düz, göğüs açık; tutamağı karnına çek.'],

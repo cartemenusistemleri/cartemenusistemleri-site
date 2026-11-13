@@ -1,4 +1,5 @@
 // COMEBACK. — hesap ve veri eşitleme
+//   POST /api/comeback/hesap/basvuru { ad, eposta, sifre, yetiskin, riza, saglikRiza, kaynak, json } → beta başvurusu (hesap + profil; onaylanınca giriş)
 //   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza, saglikRiza }
 //   POST /api/comeback/hesap/sil     { sifre }  → hesap ve bütün kayıtlar kalıcı silinir
 //   POST /api/comeback/hesap/gorus   { tur, metin, ekran }  (girişsiz de olur)
@@ -73,7 +74,7 @@ async function govde(req) {
   if (!(req.headers.get('content-type') || '').includes('application/json')) return null;
   try { return await req.json(); } catch (e) { return null; }
 }
-const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis']);
+const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan']);
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
 export async function onRequest(ctx) {
@@ -85,6 +86,43 @@ export async function onRequest(ctx) {
   const m = req.method;
 
   try {
+    // Beta başvurusu: hesap + profil tek seferde. Onay gelene kadar rol 'aday' (giriş yapamaz); onaylanınca aynı şifreyle girer, profili hazırdır.
+    if (yol === 'basvuru' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const ad = String(g.ad || '').trim().replace(/[<>]/g, '').slice(0, 40);
+      const eposta = String(g.eposta || '').trim().toLowerCase();
+      const sifre = String(g.sifre || '');
+      const kisa = (v, n) => String(v || '').trim().replace(/[<>]/g, '').slice(0, n);
+      if (ad.length < 2) return hata('Adını yaz.', 400);
+      if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
+      if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
+      if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
+      if (g.riza !== true) return hata('Verilerinin hesabında saklanmasına onay vermelisin.', 400);
+      if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza vermelisin.', 400);
+      if (typeof g.json !== 'string' || g.json.length > 200000) return hata('Profil bilgilerin eksik.', 400);
+      let st; try { st = JSON.parse(g.json); } catch (e) { return hata('Profil bilgilerin eksik.', 400); }
+      if (!st || !st.profil || !st.program) return hata('Profil bilgilerin eksik.', 400);
+      if (!(await sinir(db, 'basvuru:' + ip, 8, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      const var_ = await db.prepare('SELECT id, rol FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
+      if (var_) return hata(var_.rol === 'aday' ? 'Bu e-postayla başvurun zaten alındı. Onaylanınca giriş yapabilirsin.' : 'Bu e-postayla zaten bir hesap var. Giriş yap.', 409);
+      const simdi = Date.now();
+      await db.prepare('INSERT OR IGNORE INTO bekleme (eposta, ad, hedef, kaynak, durum, zaman) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(eposta, ad, kisa(st.profil.hedef, 40), kisa(g.kaynak, 60), 'bekliyor', simdi).run();
+      await db.prepare('UPDATE bekleme SET ad = ?, kaynak = COALESCE(NULLIF(?, \'\'), kaynak) WHERE eposta = ?').bind(ad, kisa(g.kaynak, 60), eposta).run();
+      const b = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
+      if (b && b.durum === 'reddedildi') return hata('Bu e-postayla yapılan başvuru şu an onaylanmadı.', 403);
+      const onayli = b && b.durum === 'onayli';
+      const id = crypto.randomUUID(); const tuz = hex(rastgele(16));
+      await db.batch([
+        db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, saglik_onay, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .bind(id, eposta, ad, await sifreHash(sifre, tuz), tuz, onayli ? 'uye' : 'aday', simdi, simdi, simdi),
+        db.prepare('INSERT INTO veriler (kullanici_id, json, guncelleme) VALUES (?, ?, ?)').bind(id, g.json, simdi)
+      ]);
+      if (!onayli) return json({ ok: true, durum: 'bekliyor' }, 201);
+      const token = await oturumAc(db, id);
+      return json({ ok: true, durum: 'onayli', kullanici: { id, ad, eposta, rol: 'uye' } }, 201, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
+    }
+
     if (yol === 'kayit' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const ad = String(g.ad || '').trim().replace(/[<>]/g, '').slice(0, 40);
@@ -114,6 +152,11 @@ export async function onRequest(ctx) {
       if (!(await sinir(db, 'giris:' + ip, 10, 900))) return hata('Çok fazla hatalı deneme. 15 dakika sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT id, ad, eposta, rol, kullanici_adi, sifre_hash, tuz FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
       if (!k || !esit(await sifreHash(sifre, k.tuz), k.sifre_hash)) return hata('E-posta ya da şifre hatalı.', 401);
+      if (k.rol === 'aday') {
+        const b = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
+        if (!b || b.durum !== 'onayli') return json({ hata: b && b.durum === 'reddedildi' ? 'Başvurun şu an onaylanmadı.' : 'Başvurun inceleniyor. Onaylanınca bu e-posta ve şifreyle giriş yapabileceksin.', beta: 'bekliyor' }, 403);
+        await db.prepare("UPDATE kullanicilar SET rol = 'uye' WHERE id = ? AND rol = 'aday'").bind(k.id).run(); k.rol = 'uye';
+      }
       await db.prepare('DELETE FROM giris_deneme WHERE anahtar = ?').bind('giris:' + ip).run();
       await db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ? AND bitis < ?').bind(k.id, Date.now()).run();
       const token = await oturumAc(db, k.id);
@@ -165,8 +208,8 @@ export async function onRequest(ctx) {
       if (alt === 'ozet' && m === 'GET') {
         const say = async (sql, ...b) => ((await db.prepare(sql).bind(...b).first()) || {}).n || 0;
         return json({
-          kullanici: await say('SELECT COUNT(*) n FROM kullanicilar'),
-          yeniKullanici: await say('SELECT COUNT(*) n FROM kullanicilar WHERE olusturma > ?', hafta),
+          kullanici: await say("SELECT COUNT(*) n FROM kullanicilar WHERE rol != 'aday'"),
+          yeniKullanici: await say("SELECT COUNT(*) n FROM kullanicilar WHERE rol != 'aday' AND olusturma > ?", hafta),
           aktif: await say('SELECT COUNT(*) n FROM veriler WHERE guncelleme > ?', hafta),
           bekleyen: await say("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor'"),
           onayli: await say("SELECT COUNT(*) n FROM bekleme WHERE durum = 'onayli'"),
@@ -193,7 +236,7 @@ export async function onRequest(ctx) {
         return new Response(JSON.stringify(veri), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'content-disposition': 'attachment; filename="comeback-yedek-' + veri.zaman.slice(0, 10) + '.json"' } });
       }
       if (alt === 'bekleme' && m === 'GET') {
-        const r = await db.prepare('SELECT b.eposta, b.ad, b.hedef, b.kaynak, b.durum, b.zaman, b.onay_zamani, (SELECT 1 FROM kullanicilar k WHERE k.eposta = b.eposta) kayitli FROM bekleme b ORDER BY CASE b.durum WHEN \'bekliyor\' THEN 0 ELSE 1 END, b.zaman DESC LIMIT 500').all();
+        const r = await db.prepare('SELECT b.eposta, b.ad, b.hedef, b.kaynak, b.durum, b.zaman, b.onay_zamani, (SELECT CASE WHEN k.rol = \'aday\' THEN 2 ELSE 1 END FROM kullanicilar k WHERE k.eposta = b.eposta) kayitli FROM bekleme b ORDER BY CASE b.durum WHEN \'bekliyor\' THEN 0 ELSE 1 END, b.zaman DESC LIMIT 500').all();
         return json({ liste: r.results || [] });
       }
       if (alt === 'onay' && m === 'POST') {
@@ -203,6 +246,7 @@ export async function onRequest(ctx) {
         if (!EPOSTA.test(eposta) || !durum) return hata('Geçersiz istek.', 400);
         await db.prepare('INSERT INTO bekleme (eposta, durum, zaman, onay_zamani) VALUES (?, ?, ?, ?) ON CONFLICT(eposta) DO UPDATE SET durum = excluded.durum, onay_zamani = excluded.onay_zamani')
           .bind(eposta, durum, Date.now(), durum === 'onayli' ? Date.now() : null).run();
+        if (durum === 'onayli') await db.prepare("UPDATE kullanicilar SET rol = 'uye' WHERE eposta = ? AND rol = 'aday'").bind(eposta).run();
         return json({ ok: true });
       }
       if (alt === 'rol' && m === 'POST') {
