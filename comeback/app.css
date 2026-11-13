@@ -648,8 +648,8 @@ fieldset.t>legend+*{clear:both}
 .sira-liste>div .av{align-self:center}
 /* mesajlar */
 .mn-sayac{font-style:normal;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--hata);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;flex:none}
-.nav a[data-tab="profil"].yeni .nav-mark::after{content:"";position:absolute;top:-3px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--hata);box-shadow:0 0 0 2px var(--kutu)}
-.nav-mark{position:relative}
+.nav a[data-tab="profil"].yeni .nav-kelime::after{content:"";position:absolute;top:-8px;right:-8px;width:10px;height:10px;border-radius:50%;background:var(--hata);box-shadow:0 0 0 2px var(--kutu)}
+.nav-kelime{position:relative}
 .mk-satir{min-height:72px}
 .mk-satir .mn-yazi b{display:flex;align-items:baseline;gap:8px}
 .mk-satir .mn-yazi b small{font-size:12px;font-weight:600;color:var(--ikincil)}
@@ -681,12 +681,6 @@ fieldset.t>legend+*{clear:both}
 .mini select{width:100%;min-height:44px;border-radius:12px;border:1.5px solid var(--cizgi);padding:0 8px;font:inherit;font-size:16px;font-weight:700;background:#fff;color:var(--murekkep);outline:none}
 .mini select:focus{border-color:var(--kobalt)}
 
-/* menü sekmesi: telefonda yalnızca logo */
-@media (max-width:1023px){
-  .nav a[data-tab="profil"]{justify-content:center}
-  .nav a[data-tab="profil"] .nav-mark{width:40px;height:36px;border-radius:11px;font-size:20px}
-  .nav-etiket{display:none}
-}
 
 /* profil resmi kırpma */
 .kirp-arka{position:fixed;inset:0;z-index:80;background:rgba(10,10,14,.6);display:grid;place-items:center;padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -718,3 +712,15 @@ fieldset.t>legend+*{clear:both}
 .rh-bolum{gap:8px}
 .rh-bolum h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em}
 .rh-bolum p{margin:0;font-size:16px;line-height:1.6;max-width:66ch}
+
+/* menü sekmesi: COMEBACK. yazılı logo */
+.nav-kelime{font-weight:900;font-size:17px;letter-spacing:-.045em;line-height:1;color:var(--murekkep);white-space:nowrap}
+.nav-kelime i{font-style:normal;color:var(--kobalt)}
+.nav a[aria-current="page"] .nav-kelime{color:var(--kobalt)}
+.nav a[aria-current="page"] .nav-kelime i{color:var(--murekkep)}
+@media (max-width:1023px){
+  .nav a[data-tab="profil"]{justify-content:center;flex:1.35}
+  .nav-kelime{font-size:13.5px}
+}
+@media (max-width:1023px){.nav .nav-masa{display:none}}
+@media (min-width:1024px){.nav .nav-kelime{display:none}}
