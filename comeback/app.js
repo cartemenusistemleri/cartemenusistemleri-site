@@ -266,6 +266,7 @@
           (S.basvuru ? '<div class="t kobalt" style="gap:6px;margin-top:6px"><span class="k">Başvurun alındı</span><span style="font-size:16px;font-weight:600;line-height:1.45">' + esc(S.basvuru.eposta) + ' ile yaptığın başvuru inceleniyor. Onaylanınca aynı e-posta ve şifreyle giriş yap; profilin ve programın hazır.</span></div>'
             : '<a class="btn ana buyuk-btn" href="#/basvuru" style="margin-top:6px">Beta\'ya başvur' + IK.ok + '</a>') +
           '<a class="metin-btn" href="#/giris" style="align-self:center;color:var(--murekkep)">Zaten hesabım var ·&nbsp;<span style="color:var(--kobalt)">Giriş yap</span></a>') +
+      '<a class="metin-btn" href="#/topluluk/rehber" style="align-self:center;color:var(--ikincil)">Kas grubu rehberini oku →</a>' +
       (S.profil && !hesap && !cevrimdisi && !S.basvuru ? '<div class="uyari">Bu cihazda kayıtların var. Hesap oluşturursan hepsi hesabına aktarılır ve her cihazdan erişirsin.</div>' : '') +
       '<p class="not">18 yaş ve üstü içindir.' + (cevrimdisi ? ' Sunucuya şu an ulaşılamıyor; kayıtların bu cihazda tutuluyor.' : '') + '</p>' +
       '</div><div class="izgara">' +
@@ -660,10 +661,32 @@
   }
   const menuDugme = (tur, id, yazarId, benim) => '<button class="pd-ikon" data-act="tp-menu" data-tur="' + tur + '" data-id="' + id + '" aria-label="Seçenekler" aria-expanded="' + (tp.menu === tur + id) + '"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>' +
     (tp.menu === tur + id ? '<div class="tp-menu">' + (benim || (hesap && hesap.rol === 'admin') ? '<button data-act="tp-sil" data-tur="' + tur + '" data-id="' + id + '">Sil</button>' : '') + (!benim ? '<button data-act="tp-sikayet" data-tur="' + tur + '" data-id="' + id + '">Şikâyet et</button><button data-act="tp-engel" data-k="' + esc(yazarId) + '">Bu kişiyi engelle</button>' : '') + '</div>' : '');
+  // Rehber: kas grubu yazıları (rehber.js), girişsiz de okunur
+  function ekranRehber(id) {
+    const RB = window.COMEBACK_REHBER; if (!RB) return ust(geri('#/topluluk')) + '<div class="t"><span>Rehber yüklenemedi. Sayfayı yenile.</span></div>';
+    const sek = '<div class="yatay">' + [['forum', 'Forum', '#/topluluk'], ['meydan', 'Meydan okuma', '#/topluluk/meydan'], ['rehber', 'Rehber', '#/topluluk/rehber']].map((x) => '<a class="hap" href="' + x[2] + '" aria-pressed="' + (x[0] === 'rehber') + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '</div>';
+    const y = id && RB.R.find((x) => x.id === id);
+    if (y) {
+      const hl = y.hareketler.filter((h) => D.HAREKET[h]);
+      return ust(geri('#/topluluk/rehber'), '<span class="alt">Rehber · ' + y.sure + ' okuma</span>') +
+        '<article class="rh-yazi">' +
+        '<h1 class="baslik">' + esc(y.ad) + '<span class="nokta">.</span></h1>' +
+        '<p class="rh-ozet">' + esc(y.ozet) + '</p>' +
+        y.bolumler.map((b) => '<section class="t rh-bolum"><h2>' + esc(b[0]) + '</h2><p>' + esc(b[1]) + '</p></section>').join('') +
+        '<section class="t rh-bolum"><h2>Bu kası çalıştıran hareketler</h2><div class="haplar">' + hl.map((h) => '<span class="hap" style="cursor:default">' + esc(D.HAREKET[h].ad) + '</span>').join('') + '</div><a class="btn cerceve" href="#/program" style="align-self:flex-start;margin-top:4px">Programıma ekle</a></section>' +
+        RB.GENEL.map((b) => '<section class="t koyu rh-bolum"><h2>' + esc(b[0]) + '</h2><p>' + esc(b[1]) + '</p></section>').join('') +
+        '<p class="ik" style="padding:4px">Genel bilgilendirmedir, tıbbi tavsiye değildir. Ağrın varsa bir uzmana danış.</p>' +
+        '</article>';
+    }
+    return ust(geri(hesap ? '#/profil' : '#/'), '<span class="alt">Topluluk</span>') + '<h1 class="baslik">Rehber<span class="nokta">.</span></h1>' + sek +
+      '<p class="ik" style="padding:2px 4px 8px;max-width:56ch">Her kas grubu için kısa ve net: nasıl çalışır, haftada kaç set, en sık hatalar.</p>' +
+      '<div class="izgara">' + RB.R.map((x, i) => '<a class="t rh-kart' + (i === 0 ? ' kobalt' : i === 6 ? ' limon' : '') + '" href="#/topluluk/rehber/' + x.id + '"><span class="k">' + x.sure + ' okuma</span><b>' + esc(x.ad) + '</b><span class="rh-kisa">' + esc(x.ozet) + '</span></a>').join('') + '</div>';
+  }
   function ekranTopluluk(alt, id) {
+    if (alt === 'rehber') return ekranRehber(id);
     if (!S.profil) return ekranKarsilama();
     if (!hesap) return ust(geri('#/profil')) + '<div class="t"><b>Topluluk için giriş yapmalısın.</b></div>';
-    const sekmeler = '<div class="yatay">' + [['forum', 'Forum'], ['meydan', 'Meydan okuma']].map((x) => '<a class="hap" href="#/topluluk' + (x[0] === 'meydan' ? '/meydan' : '') + '" aria-pressed="' + ((alt === 'meydan' || alt === 'meydan-yeni') === (x[0] === 'meydan')) + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '</div>';
+    const sekmeler = '<div class="yatay">' + [['forum', 'Forum'], ['meydan', 'Meydan okuma']].map((x) => '<a class="hap" href="#/topluluk' + (x[0] === 'meydan' ? '/meydan' : '') + '" aria-pressed="' + ((alt === 'meydan' || alt === 'meydan-yeni') === (x[0] === 'meydan')) + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '<a class="hap" href="#/topluluk/rehber" aria-pressed="false" style="text-decoration:none">Rehber</a></div>';
     if (alt === 'yeni') return ust(geri('#/topluluk'), '<span class="alt">Yeni konu</span>') + '<h1 class="baslik">Konu aç<span class="nokta">.</span></h1>' +
       '<form data-form="tp-konu" class="izgara" novalidate><div class="t genis"><span class="k">Kategori</span><div class="haplar">' + FKAT.map((k, i) => '<button type="button" class="hap" data-act="hap" data-grup="fkat" data-deger="' + k[0] + '" aria-pressed="' + (i === 0) + '">' + k[1] + '</button>').join('') + '</div></div>' +
       '<label class="t genis alan"><span>Başlık</span><input name="baslik" maxlength="120" required placeholder="İlk ayımda neler öğrendim" style="font-size:20px"></label>' +
@@ -2245,6 +2268,7 @@
       mGrup('Topluluk', [
         hesap ? mSatir('#/mesajlar', 'mesaj', 'Mesajlar', okunmamis ? okunmamis + ' okunmamış mesaj' : (hocaMi() ? 'Öğrencilerinle yazış' : 'Hocanla yazış'), 'kobalt', okunmamis) : '',
         hesap ? mSatir('#/topluluk', 'topluluk', 'Forum ve meydan okuma', 'Sor, paylaş, arkadaşınla yarış', 'limon') : '',
+        mSatir('#/topluluk/rehber', 'plan', 'Rehber', 'Her kas grubu için kısa yazılar'),
         hesap ? mSatir('#/siralama', 'siralama', 'Sıralama', 'Haftalık ve aylık hacim tablosu') : ''
       ]) +
       hocaKutu().replace('class="t h130"', 'class="t genis"') +
@@ -2296,6 +2320,7 @@
     else if (parca[0] === 'bekleme') html = ekranBekleme();
     else if (parca[0] === 'giris') html = ekranGiris();
     else if (parca[0] === 'basvuru' && !hesap) html = ekranKurulum(true);
+    else if (parca[0] === 'topluluk' && parca[1] === 'rehber' && !hesap) html = ekranRehber(parca[2]);
     else if (!acik) { html = ekranKarsilama(); parca.length = 0; }
     else if (!parca.length) { html = ekranBugun(); sekme = 'bugun'; }
     else if (parca[0] === 'kurulum') html = ekranKurulum();

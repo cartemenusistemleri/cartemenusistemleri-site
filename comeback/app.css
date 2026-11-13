@@ -708,3 +708,13 @@ fieldset.t>legend+*{clear:both}
 .hp-gun:focus-visible{outline:2px solid var(--kobalt);outline-offset:2px}
 .hp-kutu.kobalt .hp-gun{background:rgba(255,255,255,.16);color:#fff}
 .hp-kutu.kobalt .hp-gun[aria-pressed="true"]{background:#fff;color:var(--kobalt)}
+
+/* rehber */
+.rh-kart{gap:6px;min-height:150px;text-decoration:none;color:inherit}
+.rh-kart b{font-size:22px;font-weight:850;letter-spacing:-.02em;line-height:1.15}
+.rh-kisa{font-size:14px;line-height:1.45;opacity:.85;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rh-yazi{display:flex;flex-direction:column;gap:var(--ara);max-width:720px}
+.rh-ozet{margin:0;padding:0 4px 6px;font-size:18px;line-height:1.5;font-weight:600;max-width:60ch}
+.rh-bolum{gap:8px}
+.rh-bolum h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em}
+.rh-bolum p{margin:0;font-size:16px;line-height:1.6;max-width:66ch}
