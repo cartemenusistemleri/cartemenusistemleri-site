@@ -2194,7 +2194,7 @@
   function haftaPlanKutu(tam) {
     if (!S.program || !antrenmanGunleri().length) return '';
     const bas = planHaftasi(); const anahtar = tarihKey(bas); const kayitli = (S.haftaPlan || {})[anahtar];
-    if (!tam && (kayitli || (S.ayar && S.ayar.hpGec === anahtar) || [6, 0, 1].indexOf(haftaGunu()) < 0)) return '';
+    if (!tam && (kayitli || (S.ayar && S.ayar.hpGec === anahtar) || [6, 0].indexOf(haftaGunu()) < 0)) return '';
     if (!hpTaslak || hpTaslak.hafta !== anahtar) hpTaslak = { hafta: anahtar, gunler: hpVarsayilan(bas) };
     const son = new Date(bas); son.setDate(son.getDate() + 6);
     const aralik = bas.getDate() + (bas.getMonth() !== son.getMonth() ? ' ' + AY[bas.getMonth()] : '') + '–' + son.getDate() + ' ' + AY[son.getMonth()];
