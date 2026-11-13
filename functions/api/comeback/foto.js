@@ -53,6 +53,11 @@ export async function onRequestPost(ctx) {
     const n = parseInt((await kv.get(anahtar)) || '0', 10);
     if (n >= limit) return json({ hata: 'Bugünkü fotoğraf analizi hakkın doldu. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
     ctx.waitUntil(kv.put(anahtar, String(n + 1), { expirationTtl: 60 * 60 * 30 }));
+    // maliyet sigortası: koçla ortak günlük toplam yapay zekâ çağrısı
+    const tk = 'comeback:ai-toplam:' + new Date().toISOString().slice(0, 10);
+    const tn = parseInt((await kv.get(tk)) || '0', 10);
+    if (tn >= parseInt(env.COMEBACK_AI_GUNLUK || '3000', 10)) return json({ hata: 'Yapay zekâ bugün çok yoğun. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
+    ctx.waitUntil(kv.put(tk, String(tn + 1), { expirationTtl: 60 * 60 * 30 }));
   }
 
   let yanit;

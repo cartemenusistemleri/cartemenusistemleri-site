@@ -109,6 +109,8 @@ async function isle(ctx) {
   if (!uid) return json({ hata: 'Koçla konuşmak için giriş yapmalısın.' }, 401);
   let g; try { g = await request.json(); } catch (e) { return json({ hata: 'Geçersiz istek.' }, 400); }
   const gun = new Date().toISOString().slice(0, 10);
+  // maliyet sigortası: bütün kullanıcıların günlük toplam yapay zekâ çağrısı (COMEBACK_AI_GUNLUK, varsayılan 3000)
+  if (!(await sinir(ctx, 'comeback:ai-toplam:' + gun, parseInt(env.COMEBACK_AI_GUNLUK || '3000', 10)))) return json({ hata: 'Yapay zekâ bugün çok yoğun. Yarın tekrar dene.' }, 429);
 
   if (g && g.tur === 'program') {
     if (!(await sinir(ctx, 'comeback:kocp:' + uid + ':' + gun, 10))) return json({ hata: 'Bugünkü program yorumu hakkın doldu. Yarın tekrar dene.' }, 429);
