@@ -97,8 +97,8 @@ export async function onRequest(ctx) {
       if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
       if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
       if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
-      if (g.riza !== true) return hata('Verilerinin hesabında saklanmasına onay vermelisin.', 400);
-      if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza vermelisin.', 400);
+      if (g.riza !== true) return hata('Verilerinin hesabında saklanması için onay kutusunu işaretle.', 400);
+      if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza kutusunu işaretle.', 400);
       if (typeof g.json !== 'string' || g.json.length > 200000) return hata('Profil bilgilerin eksik.', 400);
       let st; try { st = JSON.parse(g.json); } catch (e) { return hata('Profil bilgilerin eksik.', 400); }
       if (!st || !st.profil || !st.program) return hata('Profil bilgilerin eksik.', 400);
@@ -132,8 +132,8 @@ export async function onRequest(ctx) {
       if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
       if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
       if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
-      if (g.riza !== true) return hata('Verilerinin hesabında saklanmasına onay vermelisin.', 400);
-      if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza vermelisin.', 400);
+      if (g.riza !== true) return hata('Verilerinin hesabında saklanması için onay kutusunu işaretle.', 400);
+      if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza kutusunu işaretle.', 400);
       if (!(await sinir(db, 'kayit:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
       const beta = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
       if (!beta || beta.durum !== 'onayli') return json({ hata: beta ? 'Beta başvurun alındı, onaylanınca kayıt olabileceksin.' : 'COMEBACK. şu an kapalı betada. Önce bekleme listesine katıl.', beta: beta ? 'bekliyor' : 'yok' }, 403);

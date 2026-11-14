@@ -40,7 +40,7 @@ export async function onRequestPost(ctx) {
   let kisi = request.headers.get('cf-connecting-ip') || 'yok';
   if (env.COMEBACK_DB) {
     const cm = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cb_oturum=([A-Za-z0-9_-]+)/);
-    if (!cm) return json({ hata: 'Fotoğraf analizi için giriş yapmalısın.' }, 401);
+    if (!cm) return json({ hata: 'Fotoğraf analizi için giriş yap.' }, 401);
     const oz = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(cm[1])))).map((b) => b.toString(16).padStart(2, '0')).join('');
     const o = await env.COMEBACK_DB.prepare('SELECT kullanici_id, bitis FROM oturumlar WHERE token_hash = ?').bind(oz).first();
     if (!o || o.bitis < Date.now()) return json({ hata: 'Oturumun sona ermiş. Tekrar giriş yap.' }, 401);

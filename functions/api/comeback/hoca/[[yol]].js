@@ -60,7 +60,7 @@ export async function onRequest(ctx) {
     }
     if (p[0] === 'baglan' && m === 'POST') {
       const g = await govde(req); const kod = String((g && g.kod) || '').trim().toUpperCase();
-      if (!g || g.riza !== true) return hata('Hocanın verilerini görmesine onay vermelisin.', 400);
+      if (!g || g.riza !== true) return hata('Hocanın verilerini görebilmesi için onay kutusunu işaretle.', 400);
       if (!/^[A-Z0-9]{6}$/.test(kod)) return hata('Kod 6 karakter olmalı.', 400);
       const h = await db.prepare('SELECT hk.koc_id, k.ad FROM hoca_kod hk JOIN kullanicilar k ON k.id = hk.koc_id WHERE hk.kod = ?').bind(kod).first();
       if (!h) return hata('Bu kodla bir hoca bulunamadı.', 404);

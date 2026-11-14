@@ -52,6 +52,7 @@ a.t:active,button.t:active{transform:scale(.985)}
 .ik{color:var(--ikincil);font-size:13px}
 .buyuk{font-size:46px;font-weight:900;letter-spacing:-.04em;line-height:.9}
 .dev{font-size:54px;font-weight:900;letter-spacing:-.045em;line-height:.9}
+.bitti-soz{font-size:19px;font-weight:600;line-height:1.4;letter-spacing:-.01em;color:var(--ikincil);padding:0 4px 8px;max-width:34ch;text-wrap:pretty}
 .orta{font-size:28px;font-weight:900;letter-spacing:-.03em;line-height:1}
 .satir{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .yigin{display:flex;flex-direction:column;gap:4px}

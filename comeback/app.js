@@ -685,7 +685,7 @@
   function ekranTopluluk(alt, id) {
     if (alt === 'rehber') return ekranRehber(id);
     if (!S.profil) return ekranKarsilama();
-    if (!hesap) return ust(geri('#/profil')) + '<div class="t"><b>Topluluk için giriş yapmalısın.</b></div>';
+    if (!hesap) return ust(geri('#/profil')) + '<div class="t"><b>Topluluğa katılmak için giriş yap.</b></div>';
     const sekmeler = '<div class="yatay">' + [['forum', 'Forum'], ['meydan', 'Meydan okuma']].map((x) => '<a class="hap" href="#/topluluk' + (x[0] === 'meydan' ? '/meydan' : '') + '" aria-pressed="' + ((alt === 'meydan' || alt === 'meydan-yeni') === (x[0] === 'meydan')) + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '<a class="hap" href="#/topluluk/rehber" aria-pressed="false" style="text-decoration:none">Rehber</a></div>';
     if (alt === 'yeni') return ust(geri('#/topluluk'), '<span class="alt">Yeni konu</span>') + '<h1 class="baslik">Konu aç<span class="nokta">.</span></h1>' +
       '<form data-form="tp-konu" class="izgara" novalidate><div class="t genis"><span class="k">Kategori</span><div class="haplar">' + FKAT.map((k, i) => '<button type="button" class="hap" data-act="hap" data-grup="fkat" data-deger="' + k[0] + '" aria-pressed="' + (i === 0) + '">' + k[1] + '</button>').join('') + '</div></div>' +
@@ -824,7 +824,7 @@
   }
   async function kocGonder(metin) {
     metin = String(metin || '').trim(); if (!metin || kocYuk) return;
-    if (!hesap) { toast('Koçla konuşmak için giriş yapmalısın.'); return; }
+    if (!hesap) { toast('Koçla konuşmak için giriş yap.'); return; }
     S.koc = (S.koc || []).concat([{ rol: 'ben', metin: metin.slice(0, 1200), zaman: Date.now() }]).slice(-40);
     kocYuk = true; kaydet(); render(); kocKaydir();
     try {
@@ -1013,7 +1013,7 @@
       '</div>';
   }
   async function bpHazirla() {
-    if (!hesap) { toast('Bunun için giriş yapmalısın.'); return; }
+    if (!hesap) { toast('Bunun için giriş yap.'); return; }
     const h = S.hedef;
     const yemekler = D.YEMEK.map((y) => [y.ad, Math.round(y.k), Math.round(y.p * 10) / 10, Math.round(y.kh * 10) / 10, Math.round(y.y * 10) / 10, y.g]);
     bpYuk = true; render();
@@ -1052,7 +1052,7 @@
   }
   async function programKur() {
     const metin = (pAnlat || '').trim(); if (metin.length < 8) { toast('Nasıl bir program istediğini biraz anlat.'); const t = document.getElementById('pdAnlat'); if (t) t.focus(); return; }
-    if (!hesap) { toast('Bunun için giriş yapmalısın.'); return; }
+    if (!hesap) { toast('Bunun için giriş yap.'); return; }
     const p = pProfil() || {}; const ekip = K.ORTAM[p.ortam] ? K.ORTAM[p.ortam].ekipman : null; const sak = p.sakatlik || [];
     const bolgeAd = (h) => (PBOLGE.find((b) => b[2].indexOf(h.kalip) >= 0) || ['', 'Diğer'])[1];
     const katalog = Object.keys(K.HAREKET).map((id) => K.HAREKET[id]).filter((h) => (!ekip || h.ekipman.every((e) => ekip.indexOf(e) >= 0)) && !sak.some((b) => (h.kontra || []).indexOf(b) >= 0))
@@ -1115,11 +1115,13 @@
     const b = S.sonSeans; if (!b) { location.hash = '#/'; return ''; }
     const t = fbTaslak || (fbTaslak = { zor: 0, iyi: [], agri: [], not: '' });
     const hap = (grup, deger, ad, secili) => '<button type="button" class="hap" data-act="fb" data-grup="' + grup + '" data-deger="' + esc(deger) + '" aria-pressed="' + secili + '">' + esc(ad) + '</button>';
+    const soz = b.rekor ? (b.rekor === 1 ? 'Bir yeni rekor. Dün yapamadığını bugün yaptın.' : b.rekor + ' yeni rekor. Dün yapamadığını bugün yaptın.') : b.donus ? 'Uzun bir aradan sonra geri döndün. En zor set buydu.' : 'Kimse görmese de bu setler sayıldı.';
     return ust('', '<span class="alt">Antrenman bitti</span>') +
-      '<h1 class="baslik">Nasıl geçti<span class="nokta">?</span></h1>' +
+      '<h1 class="baslik">Bugün de geldin<span class="nokta">.</span></h1>' +
+      '<p class="bitti-soz">' + soz + '</p>' +
       '<div class="izgara">' +
       '<div class="t kobalt h130"><span class="k">' + esc(b.ad) + '</span><span class="orta num">' + b.set + ' set</span><span class="k num">' + sayi(b.hacim) + ' kg · ' + b.dk + ' dk' + (b.rekor ? ' · ' + b.rekor + ' rekor' : '') + '</span></div>' +
-      '<div class="t koyu h130"><span class="k">Notların</span><b style="font-size:17px;line-height:1.35">Programını bunlara göre önereceğiz</b><span class="ik" style="color:var(--koyu-ikincil)">30 saniye sürer</span></div>' +
+      '<div class="t koyu h130"><span class="k">Nasıl geçti?</span><b style="font-size:17px;line-height:1.35">Söyle, programını buna göre ayarlayalım</b><span class="ik" style="color:var(--koyu-ikincil)">30 saniye sürer</span></div>' +
       (b.jam && jamV && jamV.uyeler ? jamTablo(jamV.uyeler) + '<button class="metin-btn genis" data-act="jam-yenile">Sıralamayı yenile</button>' : '') +
       '<div class="t genis fb-kutu"><span class="k">Zorluk</span><div class="haplar">' + ZORLUK.map((z, i) => hap('zor', i + 1, z, t.zor === i + 1)).join('') + '</div></div>' +
       (b.kaslar.length ? '<div class="t genis fb-kutu"><span class="k">Hangi kasları iyi hissettin?</span><div class="haplar">' + b.kaslar.map((g) => hap('iyi', g, g, t.iyi.indexOf(g) >= 0)).join('') + '</div></div>' : '') +
@@ -1364,7 +1366,7 @@
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
       '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + haftaPlanKutu(false) + antr +
       '<a class="t limon h150" href="#/beslenme"><span class="k">' + (kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(Math.abs(kalan)) + '">' + sayi(Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
-      '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' +
+      (seri() ? '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' : '<a class="t koyu h150" href="#/antrenman"><span class="k">Seri</span><span class="buyuk">Bugün<span style="color:var(--mavi-gece)">.</span></span><span class="ik">Yeni seri tek bir antrenmanla başlar.</span></a>') +
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
       rekorKutu +
       siraKart() +
@@ -1470,7 +1472,7 @@
     const toplamSet = Object.values(s.setler).reduce((a, l) => a + l.length, 0);
     return ust('<a class="ikon-btn" href="#/" aria-label="Ana sayfa">' + IK.geri + '</a>', '<span class="alt num">' + tamam + ' / ' + toplamSet + ' set</span>') +
       '<div class="seans-bas"><h1 class="baslik">' + esc(sg.ad) + '<span class="nokta">.</span></h1><div class="seans-saat"><span class="k">Süre</span><b class="num" id="seansSure">' + sureYaz(Date.now() - s.baslangic) + '</b></div></div>' +
-      (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Bıraktığın yerden.</span><span style="font-weight:600;line-height:1.45">' + s.donus.ara + ' gün ara verdin. Sakatlanmadan dönmen için bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yere döneriz.</span></div>' : '') +
+      (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Geri döndün.</span><span style="font-weight:600;line-height:1.45">' + s.donus.ara + ' gün oldu, önemli değil. Hiçbir zaman çok geç değil. Vücudun sana yetişsin diye bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yerden devam.</span></div>' : '') +
       jamSerit() +
       '<details class="t rutin-kutu"' + (Object.values(s.setler).some((l) => l.some((y) => y.ok)) ? '' : ' open') + '><summary><span class="k">Isınma · ~7 dk</span><span class="ik">açmak için dokun</span></summary>' + rutinListe(ISINMA.genel.concat(ISINMA[gunBolge(sg)])) + '</details>' +
       '<div class="seans-izgara">' + hl.map((x, xi) => {
@@ -1545,14 +1547,14 @@
   // dinlenme sesleri: [ad, notalar: [frekans, başlangıç sn, süre sn, dalga, ses yüksekliği]]
   const SESLER = {
     cift: ['Çift ton', [[660, 0, 0.14, 'sine', 0.09], [880, 0.16, 0.14, 'sine', 0.09]]],
-    zil: ['Zil', [[1318, 0, 0.9, 'sine', 0.07], [1975, 0, 0.6, 'sine', 0.03]]],
+    zil: ['Zil · COMEBACK sesi', [[1318, 0, 0.9, 'sine', 0.07], [1975, 0, 0.6, 'sine', 0.03]]],
     damla: ['Damla', [[1200, 0, 0.09, 'sine', 0.08], [1600, 0.1, 0.08, 'sine', 0.06]]],
     gong: ['Gong', [[196, 0, 1.4, 'sine', 0.12], [392, 0, 0.9, 'sine', 0.04]]],
     uclu: ['Üçlü bip', [[880, 0, 0.08, 'square', 0.035], [880, 0.16, 0.08, 'square', 0.035], [1175, 0.32, 0.16, 'square', 0.035]]],
     yukselen: ['Yükselen', [[523, 0, 0.12, 'triangle', 0.09], [659, 0.12, 0.12, 'triangle', 0.09], [784, 0.24, 0.22, 'triangle', 0.09]]],
     yok: ['Sessiz · sadece titreşim', []]
   };
-  const sesTur = () => (S.ayar && S.ayar.ses === false ? 'yok' : (S.ayar && SESLER[S.ayar.sesTur] ? S.ayar.sesTur : 'cift'));
+  const sesTur = () => (S.ayar && S.ayar.ses === false ? 'yok' : (S.ayar && SESLER[S.ayar.sesTur] ? S.ayar.sesTur : 'zil'));
   // ses seviyesi: notaların kazancı bu katsayıyla çarpılır; sıkıştırıcı patlamayı önler
   const SEVIYE = { kisik: ['Kısık', 1.5], orta: ['Orta', 4], yuksek: ['Yüksek', 8], cok: ['Çok yüksek', 13] };
   const sesSeviye = () => (S.ayar && SEVIYE[S.ayar.sesSeviye] ? S.ayar.sesSeviye : 'yuksek');
@@ -1836,7 +1838,7 @@
     const fark = kilolar.length >= 2 ? kilolar[kilolar.length - 1].kg - kilolar[0].kg : 0;
     return ust(logo) + '<h1 class="baslik">İlerleme<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      '<div class="t koyu h150"><span class="k">Seri</span><span class="buyuk num">' + seri() + '<span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></div>' +
+      '<div class="t koyu h150"><span class="k">Seri</span><span class="buyuk num">' + (seri() || 'Bugün') + '<span style="color:var(--mavi-gece)">.</span></span><span class="ik">' + (seri() ? 'gün üst üste' : 'Yeni seri tek bir antrenmanla başlar.') + '</span></div>' +
       '<div class="t kobalt h150"><span class="k">Bu hafta</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + S.profil.gun + '</span></span><span class="k">antrenman</span></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
@@ -2550,7 +2552,7 @@
       seansHareket(s).forEach((x, xi) => { if (!(s.setler[ksB[xi]] || []).some(setSayilir)) return; ((K.HAREKET[x.id] || {}).birincil || []).forEach((m) => { const gr = KAS_GRUP[m]; if (gr && kaslar.indexOf(gr) < 0) kaslar.push(gr); }); });
       const dkB = Math.max(1, Math.round((Date.now() - s.baslangic) / 60000));
       gun(s.tarih).antrenman = { ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, kaslar };
-      S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar }; fbTaslak = null;
+      S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus }; fbTaslak = null;
       if (S.jam) S.jamRekor = yeni;
       if (s.donus) S.donusYapildi = true;
       const yeniR = yeniRozetler();
@@ -2558,7 +2560,7 @@
       const jamOzet = S.jam ? { sure: Math.max(1, Math.round((Date.now() - s.baslangic) / 60000)), rekor: yeni } : null;
       if (S.jam) { const kod = S.jam.kod; setTimeout(() => { if (S.sonSeans) S.sonSeans.jam = kod; }, 0); jamDurumGonder(true, jamOzet).then(() => jamCek()); }
       S.seans = null; dinlenme = null; S.sonSeans.rekor = yeni; kaydet(true); skorGonder();
-      toast(yeniR.length ? 'Yeni rozet: ' + yeniR.map((r) => r.ad).join(', ') + '!' : yeni ? 'Antrenman kaydedildi. ' + yeni + ' yeni rekor!' : 'Antrenman kaydedildi.');
+      toast(yeniR.length ? 'Yeni rozet: ' + yeniR.map((r) => r.ad).join(', ') + '. Bunu sen kazandın.' : yeni ? (yeni === 1 ? 'Yeni rekor. Bunu sen yaptın.' : yeni + ' yeni rekor. Bunu sen yaptın.') : 'Kaydedildi. Bugün de geldin.');
       git('#/bitti');
     },
     async paylas() {
@@ -2593,7 +2595,7 @@
     },
     'kayitli-sil'(el) { (S.kayitliOgun || []).splice(+el.dataset.i, 1); kaydet(true); render(); },
     async oneri() {
-      if (!hesap) { toast('Öneri için giriş yapmalısın.'); return; }
+      if (!hesap) { toast('Öneri için giriş yap.'); return; }
       const g = gun(); const tp = toplam(g.ogun); const h = S.hedef;
       oneriYuk = true; oneri = null; render();
       try {
@@ -2657,8 +2659,8 @@
       toast('Çıkış yapıldı.'); git('#/');
     },
     'bekleme-hedef'(el) { beklemeHedef = el.getAttribute('aria-pressed') === 'true' ? '' : el.dataset.deger; el.parentNode.querySelectorAll('.hap').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.deger === beklemeHedef))); },
-    async 'yon-mod'(el) { const r = await tistek('moderasyon', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, gizli: el.dataset.gizli === '1' }); toast(r.ok ? 'Kaydedildi.' : 'Olmadı.'); yon.veri = null; render(); },
-    async 'yon-rol'(el) { const r = await istek('yonetim/rol', 'POST', { eposta: el.dataset.eposta, rol: el.dataset.rol }); toast(r.ok ? 'Güncellendi.' : (r.j.hata || 'Olmadı.')); yon.veri = null; render(); },
+    async 'yon-mod'(el) { const r = await tistek('moderasyon', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, gizli: el.dataset.gizli === '1' }); toast(r.ok ? 'Kaydedildi.' : 'Olmadı. Bir daha dene.'); yon.veri = null; render(); },
+    async 'yon-rol'(el) { const r = await istek('yonetim/rol', 'POST', { eposta: el.dataset.eposta, rol: el.dataset.rol }); toast(r.ok ? 'Güncellendi.' : (r.j.hata || 'Olmadı. Bir daha dene.')); yon.veri = null; render(); },
     'yon-sekme'(el) { yon.sekme = el.dataset.deger; render(); },
     'yon-yenile'() { yon.veri = null; render(); },
     async 'yon-onay'(el) {
@@ -2746,7 +2748,7 @@
       toast(g.ad + ' ' + GUN_AD[bos].toLocaleLowerCase('tr') + ' gününe kopyalandı. Adını ve gününü değiştirebilirsin.');
     },
     'paylas-ac'(el) {
-      if (!hesap) { toast('Program göndermek için giriş yapmalısın.'); return; }
+      if (!hesap) { toast('Program göndermek için giriş yap.'); return; }
       const kaynak = el.dataset.kaynak === 'taslak' ? ptaslak : S.program;
       if (!kaynak || !kaynak.gunler.some((g) => g.hareketler.length)) { toast('Önce programa birkaç hareket ekle.'); return; }
       paylasPr = ozetProgram(kaynak); paylasOnay = null; git('#/paylas');
@@ -2907,7 +2909,7 @@
       }
       S.takvim[bugun] = { off: true, gunId0: g.id };
       offAcik = false; olay('off_gun'); kaydet(true); render();
-      toast(el.dataset.tur === 'kaydir' ? g.ad + ' yarına kaydı. Bugün dinlen.' : el.dataset.tur === 'zincir' ? 'Program bir gün kaydı. Bugün dinlen.' : 'Bugün dinlenme. ' + g.ad + ' bu hafta atlandı.');
+      toast(el.dataset.tur === 'kaydir' ? g.ad + ' yarına kaydı. Bugün dinlen.' : el.dataset.tur === 'zincir' ? 'Program bir gün kaydı. Bugün dinlen.' : 'Bugün dinlen. ' + g.ad + ' bu hafta atlandı; program seni bekliyor.');
     },
     'off-geri'() {
       const bugun = tarihKey(); if (!S.takvim || !S.takvim[bugun]) return;
@@ -2918,7 +2920,7 @@
     },
     async 'pd-yorum'() {
       const pr = ptaslak; if (!pr.gunler.some((g) => g.hareketler.length)) { toast('Önce birkaç hareket ekle.'); return; }
-      if (!hesap) { toast('Yapay zekâ yorumu için giriş yapmalısın.'); return; }
+      if (!hesap) { toast('Yapay zekâ yorumu için giriş yap.'); return; }
       pYorumYuk = true; render();
       try {
         const ozet = { ad: pr.ad, gunler: pr.gunler.map((g) => ({ ad: g.ad, gun: GUN_AD[g.hafta], hareketler: g.hareketler.map((x) => D.HAREKET[x.id].ad + ' ' + x.set + 'x' + x.tekrar + (x.birim !== 'tekrar' ? ' ' + BIRIM[x.birim].toLowerCase() : '')) })) };
@@ -2999,7 +3001,7 @@
     },
     'tp-kat'(el) { tp.kat = el.dataset.deger; tp.liste = null; render(); },
     'tp-menu'(el) { const k = el.dataset.tur + el.dataset.id; tp.menu = tp.menu === k ? null : k; render(); },
-    async 'tp-sikayet'(el) { const r = await tistek('sikayet', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, neden: 'uygunsuz' }); tp.menu = null; toast(r.ok ? 'Şikâyetin alındı. İnceleyeceğiz.' : (r.j.hata || 'Olmadı.')); render(); },
+    async 'tp-sikayet'(el) { const r = await tistek('sikayet', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, neden: 'uygunsuz' }); tp.menu = null; toast(r.ok ? 'Şikâyetin alındı. İnceleyeceğiz.' : (r.j.hata || 'Olmadı. Bir daha dene.')); render(); },
     async 'tp-engel'(el) { const r = await tistek('engel', 'POST', { kullanici: el.dataset.k }); tp.menu = null; if (r.ok) { toast('Engellendi. Yazılarını artık görmeyeceksin.'); tp.konu = null; tp.liste = null; } render(); },
     async 'tp-sil'(el) { const r = await tistek('sil', 'POST', { tur: el.dataset.tur, id: +el.dataset.id }); tp.menu = null; if (!r.ok) { toast(r.j.hata || 'Silinemedi.'); return; } toast('Silindi.'); tp.liste = null; if (el.dataset.tur === 'konu') { tp.konu = null; git('#/topluluk'); } else { tp.konu = null; render(); } },
     async 'tp-meydan-paylas'(el) { const t = 'COMEBACK. uygulamasında "' + el.dataset.ad + '" meydan okumasına katıl: Topluluk → Meydan okuma → kod ' + el.dataset.kod; try { if (navigator.share) { await navigator.share({ text: t }); return; } } catch (e) { if (e.name === 'AbortError') return; } try { await navigator.clipboard.writeText(t); toast('Kopyalandı.'); } catch (e) { toast(t); } },
@@ -3009,7 +3011,7 @@
     'mk-yenile'() { mk.liste = null; render(); },
     'kirp-iptal'() { kirpKapat(); },
     'kirp-kaydet'() { if (!kirp) return; let d; try { d = kirpSonuc(); } catch (e) { d = null; } kirpKapat(); if (d) avatarYukle(null, d); else toast('Bu resim kırpılamadı. Başka bir resim dene.'); },
-    'avatar-sil'() { istek('foto', 'DELETE').then((r) => { if (r.ok) { hesap.foto = 0; toast('Profil resmi kaldırıldı.'); render(); } else toast(r.j.hata || 'Olmadı.'); }); },
+    'avatar-sil'() { istek('foto', 'DELETE').then((r) => { if (r.ok) { hesap.foto = 0; toast('Profil resmi kaldırıldı.'); render(); } else toast(r.j.hata || 'Olmadı. Bir daha dene.'); }); },
     'veri-ac'() { veriAcik = true; render(); },
     'veri-kapat'() { veriAcik = false; silAcik = false; sifirOnay = false; render(); },
     'sil-ac'() { silAcik = true; render(); const i = document.querySelector('[data-form="hesap-sil"] input'); if (i) i.focus(); },
@@ -3114,7 +3116,7 @@
       tistek('mesaj/' + encodeURIComponent(tp.mesajId), 'POST', { metin }).then(async (r) => { if (!r.ok) { if (ta) ta.value = metin; toast(r.j.hata || 'Gönderilemedi.'); return; } const r2 = await tistek('mesaj/' + encodeURIComponent(tp.mesajId)); if (r2.ok) tp.mesaj = r2.j; const a = document.getElementById('kocAkis'); if (a) { a.innerHTML = mesajAkis(); kocKaydir(); } mk.liste = null; });
       return;
     }
-    if (f.dataset.form === 'yon-hoca') { istek('yonetim/rol', 'POST', { eposta: String(v.eposta || '').trim(), rol: 'koc' }).then((r) => { toast(r.ok ? 'Artık hoca.' : (r.j.hata || 'Olmadı.')); if (r.ok) { yon.veri = null; render(); } }); return; }
+    if (f.dataset.form === 'yon-hoca') { istek('yonetim/rol', 'POST', { eposta: String(v.eposta || '').trim(), rol: 'koc' }).then((r) => { toast(r.ok ? 'Artık hoca.' : (r.j.hata || 'Olmadı. Bir daha dene.')); if (r.ok) { yon.veri = null; render(); } }); return; }
     if (f.dataset.form === 'takviye') {
       const ad = String(v.ad || '').trim().replace(/[<>]/g, '').slice(0, 40); if (!ad) { toast('Takviyenin adını yaz.'); return; }
       const mk = String(v.miktar || '').trim().replace(/[^\d.,]/g, '').slice(0, 8); const doz = mk ? mk + ' ' + (TK_BIRIM.indexOf(v.birim) >= 0 ? v.birim : 'g') : '';
@@ -3148,7 +3150,7 @@
       return;
     }
     if (f.dataset.form === 'hoca-baglan') {
-      if (!v.riza) { toast('Hocanın verilerini görmesine onay vermelisin.'); return; }
+      if (!v.riza) { toast('Hocanın verilerini görebilmesi için onay kutusunu işaretle.'); return; }
       histek('baglan', 'POST', { kod: String(v.kod || '').trim().toUpperCase(), riza: true }).then((r) => {
         if (!r.ok) { toast(r.j.hata || 'Bağlanılamadı.'); return; }
         toast('Hocan ' + r.j.hoca.ad + ' ile bağlandın.'); hocaYukle();
@@ -3229,8 +3231,8 @@
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(eposta)) return goster('Geçerli bir e-posta adresi yaz.');
       if (sifre.length < 8) return goster('Şifre en az 8 karakter olmalı.');
       if (!v.yetiskin) return goster('COMEBACK. 18 yaş ve üstü içindir; onay kutusunu işaretle.');
-      if (!v.riza) return goster('Kayıtlarının hesabında saklanmasına onay vermelisin.');
-      if (!v.saglikRiza) return goster('Sağlık verilerin için açık rıza kutusunu işaretlemelisin.');
+      if (!v.riza) return goster('Kayıtlarının hesabında saklanması için onay kutusunu işaretle.');
+      if (!v.saglikRiza) return goster('Sağlık verilerin için açık rıza kutusunu işaretle.');
     } else if (!eposta || !sifre) return goster('E-posta ve şifreni yaz.');
     btn.disabled = true; const eski = btn.innerHTML; btn.textContent = tur === 'kayit' ? 'Hesap oluşturuluyor…' : 'Giriş yapılıyor…';
     try {
@@ -3253,8 +3255,8 @@
     S.basvuruTaslak = Object.assign({}, p, { eposta });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(eposta)) return goster('Geçerli bir e-posta adresi yaz.');
     if (sifre.length < 8) return goster('Şifre en az 8 karakter olmalı.');
-    if (!v.riza) return goster('Kayıtlarının hesabında saklanmasına onay vermelisin.');
-    if (!v.saglikRiza) return goster('Sağlık verilerin için açık rıza kutusunu işaretlemelisin.');
+    if (!v.riza) return goster('Kayıtlarının hesabında saklanması için onay kutusunu işaretle.');
+    if (!v.saglikRiza) return goster('Sağlık verilerin için açık rıza kutusunu işaretle.');
     if (String(p.ad || '').length < 2) return goster('Adını yaz.');
     const st = Object.assign(bos(), { profil: p, hedef: hedefHesapla(p), program: programOlustur(p), hedefSurum: 2, kilo: [{ tarih: tarihKey(), kg: p.kilo }] });
     st.guncelleme = Date.now();
