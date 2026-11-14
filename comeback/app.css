@@ -132,6 +132,7 @@ fieldset.t>legend+*{clear:both}
 .sil svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 
 /* set tablosu */
+.seans-izgara{display:flex;flex-direction:column;gap:var(--ara)}
 .setler{display:flex;flex-direction:column}
 .set{display:grid;grid-template-columns:26px minmax(0,1fr) 72px 58px 44px;align-items:center;gap:6px;min-height:54px;border-bottom:1px solid var(--zemin)}
 .set:last-child{border-bottom:none}
@@ -149,6 +150,20 @@ fieldset.t>legend+*{clear:both}
 .set.aktif .tik[aria-pressed="false"]{background:var(--kobalt);color:#fff}
 
 /* dinlenme çubuğu */
+.dinlenme.bitti{background:var(--kobalt);color:#fff;padding:14px 14px 14px 20px;justify-content:space-between}
+.dinlenme.bitti .yigin{display:flex;flex-direction:column;gap:1px;min-width:0}
+.dinlenme.bitti b{font-size:20px;font-weight:900;letter-spacing:-.02em;line-height:1.1}
+.dinlenme.bitti .yigin span{font-size:15px;font-weight:600;color:var(--kobalt-yumusak)}
+.dinlenme.bitti button{background:#fff;color:var(--kobalt);padding:0 18px}
+.din-cip{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px 0 10px;border:0;border-radius:17px;background:var(--zemin);color:var(--murekkep);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:transform .16s cubic-bezier(.23,1,.32,1)}
+.din-cip:active{transform:scale(.97)}
+.din-cip svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.din-cip b{font-weight:800}
+.din-cip span{color:var(--ikincil);font-weight:500}
+.din-cip[aria-expanded="true"]{background:var(--kobalt);color:#fff}
+.din-cip[aria-expanded="true"] span{color:var(--kobalt-yumusak)}
+.din-panel{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:18px;background:var(--zemin)}
+.din-panel .hap:not([aria-pressed="true"]){background:var(--kutu)}
 .dinlenme{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100% - 32px));z-index:20;border-radius:22px;background:var(--koyu);color:var(--koyu-yazi);padding:12px 14px 12px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 18px 40px -18px rgba(0,0,0,.55)}
 .dinlenme .sure{font-size:30px;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums;min-width:78px}
 .dinlenme .cubuk{flex:1;background:#2C2C31;height:6px}

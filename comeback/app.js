@@ -1441,6 +1441,24 @@
   // seansın hareket listesi: başlarken programdan kopyalanır, değiştirme/atlama yalnızca bugünü etkiler
   const seansHareket = (s) => s.hareketler || ((S.program.gunler.find((g) => g.id === s.gunId) || { hareketler: [] }).hareketler);
   const setEtiket = (l, i) => { const y = l[i]; const ayni = l.slice(0, i + 1).filter((z) => (z.tur || '') === (y.tur || '')).length; return y.tur === 'isinma' ? 'I' + ayni : y.tur === 'drop' ? '↳D' : y.tur === 'ek' ? '+' + ayni : String(ayni); };
+  // dinlenme: programın önerdiği süre; kişi bir hareket için değiştirdiyse o hareketin her antrenmanında onu kullan
+  const dinOneri = (x) => (x.dinlenme === 0 ? 0 : x.dinlenme || 90);
+  const dinOzelMi = (x) => !!(S.ayar && S.ayar.dinOzel && S.ayar.dinOzel[x.id]);
+  const dinSn = (x) => (dinOzelMi(x) ? S.ayar.dinOzel[x.id] : dinOneri(x));
+  const dakYaz = (sn) => Math.floor(sn / 60) + ':' + String(sn % 60).padStart(2, '0');
+  let dinAcik = null;
+  function dinSecici(x, k) {
+    const o = dinOneri(x); const su = dinSn(x); const ozel = dinOzelMi(x);
+    const sec = [45, 60, 90, 120, 150, 180, 240].filter((v) => v !== o);
+    return '<div class="din-panel"><span class="k">Setler arası dinlenme</span><div class="haplar">' +
+      '<button class="hap" data-act="din-sec" data-id="' + x.id + '" data-sn="0" aria-pressed="' + !ozel + '">Önerilen · ' + dakYaz(o) + '</button>' +
+      sec.map((v) => '<button class="hap" data-act="din-sec" data-id="' + x.id + '" data-sn="' + v + '" aria-pressed="' + (ozel && su === v) + '">' + dakYaz(v) + '</button>').join('') + '</div>' +
+      '<span class="ik">Ağır, çok eklemli hareketlerde 2–3 dk; tek eklemli hareketlerde 60–90 sn yeterli. Seçtiğin süre bu hareketin sonraki antrenmanlarında da kalır.</span></div>';
+  }
+  // takip detayı: yeni başlayana sade, ileri seviyeye her şey. Varsayılan deneyimden gelir, menüden değişir
+  const TAKIP = { sade: ['Sade', 'Kilo, tekrar ve tik. Drop set, ısınma seti ekleme ve RIR gizli.'], standart: ['Standart', 'Isınma seti ekleme ve yedekte kalan tekrar (RIR) görünür.'], detayli: ['Detaylı', 'Her şey açık: drop set, ısınma seti, RIR.'] };
+  const takipVarsayilan = () => (S.profil && S.profil.deneyim === 'baslangic' ? 'sade' : S.profil && S.profil.deneyim === 'ileri' ? 'detayli' : 'standart');
+  const takipSeviye = () => (S.ayar && TAKIP[S.ayar.takip] ? S.ayar.takip : takipVarsayilan());
   const setSayilir = (y) => y.ok && !y.atla && y.tur !== 'isinma';
   let seAcik = null; let degisKalici = false;
   const sureYaz = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)); const sa = Math.floor(t / 3600); const dk = Math.floor((t % 3600) / 60); const sn = t % 60; return (sa ? sa + ':' + String(dk).padStart(2, '0') : dk) + ':' + String(sn).padStart(2, '0'); };
@@ -1454,7 +1472,6 @@
       '<div class="seans-bas"><h1 class="baslik">' + esc(sg.ad) + '<span class="nokta">.</span></h1><div class="seans-saat"><span class="k">Süre</span><b class="num" id="seansSure">' + sureYaz(Date.now() - s.baslangic) + '</b></div></div>' +
       (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Bıraktığın yerden.</span><span style="font-weight:600;line-height:1.45">' + s.donus.ara + ' gün ara verdin. Sakatlanmadan dönmen için bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yere döneriz.</span></div>' : '') +
       jamSerit() +
-      (bildirimVar() && Notification.permission === 'default' && !(S.ayar && S.ayar.bildirimSoruldu) ? '<div class="t genis" style="flex-direction:row;align-items:center;gap:12px"><div class="yigin" style="min-width:0;flex:1"><b>Başka uygulamadayken haber verelim mi?</b><span class="ik">Dinlenme bitince bildirim düşer, telefon titrer.</span></div><button class="btn ana" data-act="bildirim-izin" style="min-height:40px;flex-shrink:0">Aç</button><button class="ikon-btn" data-act="bildirim-gec" aria-label="Şimdi değil" style="background:var(--zemin);flex-shrink:0">×</button></div>' : '') +
       '<details class="t rutin-kutu"' + (Object.values(s.setler).some((l) => l.some((y) => y.ok)) ? '' : ' open') + '><summary><span class="k">Isınma · ~7 dk</span><span class="ik">açmak için dokun</span></summary>' + rutinListe(ISINMA.genel.concat(ISINMA[gunBolge(sg)])) + '</details>' +
       '<div class="seans-izgara">' + hl.map((x, xi) => {
         const k = ks[xi]; const hr = D.HAREKET[x.id] || { ad: x.id }; const l = s.setler[k] || []; const once = S.son[k] || S.son[x.id];
@@ -1463,8 +1480,10 @@
         const sonKg = once ? Math.max.apply(null, once.setler.filter((y) => y.tur !== 'isinma').map((y) => y.kg || 0).concat([0])) : 0;
         const oner = hedefKilo(k); const artir = sonKg && oner && oner > sonKg;
         const acik = seAcik === k;
-        return '<section class="t" aria-label="' + esc(hr.ad) + '" style="padding-bottom:6px"><div class="satir"><div class="yigin"><b style="font-size:18px;letter-spacing:-.01em">' + esc(hr.ad) + '</b><span class="ik num">Hedef ' + x.set + ' × ' + esc(x.tekrar) + (x.rir ? ' · ' + esc(x.rir) : '') + (S.rekor[x.id] ? ' · rekor ' + sayi(S.rekor[x.id].kg, 1) + ' × ' + S.rekor[x.id].tekrar : '') + '</span></div>' +
+        return '<section class="t" aria-label="' + esc(hr.ad) + '" style="padding-bottom:6px"><div class="satir"><div class="yigin"><b style="font-size:18px;letter-spacing:-.01em">' + esc(hr.ad) + '</b><span class="ik num">Hedef ' + x.set + ' × ' + esc(x.tekrar) + (x.rir && takipSeviye() !== 'sade' ? ' · ' + esc(x.rir) : '') + (S.rekor[x.id] ? ' · rekor ' + sayi(S.rekor[x.id].kg, 1) + ' × ' + S.rekor[x.id].tekrar : '') + '</span></div>' +
           '<button class="pd-ikon se-menu" data-act="se-ac" data-h="' + k + '" aria-expanded="' + acik + '" aria-label="' + esc(hr.ad) + ' seçenekleri"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></div>' +
+          (dinOneri(x) ? '<button class="din-cip" data-act="din-ac" data-h="' + k + '" aria-expanded="' + (dinAcik === k) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Dinlenme <b class="num">' + dakYaz(dinSn(x)) + '</b><span>' + (dinOzelMi(x) ? 'senin' : 'önerilen') + '</span></button>' : '') +
+          (dinAcik === k ? dinSecici(x, k) : '') +
           (acik ? seSecenek(x, k, hl) : '') +
           hareketGorsel(x.id) +
           (artir ? '<p class="ipucu">Geçen sefer ' + sayi(sonKg, 1) + ' kg ile hedefi tuttun. Hazır hissediyorsan <b>' + sayi(oner, 1) + ' kg</b> dene; kiloyu sen değiştirmezsen geçen seferki gibi kalır.</p>' : '') +
@@ -1479,7 +1498,7 @@
               '<input aria-label="' + et + '. set ' + BIRIM[birimOf(x)].toLowerCase() + '" inputmode="numeric" data-in="tekrar" data-h="' + k + '" data-i="' + i + '" value="' + esc(y.tekrar) + '" placeholder="' + (x.alt || '') + '"' + (y.atla ? ' disabled' : '') + '>' +
               (y.atla ? '<button class="tik geri" data-act="set-atla" data-h="' + k + '" data-i="' + i + '" aria-label="Atlanan seti geri al">↺</button>' : '<button class="tik" data-act="tik" data-h="' + k + '" data-i="' + i + '" aria-pressed="' + (y.ok ? 'true' : 'false') + '" aria-label="' + et + '. seti ' + (y.ok ? 'geri al' : 'tamamla') + '">' + IK.tik + '</button>') + '</div>';
           }).join('') + '</div>' +
-          '<div class="set-ek"><button class="metin-btn" data-act="set-ekle" data-h="' + k + '" data-tur="ek">+ Set</button><button class="metin-btn" data-act="set-ekle" data-h="' + k + '" data-tur="drop">+ Drop set</button><button class="metin-btn" data-act="set-ekle" data-h="' + k + '" data-tur="isinma">+ Isınma</button>' +
+          '<div class="set-ek"><button class="metin-btn" data-act="set-ekle" data-h="' + k + '" data-tur="ek">+ Set</button>' + (takipSeviye() === 'detayli' ? '<button class="metin-btn" data-act="set-ekle" data-h="' + k + '" data-tur="drop">+ Drop set</button>' : '') + (takipSeviye() !== 'sade' ? '<button class="metin-btn" data-act="set-ekle" data-h="' + k + '" data-tur="isinma">+ Isınma</button>' : '') +
           (aktifIdx >= 0 ? '<button class="metin-btn" data-act="set-atla" data-h="' + k + '" data-i="' + aktifIdx + '" style="color:var(--ikincil)">Bu seti atla</button>' : '') + '</div></section>';
       }).join('') + '</div>' +
       '<details class="t rutin-kutu"><summary><span class="k">Soğuma ve esneme · ~4 dk</span><span class="ik">bitirmeden önce</span></summary>' + rutinListe(SOGUMA[gunBolge(sg)]) + '</details>' +
@@ -1560,6 +1579,7 @@
   // uygulama arka plandayken dinlenme bitince bildirim (izin verildiyse)
   const bildirimVar = () => 'Notification' in window && 'serviceWorker' in navigator;
   async function dinlenmeBildir() {
+    return; // bildirim paneline düşmesin; bitiş uygulama içinde gösterilir
     if (!bildirimVar() || Notification.permission !== 'granted' || !document.hidden) return;
     try {
       const r = await navigator.serviceWorker.ready;
@@ -1567,6 +1587,19 @@
     } catch (e) { /* olmadı */ }
   }
   let iptalOnay = false;
+  // antrenman sürerken ekran kapanmasın (Screen Wake Lock); ayardan kapatılabilir
+  let ekranKilidi = null; let kilitIstek = false;
+  const ekranAcikAyar = () => !(S.ayar && S.ayar.ekranAcik === false);
+  const kilitVar = () => 'wakeLock' in navigator;
+  function ekranKilit() {
+    if (!kilitVar()) return;
+    const iste = !!S.seans && ekranAcikAyar() && document.visibilityState === 'visible';
+    if (iste && !ekranKilidi && !kilitIstek) {
+      kilitIstek = true;
+      navigator.wakeLock.request('screen').then((w) => { ekranKilidi = w; w.addEventListener('release', () => { if (ekranKilidi === w) ekranKilidi = null; }); if (!(S.seans && ekranAcikAyar())) { w.release(); ekranKilidi = null; } }).catch(() => {}).finally(() => { kilitIstek = false; });
+    } else if (!iste && ekranKilidi && document.visibilityState === 'visible') { ekranKilidi.release().catch(() => {}); ekranKilidi = null; }
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { ekranKilit(); if (dinlenme) dinlenmeCiz(); } });
 
   /* dinlenme sayacı */
   let dinlenme = null; let dinlenmeZaman = null;
@@ -1579,7 +1612,8 @@
   }
   function dinlenmeCiz() {
     let el = document.getElementById('dinlenme');
-    if (!dinlenme || !S.seans) { if (el) el.remove(); clearInterval(dinlenmeZaman); return; }
+    if (!dinlenme || !S.seans) { if (el && (!S.seans || !el.classList.contains('bitti'))) el.remove(); clearInterval(dinlenmeZaman); return; }
+    if (el && el.classList.contains('bitti')) { el.remove(); el = null; }
     const kalan = Math.max(0, Math.round((dinlenme.bitis - Date.now()) / 1000));
     if (!el) {
       el = document.createElement('div'); el.id = 'dinlenme'; el.className = 'dinlenme'; el.setAttribute('role', 'timer'); el.setAttribute('aria-label', 'Dinlenme sayacı');
@@ -1589,11 +1623,21 @@
     el.querySelector('.sure').textContent = Math.floor(kalan / 60) + ':' + String(kalan % 60).padStart(2, '0');
     el.querySelector('.cubuk>span').style.width = (100 - yuzde(kalan, dinlenme.toplam)) + '%';
     if (kalan === 0) {
-      dinlenme = null; clearInterval(dinlenmeZaman); el.remove();
+      dinlenme = null; clearInterval(dinlenmeZaman);
       if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-      sesHazirla(); bip(null, 2); dinlenmeBildir();
-      toast('Dinlenme bitti. Bir set daha.');
+      sesHazirla(); bip(null, 2);
+      dinlenmeBittiGoster(el);
     }
+  }
+  // dinlenme bitince çubuk "Dinlenme bitti. Bir set daha." kartına dönüşür; dokununca ya da 8 sn sonra kapanır
+  let bittiZaman = null;
+  function dinlenmeBittiGoster(el) {
+    el.className = 'dinlenme bitti'; el.setAttribute('role', 'status'); el.setAttribute('aria-label', 'Dinlenme bitti');
+    el.innerHTML = '<span class="yigin"><b>Dinlenme bitti.</b><span>Bir set daha.</span></span><button data-act="dinlenme-kapat">Tamam</button>';
+    clearTimeout(bittiZaman);
+    // arka plandan dönülürse kart beklesin: süre sayfa görünürken işlesin
+    const kapat = () => { if (document.hidden) { bittiZaman = setTimeout(kapat, 1500); return; } const e = document.getElementById('dinlenme'); if (e && e.classList.contains('bitti')) e.remove(); };
+    bittiZaman = setTimeout(kapat, 8000);
   }
 
   /* --- beslenme --- */
@@ -2304,7 +2348,10 @@
       '<div class="t genis" style="gap:10px"><span class="k">Dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div>' +
         '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
         '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
-        (bildirimVar() ? '<div class="satir" style="flex-direction:row;align-items:center;gap:10px;margin-top:6px;border-top:1px solid var(--zemin);padding-top:12px"><div class="yigin" style="min-width:0"><b>Arka planda bildirim</b><span class="ik">' + (Notification.permission === 'granted' ? 'Açık. Uygulama arka plandayken dinlenme bitince bildirim düşer.' : Notification.permission === 'denied' ? 'Telefon ayarlarından engellenmiş. Ayarlar → Bildirimler bölümünden açabilirsin.' : 'Başka uygulamadayken dinlenme bitince haber verelim.') + '</span></div>' + (Notification.permission === 'default' ? '<button class="btn cerceve" data-act="bildirim-izin" style="min-height:40px;flex-shrink:0">Aç</button>' : '') + '</div>' : '') + '</div>' +
+        '</div>' +
+      '<div class="t genis" style="gap:10px"><span class="k">Antrenman takibi</span><div class="haplar">' + Object.keys(TAKIP).map((k) => '<button class="hap" data-act="takip-sec" data-deger="' + (k === takipVarsayilan() ? '' : k) + '" aria-pressed="' + (takipSeviye() === k) + '">' + TAKIP[k][0] + (k === takipVarsayilan() ? ' · seviyene göre' : '') + '</button>').join('') + '</div>' +
+        '<span class="ik">' + TAKIP[takipSeviye()][1] + '</span>' +
+        (kilitVar() ? '<button class="ayar-satir" data-act="ekran-acik" aria-pressed="' + ekranAcikAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda ekran açık kalsın</b><span class="ik">Antrenman sürerken telefon kendiliğinden kararmaz. Bitirince normale döner.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' : '') + '</div>' +
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       '<div class="genis" style="display:flex;flex-direction:column;margin-top:18px">' + (veriAcik ? veri : '<div class="mn-kutu">' + veri + '</div>') + '</div>' +
       '</div>';
@@ -2359,7 +2406,8 @@
     nav.hidden = !menu; app.classList.toggle('tam', !menu);
     app.classList.toggle('dar', ['kurulum', 'ekle', 'porsiyon', 'kayit', 'giris', 'bekleme'].indexOf(parca[0]) >= 0);
     nav.querySelectorAll('a[data-tab]').forEach((a) => { if (a.dataset.tab === sekme) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    if (S.seans && dinlenme) dinlenmeCiz(); else { const d = document.getElementById('dinlenme'); if (d) d.remove(); }
+    if (S.seans && dinlenme) dinlenmeCiz(); else { const d = document.getElementById('dinlenme'); if (d && !(S.seans && d.classList.contains('bitti'))) d.remove(); }
+    ekranKilit();
 
     // hareket: yalnızca sayfa değişince
     const rota = parca.join('/');
@@ -2453,13 +2501,23 @@
       const sY = window.scrollY; render(); window.scrollTo(0, sY);
       if (y.ok) {
         if (sonraki && sonraki.tur === 'drop') { dinlenme = null; dinlenmeCiz(); toast('Drop set: kiloyu düşür, hemen devam.'); }
-        else if (sonraki) { const sn = y.tur === 'isinma' ? Math.min(60, dz.dinlenme || 60) : dz.dinlenme; dinlenmeBaslat(sn); jamDinlen(sn); }
-        else if (Object.keys(S.seans.setler).some((h) => !(S.seans.atlanan || {})[h] && S.seans.setler[h].some((z) => !z.ok && !z.atla))) { const sn = dz.dinlenme || 90; dinlenmeBaslat(sn); jamDinlen(sn); toast('Hareket bitti. Dinlen, sonra sıradakine geç.'); }
+        else if (sonraki) { const sn = y.tur === 'isinma' ? Math.min(60, dinSn(dz) || 60) : dinSn(dz); dinlenmeBaslat(sn); jamDinlen(sn); }
+        else if (Object.keys(S.seans.setler).some((h) => !(S.seans.atlanan || {})[h] && S.seans.setler[h].some((z) => !z.ok && !z.atla))) { const sn = dinSn(dz) || 90; dinlenmeBaslat(sn); jamDinlen(sn); toast('Hareket bitti. Dinlen, sonra sıradakine geç.'); }
         const b = document.querySelector('[data-act="tik"][data-h="' + el.dataset.h + '"][data-i="' + el.dataset.i + '"]');
         if (b && b.animate && !azHareket) b.animate([{ transform: 'scale(.82)' }, { transform: 'scale(1.06)', offset: 0.6 }, { transform: 'scale(1)' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' });
       } else { dinlenme = null; dinlenmeCiz(); }
     },
     'dinlenme-ek'() { if (dinlenme) { dinlenme.bitis += 30000; dinlenme.toplam += 30; dinlenmeCiz(); jamDinlen(Math.round((dinlenme.bitis - Date.now()) / 1000)); } },
+    'dinlenme-kapat'() { const e = document.getElementById('dinlenme'); if (e) e.remove(); },
+    'din-ac'(el) { dinAcik = dinAcik === el.dataset.h ? null : el.dataset.h; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'din-sec'(el) {
+      S.ayar = S.ayar || {}; S.ayar.dinOzel = S.ayar.dinOzel || {}; const sn = +el.dataset.sn;
+      if (sn) S.ayar.dinOzel[el.dataset.id] = sn; else delete S.ayar.dinOzel[el.dataset.id];
+      dinAcik = null; kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY);
+      toast(sn ? 'Bu harekette dinlenme artık ' + dakYaz(sn) + '.' : 'Önerilen süreye döndü.');
+    },
+    'ekran-acik'() { S.ayar = S.ayar || {}; S.ayar.ekranAcik = !ekranAcikAyar(); kaydet(true); ekranKilit(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'takip-sec'(el) { S.ayar = S.ayar || {}; if (el.dataset.deger) S.ayar.takip = el.dataset.deger; else delete S.ayar.takip; kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'dinlenme-atla'() { const vardi = !!dinlenme; dinlenme = null; dinlenmeCiz(); if (vardi) jamDinlen(0, true); },
     iptal() {
       if (!iptalOnay) { iptalOnay = true; const sY = window.scrollY; render(); window.scrollTo(0, sY); return; }
