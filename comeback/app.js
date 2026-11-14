@@ -1624,8 +1624,38 @@
     } catch (e) { /* olmadı */ }
   }
   let iptalOnay = false;
-  const geceAyar = () => !(S.ayar && S.ayar.gece === false);
+  // Görünüm: gunduz (hep açık) · antrenman (antrenmanda gece, varsayılan) · gece (hep siyah) · sistem (telefona göre)
+  const TEMA = {
+    gunduz: ['Gündüz', 'Her yerde açık renk, antrenmanda da.', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>'],
+    antrenman: ['Antrenman', 'Antrenman sırasında siyah, gerisi açık renk.', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>'],
+    gece: ['Gece', 'Her yerde siyah. Gece salonda ve karanlıkta göz yormaz.', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>'],
+    sistem: ['Telefon', 'Telefonun gece modunu izler.', '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>']
+  };
+  const TEMA_SIRA = ['gunduz', 'antrenman', 'gece', 'sistem'];
+  const temaAyar = () => { const a = S.ayar || {}; if (TEMA[a.tema]) return a.tema; return a.gece === false ? 'gunduz' : 'antrenman'; };
   const temaRenk = document.querySelector('meta[name="theme-color"]');
+  const sistemKaranlik = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function temaUygula() {
+    const t = temaAyar(); const yer = (location.hash || '').replace(/^#\/?/, '').split('/')[0];
+    const gece = t === 'gece' || (t === 'antrenman' && yer === 'antrenman' && !!S.seans) || (t === 'sistem' && !!sistemKaranlik && sistemKaranlik.matches);
+    document.body.classList.toggle('gece', gece);
+    document.documentElement.classList.remove('gece-erken');
+    if (temaRenk) temaRenk.setAttribute('content', gece ? '#0B0B0D' : '#ECECE8');
+    try { localStorage.setItem('comeback:tema', t); } catch (e) { /* yok */ }
+  }
+  if (sistemKaranlik) { try { sistemKaranlik.addEventListener('change', temaUygula); } catch (e) { if (sistemKaranlik.addListener) sistemKaranlik.addListener(temaUygula); } }
+  function anahtarCevir(el, acik) {
+    if (!el) return; el.setAttribute('aria-pressed', String(!!acik));
+    const a = el.querySelector('.anahtar'); if (!a) return;
+    a.classList.remove('vurus'); void a.offsetWidth; if (acik) a.classList.add('vurus');
+  }
+  function temaSecici() {
+    const t = temaAyar(); const i = TEMA_SIRA.indexOf(t);
+    return '<div class="t genis tema-kutu" style="gap:10px"><span class="k">Görünüm</span>' +
+      '<div class="tema-sec" role="radiogroup" aria-label="Görünüm" style="--i:' + i + '"><span class="tema-pil" aria-hidden="true"></span>' +
+      TEMA_SIRA.map((k) => '<button type="button" role="radio" aria-checked="' + (k === t) + '" data-act="tema" data-tema="' + k + '">' + TEMA[k][2] + '<span>' + TEMA[k][0] + '</span></button>').join('') +
+      '</div><span class="ik" id="temaNot">' + TEMA[t][1] + '</span></div>';
+  }
   // antrenman sürerken ekran kapanmasın (Screen Wake Lock); ayardan kapatılabilir
   let ekranKilidi = null; let kilitIstek = false;
   const ekranAcikAyar = () => !(S.ayar && S.ayar.ekranAcik === false);
@@ -2439,10 +2469,11 @@
         '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
         '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
         '</div>' +
+      temaSecici() +
       '<div class="t genis" style="gap:10px"><span class="k">Antrenman takibi</span><div class="haplar">' + Object.keys(TAKIP).map((k) => '<button class="hap" data-act="takip-sec" data-deger="' + (k === takipVarsayilan() ? '' : k) + '" aria-pressed="' + (takipSeviye() === k) + '">' + TAKIP[k][0] + (k === takipVarsayilan() ? ' · seviyene göre' : '') + '</button>').join('') + '</div>' +
         '<span class="ik">' + TAKIP[takipSeviye()][1] + '</span>' +
         (kilitVar() ? '<button class="ayar-satir" data-act="ekran-acik" aria-pressed="' + ekranAcikAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda ekran açık kalsın</b><span class="ik">Antrenman sürerken telefon kendiliğinden kararmaz. Bitirince normale döner.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' : '') +
-        '<button class="ayar-satir" data-act="gece-mod" aria-pressed="' + geceAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda gece modu</b><span class="ik">Antrenman başlayınca ekran siyaha döner. Salonda göz yormaz, pili korur.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' + '</div>' +
+        '</div>' +
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       '<div class="genis" style="display:flex;flex-direction:column;margin-top:18px">' + (veriAcik ? veri : '<div class="mn-kutu">' + veri + '</div>') + '</div>' +
       '</div>';
@@ -2492,9 +2523,7 @@
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
-    const gece = parca[0] === 'antrenman' && !!S.seans && geceAyar();
-    document.body.classList.toggle('gece', gece);
-    if (temaRenk) temaRenk.setAttribute('content', gece ? '#0B0B0D' : '#ECECE8');
+    temaUygula();
     if (hesap) okunmamisBaslat(); navRozet();
     const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme'].indexOf(parca[0]) < 0;
     nav.hidden = !menu; app.classList.toggle('tam', !menu);
@@ -2605,7 +2634,15 @@
       } else { dinlenme = null; dinlenmeCiz(); }
     },
     'kisa-iptal'() { kisaGeriAl(S.seans); kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); toast('Tam antrenman geri geldi.'); },
-    'gece-mod'() { S.ayar = S.ayar || {}; S.ayar.gece = !geceAyar(); kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    tema(el) {
+      const t = el.dataset.tema; if (!TEMA[t] || t === temaAyar()) return;
+      S.ayar = S.ayar || {}; S.ayar.tema = t; delete S.ayar.gece; kaydet(true);
+      const kutu = el.closest('.tema-sec');
+      if (kutu) { kutu.style.setProperty('--i', TEMA_SIRA.indexOf(t)); kutu.querySelectorAll('[data-tema]').forEach((b) => b.setAttribute('aria-checked', String(b === el))); }
+      const n = document.getElementById('temaNot'); if (n) n.textContent = TEMA[t][1];
+      const az = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (document.startViewTransition && !az) document.startViewTransition(temaUygula); else temaUygula();
+    },
     'dinlenme-ek'() { if (dinlenme) { dinlenme.bitis += 30000; dinlenme.toplam += 30; dinlenmeCiz(); jamDinlen(Math.round((dinlenme.bitis - Date.now()) / 1000)); } },
     'dinlenme-kapat'() { const e = document.getElementById('dinlenme'); if (e) e.remove(); },
     'din-ac'(el) { dinAcik = dinAcik === el.dataset.h ? null : el.dataset.h; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
@@ -2615,7 +2652,7 @@
       dinAcik = null; kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY);
       toast(sn ? 'Bu harekette dinlenme artık ' + dakYaz(sn) + '.' : 'Önerilen süreye döndü.');
     },
-    'ekran-acik'() { S.ayar = S.ayar || {}; S.ayar.ekranAcik = !ekranAcikAyar(); kaydet(true); ekranKilit(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'ekran-acik'(el) { S.ayar = S.ayar || {}; S.ayar.ekranAcik = !ekranAcikAyar(); kaydet(true); ekranKilit(); anahtarCevir(el, S.ayar.ekranAcik); },
     'takip-sec'(el) { S.ayar = S.ayar || {}; if (el.dataset.deger) S.ayar.takip = el.dataset.deger; else delete S.ayar.takip; kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'dinlenme-atla'() { const vardi = !!dinlenme; dinlenme = null; dinlenmeCiz(); if (vardi) jamDinlen(0, true); },
     iptal() {
