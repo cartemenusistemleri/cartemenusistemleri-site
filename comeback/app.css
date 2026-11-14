@@ -556,8 +556,8 @@ fieldset.t>legend+*{clear:both}
 .tk-tik[aria-pressed="true"]{background:var(--kobalt);color:#fff}
 .tk-tik svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 /* ayar satırı */
-.ayar-satir{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;border:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
-.anahtar{width:46px;height:28px;border-radius:14px;background:var(--cizgi);position:relative;flex:none;transition:background .18s ease}
+.ayar-satir{display:flex;width:100%;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;border:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.anahtar{display:block;width:46px;height:28px;border-radius:14px;background:var(--cizgi);position:relative;flex:none;transition:background .18s ease}
 .anahtar i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s cubic-bezier(.23,1,.32,1)}
 .ayar-satir[aria-pressed="true"] .anahtar{background:var(--kobalt)}
 .ayar-satir[aria-pressed="true"] .anahtar i{transform:translateX(18px)}
@@ -740,3 +740,74 @@ fieldset.t>legend+*{clear:both}
 }
 @media (max-width:1023px){.nav .nav-masa{display:none}}
 @media (min-width:1024px){.nav .nav-kelime{display:none}}
+
+/* ---------- marka: Make the COMEBACK. kilidi ---------- */
+.baslik.kilit{font-size:clamp(46px,14.5vw,60px);padding-top:30px;line-height:.86;letter-spacing:-.055em}
+.baslik.kilit .mk{display:block;font-size:.4em;font-weight:700;letter-spacing:-.02em;color:var(--ikincil);margin:0 0 .18em .04em}
+
+/* ---------- Bugün zor: kısa antrenman ---------- */
+.zor-btn{align-self:center;color:var(--murekkep)}
+.zor-btn::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--kobalt);margin-right:8px}
+.kisa-bant{gap:4px}
+.kisa-bant b{font-size:19px;letter-spacing:-.02em;line-height:1.25}
+.kisa-bant .metin-btn{align-self:flex-start;min-height:40px;color:var(--mavi-gece)}
+
+/* ---------- haftalık söz ---------- */
+.soz-kutu{gap:12px}
+.soz-sayi{font-size:15px;font-weight:700;color:var(--ikincil)}
+.soz-sayi b{font-size:22px;font-weight:900;color:var(--murekkep);letter-spacing:-.02em}
+.soz-gunler{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.soz-gunler span{height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#A9A79F;background:transparent}
+.soz-gunler span.plan{background:var(--zemin);color:var(--murekkep)}
+.soz-gunler span.kacti{background:transparent;color:#A9A79F;box-shadow:inset 0 0 0 1.5px var(--cizgi)}
+.soz-gunler span.ok{background:var(--kobalt);color:#fff;box-shadow:none}
+.soz-gunler span.bugun{outline:2px solid var(--murekkep);outline-offset:2px}
+.soz-sonuc{font-size:14px;font-weight:700;line-height:1.4;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.14);align-self:flex-start}
+.t:not(.kobalt) .soz-sonuc{background:var(--zemin)}
+
+/* ---------- Senin COMEBACK'in ---------- */
+.senin{gap:12px;padding:18px}
+.senin .orta{font-size:30px}
+.senin-sayilar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 0 2px;border-top:1px solid #2C2C31}
+.senin-sayilar span{display:flex;flex-direction:column;font-size:12px;font-weight:700;color:var(--koyu-ikincil);padding-top:10px}
+.senin-sayilar b{font-size:30px;font-weight:900;letter-spacing:-.03em;color:var(--koyu-yazi);line-height:1}
+.senin-liste{display:flex;flex-direction:column;border-top:1px solid #2C2C31}
+.senin-liste>div{display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:44px;border-bottom:1px solid #2C2C31;font-size:14px}
+.senin-liste>div:last-child{border-bottom:0}
+.senin-liste span{color:var(--koyu-ikincil);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.senin-liste b{font-weight:800;color:var(--koyu-yazi);white-space:nowrap}
+.senin-son{font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--koyu-yazi)}
+
+/* ---------- antrenman gece modu: siyah sahne, kobalt ışık ---------- */
+body.gece{
+  color-scheme:dark;
+  --zemin:#0B0B0D; --kutu:#17171B; --murekkep:#F3F1EC; --ikincil:#A3A098; --cizgi:#2C2C33; --iz:#222228;
+  --kobalt:#4A63FF; --kobalt-acik:rgba(74,99,255,.16); --kobalt-yumusak:#C9D2FF; --koyu:#1F1F25;
+}
+body.gece .t.koyu{background:#1F1F25}
+body.gece .t.limon,body.gece .t.limon .orta,body.gece .t.limon b{color:#16161A}
+body.gece .t.limon .k,body.gece .t.limon .ik{color:#3E4410}
+body.gece .btn.siyah,body.gece .yatay .hap[aria-pressed="true"],body.gece .hap.siyah[aria-pressed="true"]{background:#F3F1EC;color:#16161A}
+body.gece .btn.beyaz{background:#F3F1EC;color:#16161A}
+body.gece .yatay .hap{background:var(--kutu)}
+body.gece .tik{color:#6E6C66}
+body.gece .tik[aria-pressed="true"]{background:#F3F1EC;color:#0B0B0D}
+body.gece .set.aktif input{background:#0B0B0D;border-color:rgba(74,99,255,.55);color:#fff}
+body.gece .set input::placeholder{color:#5F5D57}
+body.gece .mini input,body.gece .giris{background:#0B0B0D;color:var(--murekkep)}
+body.gece .toast{background:#F3F1EC;color:#0B0B0D}
+body.gece .uyari{background:#2A2414;color:#F2DFA6}
+body.gece .t.bos{border-color:#2C2C33}
+body.gece .sil:hover{background:#222228}
+body.gece .nav{background:rgba(23,23,27,.72);border-color:rgba(255,255,255,.08);box-shadow:0 12px 32px -12px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}
+body.gece .nav a:not(.nav-logo){color:#8B8A92}
+body.gece .nav a[aria-current="page"]{color:#8EA0FF}
+body.gece .nav-pil{background:rgba(255,255,255,.08);box-shadow:none}
+body.gece .nav-kelime{color:#F3F1EC}
+body.gece .nav a[aria-current="page"] .nav-kelime{color:#8EA0FF}
+body.gece .nav a[aria-current="page"] .nav-kelime i{color:#F3F1EC}
+body.gece .metin-btn{color:#8EA0FF}
+body.gece .zor-btn{color:var(--murekkep)}
+body.gece .hg{background:#F3F1EC}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body.gece .nav{background:rgba(23,23,27,.97)}}
+body{transition:background-color .35s ease}

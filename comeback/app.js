@@ -258,8 +258,8 @@
   function ekranKarsilama() {
     return ust(logo) +
       '<div class="karsilama"><div class="sol">' +
-      '<h1 class="baslik" style="font-size:52px;padding-top:28px">Bıraktığın<br>yerden<br>başla<span class="nokta">.</span></h1>' +
-      '<p class="ik" style="padding:4px 4px 8px;font-size:16px;max-width:36ch">Sana göre kurulan program, fotoğrafla kalori ve set set antrenman kaydı. Tek uygulamada.</p>' +
+      '<h1 class="baslik kilit"><span class="mk">Make the</span>COMEBACK<span class="nokta">.</span></h1>' +
+      '<p class="ik" style="padding:4px 4px 8px;font-size:16px;max-width:36ch">Bıraktığın yerden başla. Sana göre kurulan program, fotoğrafla kalori ve set set antrenman kaydı. En zor gününde bile yanında.</p>' +
       (hesap || cevrimdisi
         ? '<a class="btn ana buyuk-btn" href="#/kurulum" style="margin-top:6px">Programımı oluştur' + IK.ok + '</a>'
         : '<span class="etiket" style="align-self:flex-start;margin:2px 4px 4px">Kapalı beta</span>' +
@@ -1115,7 +1115,7 @@
     const b = S.sonSeans; if (!b) { location.hash = '#/'; return ''; }
     const t = fbTaslak || (fbTaslak = { zor: 0, iyi: [], agri: [], not: '' });
     const hap = (grup, deger, ad, secili) => '<button type="button" class="hap" data-act="fb" data-grup="' + grup + '" data-deger="' + esc(deger) + '" aria-pressed="' + secili + '">' + esc(ad) + '</button>';
-    const soz = b.rekor ? (b.rekor === 1 ? 'Bir yeni rekor. Dün yapamadığını bugün yaptın.' : b.rekor + ' yeni rekor. Dün yapamadığını bugün yaptın.') : b.donus ? 'Uzun bir aradan sonra geri döndün. En zor set buydu.' : 'Kimse görmese de bu setler sayıldı.';
+    const soz = b.rekor ? (b.rekor === 1 ? 'Bir yeni rekor. Dün yapamadığını bugün yaptın.' : b.rekor + ' yeni rekor. Dün yapamadığını bugün yaptın.') : b.kisa ? 'Zor bir günde bile geldin. En önemli antrenman buydu.' : b.donus ? 'Uzun bir aradan sonra geri döndün. En zor set buydu.' : 'Kimse görmese de bu setler sayıldı.';
     return ust('', '<span class="alt">Antrenman bitti</span>') +
       '<h1 class="baslik">Bugün de geldin<span class="nokta">.</span></h1>' +
       '<p class="bitti-soz">' + soz + '</p>' +
@@ -1342,18 +1342,19 @@
       const yarin = new Date(); yarin.setDate(yarin.getDate() + 1);
       const yarinBos = !gunIcin(yarin);
       antr += offAcik
-        ? '<div class="t genis off-kutu acik"><span class="k">Bugün gitmek istemiyor musun?</span><span class="ik">Öğünlerini kaydetmeye devam edersen serin bozulmaz. Ne yapalım?</span><div class="haplar">' +
+        ? '<div class="t genis off-kutu acik"><span class="k">Bugün zor mu?</span><span class="ik">Az da olsa gel. ' + esc(bugunku.ad) + ' antrenmanının 20 dakikalık kısa hâli hazır; bir set bile sayılır. Ya da bugünü dinlenmeye ayır, öğünlerini yazmaya devam edersen serin bozulmaz.</span><div class="haplar">' +
+          '<button class="btn ana kucuk" data-act="basla" data-id="' + bugunku.id + '" data-kisa="1">Kısa yap · 20 dk</button>' +
           '<button class="btn siyah kucuk" data-act="off" data-tur="dinlen">Bugünü atla, dinleneyim</button>' +
-          (yarinBos ? '<button class="btn ana kucuk" data-act="off" data-tur="kaydir">Yarına kaydır</button>' : (zincirVar() ? '<button class="btn ana kucuk" data-act="off" data-tur="zincir">Programı bir gün kaydır</button>' : '')) +
+          (yarinBos ? '<button class="btn cerceve kucuk" data-act="off" data-tur="kaydir">Yarına kaydır</button>' : (zincirVar() ? '<button class="btn cerceve kucuk" data-act="off" data-tur="zincir">Programı bir gün kaydır</button>' : '')) +
           '<button class="metin-btn" data-act="off-ac" style="color:var(--ikincil)">Vazgeç</button></div>' +
           (yarinBos ? '' : '<span class="ik">"Programı bir gün kaydır" bugünü ve sonraki antrenmanları ilk boş güne kadar birer gün ileri atar.</span>') + '</div>'
-        : '<div class="off-satir"><button class="metin-btn off-btn" data-act="off-ac">Bugün gidemiyorum · off gün ver</button><button class="metin-btn off-btn" data-act="gd-ac">Bugün başka antrenman yap</button></div>';
+        : '<div class="off-satir"><button class="metin-btn off-btn" data-act="off-ac">Bugün zor mu? Kısa yap ya da dinlen</button><button class="metin-btn off-btn" data-act="gd-ac">Bugün başka antrenman yap</button></div>';
     }
     if (!S.seans && !g.antrenman && S.program && S.program.gunler.length > (bugunku ? 1 : 0)) {
       if (gunDegisAcik) antr += gunDegisKutu(bugunku);
       else if (!bugunku && !offMu()) antr += '<button class="metin-btn off-btn" data-act="gd-ac">Bugün antrenman yapmak istiyorum</button>';
     }
-    if (!S.seans && S.takvim && S.takvim[tarihKey()] && S.takvim[tarihKey()].gunId && !S.takvim[tarihKey()].off) antr += '<button class="metin-btn off-btn" data-act="off-geri">Asıl programa dön</button>';
+    if (!S.seans && S.takvim && S.takvim[tarihKey()] && S.takvim[tarihKey()].gunId && !S.takvim[tarihKey()].off && !S.takvim[tarihKey()].plan) antr += '<button class="metin-btn off-btn" data-act="off-geri">Asıl programa dön</button>';
     const ana = ['bench', 'squat', 'deadlift', 'ohp', 'db_bench', 'goblet', 'legpress'].find((x) => S.rekor[x]);
     const rekorKutu = ana
       ? '<a class="t h150" href="#/ilerleme"><span class="k">' + esc(D.HAREKET[ana].ad) + ' rekoru</span><span class="orta num">' + sayi(S.rekor[ana].kg, 1) + '<span class="ik" style="font-weight:600"> kg × ' + S.rekor[ana].tekrar + '</span></span><span class="ik">' + esc(S.rekor[ana].tarih) + '</span></a>'
@@ -1364,7 +1365,7 @@
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + haftaPlanKutu(false) + antr +
+      '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (haftaPlanKutu(false) || '') + antr + (haftaPlanKutu(false) ? '' : sozKutu()) +
       '<a class="t limon h150" href="#/beslenme"><span class="k">' + (kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(Math.abs(kalan)) + '">' + sayi(Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
       (seri() ? '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' : '<a class="t koyu h150" href="#/antrenman"><span class="k">Seri</span><span class="buyuk">Bugün<span style="color:var(--mavi-gece)">.</span></span><span class="ik">Yeni seri tek bir antrenmanla başlar.</span></a>') +
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
@@ -1403,6 +1404,7 @@
       }).join('') + '</div></div></div>' +
       (bitti ? '<div class="t limon"><span class="k">Bugün ' + esc(bitti.ad) + ' tamamlandı</span><span style="font-weight:700">İstersen yine de yeni bir antrenman başlatabilirsin.</span></div>' : '') +
       '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>' +
+      '<button class="metin-btn zor-btn" data-act="basla" data-id="' + sg.id + '" data-kisa="1">Bugün zor mu? 20 dakikalık kısa hâlini yap</button>' +
       '<a class="metin-btn" href="#/program" style="align-self:center;color:var(--murekkep)">' + (pr.ozel ? 'Programımı düzenle' : 'Programı düzenle ya da kendi programını yaz') + '</a>' +
        (hesap ? '<a class="t koyu jam-giris" href="#/jam" style="flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><span class="yigin"><span class="k">Jam</span><b>' + (S.jam ? 'Ortak antrenmandasın · ' + esc(S.jam.kod) : 'Arkadaşınla birlikte antrenman yap') + '</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>' : '') +
       (hesap ? '<button class="metin-btn" data-act="paylas-ac" data-kaynak="program" style="align-self:center;color:var(--kobalt)">Programımı bir arkadaşıma gönder</button>' : '');
@@ -1462,17 +1464,43 @@
   const takipVarsayilan = () => (S.profil && S.profil.deneyim === 'baslangic' ? 'sade' : S.profil && S.profil.deneyim === 'ileri' ? 'detayli' : 'standart');
   const takipSeviye = () => (S.ayar && TAKIP[S.ayar.takip] ? S.ayar.takip : takipVarsayilan());
   const setSayilir = (y) => y.ok && !y.atla && y.tur !== 'isinma';
+  // Bugün zor: günün antrenmanının ~20 dakikalık asgari hâli. En önemli 3 hareket, her birinde 2 çalışma seti; geri kalanı bugün atlanır.
+  // Kesilen setler ve atlanan hareketler saklanır; "Tam antrenmana dön" hepsini geri getirir.
+  const KISA_ONCELIK = { ana: 0, guc: 1, yard: 2, vurgu: 3, izo: 4, odak: 5, core: 6, onleme: 7, kardiyo: 8 };
+  function kisalt(s) {
+    const hl = seansHareket(s); const ks = seansAnahtar({ hareketler: hl });
+    const sira = hl.map((x, i) => i).sort((a, b) => ((KISA_ONCELIK[hl[a].blok] != null ? KISA_ONCELIK[hl[a].blok] : 2) - (KISA_ONCELIK[hl[b].blok] != null ? KISA_ONCELIK[hl[b].blok] : 2)) || a - b);
+    const tut = new Set(sira.slice(0, 3)); const ilkTut = sira.slice(0, 3).sort((a, b) => a - b)[0];
+    const kayit = { atlanan: [], kesilen: {} };
+    hl.forEach((x, i) => {
+      const k = ks[i];
+      if (!tut.has(i)) { if (!s.atlanan[k]) { s.atlanan[k] = true; kayit.atlanan.push(k); } return; }
+      const l = s.setler[k] || []; const isinma = l.filter((y) => y.tur === 'isinma'); const calis = l.filter((y) => y.tur !== 'isinma');
+      const isTut = i === ilkTut ? isinma.slice(0, 1) : []; const bas = isinma.slice(isTut.length); const son = calis.slice(2);
+      if (!bas.length && !son.length) return;
+      s.setler[k] = isTut.concat(calis.slice(0, 2)); kayit.kesilen[k] = { bas, son };
+    });
+    s.kisa = kayit;
+  }
+  function kisaGeriAl(s) {
+    if (!s || !s.kisa) return;
+    s.kisa.atlanan.forEach((k) => { delete s.atlanan[k]; });
+    Object.keys(s.kisa.kesilen).forEach((k) => { const l = s.setler[k]; if (!l) return; const c = s.kisa.kesilen[k]; s.setler[k] = c.bas.concat(l).concat(c.son); });
+    delete s.kisa;
+  }
   let seAcik = null; let degisKalici = false;
   const sureYaz = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)); const sa = Math.floor(t / 3600); const dk = Math.floor((t % 3600) / 60); const sn = t % 60; return (sa ? sa + ':' + String(dk).padStart(2, '0') : dk) + ':' + String(sn).padStart(2, '0'); };
   setInterval(() => { const e = document.getElementById('seansSure'); if (e && S.seans) e.textContent = sureYaz(Date.now() - S.seans.baslangic); }, 1000);
   function ekranSeans() {
     const s = S.seans; const sg = S.program.gunler.find((x) => x.id === s.gunId) || { ad: s.ad || 'Antrenman', hareketler: seansHareket(s) };
     const hl = seansHareket(s); const ks = seansAnahtar({ hareketler: hl });
-    const tamam = Object.values(s.setler).reduce((a, l) => a + l.filter((x) => x.ok || x.atla).length, 0);
-    const toplamSet = Object.values(s.setler).reduce((a, l) => a + l.length, 0);
+    const sayilan = Object.keys(s.setler).filter((k) => !(s.atlanan && s.atlanan[k])).map((k) => s.setler[k]);
+    const tamam = sayilan.reduce((a, l) => a + l.filter((x) => x.ok || x.atla).length, 0);
+    const toplamSet = sayilan.reduce((a, l) => a + l.length, 0);
     return ust('<a class="ikon-btn" href="#/" aria-label="Ana sayfa">' + IK.geri + '</a>', '<span class="alt num">' + tamam + ' / ' + toplamSet + ' set</span>') +
       '<div class="seans-bas"><h1 class="baslik">' + esc(sg.ad) + '<span class="nokta">.</span></h1><div class="seans-saat"><span class="k">Süre</span><b class="num" id="seansSure">' + sureYaz(Date.now() - s.baslangic) + '</b></div></div>' +
       (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Geri döndün.</span><span style="font-weight:600;line-height:1.45">' + s.donus.ara + ' gün oldu, önemli değil. Hiçbir zaman çok geç değil. Vücudun sana yetişsin diye bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yerden devam.</span></div>' : '') +
+      (s.kisa ? '<div class="t koyu kisa-bant"><span class="k">Kısa antrenman · ~20 dk</span><b>Az da olsa geldin. Bir set bile sayılır.</b><span class="ik">En önemli ' + Math.min(3, hl.length) + ' hareket, her birinde 2 set. Geri kalanı bugün atlandı.</span><button class="metin-btn" data-act="kisa-iptal">Tam antrenmana dön</button></div>' : '') +
       jamSerit() +
       '<details class="t rutin-kutu"' + (Object.values(s.setler).some((l) => l.some((y) => y.ok)) ? '' : ' open') + '><summary><span class="k">Isınma · ~7 dk</span><span class="ik">açmak için dokun</span></summary>' + rutinListe(ISINMA.genel.concat(ISINMA[gunBolge(sg)])) + '</details>' +
       '<div class="seans-izgara">' + hl.map((x, xi) => {
@@ -1554,13 +1582,18 @@
     yukselen: ['Yükselen', [[523, 0, 0.12, 'triangle', 0.09], [659, 0.12, 0.12, 'triangle', 0.09], [784, 0.24, 0.22, 'triangle', 0.09]]],
     yok: ['Sessiz · sadece titreşim', []]
   };
+  // marka sesleri (ayar listesinde görünmez): antrenman bitişi ve rekor; hepsi Zil ailesinden
+  const MARKA_SES = {
+    bitis: [[196, 0, 1.1, 'sine', 0.10], [1318, 0.12, 0.9, 'sine', 0.06], [1975, 0.12, 0.6, 'sine', 0.025]],
+    rekor: [[98, 0, 1.3, 'sine', 0.16], [196, 0, 0.8, 'sine', 0.05], [1318, 0.32, 1.0, 'sine', 0.065], [1975, 0.32, 0.7, 'sine', 0.03]]
+  };
   const sesTur = () => (S.ayar && S.ayar.ses === false ? 'yok' : (S.ayar && SESLER[S.ayar.sesTur] ? S.ayar.sesTur : 'zil'));
   // ses seviyesi: notaların kazancı bu katsayıyla çarpılır; sıkıştırıcı patlamayı önler
   const SEVIYE = { kisik: ['Kısık', 1.5], orta: ['Orta', 4], yuksek: ['Yüksek', 8], cok: ['Çok yüksek', 13] };
   const sesSeviye = () => (S.ayar && SEVIYE[S.ayar.sesSeviye] ? S.ayar.sesSeviye : 'yuksek');
   let sesCikis = null, oturumZ = 0;
   function bip(tur, tekrar) {
-    const t0 = SESLER[tur || sesTur()]; if (!sesCtx || !t0 || !t0[1].length) return;
+    const t0 = MARKA_SES[tur] ? ['', MARKA_SES[tur]] : SESLER[tur || sesTur()]; if (!sesCtx || !t0 || !t0[1].length) return;
     try {
       // iPhone'da (Safari 16.4+) müziği durdurmadan kısar, ses bitince müzik normale döner
       if (navigator.audioSession) { try { navigator.audioSession.type = 'transient'; clearTimeout(oturumZ); oturumZ = setTimeout(() => { try { navigator.audioSession.type = 'auto'; } catch (e) { /* yok */ } }, 2600); } catch (e) { /* yok */ } }
@@ -1589,6 +1622,8 @@
     } catch (e) { /* olmadı */ }
   }
   let iptalOnay = false;
+  const geceAyar = () => !(S.ayar && S.ayar.gece === false);
+  const temaRenk = document.querySelector('meta[name="theme-color"]');
   // antrenman sürerken ekran kapanmasın (Screen Wake Lock); ayardan kapatılabilir
   let ekranKilidi = null; let kilitIstek = false;
   const ekranAcikAyar = () => !(S.ayar && S.ayar.ekranAcik === false);
@@ -1821,6 +1856,22 @@
   }
 
   /* --- ilerleme --- */
+  // Senin COMEBACK'in: ilk antrenmandan bugüne emeğin özeti (beden değil, iş)
+  function seninComeback() {
+    const tg = Object.keys(S.gunluk).filter((k) => S.gunluk[k].antrenman).sort(); if (tg.length < 2) return '';
+    const set = tg.reduce((a, k) => a + (S.gunluk[k].antrenman.set || 0), 0); const dk = tg.reduce((a, k) => a + (S.gunluk[k].antrenman.dk || 0), 0);
+    // Türkçe ayrılma eki: Ekim'den, Kasım'dan, Aralık'tan; yıl yazılırsa yıla göre (2025'ten, 2026'dan)
+    const AY_EK = ['tan', 'tan', 'tan', 'dan', 'tan', 'dan', 'dan', 'tan', 'den', 'den', 'dan', 'tan'];
+    const YIL_EK = ['dan', 'den', 'den', 'ten', 'ten', 'ten', 'dan', 'den', 'den', 'dan'];
+    const ilkT = new Date(tg[0]); const baskaYil = ilkT.getFullYear() !== new Date().getFullYear();
+    const ilkYazi = ilkT.getDate() + ' ' + AY[ilkT.getMonth()] + (baskaYil ? ' ' + ilkT.getFullYear() + '\'' + YIL_EK[ilkT.getFullYear() % 10] : '\'' + AY_EK[ilkT.getMonth()]);
+    const gel = Object.keys(S.ilk || {}).filter((h) => S.rekor[h] && D.HAREKET[h] && e1rm(S.rekor[h].kg, S.rekor[h].tekrar) > e1rm(S.ilk[h].kg, S.ilk[h].tekrar) + 0.01)
+      .sort((a, b) => (e1rm(S.rekor[b].kg, S.rekor[b].tekrar) - e1rm(S.ilk[b].kg, S.ilk[b].tekrar)) - (e1rm(S.rekor[a].kg, S.rekor[a].tekrar) - e1rm(S.ilk[a].kg, S.ilk[a].tekrar))).slice(0, 3);
+    return '<div class="t koyu genis senin"><span class="k">Senin COMEBACK\'in</span><span class="orta">' + esc(ilkYazi) + ' beri<span style="color:var(--mavi-gece)">.</span></span>' +
+      '<div class="senin-sayilar num"><span><b>' + tg.length + '</b>antrenman</span><span><b>' + sayi(set) + '</b>set</span><span><b>' + (dk >= 120 ? sayi(dk / 60, 1) : dk) + '</b>' + (dk >= 120 ? 'saat' : 'dk') + '</span></div>' +
+      (gel.length ? '<div class="senin-liste">' + gel.map((h) => '<div><span>' + esc(D.HAREKET[h].ad) + '</span><b class="num">' + sayi(S.ilk[h].kg, 1) + ' → ' + sayi(S.rekor[h].kg, 1) + ' kg</b></div>').join('') + '</div>' : '') +
+      '<span class="senin-son">Kimse görmedi. Sen yaptın.</span></div>';
+  }
   function ekranIlerleme() {
     if (!S.profil) return ekranKarsilama();
     const kilolar = S.kilo.slice(-12);
@@ -1837,9 +1888,9 @@
     }
     const fark = kilolar.length >= 2 ? kilolar[kilolar.length - 1].kg - kilolar[0].kg : 0;
     return ust(logo) + '<h1 class="baslik">İlerleme<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' +
+      '<div class="izgara">' + seninComeback() +
       '<div class="t koyu h150"><span class="k">Seri</span><span class="buyuk num">' + (seri() || 'Bugün') + '<span style="color:var(--mavi-gece)">.</span></span><span class="ik">' + (seri() ? 'gün üst üste' : 'Yeni seri tek bir antrenmanla başlar.') + '</span></div>' +
-      '<div class="t kobalt h150"><span class="k">Bu hafta</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + S.profil.gun + '</span></span><span class="k">antrenman</span></div>' +
+      '<div class="t kobalt h150"><span class="k">' + (sozDurum(haftaBasi()) ? 'Bu haftaki sözün' : 'Bu hafta') + '</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + (sozDurum(haftaBasi()) ? sozDurum(haftaBasi()).soz : S.profil.gun) + '</span></span><span class="k">antrenman</span></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Rozetler</span><span class="ik num">' + rozetDurum().filter((r) => r.var).length + ' / ' + ROZET.length + '</span></div><div class="rozetler">' + rozetDurum().map((r) => '<div class="rozet' + (r.var ? ' var' : '') + '">' + rozetSvg(r.id, r.var) + '<b>' + esc(r.ad) + '</b><span>' + (r.var ? esc(r.acik) : 'Kilitli · ' + esc(r.acik)) + '</span></div>').join('') + '</div></div>' +
@@ -2018,33 +2069,46 @@
       '</div>';
   }
 
-  /* haftalık paylaşım kartı: 1080×1920, bento */
+  /* haftalık iş kartı: 1080×1920, siyah sahne. Beden değil emek: gün, set, süre. */
   function haftaKarti() {
     const W = 1080, H = 1920; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
     const F = getComputedStyle(document.body).fontFamily;
-    const haftaBas = new Date(); haftaBas.setDate(haftaBas.getDate() - haftaGunu()); const hb = tarihKey(haftaBas);
+    const haftaBas = haftaBasi(); const hb = tarihKey(haftaBas);
     const gunler = Object.keys(S.gunluk).filter((k) => k >= hb).sort();
     const antr = gunler.filter((k) => S.gunluk[k].antrenman).map((k) => S.gunluk[k].antrenman);
-    const set = antr.reduce((a, y) => a + y.set, 0), hacim = antr.reduce((a, y) => a + y.hacim, 0), dk = antr.reduce((a, y) => a + y.dk, 0);
+    const set = antr.reduce((a, y) => a + y.set, 0), dk = antr.reduce((a, y) => a + y.dk, 0);
     const rekor = Object.keys(S.rekor).filter((h) => { const t = S.rekor[h].tarih; return gunler.some((k) => new Date(k).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) === t); }).length;
-    const kutu = (X, Y, w, h, renk) => { x.fillStyle = renk; x.beginPath(); x.roundRect(X, Y, w, h, 56); x.fill(); };
-    const yaz = (t, X, Y, boyut, kalinlik, renk, ls) => { x.fillStyle = renk; x.font = kalinlik + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; x.fillText(t, X, Y); };
-    x.fillStyle = '#ECECE8'; x.fillRect(0, 0, W, H);
-    yaz('COMEBACK', 80, 160, 64, 900, '#16161A', -3); const lw = x.measureText('COMEBACK').width; yaz('.', 80 + lw + 2, 160, 64, 900, '#2E4BFF', 0);
+    const yaz = (t, X, Y, boyut, kalinlik, renk, ls, hiza) => { x.fillStyle = renk; x.font = kalinlik + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; x.textAlign = hiza || 'left'; x.fillText(t, X, Y); x.textAlign = 'left'; return x.measureText(t).width; };
+    // zemin: siyah, ortada çok hafif kobalt ışık
+    x.fillStyle = '#0B0B0D'; x.fillRect(0, 0, W, H);
+    const gl = x.createRadialGradient(W * 0.5, 980, 40, W * 0.5, 980, 760); gl.addColorStop(0, 'rgba(46,75,255,.20)'); gl.addColorStop(1, 'rgba(46,75,255,0)'); x.fillStyle = gl; x.fillRect(0, 0, W, H);
     const bitis = new Date(haftaBas); bitis.setDate(bitis.getDate() + 6);
-    yaz(haftaBas.getDate() + ' ' + AY[haftaBas.getMonth()] + ' – ' + bitis.getDate() + ' ' + AY[bitis.getMonth()], 80, 230, 36, 700, '#5F5D57');
-    yaz('Bu haftam', 80, 400, 150, 900, '#16161A', -7); yaz('.', 80 + x.measureText('Bu haftam').width + 2, 400, 150, 900, '#2E4BFF', 0);
-    kutu(60, 470, 960, 470, '#2E4BFF');
-    yaz('Antrenman', 120, 560, 40, 700, 'rgba(255,255,255,.8)');
-    yaz(String(antr.length), 120, 840, 280, 900, '#FFFFFF', -12);
-    yaz('/ ' + (S.profil ? S.profil.gun : antr.length) + ' gün', 120 + x.measureText(String(antr.length)).width + 30, 840, 64, 800, 'rgba(255,255,255,.75)', 0);
-    kutu(60, 970, 470, 360, '#D9F05A'); yaz('Set', 110, 1050, 36, 700, '#3E4410'); yaz(sayi(set), 110, 1250, 150, 900, '#16161A', -6);
-    kutu(550, 970, 470, 360, '#16161A'); yaz('Seri', 600, 1050, 36, 700, '#B9B6AE'); yaz(String(seri()), 600, 1250, 150, 900, '#F3F1EC', -6); yaz('gün', 600 + x.measureText(String(seri())).width + 16, 1250, 48, 800, '#6E86FF', 0);
-    kutu(60, 1360, 960, 300, '#FFFFFF');
-    yaz('Toplam hacim', 120, 1440, 36, 700, '#5F5D57'); yaz(sayi(hacim) + ' kg', 120, 1580, 110, 900, '#16161A', -5);
-    yaz((rekor ? rekor + ' rekor · ' : '') + dk + ' dk', 640, 1440, 36, 700, '#2E4BFF');
-    yaz('Bıraktığın yerden başla.', 80, 1790, 44, 800, '#16161A', -1);
-    yaz('comeback.com.tr', 80, 1850, 32, 700, '#5F5D57');
+    yaz(haftaBas.getDate() + ' ' + AY[haftaBas.getMonth()] + ' – ' + bitis.getDate() + ' ' + AY[bitis.getMonth()], 90, 170, 36, 700, '#8B8A92', 1);
+    // başlık
+    if (antr.length) { yaz('Kimse', 90, 360, 150, 900, '#F3F1EC', -7); const w2 = yaz('izlemedi', 90, 500, 150, 900, '#F3F1EC', -7); yaz('.', 90 + w2 + 4, 500, 150, 900, '#4A63FF', 0); }
+    else { yaz('Her şey bir', 90, 360, 130, 900, '#F3F1EC', -6); const w2 = yaz('setle başlar', 90, 490, 130, 900, '#F3F1EC', -6); yaz('.', 90 + w2 + 4, 490, 130, 900, '#4A63FF', 0); }
+    // ana sayı: antrenman
+    const wN = yaz(String(antr.length), 80, 960, 330, 900, '#FFFFFF', -16);
+    yaz('antrenman', 80 + wN + 34, 860, 48, 800, '#F3F1EC', -1);
+    const soz = sozDurum(haftaBas); const hedef = soz ? soz.soz : (S.profil ? S.profil.gun : 0);
+    if (hedef) yaz((soz ? 'söz: ' : 'hedef: ') + hedef + ' gün', 80 + wN + 34, 930, 40, 700, '#6E86FF', 0);
+    // gün noktaları
+    const GH = ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(haftaBas); d.setDate(d.getDate() + i); const k = tarihKey(d); const v = !!(S.gunluk[k] && S.gunluk[k].antrenman);
+      const cx = 140 + i * 133, cy = 1080;
+      x.beginPath(); x.arc(cx, cy, 38, 0, Math.PI * 2);
+      if (v) { x.fillStyle = '#2E4BFF'; x.fill(); } else { x.lineWidth = 3; x.strokeStyle = '#2C2C33'; x.stroke(); }
+      yaz(GH[i], cx, cy + 112, 32, 700, v ? '#F3F1EC' : '#5A5960', 0, 'center');
+    }
+    // alt sayılar
+    x.fillStyle = '#222228'; x.fillRect(90, 1270, 900, 2);
+    const kol = [[sayi(set), 'set'], [String(dk), 'dakika'], [String(rekor), rekor === 1 ? 'rekor' : 'rekor']];
+    kol.forEach((k, i) => { const X = 90 + i * 320; yaz(k[0], X, 1410, 110, 900, '#F3F1EC', -5); yaz(k[1], X, 1470, 34, 700, '#8B8A92', 0); });
+    // imza: Make the COMEBACK.
+    yaz('Make the', 90, 1640, 44, 700, '#B9B6AE', -1);
+    const wC = yaz('COMEBACK', 86, 1760, 120, 900, '#F3F1EC', -6); yaz('.', 86 + wC + 2, 1760, 120, 900, '#4A63FF', 0);
+    yaz('comeback.com.tr', 90, 1840, 30, 700, '#5A5960', 1);
     return c;
   }
 
@@ -2203,7 +2267,7 @@
     const o = sOzet;
     if (!o) return '<a class="t genis sira-kart" href="#/siralama"><span class="k">Bu hafta · sıralama</span><span class="ik">Yükleniyor…</span></a>';
     const ilk = (o.ilk || []).map((x) => '<span class="sk-kisi' + (x.ben ? ' ben' : '') + '">' + avatar(x.ad, x.fid, x.fv, 'kucuk') + '<span><b class="num">' + x.sira + '.</b> ' + esc(x.ben ? 'Sen' : x.ad) + '</span></span>').join('');
-    if (!o.katildi) return '<a class="t genis sira-kart" href="#/siralama"><div class="sk-ust"><span class="k">Bu hafta · sıralama</span><span class="k num">' + sayi(o.toplam) + ' kişi yarışıyor</span></div><b class="sk-baslik">Sen de listeye gir</b><span class="ik">Haftalık hacmin diğer üyelerle yarışsın. Katılmak senin elinde, istediğin zaman çıkarsın.</span>' + (ilk ? '<div class="sk-ilk">' + ilk + '</div>' : '') + '<span class="btn siyah kucuk" style="align-self:flex-start">Sıralamaya katıl' + IK.ok + '</span></a>';
+    if (!o.katildi) return '<a class="t genis sira-kart" href="#/siralama"><div class="sk-ust"><span class="k">Bu hafta · sıralama</span>' + (o.toplam >= 3 ? '<span class="k num">' + sayi(o.toplam) + ' kişi yarışıyor</span>' : '') + '</div><b class="sk-baslik">' + (o.toplam >= 3 ? 'Sen de listeye gir' : 'Bu hafta ilk sen ol') + '</b><span class="ik">Haftalık hacmin diğer üyelerle yarışsın. Katılmak senin elinde, istediğin zaman çıkarsın.</span>' + (ilk ? '<div class="sk-ilk">' + ilk + '</div>' : '') + '<span class="btn siyah kucuk" style="align-self:flex-start">Sıralamaya katıl' + IK.ok + '</span></a>';
     if (!o.benim) return '<a class="t genis sira-kart" href="#/siralama"><div class="sk-ust"><span class="k">Bu hafta · sıralama</span><span class="k num">' + sayi(o.toplam) + ' kişi</span></div><b class="sk-baslik">Bu hafta henüz listede değilsin</b><span class="ik">Bir antrenman bitir, hacmin sayılsın ve sıran çıksın.</span>' + (ilk ? '<div class="sk-ilk">' + ilk + '</div>' : '') + '</a>';
     const yuzde = o.toplam > 1 ? Math.max(1, Math.round(o.benim.sira / o.toplam * 100)) : 0;
     return '<a class="t genis sira-kart var" href="#/siralama"><div class="sk-ust"><span class="k">Bu hafta · hacim sıralaması</span><span class="k">Tümü →</span></div>' +
@@ -2237,6 +2301,27 @@
     // eski haftaları temizle
     Object.keys(S.haftaPlan).forEach((k) => { if (k < tarihKey(haftaBasi(new Date(Date.now() - 35 * 864e5)))) delete S.haftaPlan[k]; });
   }
+  // haftalık söz: planlanan gün sayısı kişinin kendine verdiği sözdür; yapılan antrenmanlarla karşılaştırılır
+  function sozDurum(bas) {
+    const p = (S.haftaPlan || {})[tarihKey(bas)]; if (!p || !p.gunler.length) return null;
+    let yapilan = 0; const gunler = [];
+    for (let i = 0; i < 7; i++) { const d = new Date(bas); d.setDate(d.getDate() + i); const k = tarihKey(d); const v = !!(S.gunluk[k] && S.gunluk[k].antrenman); if (v) yapilan++; gunler.push({ plan: p.gunler.indexOf(i) >= 0, yapildi: v, gecti: k < tarihKey(), bugun: k === tarihKey() }); }
+    return { soz: p.gunler.length, yapilan, gunler };
+  }
+  function sozKutu() {
+    const bas = haftaBasi(); const d = sozDurum(bas); if (!d) return '';
+    const tuttu = d.yapilan >= d.soz;
+    return '<div class="t genis soz-kutu"><div class="satir"><span class="k">Bu haftaki sözün</span><span class="soz-sayi num"><b>' + d.yapilan + '</b> / ' + d.soz + ' gün</span></div>' +
+      '<div class="soz-gunler" aria-hidden="true">' + d.gunler.map((g, i) => '<span class="' + [g.yapildi ? 'ok' : '', g.plan ? 'plan' : '', g.gecti && g.plan && !g.yapildi ? 'kacti' : '', g.bugun ? 'bugun' : ''].join(' ').trim() + '">' + KISA_GUN[i].charAt(0) + '</span>').join('') + '</div>' +
+      (tuttu ? '<span class="ik">Sözünü tuttun. Fazlası senden.</span>' : '') + '</div>';
+  }
+  function sozSonuc() {
+    // pazar: bu hafta, pazartesi: geçen hafta
+    const ref = new Date(planHaftasi()); ref.setDate(ref.getDate() - 7); const d = sozDurum(ref); if (!d) return '';
+    const bu = haftaGunu() === 6;
+    if (d.yapilan >= d.soz) return '<span class="soz-sonuc">' + (bu ? 'Bu hafta' : 'Geçen hafta') + ' sözünü tuttun: ' + d.yapilan + ' / ' + d.soz + '.</span>';
+    return '<span class="soz-sonuc">' + (bu ? 'Bu hafta şimdilik' : 'Geçen hafta') + ' ' + d.yapilan + ' / ' + d.soz + '.' + (bu ? '' : ' Sorun değil. Bıraktığın yerden.') + '</span>';
+  }
   function haftaPlanKutu(tam) {
     if (!S.program || !antrenmanGunleri().length) return '';
     const bas = planHaftasi(); const anahtar = tarihKey(bas); const kayitli = (S.haftaPlan || {})[anahtar];
@@ -2247,10 +2332,11 @@
     const n = hpTaslak.gunler.length; const pn = antrenmanGunleri().length;
     const bugunI = tarihKey(bas) === tarihKey(haftaBasi()) ? haftaGunu() : -1;
     return '<div class="t genis hp-kutu' + (tam ? '' : ' kobalt') + '" style="gap:12px"><div class="satir" style="flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px"><span class="k">' + (haftaGunu() === 6 ? 'Gelecek hafta' : 'Bu hafta') + ' · ' + aralik + '</span>' + (!tam ? '<button class="metin-btn kucuk-metin" data-act="hp-gec" style="color:inherit;opacity:.8">Şimdi değil</button>' : '') + '</div>' +
-      '<span class="orta" style="font-size:22px;line-height:1.2">' + (kayitli && tam ? 'Planın hazır, istersen değiştir.' : (haftaGunu() === 6 ? 'Gelecek hafta' : 'Bu hafta') + ' hangi günler geliyorsun?') + '</span>' +
+      (!tam ? sozSonuc() : '') +
+      '<span class="orta" style="font-size:22px;line-height:1.2">' + (kayitli && tam ? 'Sözün hazır, istersen değiştir.' : (haftaGunu() === 6 ? 'Gelecek hafta' : 'Bu hafta') + ' kaç gün geliyorsun? Kendine söz ver.') + '</span>' +
       '<div class="hp-gunler" role="group" aria-label="Antrenman günleri">' + KISA_GUN.map((g, i) => '<button class="hp-gun" data-act="hp-gun" data-i="' + i + '" aria-pressed="' + (hpTaslak.gunler.indexOf(i) >= 0) + '"' + (bugunI > i ? ' disabled' : '') + '>' + g + '</button>').join('') + '</div>' +
       '<span class="' + (tam ? 'ik' : '') + '" style="font-size:14px;line-height:1.45' + (tam ? '' : ';opacity:.9') + '">' + n + ' gün seçtin' + (n !== pn ? ', programın ' + pn + ' gün. Seçtiğin günlere antrenmanları sırayla dağıtırız' + (n < pn ? '; yetişmeyenler sonraki haftaya kayar.' : '; fazla günlerde programın baştan döner.') : '. Antrenmanlar bu günlere sırayla yerleşir.') + '</span>' +
-      '<button class="btn ' + (tam ? 'ana' : 'beyaz') + '" data-act="hp-kaydet" style="align-self:flex-start"' + (n ? '' : ' disabled') + '>Haftamı planla</button></div>';
+      '<button class="btn ' + (tam ? 'ana' : 'beyaz') + '" data-act="hp-kaydet" style="align-self:flex-start"' + (n ? '' : ' disabled') + '>Söz veriyorum · ' + n + ' gün</button></div>';
   }
   function ekranHaftaPlan() {
     if (!S.profil) return ekranKarsilama();
@@ -2353,7 +2439,8 @@
         '</div>' +
       '<div class="t genis" style="gap:10px"><span class="k">Antrenman takibi</span><div class="haplar">' + Object.keys(TAKIP).map((k) => '<button class="hap" data-act="takip-sec" data-deger="' + (k === takipVarsayilan() ? '' : k) + '" aria-pressed="' + (takipSeviye() === k) + '">' + TAKIP[k][0] + (k === takipVarsayilan() ? ' · seviyene göre' : '') + '</button>').join('') + '</div>' +
         '<span class="ik">' + TAKIP[takipSeviye()][1] + '</span>' +
-        (kilitVar() ? '<button class="ayar-satir" data-act="ekran-acik" aria-pressed="' + ekranAcikAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda ekran açık kalsın</b><span class="ik">Antrenman sürerken telefon kendiliğinden kararmaz. Bitirince normale döner.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' : '') + '</div>' +
+        (kilitVar() ? '<button class="ayar-satir" data-act="ekran-acik" aria-pressed="' + ekranAcikAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda ekran açık kalsın</b><span class="ik">Antrenman sürerken telefon kendiliğinden kararmaz. Bitirince normale döner.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' : '') +
+        '<button class="ayar-satir" data-act="gece-mod" aria-pressed="' + geceAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda gece modu</b><span class="ik">Antrenman başlayınca ekran siyaha döner. Salonda göz yormaz, pili korur.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' + '</div>' +
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       '<div class="genis" style="display:flex;flex-direction:column;margin-top:18px">' + (veriAcik ? veri : '<div class="mn-kutu">' + veri + '</div>') + '</div>' +
       '</div>';
@@ -2403,6 +2490,9 @@
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
+    const gece = parca[0] === 'antrenman' && !!S.seans && geceAyar();
+    document.body.classList.toggle('gece', gece);
+    if (temaRenk) temaRenk.setAttribute('content', gece ? '#0B0B0D' : '#ECECE8');
     if (hesap) okunmamisBaslat(); navRozet();
     const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme'].indexOf(parca[0]) < 0;
     nav.hidden = !menu; app.classList.toggle('tam', !menu);
@@ -2492,8 +2582,11 @@
       const hl = JSON.parse(JSON.stringify(g.hareketler)); const ks = seansAnahtar({ hareketler: hl });
       hl.forEach((x, xi) => { setler[ks[xi]] = setOlustur(x, ks[xi], oran); });
       S.seans = { gunId: g.id, tarih: tarihKey(), baslangic: Date.now(), setler, hareketler: hl, atlanan: {}, donus: oran < 1 ? { ara, oran } : null };
-      sesHazirla(); seAcik = null;
-      kaydet(true); render(); window.scrollTo(0, 0);
+      if (el.dataset.kisa) { kisalt(S.seans); olay('kisa'); }
+      sesHazirla(); seAcik = null; offAcik = false;
+      kaydet(true);
+      if (location.hash.indexOf('#/antrenman') !== 0) git('#/antrenman'); else render();
+      window.scrollTo(0, 0);
     },
     tik(el) {
       const y = S.seans.setler[el.dataset.h][+el.dataset.i];
@@ -2509,6 +2602,8 @@
         if (b && b.animate && !azHareket) b.animate([{ transform: 'scale(.82)' }, { transform: 'scale(1.06)', offset: 0.6 }, { transform: 'scale(1)' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' });
       } else { dinlenme = null; dinlenmeCiz(); }
     },
+    'kisa-iptal'() { kisaGeriAl(S.seans); kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); toast('Tam antrenman geri geldi.'); },
+    'gece-mod'() { S.ayar = S.ayar || {}; S.ayar.gece = !geceAyar(); kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'dinlenme-ek'() { if (dinlenme) { dinlenme.bitis += 30000; dinlenme.toplam += 30; dinlenmeCiz(); jamDinlen(Math.round((dinlenme.bitis - Date.now()) / 1000)); } },
     'dinlenme-kapat'() { const e = document.getElementById('dinlenme'); if (e) e.remove(); },
     'din-ac'(el) { dinAcik = dinAcik === el.dataset.h ? null : el.dataset.h; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
@@ -2545,14 +2640,15 @@
           if (!x.kg || !x.tekrar) return;
           const r = S.rekor[kh];
           if (!r || e1rm(x.kg, x.tekrar) > e1rm(r.kg, r.tekrar) + 0.01) { if (r && r.tarih !== tarih) yeni++; S.rekor[kh] = { kg: x.kg, tekrar: x.tekrar, tarih }; }
+          S.ilk = S.ilk || {}; if (!S.ilk[kh] || (S.ilk[kh].tarih === s.tarih && e1rm(x.kg, x.tekrar) > e1rm(S.ilk[kh].kg, S.ilk[kh].tekrar))) S.ilk[kh] = { kg: x.kg, tekrar: x.tekrar, tarih: s.tarih };
         });
       });
       if (!set) { toast('Önce en az bir seti tamamla.'); return; }
       const ksB = seansAnahtar({ hareketler: seansHareket(s) }); const kaslar = [];
       seansHareket(s).forEach((x, xi) => { if (!(s.setler[ksB[xi]] || []).some(setSayilir)) return; ((K.HAREKET[x.id] || {}).birincil || []).forEach((m) => { const gr = KAS_GRUP[m]; if (gr && kaslar.indexOf(gr) < 0) kaslar.push(gr); }); });
       const dkB = Math.max(1, Math.round((Date.now() - s.baslangic) / 60000));
-      gun(s.tarih).antrenman = { ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, kaslar };
-      S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus }; fbTaslak = null;
+      gun(s.tarih).antrenman = Object.assign({ ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, kaslar }, s.kisa ? { kisa: true } : {});
+      S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus, kisa: !!s.kisa }; fbTaslak = null;
       if (S.jam) S.jamRekor = yeni;
       if (s.donus) S.donusYapildi = true;
       const yeniR = yeniRozetler();
@@ -2560,7 +2656,9 @@
       const jamOzet = S.jam ? { sure: Math.max(1, Math.round((Date.now() - s.baslangic) / 60000)), rekor: yeni } : null;
       if (S.jam) { const kod = S.jam.kod; setTimeout(() => { if (S.sonSeans) S.sonSeans.jam = kod; }, 0); jamDurumGonder(true, jamOzet).then(() => jamCek()); }
       S.seans = null; dinlenme = null; S.sonSeans.rekor = yeni; kaydet(true); skorGonder();
-      toast(yeniR.length ? 'Yeni rozet: ' + yeniR.map((r) => r.ad).join(', ') + '. Bunu sen kazandın.' : yeni ? (yeni === 1 ? 'Yeni rekor. Bunu sen yaptın.' : yeni + ' yeni rekor. Bunu sen yaptın.') : 'Kaydedildi. Bugün de geldin.');
+      if (sesTur() !== 'yok') { sesHazirla(); bip(yeni ? 'rekor' : 'bitis'); }
+      if (navigator.vibrate) navigator.vibrate(yeni ? [60, 80, 160] : [40]);
+      toast(yeniR.length ? (yeniR.length === 1 ? 'Yeni rozet: ' + yeniR[0].ad + '. Bunu sen kazandın.' : yeniR.length + ' yeni rozet. Bunu sen kazandın.') : yeni ? (yeni === 1 ? 'Yeni rekor. Bunu sen yaptın.' : yeni + ' yeni rekor. Bunu sen yaptın.') : 'Kaydedildi. Bugün de geldin.');
       git('#/bitti');
     },
     async paylas() {
@@ -2707,7 +2805,7 @@
       const sY = window.scrollY; render(); window.scrollTo(0, sY);
     },
     'hp-gun'(el) { if (!hpTaslak) return; const i = +el.dataset.i; const j = hpTaslak.gunler.indexOf(i); if (j >= 0) hpTaslak.gunler.splice(j, 1); else hpTaslak.gunler.push(i); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
-    'hp-kaydet'() { if (!hpTaslak || !hpTaslak.gunler.length) return; haftaPlanUygula(planHaftasi(), hpTaslak.gunler); kaydet(true); olay('haftaplan'); toast('Haftan planlandı: ' + hpTaslak.gunler.length + ' gün.'); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'hp-kaydet'() { if (!hpTaslak || !hpTaslak.gunler.length) return; haftaPlanUygula(planHaftasi(), hpTaslak.gunler); kaydet(true); olay('haftaplan'); toast('Söz verildi: bu hafta ' + hpTaslak.gunler.length + ' gün. Gerisi sende.'); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'hp-gec'() { S.ayar = S.ayar || {}; S.ayar.hpGec = tarihKey(planHaftasi()); kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'ses-seviye'(el) { S.ayar = S.ayar || {}; S.ayar.sesSeviye = el.dataset.deger; kaydet(true); sesHazirla(); bip(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'bildirim-izin'() { if (!bildirimVar()) return; Notification.requestPermission().then((d) => { toast(d === 'granted' ? 'Bildirimler açık.' : 'Bildirim izni verilmedi.'); S.ayar = S.ayar || {}; S.ayar.bildirimSoruldu = 1; kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY); }); },
