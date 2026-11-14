@@ -3,16 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>COMEBACK. · Bıraktığın yerden başla.</title>
+<title>Make the COMEBACK.</title>
 <!-- y2 -->
 <meta name="description" content="COMEBACK. sana göre antrenman programı kurar, yediğini fotoğraftan sayar, her seti kaydeder. Arkadaşınla ortak antrenman, hocanla mesajlaşma, kas grubu rehberi. Kapalı beta açık.">
-<meta name="theme-color" content="#ECECE8">
+<meta name="theme-color" content="#000000">
 <link rel="canonical" href="https://comeback.com.tr/">
 <link rel="alternate" hreflang="tr" href="https://comeback.com.tr/">
 <link rel="alternate" hreflang="en" href="https://comeback.com.tr/?lang=en">
-<meta property="og:title" content="COMEBACK. · Bıraktığın yerden başla.">
-<meta property="og:description" content="Sana göre program, fotoğrafla kalori, set set antrenman kaydı. Kapalı betaya başvur.">
+<meta property="og:title" content="Make the COMEBACK.">
+<meta property="og:description" content="Bıraktığın yerden başla. Sana göre program, fotoğrafla kalori, set set antrenman kaydı. Kapalı betaya başvur.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="COMEBACK.">
+<meta property="og:image" content="https://cartemenusistemleri.com.tr/comeback-marka/img/og.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Make the COMEBACK.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Make the COMEBACK.">
+<meta name="twitter:image" content="https://cartemenusistemleri.com.tr/comeback-marka/img/og.jpg?v=1">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:locale:alternate" content="en_US">
 <link rel="icon" href="/comeback/favicon.ico?v=4" sizes="any">
@@ -49,6 +57,17 @@ p{margin:0;text-wrap:pretty}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:rgba(236,236,232,.86)}
 .ust{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(236,236,232,.8);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s ease}
 .ust.kaydi{border-bottom-color:var(--cizgi)}
+.ust,.logo,.ust nav a,.dil-btn,.ust .btn.siyah{transition:background-color .3s ease,color .3s ease,border-color .3s ease}
+body.ust-gece::before{background:rgba(0,0,0,.86)}
+body.ust-gece .ust{background:rgba(0,0,0,.38);border-bottom-color:transparent}
+body.ust-gece .ust:not(.kaydi){background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.ust-gece .ust.kaydi{background:rgba(0,0,0,.62);border-bottom-color:rgba(255,255,255,.08)}
+body.ust-gece .logo{color:#fff}
+body.ust-gece .ust nav a{color:#A9A69E}
+body.ust-gece .ust nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+body.ust-gece .dil-btn{background:rgba(255,255,255,.1);color:#fff}
+body.ust-gece .bayrak{box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+body.ust-gece .ust .btn.siyah{background:#fff;color:var(--murekkep)}
 .ust .ic{display:flex;align-items:center;gap:16px;height:68px}
 .logo{font-weight:900;font-size:22px;letter-spacing:-.04em;text-decoration:none;white-space:nowrap}
 .ust nav{display:flex;gap:2px;margin-left:auto}
@@ -80,29 +99,37 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (max-width:900px){.ust nav{display:none}.ust .dil{margin-left:auto}}
 @media (max-width:480px){.ust .ic{gap:10px}.ust .btn.kucuk{display:none}.dil-btn span.kod{display:none}}
 
-/* giriş */
-.giris{padding:48px 0 32px;overflow:hidden}
-.giris .ic{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center}
-.giris h1{font-size:clamp(56px,9vw,124px);font-weight:900;letter-spacing:-.055em;line-height:.9}
-.giris h1 .sat{display:block;overflow:hidden;padding-bottom:.04em;margin-bottom:-.04em}
+/* giriş: karanlık film sahnesi. Arkada filmimizden sessiz döngü, önde "Make the COMEBACK." */
+.giris{position:relative;background:#000;color:#fff;overflow:hidden;margin-top:-68px;padding:calc(68px + 40px) 0 56px;min-height:min(100vh,980px);min-height:min(100svh,980px);display:flex;align-items:center}
+.giris-film{position:absolute;inset:0;z-index:0;overflow:hidden;background:#000 url(img/giris-film-genis.webp?v=1) 50% 50%/cover no-repeat;pointer-events:none}
+.giris-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.4s ease}
+.giris-film video.oynuyor{opacity:1}
+.giris-film::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.72) 38%,rgba(0,0,0,.42) 66%,rgba(0,0,0,.55) 100%),linear-gradient(0deg,#000 0%,rgba(0,0,0,0) 26%),linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,0) 20%)}
+.giris-film .gren{position:absolute;inset:-50%;z-index:0;opacity:.1;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");animation:gren 1.2s steps(6) infinite}
+@keyframes gren{0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}100%{transform:translate(0,0)}}
+.giris .ic{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);gap:32px;align-items:center}
+.giris h1{font-size:clamp(60px,8.6vw,108px);font-weight:900;letter-spacing:-.055em;line-height:.86;color:#fff}
+.giris h1 .sat{display:block;overflow:hidden;padding-bottom:.05em;margin-bottom:-.05em}
 .giris h1 .sat>span{display:block;animation:satir .9s var(--ease) both}
-.giris h1 .sat:nth-child(2)>span{animation-delay:.08s}
-.giris h1 .sat:nth-child(3)>span{animation-delay:.16s}
+.giris h1 .sat:nth-child(2)>span{animation-delay:.1s}
+.giris h1 .mk{font-size:.38em;font-weight:700;letter-spacing:-.025em;color:#A3A098;margin:0 0 .12em .05em}
 @keyframes satir{from{transform:translateY(105%)}to{transform:none}}
-.giris .alt{font-size:clamp(18px,1.7vw,21px);color:var(--ikincil);max-width:34ch;margin-top:26px;line-height:1.5}
-.giris .alt b{color:var(--murekkep);font-weight:700}
+.giris .ikinci{font-size:clamp(22px,2.1vw,28px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:30px;color:#fff}
+.giris .alt{font-size:clamp(17px,1.5vw,19px);color:#A9A69E;max-width:40ch;margin-top:12px;line-height:1.55}
+.giris .alt b{color:#E9E7E1;font-weight:700}
 .eylem{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px;align-items:center}
-.durum{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ikincil);margin-top:18px}
-.durum i{width:8px;height:8px;border-radius:50%;background:var(--kobalt);position:relative}
+.giris .btn.cerceve{color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.38);transition:transform .16s var(--ease),box-shadow .2s ease}
+.giris .btn.cerceve:hover{box-shadow:inset 0 0 0 1.5px #fff}
+.giris .btn.ana{box-shadow:0 12px 30px -14px rgba(46,75,255,.9)}
+.durum{display:inline-flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:700;line-height:1.4;color:var(--ikincil);margin-top:18px}
+.giris .durum{color:#A9A69E}
+.durum i{width:8px;height:8px;border-radius:50%;background:var(--kobalt);position:relative;flex:none;margin-top:6px}
 .durum i::after{content:"";position:absolute;inset:-4px;border-radius:50%;background:var(--kobalt);opacity:.3;animation:nabiz 2s var(--ease) infinite}
 @keyframes nabiz{from{transform:scale(.6);opacity:.45}to{transform:scale(2.2);opacity:0}}
-.magaza{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
-.magaza>span{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 16px 0 12px;border-radius:14px;background:var(--kutu);color:var(--ikincil);font-size:12px;font-weight:600;line-height:1.15;cursor:default;box-shadow:inset 0 0 0 1.5px var(--cizgi)}
-.magaza svg{width:22px;height:22px;fill:var(--ikincil)}
-.magaza b{display:block;font-size:15px;color:var(--murekkep)}
 /* telefonlar */
 .telefonlar{position:relative;height:640px;perspective:1400px}
 .tel{width:300px;aspect-ratio:585/1266;border-radius:46px;background:#0d0d10;padding:9px;box-shadow:0 40px 70px -28px rgba(22,22,26,.45),0 8px 20px -8px rgba(22,22,26,.25),inset 0 0 0 1.5px #2a2a31}
+.giris .tel{box-shadow:0 50px 90px -30px #000,0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 1.5px #2a2a31}
 .tel img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:37px;background:var(--zemin)}
 .telefonlar .tel{position:absolute;will-change:transform}
 .telefonlar .tel.on{right:130px;top:0;z-index:2}
@@ -112,7 +139,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .giris-tel-arka{animation:yuksel2 1s .22s var(--ease) both}
 @keyframes yuksel{from{transform:translateY(40px) rotate(-2deg)}to{transform:none}}
 @keyframes yuksel2{from{transform:translateY(60px) rotate(9deg)}to{transform:rotate(5deg)}}
-.cip{position:absolute;z-index:3;background:var(--kutu);border-radius:18px;padding:10px 14px 10px 10px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;line-height:1.2;box-shadow:0 18px 36px -16px rgba(22,22,26,.35);white-space:nowrap;animation:suz 6s ease-in-out infinite}
+.cip{position:absolute;z-index:3;color:var(--murekkep);background:var(--kutu);border-radius:18px;padding:10px 14px 10px 10px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;line-height:1.2;box-shadow:0 18px 36px -16px rgba(22,22,26,.35);white-space:nowrap;animation:suz 6s ease-in-out infinite}
 .cip span.ik{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;flex:none}
 .cip span.ik svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .cip small{display:block;font-size:12px;font-weight:600;color:var(--ikincil)}
@@ -121,7 +148,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .cip.c3{right:-6px;bottom:30px;animation-delay:-4s}.cip.c3 .ik{background:var(--murekkep);color:#fff}
 @keyframes suz{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @media (max-width:980px){
-  .giris .ic{grid-template-columns:1fr}
+  .giris{display:block;min-height:0;padding:0 0 20px}
+  .giris-film{inset:0 0 auto;height:66vh;height:66svh;min-height:430px;max-height:720px;background-image:url(img/giris-film-dikey.webp?v=1);background-position:50% 28%}
+  .giris-film video{object-position:50% 28%}
+  .giris-film::after{background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,0) 20%,rgba(0,0,0,0) 42%,rgba(0,0,0,.82) 80%,#000 100%)}
+  .giris .ic{grid-template-columns:1fr;gap:8px}
+  .giris .ic>div:first-child{padding-top:calc(clamp(430px,66svh,720px) - 156px)}
+  .giris h1{font-size:min(14.8vw,104px)}
+  .giris .ikinci{margin-top:24px}
   .telefonlar{height:560px;max-width:440px;width:100%;margin:8px auto 0}
   .telefonlar .tel{width:min(60vw,250px)}
   .telefonlar .tel.on{right:auto;left:8%;top:0}
@@ -130,14 +164,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 }
 @media (max-width:420px){.telefonlar{height:480px}.telefonlar .tel.on{left:4%}}
 
-/* kayan şerit */
+/* kayan şerit: girişin devamı, karanlıkta */
+.serit-zemin{background:#000;padding-bottom:4px}
 .serit{padding:24px 0 8px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .serit-ray{display:flex;gap:10px;width:max-content;animation:kay 40s linear infinite}
 .serit:hover .serit-ray{animation-play-state:paused}
-.serit-ray span{background:var(--kutu);border-radius:999px;padding:10px 18px;font-size:15px;font-weight:600;color:var(--ikincil);white-space:nowrap}
-.serit-ray span.v{background:var(--murekkep);color:#fff}
-.serit-ray b{color:var(--murekkep);font-variant-numeric:tabular-nums}
-.serit-ray span.v b{color:var(--limon)}
+.serit-ray span{background:#16161A;border-radius:999px;padding:10px 18px;font-size:15px;font-weight:600;color:#A9A69E;white-space:nowrap;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.serit-ray span.v{background:#F3F1EC;color:var(--murekkep);box-shadow:none}
+.serit-ray b{color:#fff;font-variant-numeric:tabular-nums}
+.serit-ray span.v b{color:var(--kobalt)}
 @keyframes kay{to{transform:translateX(-50%)}}
 
 /* bölüm başlıkları */
@@ -305,10 +340,11 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
   html{scroll-behavior:auto}
   .hk-tel img{filter:none;transform:none}
+  .giris-film .gren{display:none}
 }
 </style>
 </head>
-<body>
+<body class="ust-gece">
 
 <header class="ust" id="ust">
   <div class="ic">
@@ -334,20 +370,18 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
 </header>
 
 <main>
-<section class="giris">
+<section class="giris" id="giris" data-koyu>
+  <div class="giris-film" id="girisFilm" aria-hidden="true"><div class="gren"></div></div>
   <div class="ic">
     <div>
-      <h1><span class="sat"><span data-i="hx1">Bıraktığın</span></span><span class="sat"><span data-i="hx2">yerden</span></span><span class="sat"><span data-i="hx3">başla<span class="nokta">.</span></span></span></h1>
+      <h1><span class="sat"><span class="mk" data-i="hx1">Make the</span></span> <span class="sat"><span>COMEBACK<span class="nokta">.</span></span></span></h1>
+      <p class="ikinci" data-i="hx3">Bıraktığın yerden başla.</p>
       <p class="alt" data-i="alt">Ne kadar ara verdiğin, ne kadar geride olduğun önemli değil. COMEBACK. <b>programını kurar</b>, <b>her seti</b> kaydeder ve <b>en zor gününde bile</b> yanında olur.</p>
       <div class="eylem">
         <a class="btn ana" href="/comeback/#/basvuru" data-app="#/basvuru"><span data-i="basvur">Beta'ya başvur</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="btn cerceve" href="/comeback/#/giris" data-app="#/giris" data-i="girisyap">Giriş yap</a>
       </div>
       <p class="durum"><i aria-hidden="true"></i><span data-i="durum">Kapalı beta açık · başvurular sırayla onaylanıyor</span></p>
-      <div class="magaza" aria-label="Mağaza uygulamaları yakında">
-        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.3 1.3-2.7 1.3-2.8 0 0-2.4-.9-2.4-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg><span><span data-i="yakinda">Yakında</span><b>App Store</b></span></span>
-        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.3c-.3.3-.4.7-.4 1.2v17c0 .5.1.9.4 1.2l9.5-9.7zM14.2 13.1l2.9 3-11.6 6.6c-.4.2-.8.3-1.1.2zM17.5 9.3l3 1.7c1 .6 1 1.5 0 2.1l-3 1.7-3.2-3.2zM4.4 1.1c.3-.1.7 0 1.1.2l11.6 6.6-2.9 3z"/></svg><span><span data-i="yakinda2">Yakında</span><b>Google Play</b></span></span>
-      </div>
     </div>
     <div class="telefonlar" id="telefonlar" aria-hidden="true">
       <div class="kat" id="kat">
@@ -361,7 +395,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   </div>
 </section>
 
-<div class="serit" aria-hidden="true"><div class="serit-ray" id="seritRay">
+<div class="serit-zemin" data-koyu><div class="serit" aria-hidden="true"><div class="serit-ray" id="seritRay">
   <span data-i="s1"><b>190+</b> hareket</span>
   <span class="v" data-i="s2"><b>369</b> Türk yemeği</span>
   <span data-i="s3"><b>6</b> spora özel program</span>
@@ -369,9 +403,9 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   <span class="v" data-i="s5">Salon · ev · ekipmansız · park</span>
   <span data-i="s6">Futbol · basketbol · koşu · yüzme · tenis · dövüş</span>
   <span data-i="s7"><b>4</b> ses seviyesi, <b>6</b> dinlenme sesi</span>
-</div></div>
+</div></div></div>
 
-<section class="inanc" id="inanc" aria-label="COMEBACK. manifestosu">
+<section class="inanc" id="inanc" data-koyu aria-label="COMEBACK. manifestosu">
   <div class="yap"><div class="ic">
     <span class="k" data-i="m_k">NEDEN COMEBACK.</span>
     <div class="metin" id="manifesto">
@@ -472,7 +506,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   </div>
 </section>
 
-<section class="bolum koyu-bant" id="hocalar">
+<section class="bolum koyu-bant" id="hocalar" data-koyu>
   <div class="ic">
     <div class="bolum-bas belir">
       <h2 data-i="h_b">Hocalar için<span class="nokta">.</span></h2>
@@ -528,7 +562,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   </div>
 </section>
 
-<section class="son" id="son">
+<section class="son" id="son" data-koyu>
   <div class="son-foto" aria-hidden="true"></div>
   <div class="ic">
     <h2><span data-i="sn1">Bir set</span><b data-i="sn2">daha<span class="nokta">.</span></b></h2>
@@ -560,10 +594,35 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   document.querySelectorAll('[data-app]').forEach(function (a) { a.href = APP + a.getAttribute('data-app'); });
   var azHareket = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // üst çubuk gölgesi
+  // üst çubuk: gölge + karanlık bölümün üstündeyken karanlık
   var ust = document.getElementById('ust');
-  var kay = function () { ust.classList.toggle('kaydi', window.scrollY > 8); };
-  window.addEventListener('scroll', kay, { passive: true }); kay();
+  var koyular = Array.from(document.querySelectorAll('[data-koyu]'));
+  var temaMeta = document.querySelector('meta[name=theme-color]');
+  var gece = null;
+  var kay = function () {
+    ust.classList.toggle('kaydi', window.scrollY > 8);
+    var y = ust.getBoundingClientRect().bottom - 1;
+    var k = koyular.some(function (b) { var r = b.getBoundingClientRect(); return r.top <= y && r.bottom > y; });
+    if (k !== gece) { gece = k; document.body.classList.toggle('ust-gece', k); if (temaMeta) temaMeta.setAttribute('content', k ? '#000000' : '#ECECE8'); }
+  };
+  window.addEventListener('scroll', kay, { passive: true }); window.addEventListener('resize', kay); kay();
+
+  // giriş filmi: sayfa yüklendikten sonra, sessiz döngü. Azaltılmış harekette ve veri tasarrufunda yalnız ilk kare.
+  var film = document.getElementById('girisFilm');
+  var tasarruf = navigator.connection && navigator.connection.saveData;
+  if (film && !azHareket && !tasarruf) {
+    var v = document.createElement('video');
+    v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.disablePictureInPicture = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true'); v.setAttribute('tabindex', '-1');
+    var ad = 'img/giris-film-' + (window.matchMedia('(min-width: 981px)').matches ? 'genis' : 'dikey');
+    [[ad + '.webm?v=1', 'video/webm; codecs="vp9"'], [ad + '.mp4?v=1', 'video/mp4']].forEach(function (k) { var x = document.createElement('source'); x.src = k[0]; x.type = k[1]; v.appendChild(x); });
+    v.addEventListener('playing', function () { v.classList.add('oynuyor'); });
+    var oynat = function () { var p = v.play(); if (p && p.catch) p.catch(function () { /* otomatik oynatma kapalı: kare kalır */ }); };
+    var yukle = function () { film.insertBefore(v, film.firstChild); oynat(); };
+    if (document.readyState === 'complete') setTimeout(yukle, 150); else window.addEventListener('load', function () { setTimeout(yukle, 150); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (l) { l.forEach(function (g) { if (!v.parentNode) return; if (g.isIntersecting) oynat(); else v.pause(); }); }).observe(film);
+    document.addEventListener('visibilitychange', function () { if (!v.parentNode) return; if (document.hidden) v.pause(); else oynat(); });
+  }
 
   // kayan şerit: içerik iki kez, böylece kesintisiz döner
   var ray = document.getElementById('seritRay');
@@ -606,7 +665,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
 
   var EN = {
     nav1: 'Features', nav2: 'How it works', nav3: 'Coaches', nav4: 'FAQ', ustgir: 'Open the app',
-    hx1: 'Pick up', hx2: 'where you', hx3: 'left off<span class="nokta">.</span>',
+    hx1: 'Make the', hx3: 'Pick up where you left off.',
     alt: 'It doesn\'t matter how long you\'ve been away or how far behind you feel. COMEBACK. <b>builds your program</b>, logs <b>every set</b> and stays with you <b>on your hardest days</b>.',
     m_k: 'WHY COMEBACK.', m1: 'No one is watching.', m2: 'The gym is empty, your arms are shaking.', m3: 'You could quit. Everyone else did.', m4: 'But you didn\'t.', m5: 'Because you believed.', m6: 'You might be far behind. It\'s never too late.', m7: 'One more set.',
     basvur: 'Apply for the beta', basvur2: 'Apply for the beta', girisyap: 'Log in',
@@ -665,7 +724,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
 
   var TR = {};
   document.querySelectorAll('[data-i]').forEach(function (el) { TR[el.getAttribute('data-i')] = el.innerHTML; });
-  var BASLIK = { tr: document.title, en: 'COMEBACK. · Pick up where you left off.' };
+  var BASLIK = { tr: document.title, en: 'Make the COMEBACK.' };
   var ACIK = { tr: document.querySelector('meta[name=description]').content, en: 'COMEBACK. builds your training program, counts calories from a photo and logs every set. Train with friends, chat with your coach, learn every muscle group. Closed beta is open.' };
   function uygula(d) {
     var s = d === 'en' ? EN : TR;

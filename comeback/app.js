@@ -81,6 +81,8 @@
       fetch(API + 'hata', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: govde, keepalive: true }).catch(() => {});
     } catch (e) { /* sessiz */ }
   }
+  // afiş QR'ı ya da davet bağlantısıyla gelenin kaynağı (basla.html yazar); başvuruda "Bizi nereden duydun?" hazır gelir
+  const kaynakOn = () => { try { return sessionStorage.getItem('cb-kaynak') || ''; } catch (e) { return ''; } };
   function olay(ad) { try { if (hesap) fetch(API + 'olay', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ olay: ad }), keepalive: true }).catch(() => {}); } catch (e) { /* sessiz */ } }
   window.addEventListener('error', (e) => { if (e.message) hataBildir(e.message, (e.filename || '').split('/').pop() + ':' + e.lineno + ':' + e.colno); });
   window.addEventListener('unhandledrejection', (e) => { const r = e.reason || {}; hataBildir('Promise: ' + (r.message || String(r)), (r.stack || '').split('\n')[1] || ''); });
@@ -297,7 +299,7 @@
       '<label class="t genis alan"><span>Adın</span><input name="ad" autocomplete="given-name" maxlength="40" placeholder="Deniz" style="font-size:22px"></label>' +
       '<label class="t genis alan"><span>E-posta</span><input name="eposta" type="email" autocomplete="email" inputmode="email" required placeholder="ornek@eposta.com" style="font-size:20px;letter-spacing:-.01em"></label>' +
       '<div class="t genis"><span class="k">Hedefin ne?</span><div class="haplar">' + hedefler.map((x) => '<button type="button" class="hap" data-act="bekleme-hedef" data-deger="' + x[0] + '" aria-pressed="' + (beklemeHedef === x[0]) + '">' + x[1] + '</button>').join('') + '</div></div>' +
-      '<label class="t genis alan"><span>Bizi nereden duydun? · isteğe bağlı</span><input name="kaynak" maxlength="60" placeholder="Instagram, arkadaşım, salonum…" style="font-size:18px"></label>' +
+      '<label class="t genis alan"><span>Bizi nereden duydun? · isteğe bağlı</span><input name="kaynak" maxlength="60" placeholder="Instagram, arkadaşım, salonum…" value="' + esc(kaynakOn()) + '" style="font-size:18px"></label>' +
       '<p class="hata genis" id="formHata" role="alert" hidden></p>' +
       '<button class="btn ana buyuk-btn genis" type="submit" id="formBtn">Listeye katıl' + IK.ok + '</button>' +
       '<p class="not genis" style="padding:0 4px">E-postanı yalnızca beta davetin ve COMEBACK. duyuruları için kullanırız. <a href="gizlilik.html" target="_blank" rel="noopener" style="color:var(--kobalt)">Aydınlatma metni</a></p>' +
@@ -429,7 +431,7 @@
       '<label class="t genis onay"><input type="checkbox" name="yetiskin"' + (duzen || (hesap && !basvuru) ? ' checked' : '') + '><span>18 yaşından büyüğüm. Programın ve kalori hedeflerinin genel bilgi olduğunu, tıbbi tavsiye yerine geçmediğini biliyorum.</span></label>' +
       (basvuru ? '<label class="t genis onay"><input type="checkbox" name="riza"><span>Antrenman ve beslenme kayıtlarımın programımı hazırlamak için hesabımda saklanmasına onay veriyorum.</span></label>' +
         '<label class="t genis onay"><input type="checkbox" name="saglikRiza"><span><b>Açık rıza:</b> Doğum tarihim, kilo, boy, sakatlık bölgelerim ve sağlık kontrolü cevabım gibi sağlık verilerimin yalnızca programımı ve kalori hedefimi hesaplamak için işlenmesine açık rıza veriyorum. Rızamı hesabımı silerek her zaman geri alabilirim.</span></label>' +
-        '<label class="t genis alan"><span>Bizi nereden duydun? · isteğe bağlı</span><input name="kaynak" maxlength="60" placeholder="Instagram, arkadaşım, salonum…" style="font-size:18px"></label>' +
+        '<label class="t genis alan"><span>Bizi nereden duydun? · isteğe bağlı</span><input name="kaynak" maxlength="60" placeholder="Instagram, arkadaşım, salonum…" value="' + esc(kaynakOn()) + '" style="font-size:18px"></label>' +
         '<a class="metin-btn genis" href="gizlilik.html" target="_blank" rel="noopener" style="text-align:left;color:var(--kobalt);padding-top:0">Aydınlatma metnini oku →</a>' : '') +
       '<p class="hata genis" id="kurulumHata" role="alert" hidden></p>' +
       (basvuru ? '<button class="btn ana buyuk-btn genis" type="submit" id="formBtn">Başvurumu gönder' + IK.ok + '</button><a class="metin-btn genis" href="#/giris" style="text-align:center;color:var(--murekkep)">Zaten hesabım var · <span style="color:var(--kobalt)">Giriş yap</span></a>' : '') +

@@ -74,7 +74,7 @@ async function govde(req) {
   if (!(req.headers.get('content-type') || '').includes('application/json')) return null;
   try { return await req.json(); } catch (e) { return null; }
 }
-const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan']);
+const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan', 'kisa', 'giris_afis', 'giris_wa', 'giris_ig', 'giris_qr']);
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
 export async function onRequest(ctx) {
