@@ -385,8 +385,8 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
     </div>
     <div class="telefonlar" id="telefonlar" aria-hidden="true">
       <div class="kat" id="kat">
-        <div class="tel on"><div class="giris-tel-on" style="width:100%;height:100%"><img src="img/bugun.webp?v=2" data-ekr="bugun" alt="" width="585" height="1266" fetchpriority="high"></div></div>
-        <div class="tel arka giris-tel-arka"><img src="img/seans.webp?v=2" data-ekr="seans" alt="" width="585" height="1266"></div>
+        <div class="tel on"><div class="giris-tel-on" style="width:100%;height:100%"><img src="img/bugun.webp?v=3" data-ekr="bugun" alt="" width="585" height="1266" fetchpriority="high"></div></div>
+        <div class="tel arka giris-tel-arka"><img src="img/seans.webp?v=3" data-ekr="seans" alt="" width="585" height="1266"></div>
       </div>
       <div class="cip c1"><span class="ik"><svg viewBox="0 0 24 24"><path d="M4 19h16M7 15l4-4 3 3 5-6"/></svg></span><span><span data-i="cip1">Yeni rekor</span><small data-i="cip1a">Squat 85 kg × 6</small></span></div>
       <div class="cip c2"><span class="ik"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></span><span><span data-i="cip2">Dinlenme bitti</span><small data-i="cip2a">Bir set daha</small></span></div>
@@ -452,7 +452,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
               <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="a_4"><b>Bitince:</b> ne kadar zordu, nerede iyi hissettin, ağrı var mı; bir sonraki antrenman buna göre ayarlanır.</span></li>
             </ul>
           </div>
-          <div class="oz-gorsel limon"><div class="tel"><img src="img/seans.webp?v=2" data-ekr="seans" alt="Antrenman ekranı" width="585" height="1266" loading="lazy"></div></div>
+          <div class="oz-gorsel limon"><div class="tel"><img src="img/seans.webp?v=3" data-ekr="seans" alt="Antrenman ekranı" width="585" height="1266" loading="lazy"></div></div>
         </article>
         <article class="ozellik" data-ekr="beslenme" data-r="kobalt">
           <div class="oz-yazi limon">
@@ -477,7 +477,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
               <li><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg><span data-i="i_3"><b>Yapay zekâ koç:</b> programını yorumlar, sorularını cevaplar; kendi tarzını seçersin.</span></li>
             </ul>
           </div>
-          <div class="oz-gorsel limon"><div class="tel"><img src="img/ilerleme.webp?v=2" data-ekr="ilerleme" alt="İlerleme ekranı" width="585" height="1266" loading="lazy"></div></div>
+          <div class="oz-gorsel limon"><div class="tel"><img src="img/ilerleme.webp?v=3" data-ekr="ilerleme" alt="İlerleme ekranı" width="585" height="1266" loading="lazy"></div></div>
         </article>
         <article class="ozellik" data-ekr="rehber" data-r="koyu">
           <div class="oz-yazi">
@@ -495,9 +495,9 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
       <div class="hk-sahne" id="sahne" data-r="kobalt" aria-hidden="true">
         <div class="hk-tel"><div class="ekranlar">
           <img class="gor" src="img/menu.webp?v=2" data-ekr="menu" alt="" width="585" height="1266">
-          <img src="img/seans.webp?v=2" data-ekr="seans" alt="" width="585" height="1266" loading="lazy">
+          <img src="img/seans.webp?v=3" data-ekr="seans" alt="" width="585" height="1266" loading="lazy">
           <img src="img/beslenme.webp?v=2" data-ekr="beslenme" alt="" width="585" height="1266" loading="lazy">
-          <img src="img/ilerleme.webp?v=2" data-ekr="ilerleme" alt="" width="585" height="1266" loading="lazy">
+          <img src="img/ilerleme.webp?v=3" data-ekr="ilerleme" alt="" width="585" height="1266" loading="lazy">
           <img src="img/rehber.webp?v=2" data-ekr="rehber" alt="" width="585" height="1266" loading="lazy">
         </div></div>
         <div class="hk-sayac"><i class="on"></i><i></i><i></i><i></i><i></i></div>
@@ -729,7 +729,8 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   function uygula(d) {
     var s = d === 'en' ? EN : TR;
     document.querySelectorAll('[data-i]').forEach(function (el) { var k = el.getAttribute('data-i'); if (s[k] != null) el.innerHTML = s[k]; });
-    document.querySelectorAll('img[data-ekr]').forEach(function (im) { im.src = 'img/' + im.dataset.ekr + (d === 'en' ? '-en' : '') + '.webp?v=2'; });
+    var EKR_TR = { bugun: 3, seans: 3, ilerleme: 3 };
+    document.querySelectorAll('img[data-ekr]').forEach(function (im) { im.src = 'img/' + im.dataset.ekr + (d === 'en' ? '-en' : '') + '.webp?v=' + (d === 'en' ? 2 : (EKR_TR[im.dataset.ekr] || 2)); });
     document.documentElement.lang = d; document.title = BASLIK[d];
     document.querySelector('meta[name=description]').content = ACIK[d];
     document.getElementById('dilBayrak').innerHTML = BAYRAK[d]; document.getElementById('dilKod').textContent = d.toUpperCase();
