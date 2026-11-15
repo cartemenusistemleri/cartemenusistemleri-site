@@ -74,6 +74,32 @@ async function govde(req) {
   if (!(req.headers.get('content-type') || '').includes('application/json')) return null;
   try { return await req.json(); } catch (e) { return null; }
 }
+// Bir kullanıcıya ait BÜTÜN kişisel kayıtları silen adımlar (hesap silme + demo silme aynı listeyi kullanır).
+// Aydınlatma metnindeki "bütün kayıtların kalıcı olarak silinir" sözünü karşılar; geride yetim satır bırakmaz.
+// gorusler ve ai_oy isimsizleştirilir (geliştirme için saklanır), gerisi tamamen silinir.
+function hesapSilAdimlari(db, id) {
+  return [
+    db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM paylasim WHERE gonderen_id = ? OR alici_id = ?').bind(id, id),
+    db.prepare('DELETE FROM skor WHERE kullanici_id = ?').bind(id),
+    db.prepare('UPDATE ai_oy SET kullanici_id = NULL WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM jam_uye WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM mesajlar WHERE koc_id = ? OR ogrenci_id = ?').bind(id, id),
+    db.prepare('DELETE FROM hoca_ogrenci WHERE koc_id = ? OR ogrenci_id = ?').bind(id, id),
+    db.prepare('DELETE FROM hoca_kod WHERE koc_id = ?').bind(id),
+    db.prepare('DELETE FROM atanan WHERE koc_id = ? OR ogrenci_id = ?').bind(id, id),
+    db.prepare('DELETE FROM cevaplar WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM cevaplar WHERE konu_id IN (SELECT id FROM konular WHERE kullanici_id = ?)').bind(id),
+    db.prepare('DELETE FROM konular WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM katilim WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM engel WHERE kullanici_id = ? OR engellenen_id = ?').bind(id, id),
+    db.prepare('DELETE FROM sikayet WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM sablonlar WHERE koc_id = ?').bind(id),
+    db.prepare('UPDATE gorusler SET kullanici_id = NULL WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(id)
+  ];
+}
 const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan', 'kisa', 'giris_afis', 'giris_wa', 'giris_ig', 'giris_qr']);
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
@@ -157,7 +183,8 @@ export async function onRequest(ctx) {
         if (!b || b.durum !== 'onayli') return json({ hata: b && b.durum === 'reddedildi' ? 'Başvurun şu an onaylanmadı.' : 'Başvurun inceleniyor. Onaylanınca bu e-posta ve şifreyle giriş yapabileceksin.', beta: 'bekliyor' }, 403);
         await db.prepare("UPDATE kullanicilar SET rol = 'uye' WHERE id = ? AND rol = 'aday'").bind(k.id).run(); k.rol = 'uye';
       }
-      await db.prepare('DELETE FROM giris_deneme WHERE anahtar = ?').bind('giris:' + ip).run();
+      // kendi deneme sayacını sıfırla + süresi dolmuş sayaçları temizle (tablo sınırsız büyümesin)
+      await db.prepare('DELETE FROM giris_deneme WHERE anahtar = ? OR bitis < ?').bind('giris:' + ip, Date.now()).run();
       await db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ? AND bitis < ?').bind(k.id, Date.now()).run();
       const token = await oturumAc(db, k.id);
       return json({ kullanici: { id: k.id, ad: k.ad, eposta: k.eposta, rol: k.rol, kadi: k.kullanici_adi || null } }, 200, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
@@ -272,7 +299,7 @@ export async function onRequest(ctx) {
         if (k && k.rol !== 'demo') return hata('Bu e-posta gerçek bir hesaba ait; demo yapılamaz.', 409);
         if (g.sifirla && k) { await db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(k.id).run(); return json({ ok: true, sifirlandi: true }); }
         if (g.sil && k) {
-          await db.batch([db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(k.id), db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(k.id), db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(k.id)]);
+          await db.batch(hesapSilAdimlari(db, k.id));
           return json({ ok: true, silindi: true });
         }
         if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
@@ -349,16 +376,7 @@ export async function onRequest(ctx) {
       if (!(await sinir(db, 'sil:' + kim.id, 5, 900))) return hata('Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT sifre_hash, tuz FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       if (!k || !esit(await sifreHash(String(g.sifre || ''), k.tuz), k.sifre_hash)) return hata('Şifre hatalı.', 401);
-      await db.batch([
-        db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(kim.id),
-        db.prepare('DELETE FROM paylasim WHERE gonderen_id = ? OR alici_id = ?').bind(kim.id, kim.id),
-        db.prepare('DELETE FROM skor WHERE kullanici_id = ?').bind(kim.id),
-        db.prepare('UPDATE ai_oy SET kullanici_id = NULL WHERE kullanici_id = ?').bind(kim.id),
-        db.prepare('DELETE FROM jam_uye WHERE kullanici_id = ?').bind(kim.id),
-        db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(kim.id),
-        db.prepare('UPDATE gorusler SET kullanici_id = NULL WHERE kullanici_id = ?').bind(kim.id),
-        db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(kim.id)
-      ]);
+      await db.batch(hesapSilAdimlari(db, kim.id));
       return json({ ok: true }, 200, { 'set-cookie': cerezYaz('', 0) });
     }
 

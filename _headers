@@ -1,0 +1,18 @@
+# Cloudflare Pages başlıkları. Yalnızca COMEBACK yollarını kapsar; sitenin geri kalanı
+# (menüler, ödeme, paneller) Cloudflare tarafındaki mevcut ayarlarıyla kalır.
+# Burada yalnızca çerçeveleme / <base> / <object> / form hedefi kısıtlanır: script, stil,
+# görsel ve bağlantı (fetch) hiç kısıtlanmaz, bu yüzden uygulamanın çalışmasını bozmaz.
+# COOP bilerek konmadı: /comeback/aktar.html, Dreamina penceresiyle window.opener üzerinden
+# haberleştiği için COOP bu akışı koparırdı.
+
+/comeback/*
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
+
+/api/comeback/*
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+
+/comeback-marka/*
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
