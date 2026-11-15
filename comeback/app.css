@@ -878,3 +878,8 @@ button.hk-gun:active{transform:scale(.94)}
 .hk-gun:not(button):not(.bitti){opacity:.55}
 .hk-gun.bugun:not(button){opacity:1}
 .hk-alt{font-size:14px;font-weight:600;line-height:1.4}
+.hk-son{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hk-paylas{font-size:14px;font-weight:800;color:var(--kobalt);padding:6px 0;min-height:44px}
+/* gece: yakın siyah basamaklar + kartlarda ince kenar (yüzeyler birbirinden ayrılsın) */
+body.gece .t{box-shadow:inset 0 0 0 1px rgba(255,255,255,.045)}
+body.gece .t.kobalt,body.gece .t.limon{box-shadow:none}

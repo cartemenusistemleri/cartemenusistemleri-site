@@ -244,6 +244,8 @@
     while (dolu(tarihKey(d))) { n++; d.setDate(d.getDate() - 1); }
     return n;
   }
+  // kalori hedefi tuttu mu: hedefin %90–105'i (limon yalnız bu zafer anında)
+  const hedefTamam = (k, hedef) => hedef > 0 && k >= hedef * 0.9 && k <= hedef * 1.05;
   function toplam(liste) {
     return liste.reduce((a, o) => ({ k: a.k + o.k, p: a.p + o.p, kh: a.kh + o.kh, y: a.y + o.y }), { k: 0, p: 0, kh: 0, y: 0 });
   }
@@ -273,7 +275,7 @@
       '<p class="not">18 yaş ve üstü içindir.' + (cevrimdisi ? ' Sunucuya şu an ulaşılamıyor; kayıtların bu cihazda tutuluyor.' : '') + '</p>' +
       '</div><div class="izgara">' +
       '<div class="t kobalt genis h130"><span class="k">Kişiye özel program</span><span class="orta">Yaşın, kilon, hedefin ve sporuna göre.</span></div>' +
-      '<div class="t limon h150"><span class="k">Beslenme</span><span class="orta">Fotoğrafla, listeden, plana göre.</span></div>' +
+      '<div class="t h150"><span class="k">Beslenme</span><span class="orta">Fotoğrafla, listeden, plana göre.</span></div>' +
       '<div class="t koyu h150"><span class="k">Antrenman</span><span class="orta">Set, kilo, tekrar, rekor.</span></div>' +
       '</div></div>';
   }
@@ -422,7 +424,7 @@
       '<fieldset class="t genis"><legend>Nerede çalışacaksın?</legend><div class="haplar">' + tekli('ortam', [['salon', 'Spor salonu'], ['ev', 'Evde, dambılla'], ['vucut', 'Ekipmansız'], ['dis', 'Dışarıda, parkta']], p.ortam || 'salon') + '</div><span class="ik">' + 'Ev: dambıl ve lastik bant. Ekipmansız: yalnızca vücut ağırlığı ve bir sandalye. Park: barfiks ve paralel bar.' + '</span></fieldset>' +
       '<fieldset class="t genis"><legend>Bir antrenman ne kadar sürsün?</legend><div class="haplar">' + tekli('sure', [['45', '45 dk'], ['60', '60 dk'], ['75', '75 dk'], ['90', '90 dk']], String(p.sure || 60)) + '</div></fieldset>' +
       '<fieldset class="t"><legend>Deneyim</legend><div class="haplar">' + tekli('deneyim', [['baslangic', 'Yeni'], ['orta', 'Orta'], ['ileri', 'İleri']], p.deneyim) + '</div></fieldset>' +
-      '<div class="t limon ara-sb"><span class="k">Haftada</span><div class="satir"><button type="button" class="yuvarlak" data-act="gun" data-yon="-1" aria-label="Gün azalt">−</button><span class="buyuk num" id="gunSay">' + p.gun + '</span><button type="button" class="yuvarlak" data-act="gun" data-yon="1" aria-label="Gün artır">+</button></div><span class="k">gün antrenman</span></div>' +
+      '<div class="t ara-sb"><span class="k">Haftada</span><div class="satir"><button type="button" class="yuvarlak" data-act="gun" data-yon="-1" aria-label="Gün azalt">−</button><span class="buyuk num" id="gunSay">' + p.gun + '</span><button type="button" class="yuvarlak" data-act="gun" data-yon="1" aria-label="Gün artır">+</button></div><span class="k">gün antrenman</span></div>' +
       '<fieldset class="t genis"' + (basvuru ? ' hidden' : '') + '><legend>Programını kim yazsın?</legend><div class="haplar">' + tekli('yazan', [['biz', 'COMEBACK. kursun'], ['anlat', 'Anlatayım, yapay zekâ kursun'], ['ben', 'Kendim yazacağım']], S.program && S.program.ozel ? 'ben' : 'biz') + '</div>' +
         '<label class="alan" id="anlatAlan" hidden style="margin-top:8px"><span>Nasıl bir program istiyorsun?</span><textarea name="anlat" rows="3" maxlength="1200" placeholder="Ör. Haftada 4 gün, itiş-çekiş-bacak. Omuzlarım geri kalmış. En fazla 1 saat." style="font-size:16px"></textarea></label>' + '<span class="ik">Kendin yazarsan hareketleri kütüphaneden seçersin; istersen yapay zekâ yorumlar. Hazır programı da sonradan düzenleyebilirsin.</span></fieldset>' +
       '<fieldset class="t genis"><legend>Üzerine gitmek istediğin bölge</legend><div class="haplar">' + Object.keys(M.ODAK).map((k) => hap('odak', k, M.ODAK[k].ad, (p.odak || []).indexOf(k) >= 0, true)).join('') + '</div><span class="ik">En fazla 2 bölge. Seçtiğin bölgeye haftada 2 gün ek hareket koyarız. İstemezsen boş bırak.</span></fieldset>' +
@@ -471,7 +473,7 @@
   }
   function atananBant() {
     const a = hocaDurum && hocaDurum.atanan; if (!a) return '';
-    return '<a class="t limon genis" href="#/hoca-program" style="gap:4px"><span class="k">Hocan ' + esc(a.hoca) + ' sana program gönderdi</span><b style="font-size:20px">' + esc(a.program.ad || 'Yeni program') + '</b><span class="ik" style="color:#3E4410">Bak, beğenirsen kabul et.</span></a>';
+    return '<a class="t koyu genis" href="#/hoca-program" style="gap:4px"><span class="k">Hocan ' + esc(a.hoca) + ' sana program gönderdi</span><b style="font-size:20px">' + esc(a.program.ad || 'Yeni program') + '</b><span class="ik" style="color:#3E4410">Bak, beğenirsen kabul et.</span></a>';
   }
   function ekranHocaProgram() {
     const a = hocaDurum && hocaDurum.atanan; if (!a) { location.hash = '#/'; return ''; }
@@ -516,7 +518,7 @@
       '<div class="izgara">' +
       '<div class="t kobalt genis"><span class="k">Bilgiler</span><span style="font-weight:700;line-height:1.5">' + esc([pr.cinsiyet === 'k' ? 'Kadın' : 'Erkek', pr.yas ? pr.yas + ' yaş' : '', pr.boy ? pr.boy + ' cm' : '', HEDEF_AD[pr.hedef] || '', { baslangic: 'yeni başlayan', orta: 'orta seviye', ileri: 'ileri seviye' }[pr.deneyim] || '', pr.gun ? 'haftada ' + pr.gun + ' gün' : '', (K.ORTAM[pr.ortam] || {}).ad || ''].filter(Boolean).join(' · ')) + '</span>' + (sakat ? '<span style="opacity:.85">Dikkat: ' + esc(sakat) + '</span>' : '') + '</div>' +
       '<div class="t h130"><span class="k">Kilo</span><span class="orta num">' + (o.kilo.length ? sayi(o.kilo[o.kilo.length - 1].kg, 1) : '—') + '<span class="ik"> kg</span></span><span class="ik">' + (o.kilo.length >= 2 ? (o.kilo[o.kilo.length - 1].kg - o.kilo[0].kg >= 0 ? '+' : '') + sayi(o.kilo[o.kilo.length - 1].kg - o.kilo[0].kg, 1) + ' kg (' + o.kilo.length + ' tartı)' : 'tek kayıt') + '</span></div>' +
-      '<div class="t limon h130"><span class="k">Kalori (14 gün ort.)</span><span class="orta num">' + (o.ortKcal14 ? sayi(o.ortKcal14) : '—') + '</span><span class="k">' + (o.hedef ? 'hedef ' + sayi(o.hedef.kcal) + ' · ' : '') + o.kayitliGun14 + ' gün kayıt</span></div>' +
+      '<div class="t h130"><span class="k">Kalori (14 gün ort.)</span><span class="orta num">' + (o.ortKcal14 ? sayi(o.ortKcal14) : '—') + '</span><span class="k">' + (o.hedef ? 'hedef ' + sayi(o.hedef.kcal) + ' · ' : '') + o.kayitliGun14 + ' gün kayıt</span></div>' +
       '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Son antrenmanlar</span><div class="liste">' + (o.antrenmanlar.length ? o.antrenmanlar.slice(0, 8).map((a) => '<div><div class="ad"><b>' + esc(a.ad) + '</b><span class="ik">' + esc(a.tarih) + '</span></div><span class="num ik" style="font-weight:700">' + a.set + ' set · ' + sayi(a.hacim) + ' kg · ' + a.dk + ' dk</span></div>').join('') : '<div><span class="ik">Henüz antrenman kaydı yok.</span></div>') + '</div></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Programı</span>' + (hp.ogr.bekleyen ? '<span class="etiket">Gönderdiğin program onay bekliyor</span>' : '') + '</div>' + (o.program ? '<b style="font-size:18px">' + esc(o.program.ad) + '</b>' + o.program.gunler.map((g) => '<span class="ik"><b style="color:var(--murekkep)">' + GUN_KISA[g.hafta] + ' ' + esc(g.ad) + ':</b> ' + g.hareketler.map((x) => esc((D.HAREKET[x.id] || { ad: x.id }).ad) + ' ' + x.set + '×' + esc(x.tekrar)).join(', ') + '</span>').join('') : '<span class="ik">Programı yok.</span>') + '</div>' +
       '</div>' +
@@ -565,7 +567,7 @@
         '<button type="button" class="hap" data-act="hedef-sec" data-grup="protSeviye" data-deger="ozel" aria-pressed="' + (p.protSeviye === 'ozel') + '">Kendim belirleyeyim</button></div>' +
         (p.protSeviye === 'ozel' ? '<label class="mini" style="max-width:220px"><span>Günlük protein, g</span><input id="protG" data-in="prot-g" inputmode="numeric" value="' + (p.protG || yeni.protein) + '"></label>' : '') +
         '<span class="ik">Çoğu kişi için kilo başına 1,4–1,8 g yeterli. Fazla kiloluysan boyuna göre hesaplanır. Doldurması zor geliyorsa "Az" ile başla; kas kaybı riski düşük hedefte bile azdır.</span></div>' +
-      '<div class="t limon genis"><span class="k">Yeni günlük hedefin</span><span class="orta num">' + sayi(yeni.kcal) + ' kcal</span><span class="k">' + yeni.protein + ' g protein (' + String(yeni.protKg).replace('.', ',') + ' g/kg) · şu an ' + sayi(S.hedef.kcal) + ' kcal, ' + S.hedef.protein + ' g protein</span></div>' +
+      '<div class="t genis"><span class="k">Yeni günlük hedefin</span><span class="orta num">' + sayi(yeni.kcal) + ' kcal</span><span class="k">' + yeni.protein + ' g protein (' + String(yeni.protKg).replace('.', ',') + ' g/kg) · şu an ' + sayi(S.hedef.kcal) + ' kcal, ' + S.hedef.protein + ' g protein</span></div>' +
       '</div>' +
       (ozel ? '<div class="uyari">Kendi yazdığın programın korunur, sadece kalori hedefin güncellenir. İstersen programı da yeni hedefe göre COMEBACK. kursun.</div>' : '<div class="uyari">Programın yeni hedefe göre yeniden kurulur. Geçmiş antrenmanların, rekorların ve öğünlerin silinmez.</div>') +
       '<button class="btn ana buyuk-btn" data-act="hedef-kaydet" data-program="' + (ozel ? '0' : '1') + '">' + (ozel ? 'Kalori hedefimi güncelle' : 'Kaydet, programımı yeniden kur') + IK.ok + '</button>' +
@@ -615,7 +617,7 @@
   }
   function gelenBant() {
     const a = gelenler && gelenler[0]; if (!a) return '';
-    return '<a class="t limon genis" href="#/gelen/' + a.id + '" style="gap:4px"><span class="k">@' + esc(a.kadi || '') + ' · ' + esc(a.gonderen) + ' sana program gönderdi</span><b style="font-size:20px">' + esc(a.program.ad || 'Program') + '</b><span class="ik" style="color:#3E4410">' + programOzetSatir(a.program) + ' · bak, beğenirsen al.</span></a>';
+    return '<a class="t koyu genis" href="#/gelen/' + a.id + '" style="gap:4px"><span class="k">@' + esc(a.kadi || '') + ' · ' + esc(a.gonderen) + ' sana program gönderdi</span><b style="font-size:20px">' + esc(a.program.ad || 'Program') + '</b><span class="ik" style="color:#3E4410">' + programOzetSatir(a.program) + ' · bak, beğenirsen al.</span></a>';
   }
   function ekranGelen(id) {
     const a = (gelenler || []).find((x) => String(x.id) === String(id)); if (!a) { location.hash = '#/'; return ''; }
@@ -959,7 +961,7 @@
     return ust(geri('#/antrenman'), '<span class="alt">Ortak antrenman</span>') +
       '<h1 class="baslik">Jam<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      '<div class="t limon genis jam-kod"><span class="k">Kod · arkadaşına gönder</span><b class="num">' + esc(S.jam.kod) + '</b><div class="haplar"><button class="btn siyah kucuk" data-act="jam-kopya">Kodu kopyala</button></div><span class="ik" style="color:#3E4410">4 saat açık kalır · en fazla 8 kişi</span></div>' +
+      '<div class="t genis jam-kod"><span class="k">Kod · arkadaşına gönder</span><b class="num">' + esc(S.jam.kod) + '</b><div class="haplar"><button class="btn siyah kucuk" data-act="jam-kopya">Kodu kopyala</button></div><span class="ik" style="color:#3E4410">4 saat açık kalır · en fazla 8 kişi</span></div>' +
       (!S.seans && prog && prog.hareketler && prog.hareketler.length ? '<div class="t genis" style="gap:8px"><span class="k">Paylaşılan antrenman · ' + esc(prog.ad || '') + '</span><div class="liste">' + prog.hareketler.map((x) => '<div><div class="ad"><b>' + esc((D.HAREKET[x.id] || { ad: x.id }).ad) + '</b></div><span class="num" style="font-weight:800;font-size:14px">' + x.set + ' × ' + esc(x.tekrar) + '</span></div>').join('') + '</div>' +
         (!S.seans ? '<button class="btn ana buyuk-btn" data-act="jam-basla">Bu antrenmanı birlikte yap' + IK.ok + '</button>' : '') + '</div>' : '') +
       jamSerit() +
@@ -1003,7 +1005,7 @@
       '<h1 class="baslik">' + esc(b.ad) + '<span class="nokta">.</span></h1>' +
       (b.not ? '<p class="ik" style="font-size:15px;line-height:1.5;margin:0">' + esc(b.not) + '</p>' : '') +
       '<div class="izgara">' +
-      '<div class="t limon h130"><span class="k">Gün ' + (si + 1) + ' toplamı</span><span class="orta num">' + sayi(gt.k) + '</span><span class="k num">kcal · hedef ' + sayi(h.kcal) + '</span></div>' +
+      '<div class="t h130"><span class="k">Gün ' + (si + 1) + ' toplamı</span><span class="orta num">' + sayi(gt.k) + '</span><span class="k num">kcal · hedef ' + sayi(h.kcal) + '</span></div>' +
       '<div class="t koyu h130"><span class="k">Son 7 gün uyum</span><span class="orta num">%' + Math.round(uyum * 100) + '</span><span class="k" style="color:var(--koyu-ikincil)">"Yedim" dediğin öğünler</span></div>' +
       '<div class="t genis num bp-makro"><span>Protein <b style="color:var(--kobalt)">' + sayi(gt.p) + ' / ' + h.protein + ' g</b></span><span>Karb. <b>' + sayi(gt.kh) + ' g</b></span><span>Yağ <b>' + sayi(gt.y) + ' g</b></span></div>' +
       '<div class="yatay genis" role="tablist" aria-label="Günler">' + b.gunler.map((x, i) => '<button class="hap" data-act="bp-gun" data-i="' + i + '" aria-pressed="' + (i === si) + '">Gün ' + (i + 1) + (i === bi ? ' · bugün' : '') + '</button>').join('') + '</div>' +
@@ -1298,7 +1300,7 @@
       '<h1 class="baslik">' + esc(p.ad || 'Hazırsın') + (p.ad ? ', hazırsın' : '') + '<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       '<div class="t kobalt genis"><span class="k">Antrenman</span><span class="orta">' + p.gun + ' gün · ' + esc(pr.ad) + '</span><span class="ik">' + pr.gunler.map((g) => GUN_KISA[g.hafta] + ' ' + esc(g.ad)).join(' · ') + '</span></div>' +
-      '<div class="t limon h130"><span class="k">Günlük kalori</span><span class="buyuk num">' + sayi(h.kcal) + '</span><span class="k">kcal</span></div>' +
+      '<div class="t h130"><span class="k">Günlük kalori</span><span class="buyuk num">' + sayi(h.kcal) + '</span><span class="k">kcal</span></div>' +
       '<div class="t h130 num"><span class="k">Makrolar</span><div class="satir"><span>Protein</span><b>' + h.protein + ' g</b></div><div class="satir"><span>Karb.</span><b>' + h.karb + ' g</b></div><div class="satir"><span>Yağ</span><b>' + h.yag + ' g</b></div></div>' +
       '<div class="t koyu genis tum num"><span class="k">Nasıl hesapladık</span><span style="font-size:14px;line-height:1.5">Bazal metabolizman ' + sayi(h.bmr) + ' kcal (Mifflin-St Jeor). Haftada ' + p.gun + ' gün antrenmanla günlük harcaman yaklaşık ' + sayi(h.tdee) + ' kcal. Hedefine göre ' + sayi(h.kcal) + ' kcal ayarladık' + (h.haftalikKg ? ' (haftada yaklaşık ' + sayi(Math.abs(h.haftalikKg), 2) + ' kg ' + (h.haftalikKg < 0 ? 'kayıp' : 'artış') + ')' : '') + '. Protein vücut ağırlığının kilosu başına ' + sayi(h.protein / p.kilo, 1) + ' g.</span></div>' +
       planHacim(pr) +
@@ -1344,13 +1346,13 @@
       const yarin = new Date(); yarin.setDate(yarin.getDate() + 1);
       const yarinBos = !gunIcin(yarin);
       antr += offAcik
-        ? '<div class="t genis off-kutu acik"><span class="k">Bugün zor mu?</span><span class="ik">Az da olsa gel. ' + esc(bugunku.ad) + ' antrenmanının 20 dakikalık kısa hâli hazır; bir set bile sayılır. Ya da bugünü dinlenmeye ayır, öğünlerini yazmaya devam edersen serin bozulmaz.</span><div class="haplar">' +
+        ? '<div class="t genis off-kutu acik"><span class="k">Bugün Zor</span><span class="ik">Az da olsa gel. ' + esc(bugunku.ad) + ' antrenmanının 20 dakikalık kısa hâli hazır; bir set bile sayılır. Ya da bugünü dinlenmeye ayır, öğünlerini yazmaya devam edersen serin bozulmaz.</span><div class="haplar">' +
           '<button class="btn ana kucuk" data-act="basla" data-id="' + bugunku.id + '" data-kisa="1">Kısa yap · 20 dk</button>' +
           '<button class="btn siyah kucuk" data-act="off" data-tur="dinlen">Bugünü atla, dinleneyim</button>' +
           (yarinBos ? '<button class="btn cerceve kucuk" data-act="off" data-tur="kaydir">Yarına kaydır</button>' : (zincirVar() ? '<button class="btn cerceve kucuk" data-act="off" data-tur="zincir">Programı bir gün kaydır</button>' : '')) +
           '<button class="metin-btn" data-act="off-ac" style="color:var(--ikincil)">Vazgeç</button></div>' +
           (yarinBos ? '' : '<span class="ik">"Programı bir gün kaydır" bugünü ve sonraki antrenmanları ilk boş güne kadar birer gün ileri atar.</span>') + '</div>'
-        : '<div class="off-satir"><button class="metin-btn off-btn" data-act="off-ac">Bugün zor mu? Kısa yap ya da dinlen</button><button class="metin-btn off-btn" data-act="gd-ac">Bugün başka antrenman yap</button></div>';
+        : '<div class="off-satir"><button class="metin-btn off-btn" data-act="off-ac">Bugün Zor · kısa yap ya da dinlen</button><button class="metin-btn off-btn" data-act="gd-ac">Bugün başka antrenman yap</button></div>';
     }
     if (!S.seans && !g.antrenman && S.program && S.program.gunler.length > (bugunku ? 1 : 0)) {
       if (gunDegisAcik) antr += gunDegisKutu(bugunku);
@@ -1362,13 +1364,13 @@
       ? '<a class="t h150" href="#/ilerleme"><span class="k">' + esc(D.HAREKET[ana].ad) + ' rekoru</span><span class="orta num">' + sayi(S.rekor[ana].kg, 1) + '<span class="ik" style="font-weight:600"> kg × ' + S.rekor[ana].tekrar + '</span></span><span class="ik">' + esc(S.rekor[ana].tarih) + '</span></a>'
       : '<a class="t h150" href="#/ilerleme"><span class="k">Kilo</span><span class="orta num">' + sayi(S.kilo.length ? S.kilo[S.kilo.length - 1].kg : S.profil.kilo, 1) + '<span class="ik" style="font-weight:600"> kg</span></span><span class="ik">Tart, ekle, gelişimi gör</span></a>';
     const ara = S.seans ? null : sonAntrenmanAra();
-    if (ara != null && ara >= 10 && !g.antrenman && antr.indexOf('Bugünün antrenmanı') >= 0) antr = antr.replace('<span class="btn beyaz"', '<span class="ik" style="color:rgba(255,255,255,.85)">' + ara + ' gün aradan sonra yükleri biraz hafifletiyoruz. Bıraktığın yerden.</span><span class="btn beyaz"');
+    if (ara != null && ara >= 10 && !g.antrenman && antr.indexOf('Bugünün antrenmanı') >= 0) antr = antr.replace('<span class="btn beyaz"', '<span class="ik" style="color:rgba(255,255,255,.85)">Geri Dönüş Modu: ' + ara + ' gün aradan sonra yükleri biraz hafifletiyoruz. Bıraktığın yerden.</span><span class="btn beyaz"');
     const sa = new Date().getHours();
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (haftaPlanKutu(false) || '') + antr + (haftaPlanKutu(false) ? '' : haftaKart()) + (haftaPlanKutu(false) ? '' : sozKutu()) +
-      '<a class="t limon h150" href="#/beslenme"><span class="k">' + (kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(Math.abs(kalan)) + '">' + sayi(Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
+      '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (haftaPlanKutu(false) || '') + antr + (haftaPlanKutu(false) ? '' : (haftaKart() || sozKutu())) +
+      '<a class="' + (hedefTamam(tp.k, h.kcal) ? 't limon' : 't') + ' h150" href="#/beslenme"><span class="k">' + (hedefTamam(tp.k, h.kcal) ? 'Hedef tamam' : kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '">' + sayi(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
       (seri() ? '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' : '<a class="t koyu h150" href="#/antrenman"><span class="k">Seri</span><span class="buyuk">Bugün<span style="color:var(--mavi-gece)">.</span></span><span class="ik">Yeni seri tek bir antrenmanla başlar.</span></a>') +
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
       rekorKutu +
@@ -1406,7 +1408,7 @@
       }).join('') + '</div></div></div>' +
       (bitti ? '<div class="t limon"><span class="k">Bugün ' + esc(bitti.ad) + ' tamamlandı</span><span style="font-weight:700">İstersen yine de yeni bir antrenman başlatabilirsin.</span></div>' : '') +
       '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>' +
-      '<button class="metin-btn zor-btn" data-act="basla" data-id="' + sg.id + '" data-kisa="1">Bugün zor mu? 20 dakikalık kısa hâlini yap</button>' +
+      '<button class="metin-btn zor-btn" data-act="basla" data-id="' + sg.id + '" data-kisa="1">Bugün Zor · 20 dakikalık kısa hâlini yap</button>' +
       '<a class="metin-btn" href="#/program" style="align-self:center;color:var(--murekkep)">' + (pr.ozel ? 'Programımı düzenle' : 'Programı düzenle ya da kendi programını yaz') + '</a>' +
        (hesap ? '<a class="t koyu jam-giris" href="#/jam" style="flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><span class="yigin"><span class="k">Jam</span><b>' + (S.jam ? 'Ortak antrenmandasın · ' + esc(S.jam.kod) : 'Arkadaşınla birlikte antrenman yap') + '</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>' : '') +
       (hesap ? '<button class="metin-btn" data-act="paylas-ac" data-kaynak="program" style="align-self:center;color:var(--kobalt)">Programımı bir arkadaşıma gönder</button>' : '');
@@ -1501,8 +1503,8 @@
     const toplamSet = sayilan.reduce((a, l) => a + l.length, 0);
     return ust('<a class="ikon-btn" href="#/" aria-label="Ana sayfa">' + IK.geri + '</a>', '<span class="alt num">' + tamam + ' / ' + toplamSet + ' set</span>') +
       '<div class="seans-bas"><h1 class="baslik">' + esc(sg.ad) + '<span class="nokta">.</span></h1><div class="seans-saat"><span class="k">Süre</span><b class="num" id="seansSure">' + sureYaz(Date.now() - s.baslangic) + '</b></div></div>' +
-      (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Geri döndün.</span><span style="font-weight:600;line-height:1.45">' + s.donus.ara + ' gün oldu, önemli değil. Hiçbir zaman çok geç değil. Vücudun sana yetişsin diye bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yerden devam.</span></div>' : '') +
-      (s.kisa ? '<div class="t koyu kisa-bant"><span class="k">Kısa antrenman · ~20 dk</span><b>Az da olsa geldin. Bir set bile sayılır.</b><span class="ik">En önemli ' + Math.min(3, hl.length) + ' hareket, her birinde 2 set. Geri kalanı bugün atlandı.</span><button class="metin-btn" data-act="kisa-iptal">Tam antrenmana dön</button></div>' : '') +
+      (s.donus ? '<div class="t limon" style="gap:4px"><span class="k">Geri Dönüş Modu</span><span style="font-weight:600;line-height:1.45">Geri döndün. ' + s.donus.ara + ' gün oldu, önemli değil. Hiçbir zaman çok geç değil. Vücudun sana yetişsin diye bugünkü yükleri son kaldırdığının %' + Math.round(s.donus.oran * 100) + '\'ine indirdik. Rahat geliyorsa sonraki antrenmanda kaldığın yerden devam.</span></div>' : '') +
+      (s.kisa ? '<div class="t koyu kisa-bant"><span class="k">Bugün Zor · ~20 dk</span><b>Az da olsa geldin. Bir set bile sayılır.</b><span class="ik">En önemli ' + Math.min(3, hl.length) + ' hareket, her birinde 2 set. Geri kalanı bugün atlandı.</span><button class="metin-btn" data-act="kisa-iptal">Tam antrenmana dön</button></div>' : '') +
       jamSerit() +
       '<details class="t rutin-kutu"' + (Object.values(s.setler).some((l) => l.some((y) => y.ok)) ? '' : ' open') + '><summary><span class="k">Isınma · ~7 dk</span><span class="ik">açmak için dokun</span></summary>' + rutinListe(ISINMA.genel.concat(ISINMA[gunBolge(sg)])) + '</details>' +
       '<div class="seans-izgara">' + hl.map((x, xi) => {
@@ -1742,7 +1744,7 @@
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">Beslenme<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      '<div class="t limon h150"><span class="k">' + (kalan >= 0 ? 'Kalan' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(Math.abs(kalan)) + '">' + sayi(Math.abs(kalan)) + '</span><span class="k num">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></div>' +
+      '<div class="' + (hedefTamam(tp.k, h.kcal) ? 't limon' : 't') + ' h150"><span class="k">' + (hedefTamam(tp.k, h.kcal) ? 'Hedef tamam' : kalan >= 0 ? 'Kalan' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '">' + sayi(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '</span><span class="k num">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></div>' +
       '<div class="t h150 num" style="gap:6px">' + [['Protein', tp.p, h.protein], ['Karb.', tp.kh, h.karb], ['Yağ', tp.y, h.yag]].map((m) => '<div class="yigin" style="gap:3px"><div class="satir" style="font-size:13px"><span>' + m[0] + '</span><b>' + sayi(m[1]) + '/' + m[2] + ' g</b></div><div class="cubuk' + (m[1] > m[2] * 1.1 ? ' asim' : '') + '" style="height:6px"><span style="width:' + yuzde(m[1], m[2]) + '%"></span></div></div>').join('') + '</div>' +
       '<a class="t kobalt genis" href="#/ekle/foto" style="flex-direction:row;align-items:center;justify-content:space-between;min-height:76px"><div class="yigin"><span class="k">Hızlı ekle</span><b style="font-size:18px">Tabağının fotoğrafını çek</b></div><span class="ikon-btn" style="background:#fff;color:var(--kobalt)">' + IK.kamera + '</span></a>' +
       '<a class="t h130" href="#/ekle/ara" style="min-height:100px"><span class="ik" style="color:var(--murekkep)">' + IK.ara.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2"') + '</span><b>Listeden ya da markadan ara</b></a>' +
@@ -1877,7 +1879,7 @@
   }
   function fotoKalemler() {
     const t = fotoSonuc.kalemler.reduce((a, x) => a + x.k, 0);
-    return '<div class="izgara"><div class="t limon h130"><span class="k">Bu tabak</span><span class="buyuk num">' + sayi(t) + '</span><span class="k">kcal · tahmini</span></div>' +
+    return '<div class="izgara"><div class="t h130"><span class="k">Bu tabak</span><span class="buyuk num">' + sayi(t) + '</span><span class="k">kcal · tahmini</span></div>' +
       '<div class="t h130 num"><div class="satir"><span>Protein</span><b style="color:var(--kobalt)">' + sayi(fotoSonuc.kalemler.reduce((a, x) => a + x.p, 0)) + ' g</b></div><div class="satir"><span>Karb.</span><b>' + sayi(fotoSonuc.kalemler.reduce((a, x) => a + x.kh, 0)) + ' g</b></div><div class="satir"><span>Yağ</span><b>' + sayi(fotoSonuc.kalemler.reduce((a, x) => a + x.y, 0)) + ' g</b></div></div></div>' +
       '<div class="t" style="padding:4px 16px"><div class="liste">' + fotoSonuc.kalemler.map((x, i) => '<div><div class="ad"><b>' + esc(x.ad) + '</b><span class="ik num">' + sayi(x.k) + ' kcal' + (x.emin === 'dusuk' ? ' · emin değil, kontrol et' : '') + '</span><button class="metin-btn kucuk-metin" data-act="foto-sil-kalem" data-i="' + i + '" style="color:var(--ikincil);align-self:flex-start;padding:0">Bu yok, çıkar</button></div><button class="yuvarlak" data-act="foto-g" data-i="' + i + '" data-yon="-1" aria-label="' + esc(x.ad) + ' porsiyonunu azalt">−</button><span class="num" style="min-width:52px;text-align:center;font-weight:800">' + sayi(x.g) + ' g</span><button class="yuvarlak" data-act="foto-g" data-i="' + i + '" data-yon="1" aria-label="' + esc(x.ad) + ' porsiyonunu artır">+</button></div>').join('') + '</div></div>' +
       aiOy('foto', 'f' + kisaKimlik(fotoSonuc.kalemler.map((x) => x.ad + x.g).join('|')), fotoSonuc.kalemler.map((x) => x.ad + ' ' + x.g + ' g').join(', ')) +
@@ -1896,7 +1898,7 @@
       '<h1 class="baslik" style="font-size:32px">' + esc(u.ad) + '<span class="nokta">.</span></h1>' +
       (u.marka ? '<p class="not">' + esc(u.marka) + '</p>' : '') +
       '<div class="izgara">' +
-      '<div class="t limon h130"><span class="k">Bu porsiyon</span><span class="buyuk num" id="porK">' + sayi(k) + '</span><span class="k">kcal</span></div>' +
+      '<div class="t h130"><span class="k">Bu porsiyon</span><span class="buyuk num" id="porK">' + sayi(k) + '</span><span class="k">kcal</span></div>' +
       '<div class="t h130 num" id="porM"><div class="satir"><span>Protein</span><b style="color:var(--kobalt)">' + sayi((u.p * g) / 100, 1) + ' g</b></div><div class="satir"><span>Karb.</span><b>' + sayi((u.kh * g) / 100, 1) + ' g</b></div><div class="satir"><span>Yağ</span><b>' + sayi((u.y * g) / 100, 1) + ' g</b></div></div>' +
       '<label class="t genis alan"><span>Miktar, gram' + (u.birim ? ' · ' + esc(u.birim) + ' = ' + u.g + ' g' : '') + '</span><input id="porG" data-in="porsiyon" inputmode="numeric" value="' + g + '"></label>' +
       (katlar.length ? '<div class="t genis"><span class="k">Kaç tane?</span><div class="haplar">' + katlar.map((x) => '<button class="hap siyah" data-act="por-hizli" data-g="' + x[0] + '" aria-pressed="' + (x[0] === g) + '">' + esc(x[1]) + '</button>').join('') + '</div></div>' : '') +
@@ -1942,7 +1944,7 @@
     return ust(logo) + '<h1 class="baslik">İlerleme<span class="nokta">.</span></h1>' +
       '<div class="izgara">' + seninComeback() +
       '<div class="t koyu h150"><span class="k">Seri</span><span class="buyuk num">' + (seri() || 'Bugün') + '<span style="color:var(--mavi-gece)">.</span></span><span class="ik">' + (seri() ? 'gün üst üste' : 'Yeni seri tek bir antrenmanla başlar.') + '</span></div>' +
-      '<div class="t kobalt h150"><span class="k">' + (sozDurum(haftaBasi()) ? 'Bu haftaki sözün' : 'Bu hafta') + '</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + (sozDurum(haftaBasi()) ? sozDurum(haftaBasi()).soz : S.profil.gun) + '</span></span><span class="k">antrenman</span></div>' +
+      '<div class="t kobalt h150"><span class="k">' + (sozDurum(haftaBasi()) ? 'Haftalık Söz' : 'Bu hafta') + '</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + (sozDurum(haftaBasi()) ? sozDurum(haftaBasi()).soz : S.profil.gun) + '</span></span><span class="k">antrenman</span></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Rozetler</span><span class="ik num">' + rozetDurum().filter((r) => r.var).length + ' / ' + ROZET.length + '</span></div><div class="rozetler">' + rozetDurum().map((r) => '<div class="rozet' + (r.var ? ' var' : '') + '">' + rozetSvg(r.id, r.var) + '<b>' + esc(r.ad) + '</b><span>' + (r.var ? esc(r.acik) : 'Kilitli · ' + esc(r.acik)) + '</span></div>').join('') + '</div></div>' +
@@ -2071,7 +2073,7 @@
       '<h1 class="baslik">Sıralama<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       (V && !V.hata && !V.katildi ? '<div class="t kobalt genis" style="gap:8px"><span class="k">Katılmak senin elinde</span><b style="font-size:20px;line-height:1.25">Sıralamada görünmek ister misin?</b><span style="opacity:.9;line-height:1.45">Katılırsan adın ve soyadının baş harfi (ör. ' + esc(gorunenAd()) + ') ile haftalık ve aylık hacmin, set ve antrenman sayın diğer üyelere görünür. İstediğin zaman çıkabilirsin.</span><button class="btn" data-act="sira-katil" data-acik="1" style="background:#fff;color:var(--kobalt);align-self:flex-start">Sıralamaya katıl</button></div>' : '') +
-      '<div class="t limon h130"><span class="k">' + (sira.donem === 'hafta' ? 'Bu haftan' : 'Bu ayın') + '</span><span class="orta num">' + sayi(ben.hacim) + '<span class="ik" style="color:inherit"> kg</span></span><span class="k num">' + ben.set + ' set · ' + ben.antr + ' antrenman</span></div>' +
+      '<div class="t h130"><span class="k">' + (sira.donem === 'hafta' ? 'Bu haftan' : 'Bu ayın') + '</span><span class="orta num">' + sayi(ben.hacim) + '<span class="ik" style="color:inherit"> kg</span></span><span class="k num">' + ben.set + ' set · ' + ben.antr + ' antrenman</span></div>' +
       '<div class="t koyu h130"><span class="k">Sıran</span><span class="orta num">' + (V && V.benim ? V.benim.sira + '<span style="font-size:18px;color:var(--koyu-ikincil)"> / ' + V.toplam + '</span>' : '—') + '</span><span class="k" style="color:var(--koyu-ikincil)">' + (V && V.katildi ? (V.benim ? OLC.find((o) => o[0] === sira.olcut)[1].toLocaleLowerCase('tr') + ' sıralaması' : 'antrenman bitirince görünürsün') : 'katılmadın') + '</span></div>' +
       '<div class="yatay genis" role="group" aria-label="Dönem">' + [['hafta', 'Bu hafta'], ['ay', 'Bu ay']].map((d) => '<button class="hap" data-act="sira-sec" data-tur="donem" data-deger="' + d[0] + '" aria-pressed="' + (sira.donem === d[0]) + '">' + d[1] + '</button>').join('') + '</div>' +
       '<div class="yatay genis sira-olcut" role="group" aria-label="Ölçüt">' + OLC.map((o) => '<button class="hap" data-act="sira-sec" data-tur="olcut" data-deger="' + o[0] + '" aria-pressed="' + (sira.olcut === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' +
@@ -2109,7 +2111,7 @@
       '<div class="izgara">' +
       '<div class="t kobalt h150"><span class="k">Antrenman</span><span class="buyuk num">' + antr.length + '</span><span class="k">en çok ' + esc(enGun) + '</span></div>' +
       '<div class="t koyu h150"><span class="k">Toplam</span><span class="orta num">' + sayi(set) + ' set</span><span class="ik num">' + sayi(hacim) + ' kg · ' + sayi(dk) + ' dk</span></div>' +
-      '<div class="t limon h150"><span class="k">Ortalama kalori</span><span class="orta num">' + (kcal.length ? sayi(ortK) : '—') + '</span><span class="k">' + kcal.length + ' gün kayıt · ' + uyum + ' gün hedefte</span></div>' +
+      '<div class="t h150"><span class="k">Ortalama kalori</span><span class="orta num">' + (kcal.length ? sayi(ortK) : '—') + '</span><span class="k">' + kcal.length + ' gün kayıt · ' + uyum + ' gün hedefte</span></div>' +
       '<div class="t h150"><span class="k">Ortalama protein</span><span class="orta num">' + (kcal.length ? sayi(ortP) + '<span class="ik"> g</span>' : '—') + '</span><span class="ik">hedef ' + S.hedef.protein + ' g' + (su.length ? ' · su ort. ' + sayi(su.reduce((a, b) => a + b, 0) / su.length / 1000, 1) + ' L' : '') + '</span></div>' +
       '<div class="t genis"><span class="k">Kilo</span><span class="orta num">' + (kilo.length >= 2 ? sayi(kilo[0].kg, 1) + ' → ' + sayi(kilo[kilo.length - 1].kg, 1) + ' kg <span style="color:var(--kobalt)">(' + (kilo[kilo.length - 1].kg - kilo[0].kg >= 0 ? '+' : '') + sayi(kilo[kilo.length - 1].kg - kilo[0].kg, 1) + ')</span>' : kilo.length ? sayi(kilo[0].kg, 1) + ' kg' : '—') + '</span>' +
       (olc.length >= 2 && olc[0].bel != null && olc[olc.length - 1].bel != null ? '<span class="ik">Bel ' + sayi(olc[0].bel, 1) + ' → ' + sayi(olc[olc.length - 1].bel, 1) + ' cm</span>' : '') + '</div>' +
@@ -2162,6 +2164,45 @@
     const wC = yaz('COMEBACK', 86, 1760, 120, 900, '#F3F1EC', -6); yaz('.', 86 + wC + 2, 1760, 120, 900, '#4A63FF', 0);
     yaz('comeback.com.tr', 90, 1840, 30, 700, '#5A5960', 1);
     return c;
+  }
+
+  /* söz kartı: 1080×1920, siyah sahne. Kişinin kendine verdiği haftalık söz; tutulunca tek limon an. */
+  function sozKarti() {
+    const W = 1080, H = 1920; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    const F = getComputedStyle(document.body).fontFamily;
+    const bas = haftaBasi(); const d = sozDurum(bas) || { soz: 0, yapilan: 0, gunler: [] };
+    const tuttu = d.soz > 0 && d.yapilan >= d.soz;
+    const yaz = (t, X, Y, boyut, kalinlik, renk, ls, hiza) => { x.fillStyle = renk; x.font = kalinlik + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; x.textAlign = hiza || 'left'; x.fillText(t, X, Y); x.textAlign = 'left'; return x.measureText(t).width; };
+    x.fillStyle = '#0B0B0D'; x.fillRect(0, 0, W, H);
+    const gl = x.createRadialGradient(W * 0.5, 900, 40, W * 0.5, 900, 760); gl.addColorStop(0, 'rgba(46,75,255,.22)'); gl.addColorStop(1, 'rgba(46,75,255,0)'); x.fillStyle = gl; x.fillRect(0, 0, W, H);
+    const son = new Date(bas); son.setDate(son.getDate() + 6);
+    yaz(bas.getDate() + ' ' + AY[bas.getMonth()] + ' – ' + son.getDate() + ' ' + AY[son.getMonth()], 90, 170, 36, 700, '#8B8A92', 1);
+    yaz('Söz', 90, 380, 170, 900, '#F3F1EC', -8);
+    const w2 = yaz(tuttu ? 'tutuldu' : 'verildi', 90, 540, 170, 900, '#F3F1EC', -8); yaz('.', 90 + w2 + 4, 540, 170, 900, tuttu ? '#D9F05A' : '#4A63FF', 0);
+    const wN = yaz(String(d.soz), 80, 920, 330, 900, tuttu ? '#D9F05A' : '#FFFFFF', -16);
+    yaz('gün', 80 + wN + 34, 820, 56, 800, '#F3F1EC', -1);
+    yaz(d.yapilan + ' / ' + d.soz + ' yapıldı', 80 + wN + 34, 900, 40, 700, '#6E86FF', 0);
+    const GH = ['P', 'S', 'Ç', 'P', 'C', 'C', 'P'];
+    for (let i = 0; i < 7; i++) {
+      const g = d.gunler[i] || {}; const cx = 140 + i * 133, cy = 1060;
+      x.beginPath(); x.arc(cx, cy, 38, 0, Math.PI * 2);
+      if (g.yapildi) { x.fillStyle = '#2E4BFF'; x.fill(); } else if (g.plan) { x.lineWidth = 5; x.strokeStyle = '#2E4BFF'; x.stroke(); } else { x.lineWidth = 3; x.strokeStyle = '#2C2C33'; x.stroke(); }
+      yaz(GH[i], cx, cy + 112, 32, 700, g.yapildi || g.plan ? '#F3F1EC' : '#5A5960', 0, 'center');
+    }
+    x.fillStyle = '#222228'; x.fillRect(90, 1290, 900, 2);
+    yaz(tuttu ? 'Kimse izlemedi. Sen yine de geldin.' : 'Kendime söz verdim. Gerisi bende.', 90, 1390, 50, 800, '#F3F1EC', -1);
+    yaz('Make the', 90, 1640, 44, 700, '#B9B6AE', -1);
+    const wC = yaz('COMEBACK', 86, 1760, 120, 900, '#F3F1EC', -6); yaz('.', 86 + wC + 2, 1760, 120, 900, '#4A63FF', 0);
+    yaz('comeback.com.tr', 90, 1840, 30, 700, '#5A5960', 1);
+    return c;
+  }
+
+  async function gorselPaylas(c, ad, baslik) {
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    const dosya = new File([blob], ad, { type: 'image/png' });
+    try { if (navigator.canShare && navigator.canShare({ files: [dosya] })) { await navigator.share({ files: [dosya], title: baslik }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = ad; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000); toast('Görsel indirildi.');
   }
 
   /* --- profil --- */
@@ -2363,7 +2404,7 @@
   function sozKutu() {
     const bas = haftaBasi(); const d = sozDurum(bas); if (!d) return '';
     const tuttu = d.yapilan >= d.soz;
-    return '<div class="t genis soz-kutu"><div class="satir"><span class="k">Bu haftaki sözün</span><span class="soz-sayi num"><b>' + d.yapilan + '</b> / ' + d.soz + ' gün</span></div>' +
+    return '<div class="t genis soz-kutu"><div class="satir"><span class="k">Haftalık Söz</span><span class="soz-sayi num"><b>' + d.yapilan + '</b> / ' + d.soz + ' gün</span></div>' +
       '<div class="soz-gunler" aria-hidden="true">' + d.gunler.map((g, i) => '<span class="' + [g.yapildi ? 'ok' : '', g.plan ? 'plan' : '', g.gecti && g.plan && !g.yapildi ? 'kacti' : '', g.bugun ? 'bugun' : ''].join(' ').trim() + '">' + KISA_GUN[i].charAt(0) + '</span>').join('') + '</div>' +
       (tuttu ? '<span class="ik">Sözünü tuttun. Fazlası senden.</span>' : '') + '</div>';
   }
@@ -2410,9 +2451,9 @@
     }).join('');
     const n = secili.length;
     const alt = sirada ? (sirada.bugun ? 'Bugün: ' : 'Sıradaki: ' + GUN_AD[sirada.i] + ' · ') + esc(sirada.ad) : (n ? 'Bu haftanın planlı günleri bitti.' : 'Bu hafta plan yok. Geleceğin günlere dokun.');
-    return '<div class="t genis hk-kutu"><div class="satir" style="flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px"><span class="k">Bu hafta</span><span class="k num">' + yapilan + ' / ' + n + ' gün</span></div>' +
+    return '<div class="t genis hk-kutu"><div class="satir" style="flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px"><span class="k">' + (p ? 'Haftalık Söz' : 'Bu hafta') + '</span><span class="k num">' + yapilan + ' / ' + n + ' gün</span></div>' +
       '<div class="hk-gunler" role="group" aria-label="Bu haftanın günleri">' + hucre + '</div>' +
-      '<span class="hk-alt">' + alt + '</span></div>';
+      '<div class="hk-son"><span class="hk-alt">' + alt + '</span>' + (p && n ? '<button type="button" class="metin-btn hk-paylas" data-act="soz-paylas">' + (yapilan >= n ? 'Sözü tuttun · paylaş' : 'Sözünü paylaş') + '</button>' : '') + '</div></div>';
   }
   function ekranHaftaPlan() {
     if (!S.profil) return ekranKarsilama();
@@ -2458,7 +2499,7 @@
     return ust(logo) + '<h1 class="baslik">Menü<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       '<a class="t genis mn-profil" href="#/profilim">' + benAvatar('buyuk') + '<span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · bilgiler, hedef, hesap</span></span>' + OK_SAG + '</a>' +
-      '<a class="t limon h130" href="#/hedef"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></a>' +
+      '<a class="t h130" href="#/hedef"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></a>' +
       '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
       mGrup('Antrenman', [
         mSatir('#/program', 'program', S.program && S.program.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle', 'Hareket ekle, çıkar, günleri değiştir'),
@@ -2509,7 +2550,7 @@
       '<a class="btn ana genis" href="#/kurulum">Bilgilerimi güncelle · kilo, boy, yaş, spor</a>' +
       '<a class="btn cerceve genis" href="#/hedef">Hedefimi değiştir · kas, yağ yakma, gün, odak</a>' +
       kadiKutu() +
-      '<div class="t genis" style="gap:10px"><span class="k">Dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div>' +
+      '<div class="t genis" style="gap:10px"><span class="k">Zil · dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div>' +
         '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
         '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
         '</div>' +
@@ -2770,6 +2811,7 @@
       toast(yeniR.length ? (yeniR.length === 1 ? 'Yeni rozet: ' + yeniR[0].ad + '. Bunu sen kazandın.' : yeniR.length + ' yeni rozet. Bunu sen kazandın.') : yeni ? (yeni === 1 ? 'Yeni rekor. Bunu sen yaptın.' : yeni + ' yeni rekor. Bunu sen yaptın.') : 'Kaydedildi. Bugün de geldin.');
       git('#/bitti');
     },
+    async 'soz-paylas'() { await gorselPaylas(sozKarti(), 'comeback-soz.png', 'COMEBACK. sözüm'); olay('paylas'); },
     async paylas() {
       const c = haftaKarti(); olay('paylas');
       const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
