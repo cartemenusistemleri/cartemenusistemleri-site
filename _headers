@@ -5,13 +5,13 @@
 # COOP bilerek konmadı: /comeback/aktar.html, Dreamina penceresiyle window.opener üzerinden
 # haberleştiği için COOP bu akışı koparırdı.
 
+# Not: /api/comeback/* bir Pages Function'dır; _headers yalnızca statik dosyalara
+# işler, Function yanıtlarına değil. Bu yüzden API için burada kural yok (JSON ucunda
+# çerçeveleme koruması zaten anlamsız). API başlıklarını fonksiyonun kendisi verir.
+
 /comeback/*
   X-Frame-Options: DENY
   Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'
-
-/api/comeback/*
-  X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'
 
 /comeback-marka/*
   X-Frame-Options: DENY
