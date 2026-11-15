@@ -1367,7 +1367,7 @@
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (haftaPlanKutu(false) || '') + antr + (haftaPlanKutu(false) ? '' : sozKutu()) +
+      '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (haftaPlanKutu(false) || '') + antr + (haftaPlanKutu(false) ? '' : haftaKart()) + (haftaPlanKutu(false) ? '' : sozKutu()) +
       '<a class="t limon h150" href="#/beslenme"><span class="k">' + (kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(Math.abs(kalan)) + '">' + sayi(Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
       (seri() ? '<a class="t koyu h150" href="#/ilerleme"><span class="k">Seri</span><span class="buyuk num"><span data-say="' + seri() + '">' + seri() + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">gün üst üste</span></a>' : '<a class="t koyu h150" href="#/antrenman"><span class="k">Seri</span><span class="buyuk">Bugün<span style="color:var(--mavi-gece)">.</span></span><span class="ik">Yeni seri tek bir antrenmanla başlar.</span></a>') +
       '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
@@ -1655,6 +1655,26 @@
       '<div class="tema-sec" role="radiogroup" aria-label="Görünüm" style="--i:' + i + '"><span class="tema-pil" aria-hidden="true"></span>' +
       TEMA_SIRA.map((k) => '<button type="button" role="radio" aria-checked="' + (k === t) + '" data-act="tema" data-tema="' + k + '">' + TEMA[k][2] + '<span>' + TEMA[k][0] + '</span></button>').join('') +
       '</div><span class="ik" id="temaNot">' + TEMA[t][1] + '</span></div>';
+  }
+  // uygulama simgesi: ana ekrana eklerken kullanılan simge (logo her zaman tam COMEBACK.)
+  const SIMGE = {
+    gece: ['Gece', 'ikon-192.png?v=4', 'apple-touch-icon.png?v=4', 'manifest.webmanifest?v=4'],
+    gunduz: ['Gündüz', 'ikon-gunduz-192.png?v=1', 'apple-touch-icon-gunduz.png?v=1', 'manifest-gunduz.webmanifest?v=1'],
+    kobalt: ['Kobalt', 'ikon-kobalt-192.png?v=1', 'apple-touch-icon-kobalt.png?v=1', 'manifest-kobalt.webmanifest?v=1']
+  };
+  const simgeAyar = () => { const s = (S.ayar || {}).simge; return SIMGE[s] ? s : 'gece'; };
+  function simgeUygula() {
+    const s = SIMGE[simgeAyar()];
+    const m = document.querySelector('link[rel="manifest"]'); if (m && m.getAttribute('href') !== s[3]) m.setAttribute('href', s[3]);
+    const a = document.querySelector('link[rel="apple-touch-icon"]'); if (a && a.getAttribute('href') !== s[2]) a.setAttribute('href', s[2]);
+    try { localStorage.setItem('comeback:simge', simgeAyar()); } catch (e) { /* yok */ }
+  }
+  function simgeSecici() {
+    const s = simgeAyar();
+    return '<div class="t genis" style="gap:10px"><span class="k">Uygulama simgesi</span>' +
+      '<div class="simge-sec" role="radiogroup" aria-label="Uygulama simgesi">' +
+      Object.keys(SIMGE).map((k) => '<button type="button" role="radio" aria-checked="' + (k === s) + '" data-act="simge" data-simge="' + k + '"><img src="' + SIMGE[k][1] + '" alt="" width="64" height="64" loading="lazy"><span>' + SIMGE[k][0] + '</span></button>').join('') +
+      '</div><span class="ik" id="simgeNot">' + (tekBasina() ? 'Yeni simge, uygulamayı ana ekrandan kaldırıp yeniden eklediğinde görünür. Verilerin hesabında durur.' : 'Uygulamayı ana ekrana eklediğinde bu simge görünür.') + '</span></div>';
   }
   // antrenman sürerken ekran kapanmasın (Screen Wake Lock); ayardan kapatılabilir
   let ekranKilidi = null; let kilitIstek = false;
@@ -2370,6 +2390,30 @@
       '<span class="' + (tam ? 'ik' : '') + '" style="font-size:14px;line-height:1.45' + (tam ? '' : ';opacity:.9') + '">' + n + ' gün seçtin' + (n !== pn ? ', programın ' + pn + ' gün. Seçtiğin günlere antrenmanları sırayla dağıtırız' + (n < pn ? '; yetişmeyenler sonraki haftaya kayar.' : '; fazla günlerde programın baştan döner.') : '. Antrenmanlar bu günlere sırayla yerleşir.') + '</span>' +
       '<button class="btn ' + (tam ? 'ana' : 'beyaz') + '" data-act="hp-kaydet" style="align-self:flex-start"' + (n ? '' : ' disabled') + '>Söz veriyorum · ' + n + ' gün</button></div>';
   }
+  // ana sayfada bu hafta: hangi günler geleceğin, hangileri bitti; gelecek günlere dokununca plan değişir
+  function haftaKart() {
+    if (!S.program || !antrenmanGunleri().length) return '';
+    const bas = haftaBasi(); const p = (S.haftaPlan || {})[tarihKey(bas)];
+    const secili = p ? p.gunler : hpVarsayilan(bas); const bugunK = tarihKey();
+    let yapilan = 0; let sirada = null;
+    const hucre = KISA_GUN.map((g, i) => {
+      const d = new Date(bas); d.setDate(d.getDate() + i); const k = tarihKey(d);
+      const bitti = !!(S.gunluk[k] && S.gunluk[k].antrenman); if (bitti) yapilan++;
+      const plan = secili.indexOf(i) >= 0; const gecti = k < bugunK; const bugun = k === bugunK;
+      const pg = plan && !gecti && !bitti ? gunIcin(d) : null;
+      if (pg && !sirada) sirada = { i, ad: pg.ad, bugun };
+      const sinif = ['hk-gun', bitti ? 'bitti' : '', plan ? 'plan' : '', gecti && plan && !bitti ? 'kacti' : '', bugun ? 'bugun' : ''].join(' ').replace(/\s+/g, ' ').trim();
+      const ic = '<span class="hk-ad">' + g + '</span><span class="hk-no num">' + d.getDate() + '</span><span class="hk-isaret" aria-hidden="true"></span>';
+      const durum = bitti ? 'antrenman yapıldı' : plan ? (gecti ? 'planlıydı, yapılmadı' : 'antrenman günü') : 'dinlenme';
+      if (gecti || bitti || (bugun && S.seans)) return '<span class="' + sinif + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '">' + ic + '</span>';
+      return '<button type="button" class="' + sinif + '" data-act="hk-gun" data-i="' + i + '" aria-pressed="' + plan + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '. Değiştirmek için dokun.">' + ic + '</button>';
+    }).join('');
+    const n = secili.length;
+    const alt = sirada ? (sirada.bugun ? 'Bugün: ' : 'Sıradaki: ' + GUN_AD[sirada.i] + ' · ') + esc(sirada.ad) : (n ? 'Bu haftanın planlı günleri bitti.' : 'Bu hafta plan yok. Geleceğin günlere dokun.');
+    return '<div class="t genis hk-kutu"><div class="satir" style="flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px"><span class="k">Bu hafta</span><span class="k num">' + yapilan + ' / ' + n + ' gün</span></div>' +
+      '<div class="hk-gunler" role="group" aria-label="Bu haftanın günleri">' + hucre + '</div>' +
+      '<span class="hk-alt">' + alt + '</span></div>';
+  }
   function ekranHaftaPlan() {
     if (!S.profil) return ekranKarsilama();
     const bas = planHaftasi(); const p = (S.haftaPlan || {})[tarihKey(bas)];
@@ -2470,6 +2514,7 @@
         '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
         '</div>' +
       temaSecici() +
+      simgeSecici() +
       '<div class="t genis" style="gap:10px"><span class="k">Antrenman takibi</span><div class="haplar">' + Object.keys(TAKIP).map((k) => '<button class="hap" data-act="takip-sec" data-deger="' + (k === takipVarsayilan() ? '' : k) + '" aria-pressed="' + (takipSeviye() === k) + '">' + TAKIP[k][0] + (k === takipVarsayilan() ? ' · seviyene göre' : '') + '</button>').join('') + '</div>' +
         '<span class="ik">' + TAKIP[takipSeviye()][1] + '</span>' +
         (kilitVar() ? '<button class="ayar-satir" data-act="ekran-acik" aria-pressed="' + ekranAcikAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda ekran açık kalsın</b><span class="ik">Antrenman sürerken telefon kendiliğinden kararmaz. Bitirince normale döner.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' : '') +
@@ -2523,7 +2568,7 @@
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     app.innerHTML = html;
-    temaUygula();
+    temaUygula(); simgeUygula();
     if (hesap) okunmamisBaslat(); navRozet();
     const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme'].indexOf(parca[0]) < 0;
     nav.hidden = !menu; app.classList.toggle('tam', !menu);
@@ -2572,12 +2617,31 @@
   // öncesi/sonrası fotoğraf özelliği kaldırıldı: cihazda kalan eski fotoğrafları bir kez sil
   try { if (!S.fotoKaldirildi) { indexedDB.deleteDatabase('comeback-foto'); S.fotoKaldirildi = true; kaydet(); } } catch (e) { /* yok */ }
   if (S.jam) setTimeout(() => { jamCek(); jamBaslatZaman(); }, 1500);
+  // devam eden antrenmanda sıradaki seti içeren hareketin başına kaydır
+  function aktifeKaydir(yumusak) {
+    const set = document.querySelector('.seans-izgara .set.aktif'); const kutu = set && set.closest('section');
+    if (!kutu) return false;
+    const y = Math.max(0, kutu.getBoundingClientRect().top + window.scrollY - 12);
+    const az = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: y, behavior: yumusak && !az ? 'smooth' : 'auto' });
+    return true;
+  }
+  // açık sekmeye yeniden dokununca: en üstteysen sıradaki harekete, değilsen en başa
+  nav.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]'); if (!a || a.getAttribute('href') !== location.hash) return;
+    e.preventDefault();
+    const az = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (location.hash === '#/antrenman' && S.seans && window.scrollY < 40 && aktifeKaydir(true)) return;
+    window.scrollTo({ top: 0, behavior: az ? 'auto' : 'smooth' });
+  });
   let sonHash = location.hash;
   window.addEventListener('hashchange', () => {
     const onceki = sonHash; sonHash = location.hash;
     const m = /^#\/program\/ekle\/(\d+)/.exec(onceki || '');
     if (m && !/^#\/program\/ekle\//.test(location.hash)) { pFiltreSifirla(); if (location.hash === '#/program') pDonGun = +m[1]; }
     iptalOnay = false; sifirOnay = false; offAcik = false; if (barkodAkis) barkodDurdur(); render(); window.scrollTo(0, 0);
+    // antrenman sürerken sekmeye dönünce kaldığın harekete in
+    if (location.hash === '#/antrenman' && S.seans && !/^#\/antrenman/.test(onceki || '')) aktifeKaydir(false);
     if (pDonGun != null) { const e = document.getElementById('pdgun-' + pDonGun); pDonGun = null; if (e) { let y = 0; for (let n = e; n; n = n.offsetParent) y += n.offsetTop; window.scrollTo(0, Math.max(0, y - 12)); } }
   });
 
@@ -2634,6 +2698,12 @@
       } else { dinlenme = null; dinlenmeCiz(); }
     },
     'kisa-iptal'() { kisaGeriAl(S.seans); kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); toast('Tam antrenman geri geldi.'); },
+    simge(el) {
+      const s = el.dataset.simge; if (!SIMGE[s] || s === simgeAyar()) return;
+      S.ayar = S.ayar || {}; S.ayar.simge = s; kaydet(true); simgeUygula();
+      el.closest('.simge-sec').querySelectorAll('[data-simge]').forEach((b) => b.setAttribute('aria-checked', String(b === el)));
+      if (tekBasina()) toast('Simge seçildi. Görmek için uygulamayı ana ekrandan kaldırıp yeniden ekle.');
+    },
     tema(el) {
       const t = el.dataset.tema; if (!TEMA[t] || t === temaAyar()) return;
       S.ayar = S.ayar || {}; S.ayar.tema = t; delete S.ayar.gece; kaydet(true);
@@ -2845,6 +2915,14 @@
     },
     'hp-gun'(el) { if (!hpTaslak) return; const i = +el.dataset.i; const j = hpTaslak.gunler.indexOf(i); if (j >= 0) hpTaslak.gunler.splice(j, 1); else hpTaslak.gunler.push(i); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'hp-kaydet'() { if (!hpTaslak || !hpTaslak.gunler.length) return; haftaPlanUygula(planHaftasi(), hpTaslak.gunler); kaydet(true); olay('haftaplan'); toast('Söz verildi: bu hafta ' + hpTaslak.gunler.length + ' gün. Gerisi sende.'); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'hk-gun'(el) {
+      const bas = haftaBasi(); const i = +el.dataset.i; const p = (S.haftaPlan || {})[tarihKey(bas)];
+      const secili = (p ? p.gunler : hpVarsayilan(bas)).slice(); const j = secili.indexOf(i);
+      if (j >= 0) secili.splice(j, 1); else secili.push(i);
+      haftaPlanUygula(bas, secili); kaydet(true);
+      const sY = window.scrollY; render(); window.scrollTo(0, sY);
+      toast(GUN_AD[i] + (j >= 0 ? ' dinlenme günü oldu.' : ' antrenman günü oldu.') + ' Bu hafta ' + secili.length + ' gün.');
+    },
     'hp-gec'() { S.ayar = S.ayar || {}; S.ayar.hpGec = tarihKey(planHaftasi()); kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'ses-seviye'(el) { S.ayar = S.ayar || {}; S.ayar.sesSeviye = el.dataset.deger; kaydet(true); sesHazirla(); bip(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'bildirim-izin'() { if (!bildirimVar()) return; Notification.requestPermission().then((d) => { toast(d === 'granted' ? 'Bildirimler açık.' : 'Bildirim izni verilmedi.'); S.ayar = S.ayar || {}; S.ayar.bildirimSoruldu = 1; kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY); }); },

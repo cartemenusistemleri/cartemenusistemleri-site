@@ -852,3 +852,29 @@ html.gece-erken,html.gece-erken body{background:#0B0B0D}
   .anahtar i,.anahtar i::after,.tema-pil,.tema-sec button svg{transition:none}
   .anahtar.vurus::after{animation:none}
 }
+/* uygulama simgesi seçimi */
+.simge-sec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.simge-sec button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 4px 8px;border:0;border-radius:18px;background:var(--zemin);font:inherit;font-size:12px;font-weight:800;color:var(--ikincil);cursor:pointer;transition:color .2s ease,transform .16s cubic-bezier(.23,1,.32,1),box-shadow .25s cubic-bezier(.23,1,.32,1)}
+.simge-sec button:active{transform:scale(.96)}
+.simge-sec img{width:56px;height:56px;border-radius:13px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.simge-sec button[aria-checked="true"]{color:var(--murekkep);box-shadow:inset 0 0 0 2px var(--kobalt)}
+/* ana sayfa: bu hafta */
+.hk-kutu{gap:12px}
+.hk-gunler{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.hk-gun{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 9px;border:0;border-radius:14px;background:var(--zemin);color:var(--ikincil);font:inherit;cursor:default;transition:background-color .25s cubic-bezier(.23,1,.32,1),color .25s cubic-bezier(.23,1,.32,1),transform .16s cubic-bezier(.23,1,.32,1)}
+button.hk-gun{cursor:pointer}
+button.hk-gun:active{transform:scale(.94)}
+.hk-ad{font-size:11px;font-weight:700}
+.hk-no{font-size:17px;font-weight:900;letter-spacing:-.02em;color:var(--murekkep)}
+.hk-isaret{width:6px;height:6px;border-radius:50%;margin-top:3px;background:transparent;box-shadow:inset 0 0 0 1.5px transparent}
+.hk-gun.plan .hk-isaret{box-shadow:inset 0 0 0 1.5px var(--kobalt)}
+.hk-gun.plan{background:color-mix(in srgb,var(--kobalt) 12%,var(--zemin))}
+.hk-gun.bitti{background:var(--kobalt);color:rgba(255,255,255,.8)}
+.hk-gun.bitti .hk-no{color:#fff}
+.hk-gun.bitti .hk-isaret{background:#fff}
+.hk-gun.kacti .hk-isaret{box-shadow:inset 0 0 0 1.5px var(--ikincil)}
+.hk-gun.kacti{background:var(--zemin)}
+.hk-gun.bugun{box-shadow:inset 0 0 0 2px var(--murekkep)}
+.hk-gun:not(button):not(.bitti){opacity:.55}
+.hk-gun.bugun:not(button){opacity:1}
+.hk-alt{font-size:14px;font-weight:600;line-height:1.4}
