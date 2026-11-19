@@ -62,6 +62,11 @@ export async function onRequest(ctx) {
       const g = await govde(req); const kod = String((g && g.kod) || '').trim().toUpperCase();
       if (!g || g.riza !== true) return hata('Hocanın verilerini görebilmesi için onay kutusunu işaretle.', 400);
       if (!/^[A-Z0-9]{6}$/.test(kod)) return hata('Kod 6 karakter olmalı.', 400);
+      // kod tahminine karşı: saatte en fazla 10 bağlanma denemesi
+      { const an = 'hocabag:' + kim.id; const r0 = await db.prepare('SELECT sayi, bitis FROM giris_deneme WHERE anahtar = ?').bind(an).first();
+        if (r0 && r0.bitis > simdi && r0.sayi >= 10) return hata('Çok fazla deneme. Bir saat sonra tekrar dene.', 429);
+        if (!r0 || r0.bitis <= simdi) await db.prepare('INSERT OR REPLACE INTO giris_deneme (anahtar, sayi, bitis) VALUES (?, 1, ?)').bind(an, simdi + 3600000).run();
+        else await db.prepare('UPDATE giris_deneme SET sayi = sayi + 1 WHERE anahtar = ?').bind(an).run(); }
       const h = await db.prepare('SELECT hk.koc_id, k.ad FROM hoca_kod hk JOIN kullanicilar k ON k.id = hk.koc_id WHERE hk.kod = ?').bind(kod).first();
       if (!h) return hata('Bu kodla bir hoca bulunamadı.', 404);
       if (h.koc_id === kim.id) return hata('Kendi kodunla bağlanamazsın.', 400);

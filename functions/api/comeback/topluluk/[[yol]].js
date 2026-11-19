@@ -81,6 +81,8 @@ export async function onRequest(ctx) {
         return json({ kod }, 201);
       }
       const kod = String(p[1] || '').toUpperCase(); if (!kodOk(kod)) return hata('Kod 5 karakter olmalı.', 400);
+      // kod tahminine karşı: saatte en fazla 30 katılma denemesi (yanlış kodlar da sayılır)
+      if (p[2] === 'katil' && m === 'POST' && !(await sinir(db, 'jamkatil:' + kim.id, 30, 3600))) return hata('Çok fazla deneme. Biraz sonra tekrar dene.', 429);
       const j = await db.prepare('SELECT * FROM jam WHERE kod = ? AND bitis > ?').bind(kod, simdi).first();
       if (!j) return hata('Bu kodla açık bir ortak antrenman yok ya da süresi doldu.', 404);
       const uyeMi = await db.prepare('SELECT 1 FROM jam_uye WHERE kod = ? AND kullanici_id = ?').bind(kod, kim.id).first();
