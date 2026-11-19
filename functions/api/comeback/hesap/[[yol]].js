@@ -1,4 +1,5 @@
 // COMEBACK. — hesap ve veri eşitleme
+import { gmailGonder } from '../../eposta.js';
 //   POST /api/comeback/hesap/basvuru { ad, eposta, sifre, yetiskin, riza, saglikRiza, kaynak, json } → beta başvurusu (hesap + profil; onaylanınca giriş)
 //   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza, saglikRiza }
 //   POST /api/comeback/hesap/sil     { sifre }  → hesap ve bütün kayıtlar kalıcı silinir
@@ -8,6 +9,8 @@
 //   Yönetim (rol admin): GET yonetim/ozet · GET yonetim/bekleme · POST yonetim/onay { eposta, durum } · GET yonetim/gorusler · GET yonetim/hatalar
 //   POST /api/comeback/hesap/giris   { eposta, sifre }
 //   POST /api/comeback/hesap/cikis
+//   POST /api/comeback/hesap/sifre-unuttum { eposta }        → (hesap varsa) 30 dk geçerli tek kullanımlık bağlantı e-postayla gider; cevap hep aynı
+//   POST /api/comeback/hesap/sifre-yenile  { token, sifre }  → şifre değişir, bütün oturumlar kapanır, yeni oturum açılır
 //   GET  /api/comeback/hesap/ben     → { kullanici }  (kadi = kullanıcı adı)
 //   POST /api/comeback/hesap/kullanici-adi { ad } → { kadi }
 //   GET  /api/comeback/hesap/veri    → { json, guncelleme }
@@ -97,6 +100,8 @@ function hesapSilAdimlari(db, id) {
     db.prepare('DELETE FROM sablonlar WHERE koc_id = ?').bind(id),
     db.prepare('UPDATE gorusler SET kullanici_id = NULL WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM sifre_sifirla WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM hatirlat WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(id)
   ];
 }
@@ -188,6 +193,54 @@ export async function onRequest(ctx) {
       await db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ? AND bitis < ?').bind(k.id, Date.now()).run();
       const token = await oturumAc(db, k.id);
       return json({ kullanici: { id: k.id, ad: k.ad, eposta: k.eposta, rol: k.rol, kadi: k.kullanici_adi || null } }, 200, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
+    }
+
+    // Şifre sıfırlama: hesabın var olup olmadığı dışarıya sızmasın diye cevap her durumda aynı
+    if (yol === 'sifre-unuttum' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const eposta = String(g.eposta || '').trim().toLowerCase();
+      if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
+      if (!(await sinir(db, 'sifirla:' + ip, 6, 3600)) || !(await sinir(db, 'sifirla-e:' + eposta, 3, 3600))) return hata('Çok fazla istek yapıldı. Bir saat sonra tekrar dene.', 429);
+      const tamam = json({ ok: true, mesaj: 'Bu e-postayla bir hesap varsa şifre yenileme bağlantısı gönderdik. Gelen kutunu ve gereksiz klasörünü kontrol et.' });
+      const k = await db.prepare("SELECT id, ad, rol FROM kullanicilar WHERE eposta = ? AND rol != 'demo'").bind(eposta).first();
+      if (!k) return tamam;
+      const token = b64url(rastgele(32)); const simdi = Date.now();
+      await db.batch([
+        db.prepare('DELETE FROM sifre_sifirla WHERE kullanici_id = ? OR bitis < ?').bind(k.id, simdi),
+        db.prepare('INSERT INTO sifre_sifirla (token_hash, kullanici_id, bitis, olusturma) VALUES (?, ?, ?, ?)').bind(await ozet(token), k.id, simdi + 30 * 60 * 1000, simdi)
+      ]);
+      const baglanti = new URL(req.url).origin + '/comeback/#/sifre/' + token;
+      const ad = String(k.ad || '').replace(/[<>&"]/g, '');
+      const html = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#16161A">' +
+        '<p style="font-size:26px;font-weight:900;letter-spacing:-1px;margin:0 0 20px">COMEBACK<span style="color:#2E4BFF">.</span></p>' +
+        '<p style="font-size:16px;line-height:1.5">Merhaba ' + ad + ',</p><p style="font-size:16px;line-height:1.5">Şifreni yenilemek için aşağıdaki düğmeye dokun. Bağlantı 30 dakika geçerli ve tek kullanımlık.</p>' +
+        '<p style="margin:24px 0"><a href="' + baglanti + '" style="display:inline-block;background:#2E4BFF;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:26px">Şifremi yenile</a></p>' +
+        '<p style="font-size:13px;line-height:1.5;color:#6B6A66">Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin; şifren değişmez.</p></div>';
+      const text = 'Merhaba ' + ad + ',\n\nŞifreni yenilemek için bu bağlantıyı aç (30 dakika geçerli, tek kullanımlık):\n' + baglanti + '\n\nBu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.\n\nCOMEBACK.';
+      await gmailGonder(env, { to: eposta, subject: 'COMEBACK. şifre yenileme', html, text, name: 'COMEBACK.' });
+      return tamam;
+    }
+
+    if (yol === 'sifre-yenile' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const token = String(g.token || ''); const sifre = String(g.sifre || '');
+      if (!/^[A-Za-z0-9_-]{30,60}$/.test(token)) return hata('Bağlantı geçersiz. Yeni bir bağlantı iste.', 400);
+      if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
+      if (!(await sinir(db, 'yenile:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      const th = await ozet(token);
+      const t = await db.prepare('SELECT kullanici_id, bitis FROM sifre_sifirla WHERE token_hash = ?').bind(th).first();
+      if (!t || t.bitis < Date.now()) return hata('Bağlantının süresi dolmuş ya da kullanılmış. Yeni bir bağlantı iste.', 400);
+      const k = await db.prepare('SELECT id, ad, eposta, rol, kullanici_adi FROM kullanicilar WHERE id = ?').bind(t.kullanici_id).first();
+      if (!k) return hata('Bağlantı geçersiz.', 400);
+      const tuz = hex(rastgele(16));
+      await db.batch([
+        db.prepare('UPDATE kullanicilar SET sifre_hash = ?, tuz = ? WHERE id = ?').bind(await sifreHash(sifre, tuz), tuz, k.id),
+        db.prepare('DELETE FROM sifre_sifirla WHERE kullanici_id = ?').bind(k.id),
+        db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(k.id)
+      ]);
+      if (k.rol === 'aday') return json({ ok: true, durum: 'bekliyor' });
+      const yeni = await oturumAc(db, k.id);
+      return json({ ok: true, kullanici: { id: k.id, ad: k.ad, eposta: k.eposta, rol: k.rol, kadi: k.kullanici_adi || null } }, 200, { 'set-cookie': cerezYaz(yeni, OTURUM_SN) });
     }
 
     if (yol === 'cikis' && m === 'POST') {

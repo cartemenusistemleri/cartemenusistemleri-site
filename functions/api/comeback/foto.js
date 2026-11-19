@@ -12,16 +12,17 @@ const json = (veri, durum = 200) => new Response(JSON.stringify(veri), {
 });
 
 const ISTEM = [
-  'Bu fotoğraftaki yiyecek ve içecekleri tanı, her birinin porsiyonunu tahmin et ve besin değerlerini hesapla. Türk mutfağını iyi bil (ev yemekleri, sulu yemekler, pilav/bulgur, çorbalar, kebaplar, börek, kahvaltılıklar, tatlılar).',
+  'Bu fotoğraftaki yiyecek ve içecekleri tanı, her birinin porsiyonunu tahmin et ve besin değerlerini hesapla. Türk mutfağını çok iyi bil (ev yemekleri, sulu yemekler, pilav/bulgur, çorbalar, kebaplar, börek, kahvaltılıklar, tatlılar); dünya mutfaklarını da tanı (İtalyan, Amerikan fast food, Meksika, Japon/Kore/Çin/Tay, Hint, Orta Doğu, Yunan, İspanyol, Fransız, Alman) ve global zincir ürünlerini (McDonald’s, Burger King, Starbucks, Subway…) bilinen değerleriyle hesapla.',
   'Nasıl tahmin edeceksin:',
-  '1) Önce her kalemi tanı. Emin değilsen en olası Türk mutfağı karşılığını seç.',
+  '1) Önce her kalemi tanı ve pişirme şeklini belirle (ızgara, haşlama, fırın, kızartma, sote, çiğ). Emin değilsen fotoğraftaki mutfağa göre en olası karşılığı seç.',
   '2) Porsiyonu tabak, kase, çatal, kaşık, bardak, ekmek dilimi gibi tanıdık nesnelere göre ölç. Standart tabak 26 cm, kase 300-350 ml, çay bardağı 100 ml, su bardağı 200 ml, ekmek dilimi ~30 g, bir kepçe çorba ~250 g, bir porsiyon pilav ~150 g.',
   '3) Görünmeyen kaloriyi unutma: sulu yemeklerde ve kızartmalarda yağ, salata sosu, tereyağı, şeker. Yağlı görünüyorsa yağı ayrıca hesaba kat (ayrı kalem yapma, o yemeğe ekle).',
-  '4) Besin değerlerini pişmiş hâline göre ver; değerler porsiyonun toplamı olsun (100 g başına değil). k ≈ 4*p + 4*kh + 9*y ile tutarlı olsun.',
+  '4) Gramı tahmin ederken önce kalemin tabakta kapladığı alanı ve yüksekliğini düşün, sonra yoğunluğuna göre grama çevir (pilav ~0,8 g/ml, et ~1 g/ml, salata ~0,3 g/ml). Tek parça ürünlerde (yumurta ~50 g, ekmek dilimi ~30 g, köfte ~30 g, tavuk kanadı ~35 g) adet say.',
+  '5) Besin değerlerini pişmiş hâline göre ver; değerler porsiyonun toplamı olsun (100 g başına değil). k ≈ 4*p + 4*kh + 9*y ile tutarlı olsun.',
   'PAKETLİ ÜRÜN: Fotoğrafta paketli bir ürün varsa (bisküvi, yoğurt, protein bar, içecek…) önce besin değeri tablosunu ara. Tablo görünüyorsa değerleri birebir oku (100 g ya da porsiyon başına yazanı, porsiyona göre çevir), emin: yuksek. Tablo yoksa marka ve ürün adını oku, o ürünün bilinen değerlerini kullan; adı ürünün tam adı olsun (ör. "Ülker Çikolatalı Gofret"). Paket boyutunu (g/ml) yazıdan oku, kullanıcı aksini yazmadıysa bir paket yediğini varsay.',
   'Kullanıcı bir not yazdıysa (ne yediği, miktar, "yarısını yedim" gibi) onu fotoğraftan üstün tut.',
   'Yalnızca şu biçimde geçerli JSON döndür, başka hiçbir şey yazma, ilk karakter { olsun:',
-  '{"kalemler":[{"ad":"Türkçe kısa ad","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"emin":"yuksek|orta|dusuk"}]}',
+  '{"kalemler":[{"ad":"Türkçe kısa ad","en":"English name","pisirme":"izgara|haslama|firin|kizartma|sote|cig|diger","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"emin":"yuksek|orta|dusuk"}]}',
   'Tabakta görünen her ayrı yiyeceği ayrı kalem yap, en fazla 8 kalem. Fotoğrafta yiyecek yoksa {"kalemler":[]} döndür.'
 ].join('\n');
 
@@ -87,10 +88,17 @@ export async function onRequestPost(ctx) {
   try { sonuc = JSON.parse(metin.slice(bas, son + 1)); } catch (e) { return json({ hata: 'Fotoğraf yorumlanamadı. Daha yakından ve aydınlık bir fotoğraf dene.' }, 422); }
 
   const sayi = (v, ust) => { const x = Number(v); return isFinite(x) && x >= 0 ? Math.min(ust, Math.round(x * 10) / 10) : 0; };
-  const kalemler = (Array.isArray(sonuc.kalemler) ? sonuc.kalemler : []).slice(0, 8).map((x) => ({
-    ad: String(x && x.ad || 'Yemek').replace(/[<>]/g, '').slice(0, 50),
-    g: sayi(x.g, 2000) || 100, k: sayi(x.k, 4000), p: sayi(x.p, 300), kh: sayi(x.kh, 500), y: sayi(x.y, 300),
-    emin: ['yuksek', 'orta', 'dusuk'].indexOf(x.emin) >= 0 ? x.emin : 'orta'
-  })).filter((x) => x.k > 0);
+  const kalemler = (Array.isArray(sonuc.kalemler) ? sonuc.kalemler : []).slice(0, 8).map((x) => {
+    const o = {
+      ad: String(x && x.ad || 'Yemek').replace(/[<>]/g, '').slice(0, 50), en: String(x && x.en || '').replace(/[<>]/g, '').slice(0, 60),
+      pisirme: String(x && x.pisirme || '').replace(/[^a-z]/g, '').slice(0, 12),
+      g: sayi(x.g, 2000) || 100, k: sayi(x.k, 4000), p: sayi(x.p, 300), kh: sayi(x.kh, 500), y: sayi(x.y, 300),
+      emin: ['yuksek', 'orta', 'dusuk'].indexOf(x.emin) >= 0 ? x.emin : 'orta'
+    };
+    // kalori makrolarla tutarsızsa (Atwater: 4·p + 4·kh + 9·y) makrolardan yeniden hesapla
+    const hes = 4 * o.p + 4 * o.kh + 9 * o.y;
+    if (hes > 0 && Math.abs(hes - o.k) / Math.max(hes, o.k) > 0.25) o.k = Math.round(hes);
+    return o;
+  }).filter((x) => x.k > 0);
   return json({ kalemler });
 }

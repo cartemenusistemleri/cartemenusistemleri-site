@@ -23,10 +23,10 @@
 <meta name="twitter:image" content="https://cartemenusistemleri.com.tr/comeback-marka/img/og.jpg?v=1">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:locale:alternate" content="en_US">
-<link rel="icon" href="/comeback/favicon.ico?v=5" sizes="any">
-<link rel="icon" type="image/png" sizes="96x96" href="/comeback/favicon-96.png?v=5">
-<link rel="icon" type="image/png" sizes="48x48" href="/comeback/favicon-48.png?v=5">
-<link rel="apple-touch-icon" href="/comeback/apple-touch-icon.png?v=4">
+<link rel="icon" href="/comeback/favicon.ico?v=6" sizes="any">
+<link rel="icon" type="image/png" sizes="96x96" href="/comeback/favicon-96.png?v=6">
+<link rel="icon" type="image/png" sizes="48x48" href="/comeback/favicon-48.png?v=6">
+<link rel="apple-touch-icon" href="/comeback/apple-touch-icon-kobalt.png?v=1">
 <link rel="preload" href="font/sg-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face{font-family:'Schibsted Grotesk';src:url(font/sg-latin.woff2) format('woff2');font-weight:400 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -161,15 +161,26 @@ body.ust-gece .ust .btn.siyah{background:#fff;color:var(--murekkep)}
 .ad-yazi h3{font-size:clamp(30px,3.4vw,44px);font-weight:900;letter-spacing:-.045em}
 .ad-yazi p{font-size:18px;line-height:1.5;color:var(--ikincil);max-width:40ch}
 .ad-kutu.koyu .ad-yazi p{color:var(--koyu-ikincil)}
+/* kobalt ön planda: manifesto, Zil denemesi ve üst çubuk düğmesi markanın rengiyle */
+body.ust-kobalt .ust,body.ust-kobalt .ust.kaydi{background:rgba(46,75,255,.82);border-bottom-color:rgba(255,255,255,.14)}
+.inanc .metin .son{background:none;overflow:visible}
+body.ust-kobalt .logo .nokta{color:#fff}
+body.ust-kobalt .ust nav a{color:rgba(255,255,255,.78)}
+body.ust-kobalt .ust .btn.siyah{background:#fff;color:var(--kobalt)}
+.ust .btn.siyah{background:var(--kobalt);color:#fff}
+.ust .btn.siyah:hover{background:var(--kobalt-koyu)}
+body.ust-gece:not(.ust-kobalt) .ust .btn.siyah{background:var(--kobalt);color:#fff}
+.zil .btn.ana{background:#fff;color:var(--kobalt);box-shadow:0 10px 24px -12px rgba(0,0,0,.45)}
+.zil .btn.ana:hover{background:#F3F1EC}
 /* zil denemesi: sayfadaki tek kurgulanmış an */
-.zil{background:#000;color:#fff;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-.zil-ust{display:flex;justify-content:space-between;width:100%;font-weight:800;font-size:15px;color:#A9A69E}
+.zil{background:var(--kobalt);color:#fff;border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.zil-ust{display:flex;justify-content:space-between;width:100%;font-weight:800;font-size:15px;color:rgba(255,255,255,.72)}
 .zil-ust .zil-hareket{color:#fff}
 .zil-saat{position:relative;width:150px;height:150px}
 .zil-saat svg{width:100%;height:100%;transform:rotate(-90deg)}
 .zil-saat circle{fill:none;stroke-width:8}
-.zil-iz{stroke:#1d1d22}
-.zil-dolu{stroke:var(--kobalt);stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7}
+.zil-iz{stroke:rgba(255,255,255,.22)}
+.zil-dolu{stroke:#fff;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7}
 .zil-saat b{position:absolute;inset:0;display:grid;place-items:center;font-size:38px;font-weight:900;letter-spacing:-.03em}
 .zil-durum{font-size:17px;font-weight:700;min-height:1.5em}
 .zil-btn{width:100%;max-width:280px}
@@ -262,13 +273,13 @@ body.ust-gece .ust .btn.siyah{background:#fff;color:var(--murekkep)}
 .sss details p{padding:0 0 22px;color:var(--ikincil);font-size:16px;max-width:66ch}
 
 /* manifesto: kaydırdıkça kelime kelime yanar */
-.inanc{background:#000;color:#fff;position:relative;height:300vh}
+.inanc{background:var(--kobalt);color:#fff;position:relative;height:300vh}
 .inanc .yap{position:sticky;top:0;height:100vh;height:100svh;display:flex;align-items:center;overflow:hidden;padding-top:64px}
 .inanc .metin{font-size:clamp(30px,3.9vw,54px);font-weight:800;letter-spacing:-.045em;line-height:1.06;max-width:24ch}
 .inanc .metin p{margin:0 0 .18em}
-.inanc .metin .w{color:#2a2a30;transition:color .35s ease}
+.inanc .metin .w{color:rgba(255,255,255,.24);transition:color .35s ease}
 .inanc .metin .w.on{color:#fff}
-.inanc .metin .son .w.on{color:var(--mavi-gece)}
+.inanc .metin .son .w.on{color:#fff}
 .inanc .metin .son{font-size:1.5em;font-weight:900;letter-spacing:-.06em;margin-top:.3em}
 @media (max-width:900px){.inanc{height:230vh}}
 @media (prefers-reduced-motion:reduce){.inanc{height:auto}.inanc .yap{position:static;height:auto;padding:120px 0}.inanc .metin .w{color:#fff}}
@@ -295,6 +306,8 @@ body.ust-gece .ust .btn.siyah{background:#fff;color:var(--murekkep)}
   .yuzen.gor{transform:none;pointer-events:auto}
   .yuzen .btn{width:100%}
   body.ust-gece .yuzen{background:linear-gradient(0deg,rgba(0,0,0,.94) 60%,rgba(0,0,0,0))}
+  body.ust-kobalt .yuzen{background:linear-gradient(0deg,rgba(46,75,255,.96) 60%,rgba(46,75,255,0))}
+  body.ust-kobalt .yuzen .btn.ana{background:#fff;color:var(--kobalt)}
 }
 footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-inset-bottom,0px));overflow:hidden}
 .ayak{display:grid;grid-template-columns:1.2fr 1fr repeat(4,minmax(0,.62fr));gap:12px}
@@ -374,7 +387,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
 </section>
 
 
-<section class="inanc" id="inanc" data-koyu aria-label="COMEBACK. manifestosu">
+<section class="inanc" id="inanc" data-koyu data-kobalt aria-label="COMEBACK. manifestosu">
   <div class="yap"><div class="ic">
     <div class="metin" id="manifesto">
       <p data-i="m1">Kimse izlemiyor.</p>
@@ -406,7 +419,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
         </div>
       </article>
       <article class="ad-kutu" aria-labelledby="ad-soz">
-        <div class="ad-yazi"><h3 id="ad-soz" data-i="s_b">Haftalık Söz<span class="nokta">.</span></h3><p data-i="s_p">Bu hafta kaç gün geleceğine sen karar verirsin. Antrenmanlar o günlere dağılır.</p></div>
+        <div class="ad-yazi"><h3 id="ad-soz" data-i="s_b">Haftalık Plan<span class="nokta">.</span></h3><p data-i="s_p">Bu hafta kaç gün geleceğine sen karar verirsin. Antrenmanlar o günlere dağılır.</p></div>
         <div class="soz" role="group" aria-label="Bu haftanın günleri" id="soz"></div>
         <p class="soz-not num" id="sozNot"></p>
       </article>
@@ -538,8 +551,10 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   var kay = function () {
     ust.classList.toggle('kaydi', window.scrollY > 8);
     var y = ust.getBoundingClientRect().bottom - 1;
-    var k = koyular.some(function (b) { var r = b.getBoundingClientRect(); return r.top <= y && r.bottom > y; });
-    if (k !== gece) { gece = k; document.body.classList.toggle('ust-gece', k); if (temaMeta) temaMeta.setAttribute('content', k ? '#000000' : '#ECECE8'); }
+    var alt = null; koyular.forEach(function (b) { var r = b.getBoundingClientRect(); if (r.top <= y && r.bottom > y) alt = b; });
+    var k = !!alt; var kb = !!(alt && alt.hasAttribute('data-kobalt'));
+    document.body.classList.toggle('ust-kobalt', kb);
+    if (k !== gece || kb !== ust._kb) { gece = k; ust._kb = kb; document.body.classList.toggle('ust-gece', k); if (temaMeta) temaMeta.setAttribute('content', kb ? '#2E4BFF' : k ? '#000000' : '#ECECE8'); }
   };
   window.addEventListener('scroll', kay, { passive: true }); window.addEventListener('resize', kay); kay();
 
@@ -575,7 +590,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
     var G = sozDil === 'en' ? GUNLER_EN : GUNLER_TR;
     soz.innerHTML = G.map(function (g, i) { return '<button type="button" data-i="' + i + '" aria-pressed="' + (sozSecili.indexOf(i) >= 0) + '">' + g + '<b>' + (sozSecili.indexOf(i) >= 0 ? '●' : '○') + '</b></button>'; }).join('');
     var n = sozSecili.length;
-    sozNot.textContent = sozDil === 'en' ? (n ? 'Promise made: ' + n + ' days this week. The rest is on you.' : 'Tap the days you are coming.') : (n ? 'Söz verildi: bu hafta ' + n + ' gün. Gerisi sende.' : 'Geleceğin günlere dokun.');
+    sozNot.textContent = sozDil === 'en' ? (n ? 'Plan set: ' + n + ' days this week. The rest is on you.' : 'Tap the days you are coming.') : (n ? 'Plan hazır: bu hafta ' + n + ' gün. Gerisi sende.' : 'Geleceğin günlere dokun.');
   }
   soz.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var i = +b.dataset.i, j = sozSecili.indexOf(i); if (j >= 0) sozSecili.splice(j, 1); else sozSecili.push(i); sozCiz(); });
   sozCiz();
@@ -688,7 +703,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
     alt: 'Your program is built, every set is logged. With you on your hardest days.',
     ozp: 'Your program, your calories, every set and your hardest day. All in one place.',
     z_b: 'The Bell<span class="nokta">.</span>', z_p: 'Finish the set and your rest starts. When time is up, the bell rings: one more set.', z_h: 'Squat', z_d: 'Ready? Tick the set.', z_btn: 'Finish the set', z_r: 'New record. You did this.',
-    s_b: 'Weekly Promise<span class="nokta">.</span>', s_p: 'You decide how many days you train this week. Your workouts are spread across them.',
+    s_b: 'Weekly Plan<span class="nokta">.</span>', s_p: 'You decide how many days you train this week. Your workouts are spread across them.',
     d_b: 'Comeback Mode<span class="nokta">.</span>', d_p: 'Had a break? Your first sessions start lighter. Your body catches up.', d_s: '23 days. It doesn\'t matter.', d_once: 'Last lifted', d_simdi: 'Today',
     b2_b: 'Hard Day<span class="nokta">.</span>', b2_p: 'No energy? Do the short version. One set still counts.', b2_dk: 'min', b2_h: 'exercises', b2_s: 'sets',
     f_b: 'Calories from a photo<span class="nokta">.</span>', f_p: 'Snap your plate, we write the rest. It knows Turkish food.', f_y1: 'Lentil soup', f_y2: 'Bulgur pilaf', f_y3: 'Cacık',

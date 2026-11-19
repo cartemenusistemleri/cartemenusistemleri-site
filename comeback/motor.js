@@ -238,6 +238,19 @@
         if (!degisti) break;
       }
     }
+    // 9b) hiç karşılığı olmayan kas: hedefin %60'ının altında kalan baldır, arka omuz, yan omuz, arka kol, ön kol, arka bacak
+    //     için en hafif uygun güne tek izolasyon hareketi eklenir (haftada en fazla 2 gün). Süre sınırı (10) gerekirse yine kırpar.
+    if (p.hedef !== 'kondisyon' && !sezonIci) {
+      const BOSLUK = { baldir: 'baldir', omuz_arka: 'arka_omuz', omuz_yan: 'yan_omuz', triceps: 'triceps', biceps: 'biceps', arka_bacak: 'hamstring_izo' };
+      Object.keys(BOSLUK).forEach((m) => {
+        const kalip = BOSLUK[m]; let n = 0;
+        while (hacim[m] < HEDEF_HACIM[0] * 0.6 && n < 2) {
+          const aday = gunler.filter((g) => gunAlir(g.bolge, kalip) && !g.hareketler.some((x) => HAREKET[x.id].kalip === kalip)).sort((a, c) => sureDk(a) - sureDk(c))[0];
+          if (!aday || !secVeEkle(aday, kalip, 'izo')) break;
+          n++; hacim = hacimHesapla();
+        }
+      });
+    }
     // 10) seans süresi sınırı
     let kardiyoAyri = false;
     gunler.forEach((g) => {
