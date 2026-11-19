@@ -1142,3 +1142,90 @@ body.kilit{overflow:hidden}
 .set-sil::after{content:"";position:absolute;inset:0;z-index:-1;background:color-mix(in srgb,var(--hata) 22%,transparent);clip-path:inset(0 100% 0 0);transition:clip-path .2s ease-out}
 .set-sil.tut::after{clip-path:inset(0 0 0 0);transition:clip-path .65s linear}
 .set-sil.tut{transform:scale(.97)}
+
+/* ===== simsiyah gece (OLED) ===== */
+body.gece{--zemin:#000;--kutu:#0F0F11;--koyu:#16161A;--iz:#18181C;--cizgi:#232328}
+html.gece-erken,html.gece-erken body{background:#000}
+body.gece .t{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+body.gece .set.aktif input,body.gece .mini input,body.gece .giris{background:#000}
+body.gece .nav{background:rgba(15,15,17,.78)}
+
+/* ===== rakam düzeni: sayılar sayarken titremesin ===== */
+.num,.buyuk,.orta.num,.dev,[data-say],.kp-sayi,.gs-no,.krono-sure,.ap-deger b,.hkart-no,.kr-zil-ic b{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* ===== ikon dili ===== */
+.set-sil .ik-k{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;vertical-align:-2px}
+
+/* ===== odak: tek hareket ekranı ===== */
+.odak-adim{display:flex;align-items:center;gap:8px;margin:2px 0 10px;position:sticky;top:calc(6px + env(safe-area-inset-top,0px));z-index:5;background:color-mix(in srgb,var(--zemin) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:6px 0;border-radius:22px}
+.odak-ok{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--kutu);display:grid;place-items:center;color:var(--murekkep)}
+.odak-ok svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.odak-ok.ileri svg{transform:scaleX(-1)}
+.odak-ok[disabled]{opacity:.3}
+.odak-noktalar{flex:1;min-width:0;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.odak-noktalar::-webkit-scrollbar{display:none}
+.odak-n{flex:1 0 26px;height:30px;border-radius:10px;border:0;background:var(--kutu);color:var(--ikincil);font-weight:800;font-size:12px;display:grid;place-items:center;transition:background .2s ease,color .2s ease,transform .16s ease}
+.odak-n.bitti{background:var(--kobalt);color:#fff}
+.odak-n.atla{background:transparent;box-shadow:inset 0 0 0 1.5px var(--cizgi);color:var(--ikincil)}
+.odak-n.su{background:var(--murekkep);color:var(--zemin);transform:scale(1.06)}
+.odak-n:active{transform:scale(.94)}
+.odak-say{flex:none;font-size:13px;font-weight:800;color:var(--ikincil);min-width:36px;text-align:right}
+.seans-izgara.odak{grid-template-columns:1fr}
+.odak-kart{padding:22px 18px 10px;gap:12px}
+.odak-kart .hk-baslik{font-size:clamp(30px,8.5vw,40px);font-weight:900;letter-spacing:-.045em;line-height:1}
+.hk-baslik{font-size:18px;letter-spacing:-.01em}
+.odak-kart .setler .set:not(.bas){min-height:56px}
+.odak-kart .set input{min-height:50px;font-size:22px}
+.aktif-panel{display:flex;flex-direction:column;gap:12px;background:var(--zemin);border-radius:22px;padding:16px}
+.aktif-panel .k{color:var(--ikincil)}
+.ap-satir{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ap-alan{display:flex;align-items:center;justify-content:space-between;background:var(--kutu);border-radius:18px;padding:8px}
+.ap-btn{width:48px;height:56px;border-radius:14px;border:0;background:var(--zemin);color:var(--murekkep);font-size:26px;font-weight:800;line-height:1;flex:none;transition:transform .12s ease}
+.ap-btn:active{transform:scale(.92);background:var(--kobalt);color:#fff}
+.ap-deger{display:flex;flex-direction:column;align-items:center;min-width:0}
+.ap-deger b{font-size:clamp(30px,9vw,40px);font-weight:900;letter-spacing:-.04em;line-height:1}
+.ap-deger span{font-size:12px;font-weight:800;color:var(--ikincil);margin-top:3px}
+.ap-bitir{width:100%}
+.gorunum-btn{align-self:center;color:var(--ikincil)}
+/* plaka */
+.plaka{display:flex;align-items:center;gap:2px;flex-wrap:wrap;min-height:48px}
+.plaka-bar{width:28px;height:8px;border-radius:3px;background:#9A9AA2}
+.plaka i{width:10px;border-radius:3px;display:block}
+.plaka .p25{background:#E5484D}.plaka .p20{background:#2E4BFF}.plaka .p15{background:#E8B422}.plaka .p10{background:#2FA65A}.plaka .p5{background:#F3F1EC;box-shadow:inset 0 0 0 1.5px #9A9AA2}.plaka .p2_5{background:#16161A}.plaka .p1_25{background:#9A9AA2}
+.plaka-yazi{font-size:13px;font-weight:700;color:var(--ikincil);margin-left:10px;flex-basis:100%;margin-top:6px}
+@media (min-width:380px){.plaka-yazi{flex-basis:auto;margin-top:0}}
+
+/* ===== kas haritası ===== */
+.kh-ikili{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kh-ikili figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.kh-ikili figcaption{font-size:12px;font-weight:800;color:var(--ikincil)}
+.kh-svg{width:100%;max-width:150px;height:auto}
+.kh-govde *{fill:var(--zemin)}
+.kh *{transition:fill .3s ease}
+.kh.k0 *{fill:var(--zemin);stroke:var(--cizgi);stroke-width:1}
+.kh.k1 *{fill:color-mix(in srgb,var(--kobalt) 30%,var(--zemin))}
+.kh.k2 *{fill:color-mix(in srgb,var(--kobalt) 62%,var(--zemin))}
+.kh.k3 *{fill:var(--kobalt)}
+.kh-liste{display:flex;flex-wrap:wrap;gap:6px}
+.kh-cip{font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;background:var(--zemin)}
+.kh-cip b{color:var(--kobalt);margin-left:2px}
+.kh-anahtar{display:flex;align-items:center;gap:6px;font-size:12px}
+.kh-anahtar i{width:12px;height:12px;border-radius:4px;display:inline-block;margin-left:6px}
+.kh-anahtar i.k1{background:color-mix(in srgb,var(--kobalt) 30%,var(--zemin))}.kh-anahtar i.k2{background:color-mix(in srgb,var(--kobalt) 62%,var(--zemin))}.kh-anahtar i.k3{background:var(--kobalt)}
+.gec .kh-kutu .kh{animation:hkGir .5s cubic-bezier(.23,1,.32,1) both;animation-delay:.2s}
+
+/* ===== boş ekran ===== */
+.bos-ekran{gap:8px;align-items:flex-start;background:transparent;box-shadow:inset 0 0 0 1.5px var(--cizgi)}
+.be-baslik{font-size:24px;font-weight:900;letter-spacing:-.04em;line-height:1.05}
+.be-metin{font-size:15px;line-height:1.5;color:var(--ikincil);max-width:36ch}
+.bos-ekran .btn{margin-top:4px}
+.be-mini{font-size:14px;line-height:1.5;color:var(--ikincil)}
+.be-mini b{color:var(--murekkep)}
+
+/* ===== animasyon: az ===== */
+body.az-hareket *,body.az-hareket *::before,body.az-hareket *::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+.ap-satir{gap:8px}
+.ap-alan{padding:6px;gap:4px;min-width:0}
+.ap-btn{width:38px;height:52px;font-size:22px;border-radius:12px}
+.ap-deger b{font-size:clamp(24px,7.2vw,34px)}
+.aktif-panel{padding:14px 12px}
