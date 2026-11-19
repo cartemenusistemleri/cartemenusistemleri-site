@@ -1451,7 +1451,7 @@
     } else if (bugunku && !bugunku.hareketler.length) {
       antr = '<a class="t kobalt genis ana-kutu h150" href="#/program" style="min-height:190px"><span class="k">Programın</span><span class="dev">Programını yaz<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
     } else if (bugunku) {
-      antr = '<a class="t kobalt genis ana-kutu h150" href="#/antrenman" style="min-height:230px"><div class="k satir num"><span>Bugünün antrenmanı</span><span>' + bugunku.hareketler.length + ' hareket</span></div><span class="dev">' + esc(bugunku.ad) + '<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
+      antr = '<a class="t kobalt genis ana-kutu h150 ' + gunTonu(bugunku) + '" href="#/antrenman" style="min-height:230px"><div class="k satir num"><span>Bugünün antrenmanı</span><span>' + bugunku.hareketler.length + ' hareket</span></div><span class="dev">' + esc(bugunku.ad) + '<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
     } else {
       antr = '<a class="t koyu genis ana-kutu h150" href="#/antrenman" style="min-height:190px"><span class="k">' + (offMu() ? 'Bugünü dinlenmeye ayırdın' : 'Bugün dinlenme günü') + '</span><span class="dev">Dinlen<span style="color:var(--mavi-gece)">.</span></span><span class="ik">' + (sonra ? 'Sıradaki: ' + (sonra.kac === 1 ? 'yarın' : GUN_AD[sonra.hafta]) + ' · ' + esc(sonra.gun.ad) : '') + '</span></a>';
       if (offMu()) antr += '<div class="t genis off-kutu"><span class="ik">Fikrini mi değiştirdin?</span><button class="btn cerceve kucuk" data-act="off-geri">Antrenmanı geri getir</button></div>';
@@ -1756,6 +1756,8 @@
   // marka sesleri (ayar listesinde görünmez): antrenman bitişi ve rekor; hepsi Zil ailesinden
   const MARKA_SES = {
     bitis: [[196, 0, 1.1, 'sine', 0.10], [1318, 0.12, 0.9, 'sine', 0.06], [1975, 0.12, 0.6, 'sine', 0.025]],
+    sayim: [[880, 0, 0.12, 'sine', 0.07]],
+    git: [[1318, 0, 0.5, 'sine', 0.08], [1975, 0, 0.35, 'sine', 0.03]],
     rekor: [[98, 0, 1.3, 'sine', 0.16], [196, 0, 0.8, 'sine', 0.05], [1318, 0.32, 1.0, 'sine', 0.065], [1975, 0.32, 0.7, 'sine', 0.03]]
   };
   const sesTur = () => (S.ayar && S.ayar.ses === false ? 'yok' : (S.ayar && SESLER[S.ayar.sesTur] ? S.ayar.sesTur : 'zil'));
@@ -2109,7 +2111,7 @@
     }
     const fark = kilolar.length >= 2 ? kilolar[kilolar.length - 1].kg - kilolar[0].kg : 0;
     return ust(logo) + '<h1 class="baslik">İlerleme<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + seninComeback() +
+      '<div class="izgara">' + seninComeback() + kartKoleksiyon() + antrenmanIzgara() +
       '<div class="t koyu h150">' + seriKart('Hafta serisi') + '</div>' +
       '<div class="t kobalt h150"><span class="k">' + (sozDurum(haftaBasi()) ? 'Haftalık Plan' : 'Bu hafta') + '</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + (sozDurum(haftaBasi()) ? sozDurum(haftaBasi()).soz : S.profil.gun) + '</span></span><span class="k">antrenman</span></div>' +
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
@@ -2751,6 +2753,116 @@
       '</div>';
   }
 
+  /* ---------- hafta kartları ve haftalık kapanış ----------
+     Hafta bitince (pazar akşamı ya da pazartesi ilk açılış) planı tamamlayan, aşan ya da aradan sonra geri dönen
+     kişiye tam ekran kapanış ve numaralı bir hafta kartı. Kartlar İlerleme'de koleksiyon olarak birikir; paylaşım yok. */
+  function haftaNo(d0) { const d = new Date(Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate())); const g = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() + 4 - g); const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); return Math.ceil(((d - y) / 864e5 + 1) / 7); }
+  function haftaSonucu(bas) {
+    const y = haftaYapilan(bas); if (!y) return null; const hedef = haftaHedefi(bas);
+    const g1 = new Date(bas); g1.setDate(g1.getDate() - 7); const g2 = new Date(bas); g2.setDate(g2.getDate() - 14);
+    let tur = null;
+    if (y > hedef) tur = 'asti'; else if (y >= hedef) tur = 'tuttu';
+    else if (!haftaYapilan(g1) && !haftaYapilan(g2) && Object.keys(S.gunluk).some((k) => k < tarihKey(g2) && S.gunluk[k].antrenman)) tur = 'dondu';
+    if (!tur) return null;
+    const p = (S.haftaPlan || {})[tarihKey(bas)];
+    const gunler = []; for (let i = 0; i < 7; i++) { const d = new Date(bas); d.setDate(d.getDate() + i); const gg = S.gunluk[tarihKey(d)]; gunler.push(gg && gg.antrenman ? 2 : p && p.gunler.indexOf(i) >= 0 ? 1 : 0); }
+    return { hafta: tarihKey(bas), yil: bas.getFullYear(), no: haftaNo(bas), tur, hedef, yapilan: y, gunler };
+  }
+  const KART_AD = { tuttu: 'Tuttun', asti: 'Aştın', dondu: 'Geri döndün' };
+  function kartHtml(k, cls) {
+    const b = new Date(k.hafta + 'T12:00:00'); const son = new Date(b); son.setDate(son.getDate() + 6);
+    const ar = b.getDate() + (b.getMonth() !== son.getMonth() ? ' ' + AY[b.getMonth()] : '') + '–' + son.getDate() + ' ' + AY[son.getMonth()];
+    return '<div class="hkart t-' + k.tur + (cls ? ' ' + cls : '') + '"><div class="hkart-ust num"><span>COMEBACK. ' + k.yil + '</span><span>#' + String(k.no).padStart(2, '0') + '</span></div>' +
+      '<div class="hkart-desen" aria-hidden="true"><span class="hkart-no num">' + k.yapilan + '</span></div>' +
+      '<div class="hkart-ad">' + KART_AD[k.tur] + '<span class="nokta">.</span></div>' +
+      '<div class="hkart-alt num"><span>' + ar + '</span><span>' + k.yapilan + ' / ' + k.hedef + '</span></div>' +
+      '<div class="hkart-gun" aria-hidden="true">' + k.gunler.map((x) => '<i class="g' + x + '"></i>').join('') + '</div></div>';
+  }
+  function kartKoleksiyon() {
+    const l = (S.kartlar || []).slice().reverse();
+    return '<div class="t genis" style="gap:10px"><div class="satir"><span class="k">Hafta kartların</span><span class="k num">' + l.length + '</span></div>' +
+      (l.length ? '<div class="hkart-liste">' + l.map((k) => '<button type="button" class="hkart-btn" data-act="kart-ac" data-h="' + k.hafta + '" aria-label="' + k.yil + ' ' + k.no + '. hafta kartı: ' + KART_AD[k.tur] + '">' + kartHtml(k, 'mini') + '</button>').join('') + '</div>'
+        : '<span class="ik">Haftalık planını tamamladığın her hafta numaralı bir kart kazanırsın. Aşarsan ya da aradan sonra dönersen kartın değişir.</span>') + '</div>';
+  }
+  function kapanisGoster(k, yeni) {
+    const eski = document.getElementById('kapanis'); if (eski) eski.remove();
+    const baslik = { tuttu: 'Planını tamamladın', asti: 'Planını aştın', dondu: 'Geri döndün' }[k.tur];
+    const alt = k.tur === 'dondu' ? 'Aradan sonra bu hafta ' + k.yapilan + ' antrenman. En zor set buydu.' : k.hedef + ' dedin, ' + k.yapilan + ' yaptın. ' + (k.tur === 'asti' ? 'Fazlası senden.' : 'Kimse izlemedi, sen yine geldin.');
+    const el = document.createElement('div'); el.id = 'kapanis'; el.className = 'kapanis t-' + k.tur; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', baslik);
+    el.innerHTML = '<div class="kp-sahne">' + (yeni ? '<div class="kp-bir"><span class="k num">' + k.yil + ' · ' + k.no + '. hafta</span><span class="kp-sayi num" data-say="' + k.yapilan + '">0</span><span class="kp-baslik">' + baslik + '<span class="nokta">.</span></span><span class="kp-alt">' + esc(alt) + '</span>' +
+      '<button type="button" class="btn beyaz buyuk-btn kp-ac" data-act="kapanis-kart">Kartını aç' + IK.ok + '</button></div>' : '') +
+      '<div class="kp-iki"' + (yeni ? ' hidden' : '') + '><div class="kp-kart">' + kartHtml(k) + '</div><button type="button" class="btn ' + (k.tur === 'asti' ? 'siyah' : 'beyaz') + ' kp-kapat" data-act="kapanis-kapat">' + (yeni ? 'Koleksiyonuma ekle' : 'Kapat') + '</button></div></div>';
+    document.body.appendChild(el); document.body.classList.add('kilit');
+    if (yeni) { const n = el.querySelector('.kp-sayi'); const t0 = performance.now(); const hedef = k.yapilan; (function say(t) { const p = Math.min(1, (t - t0) / 900); n.textContent = Math.round(hedef * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(say); })(t0);
+      if (sesTur() !== 'yok') { sesHazirla(); bip(k.tur === 'asti' ? 'rekor' : 'bitis'); } if (navigator.vibrate) navigator.vibrate([40, 60, 120]); }
+    const b = el.querySelector('button'); if (b) setTimeout(() => b.focus(), 300);
+  }
+  function kapanisKontrol() {
+    if (!S.profil || S.seans || document.getElementById('kapanis')) return;
+    S.kapanis = S.kapanis || {}; S.kartlar = S.kartlar || [];
+    const adaylar = []; const onceki = haftaBasi(); onceki.setDate(onceki.getDate() - 7); adaylar.push(onceki);
+    if (haftaGunu() === 6 && new Date().getHours() >= 17) adaylar.push(haftaBasi());
+    for (const bas of adaylar) {
+      const k0 = tarihKey(bas); if (S.kapanis[k0]) continue;
+      if (tarihKey(bas) === tarihKey(haftaBasi())) { const s0 = haftaSonucu(bas); if (!s0) continue; }
+      S.kapanis[k0] = 1; const sonuc = haftaSonucu(bas);
+      Object.keys(S.kapanis).forEach((x) => { if (x < tarihKey(new Date(Date.now() - 70 * 864e5))) delete S.kapanis[x]; });
+      if (!sonuc) { kaydet(); continue; }
+      S.kartlar = S.kartlar.filter((x) => x.hafta !== sonuc.hafta).concat([sonuc]).slice(-260); kaydet(true);
+      setTimeout(() => kapanisGoster(sonuc, true), 450); return;
+    }
+  }
+
+  /* ---------- 3-2-1: antrenmana giriş ---------- */
+  function geriSay(g) {
+    if (azHareket) return; const eski = document.getElementById('gerisay'); if (eski) eski.remove();
+    const ilk = g.hareketler[0]; const h = ilk && D.HAREKET[ilk.id];
+    const el = document.createElement('div'); el.id = 'gerisay'; el.className = 'gerisay'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'assertive');
+    const cent = Array.from({ length: 48 }, (_, i) => { const a = (-210 + i * (240 / 47)) * Math.PI / 180; const r1 = 118, r2 = i % 4 ? 110 : 102; return '<line x1="' + (130 + r1 * Math.cos(a)).toFixed(1) + '" y1="' + (130 + r1 * Math.sin(a)).toFixed(1) + '" x2="' + (130 + r2 * Math.cos(a)).toFixed(1) + '" y2="' + (130 + r2 * Math.sin(a)).toFixed(1) + '" data-i="' + i + '"/>'; }).join('');
+    el.innerHTML = '<span class="k">Antrenman başlıyor</span><span class="gs-ad">' + esc(g.ad) + '<span class="nokta">.</span></span><div class="gs-kadran"><svg viewBox="0 0 260 260" aria-hidden="true">' + cent + '</svg><span class="gs-no num">3</span></div>' +
+      (h ? '<span class="gs-ilk">Sıradaki · ' + esc(h.ad) + ' · ' + ilk.set + ' set</span>' : '') + '<span class="ik gs-atla">Geçmek için dokun</span>';
+    document.body.appendChild(el);
+    const cizgi = Array.from(el.querySelectorAll('line')); const no = el.querySelector('.gs-no'); const t0 = performance.now(); let son = 4; let bitti = false;
+    const kapat = () => { if (bitti) return; bitti = true; el.classList.add('git'); setTimeout(() => el.remove(), 380); };
+    el.addEventListener('click', kapat);
+    (function kare(t) {
+      if (bitti) return; const gecen = (t - t0) / 1000; const kalan = 3 - Math.floor(gecen);
+      const p = Math.min(1, gecen / 3); const n = Math.round(p * cizgi.length); cizgi.forEach((c, i) => c.classList.toggle('on', i < n));
+      if (kalan !== son) { son = kalan; if (kalan >= 1) { no.textContent = kalan; no.classList.remove('vur'); void no.offsetWidth; no.classList.add('vur'); if (sesTur() !== 'yok') bip('sayim'); if (navigator.vibrate) navigator.vibrate(15); } else { no.textContent = 'Başla'; no.classList.add('kelime'); if (sesTur() !== 'yok') bip('git'); if (navigator.vibrate) navigator.vibrate([30, 40, 60]); setTimeout(kapat, 650); return; } }
+      requestAnimationFrame(kare);
+    })(t0);
+  }
+
+  /* ---------- açılış: COMEBACK. kendini çizer (oturumda bir kez, dokununca geçer) ---------- */
+  function acilisCiz() {
+    try { if (sessionStorage.getItem('cb-acilis')) return; sessionStorage.setItem('cb-acilis', '1'); } catch (e) { return; }
+    if (azHareket) return;
+    const el = document.createElement('div'); el.id = 'acilis'; el.className = 'acilis'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<svg viewBox="0 0 640 120"><text x="320" y="88" text-anchor="middle" class="ac-yazi">COMEBACK</text><circle class="ac-nokta" cx="0" cy="80" r="11"/></svg>';
+    document.body.appendChild(el);
+    const tx = el.querySelector('text'); const c = el.querySelector('circle');
+    try { const bb = tx.getBBox(); c.setAttribute('cx', (bb.x + bb.width + 16).toFixed(1)); } catch (e) { /* yok */ }
+    const kapat = () => { el.classList.add('git'); setTimeout(() => el.remove(), 420); };
+    el.addEventListener('click', kapat); setTimeout(kapat, 1650);
+  }
+
+  /* ---------- son 6 ay antrenman ızgarası (gün saymaz, yalnızca görür) ---------- */
+  function antrenmanIzgara() {
+    const bugun = tarihKey(); const bas = haftaBasi(); bas.setDate(bas.getDate() - 25 * 7);
+    let toplam = 0; let hucre = '';
+    for (let w = 0; w < 26; w++) for (let d = 0; d < 7; d++) {
+      const g = new Date(bas); g.setDate(g.getDate() + w * 7 + d); const k = tarihKey(g);
+      const v = S.gunluk[k] && S.gunluk[k].antrenman; if (v) toplam++;
+      hucre += '<i class="' + (k > bugun ? 'gel' : v ? 'on' : '') + (k === bugun ? ' bu' : '') + '" style="grid-column:' + (w + 1) + ';grid-row:' + (d + 1) + '"></i>';
+    }
+    return '<div class="t genis" style="gap:10px"><div class="satir"><span class="k">Son 6 ay</span><span class="k num">' + toplam + ' antrenman</span></div><div class="aizgara" role="img" aria-label="Son 6 ayda ' + toplam + ' antrenman">' + hucre + '</div><div class="aizgara-alt ik"><span>' + bas.getDate() + ' ' + AY[bas.getMonth()] + '</span><span>Bugün</span></div></div>';
+  }
+  // günün tonu: bacak günü derin kobalt, üst gövde mora yakın kobalt, karışık gün parlak kobalt
+  function gunTonu(g) {
+    let u = 0, a = 0; (g.hareketler || []).forEach((x) => { const h = D.HAREKET[x.id]; if (!h) return; if (h.bolge === 'alt') a++; else if (h.bolge === 'ust') u++; });
+    return a > u * 1.5 ? 'ton-alt' : u > a * 1.5 ? 'ton-ust' : 'ton-tam';
+  }
+
   /* ---------- yönlendirme ---------- */
   function render() {
     const yol = (location.hash.slice(1) || '/').split('?')[0];
@@ -2811,6 +2923,7 @@
       } else a.removeAttribute('aria-current');
     });
     navOnceki = sekme;
+    if (!parca[0] && acik) kapanisKontrol();
     if (S.seans && dinlenme) dinlenmeCiz(); else { const d = document.getElementById('dinlenme'); if (d && !(S.seans && d.classList.contains('bitti'))) d.remove(); }
     ekranKilit();
 
@@ -2918,8 +3031,11 @@
       sesHazirla(); seAcik = null; offAcik = false;
       kaydet(true);
       if (location.hash.indexOf('#/antrenman') !== 0) git('#/antrenman'); else render();
-      window.scrollTo(0, 0);
+      window.scrollTo(0, 0); geriSay(g);
     },
+    'kapanis-kart'() { const el = document.getElementById('kapanis'); if (!el) return; el.querySelector('.kp-bir').hidden = true; const iki = el.querySelector('.kp-iki'); iki.hidden = false; iki.classList.add('ac'); const b = iki.querySelector('button'); if (b) b.focus(); },
+    'kapanis-kapat'() { const el = document.getElementById('kapanis'); if (el) { el.classList.add('git'); setTimeout(() => el.remove(), 320); } document.body.classList.remove('kilit'); if (location.hash.indexOf('#/ilerleme') === 0) { const sY = window.scrollY; render(); window.scrollTo(0, sY); } },
+    'kart-ac'(el) { const k = (S.kartlar || []).find((x) => x.hafta === el.dataset.h); if (k) kapanisGoster(k, false); },
     tik(el) {
       const y = S.seans.setler[el.dataset.h][+el.dataset.i];
       y.ok = !y.ok; kaydet(true); sesHazirla(); if (S.jam) setTimeout(jamDurumGonder, 50);
@@ -4038,6 +4154,8 @@
   }
 
   app.innerHTML = '<header class="ust"><span class="logo">COMEBACK<i>.</i></span></header>';
+  acilisCiz();
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.getElementById('kapanis')) EYLEM['kapanis-kapat'](); });
   gocEt();
   hesapYukle().then(render, render);
 })();
