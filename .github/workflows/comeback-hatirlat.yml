@@ -1,0 +1,13 @@
+# COMEBACK. hatırlatıcıları: her 10 dakikada zamanı gelen su / takviye / antrenman bildirimlerini gönderir.
+# Gizli anahtar gerekmez; uç nokta her aboneliğin son gönderimini tutar, art arda çağrı çift bildirim yollamaz.
+name: COMEBACK hatırlatıcılar
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+jobs:
+  gonder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: curl -sS -m 60 -X POST https://cartemenusistemleri.com.tr/api/comeback/hatirlat/gonder
