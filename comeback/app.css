@@ -1607,3 +1607,32 @@ body.az-hareket .gec .od-kart>*,body.az-hareket .gec .mGrup,body.az-hareket .gec
 .od-giris .od-gecen{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
 .od-fark{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:12px;background:var(--kutu);color:var(--ikincil);font-size:12px;font-weight:800}
 .od-fark.art{background:var(--kobalt);color:#fff}
+
+/* logo seçilen simgeyle eşleşir: başlıktaki altlı üstlü logo ve alt menüdeki COMEBACK. */
+body{--lg-yazi:var(--murekkep);--lg-nokta:var(--kobalt)}
+html[data-simge="kobalt"] body{--lg-yazi:var(--kobalt);--lg-nokta:var(--murekkep)}
+html[data-simge="kobalt"] body.gece{--lg-yazi:#3D5CFF;--lg-nokta:#D8F53F}
+html[data-simge="beyaz"] body{--lg-yazi:var(--kobalt);--lg-nokta:var(--murekkep)}
+html[data-simge="beyaz"] body.gece{--lg-yazi:#FFFFFF;--lg-nokta:#3D5CFF}
+html[data-simge="limon"] body.gece{--lg-yazi:#D8F53F;--lg-nokta:#3D5CFF}
+.logo-yigin,.nav-kelime,.nav a[aria-current="page"] .nav-kelime{color:var(--lg-yazi)}
+.logo-yigin i,.nav-kelime i,.nav a[aria-current="page"] .nav-kelime i{color:var(--lg-nokta)}
+/* krom: harfler metal geçiş */
+html[data-simge="krom"] body{--lg-krom:linear-gradient(180deg,#2a2a30 0%,#7a7a84 48%,#16161a 52%,#55555e 100%)}
+html[data-simge="krom"] body.gece{--lg-krom:linear-gradient(180deg,#ffffff 0%,#d4d4da 34%,#6d6d75 52%,#ececf0 70%,#8d8d95 100%)}
+html[data-simge="krom"] .logo-yigin>span,html[data-simge="krom"] .nav-kelime>span{background:var(--lg-krom);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+html[data-simge="krom"] .logo-yigin i,html[data-simge="krom"] .nav-kelime i{-webkit-text-fill-color:var(--lg-nokta)}
+/* tekrar: BACK iki kez silik, sonra net */
+.logo-yigin .lg-e{display:none}
+html[data-simge="tekrar"] .logo-yigin{font-size:16px}
+html[data-simge="tekrar"] .logo-yigin .lg-e{display:block;opacity:.22}
+html[data-simge="tekrar"] .logo-yigin .lg-e+.lg-e{opacity:.48}
+/* karşılama kobalt zeminde kendi renginde kalır */
+.kr .logo-yigin{color:#fff}
+.kr .logo-yigin i{color:#0B0B0D}
+html[data-simge] .kr .logo-yigin>span{background:none;color:#fff}
+html[data-simge] .kr .logo-yigin i{-webkit-text-fill-color:#0B0B0D}
+.kr .logo-yigin .lg-e{display:none!important}
+body.gece .nav .nav-kelime,body.gece .nav a[aria-current="page"] .nav-kelime{color:var(--lg-yazi)}
+body.gece .nav .nav-kelime i,body.gece .nav a[aria-current="page"] .nav-kelime i{color:var(--lg-nokta)}
+html[data-simge="krom"] body:not(.gece){--lg-krom:linear-gradient(180deg,#5a5a63 0%,#16161a 100%)}

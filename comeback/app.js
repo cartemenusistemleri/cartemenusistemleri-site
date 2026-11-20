@@ -352,7 +352,7 @@
 
   /* ---------- ortak parçalar ---------- */
   const ust = (sol, sag) => '<header class="ust">' + sol + (sag || '') + '</header>';
-  const logo = '<a class="logo logo-yigin" href="#/" aria-label="COMEBACK. ana sayfa"><span aria-hidden="true">COME</span><span aria-hidden="true">BACK<i>.</i></span></a>';
+  const logo = '<a class="logo logo-yigin" href="#/" aria-label="COMEBACK. ana sayfa"><span aria-hidden="true">COME</span><span class="lg-e" aria-hidden="true">BACK</span><span class="lg-e" aria-hidden="true">BACK</span><span aria-hidden="true">BACK<i>.</i></span></a>';
   const geri = (h, etiket) => '<a class="ikon-btn" href="' + h + '" aria-label="' + (etiket || 'Geri') + '">' + IK.geri + '</a>';
 
   /* ---------- ekranlar ---------- */
@@ -2108,6 +2108,8 @@
     const m = document.querySelector('link[rel="manifest"]'); if (m && m.getAttribute('href') !== s[3]) m.setAttribute('href', s[3]);
     const a = document.querySelector('link[rel="apple-touch-icon"]'); if (a && a.getAttribute('href') !== s[2]) a.setAttribute('href', s[2]);
     try { localStorage.setItem('comeback:simge', simgeAyar()); } catch (e) { /* yok */ }
+    // uygulama içindeki logo ve alt menü seçilen simgenin renklerini alır
+    if (document.documentElement.getAttribute('data-simge') !== simgeAyar()) document.documentElement.setAttribute('data-simge', simgeAyar());
   }
   function simgeSecici() {
     const s = simgeAyar();
