@@ -3150,17 +3150,36 @@
     })(t0);
   }
 
-  /* ---------- açılış: COMEBACK. kendini çizer (oturumda bir kez, dokununca geçer) ---------- */
+  /* ---------- açılış: simge büyüyüp ekranı kaplar, sonra perde yukarı çekilir (oturumda bir kez, dokununca geçer) ---------- */
+  const AC_RENK = { kobalt: ['#2B48FF', '#FFFFFF', '#D8F53F'], gece: ['#000000', '#F3F1EC', '#3D5CFF'], krom: ['#000000', '#E6E6EA', '#3D5CFF'], gunduz: ['#ECECE8', '#16161A', '#2B48FF'], beyaz: ['#FFFFFF', '#2B48FF', '#16161A'], limon: ['#D8F53F', '#16161A', '#2B48FF'], tekrar: ['#000000', '#F3F1EC', '#3D5CFF'] };
   function acilisCiz() {
     try { if (sessionStorage.getItem('cb-acilis')) return; sessionStorage.setItem('cb-acilis', '1'); } catch (e) { return; }
-    if (azHareket) return;
-    const el = document.createElement('div'); el.id = 'acilis'; el.className = 'acilis'; el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = '<svg viewBox="0 0 640 120"><text x="320" y="88" text-anchor="middle" class="ac-yazi">COMEBACK</text><circle class="ac-nokta" cx="0" cy="80" r="11"/></svg>';
+    if (azHareket || !document.body.animate) return;
+    let sg = 'kobalt'; try { sg = localStorage.getItem('comeback:simge') || 'kobalt'; } catch (e) { /* yok */ }
+    const r = AC_RENK[sg] || AC_RENK.kobalt; const zemin = r[0] === '#000000' ? '#1C1C21' : '#0B0B0D';
+    const el = document.createElement('div'); el.id = 'acilis'; el.className = 'acilis2'; el.setAttribute('aria-hidden', 'true');
+    el.style.cssText = '--ac-zemin:' + zemin + ';--ac-bg:' + r[0] + ';--ac-fg:' + r[1] + ';--ac-nk:' + r[2];
+    el.innerHTML = '<div class="ac-kat"><div class="ac-logo"><span>COME</span><span>BACK<i>.</i></span></div></div>';
     document.body.appendChild(el);
-    const tx = el.querySelector('text'); const c = el.querySelector('circle');
-    try { const bb = tx.getBBox(); c.setAttribute('cx', (bb.x + bb.width + 16).toFixed(1)); } catch (e) { /* yok */ }
-    const kapat = () => { el.classList.add('git'); setTimeout(() => el.remove(), 420); };
-    el.addEventListener('click', kapat); setTimeout(kapat, 1650);
+    const kat = el.querySelector('.ac-kat'); const logo = el.querySelector('.ac-logo'); const nk = logo.querySelector('i');
+    const E = { cik: 'cubic-bezier(.23,1,.32,1)', gec: 'cubic-bezier(.77,0,.175,1)', cekmece: 'cubic-bezier(.32,.72,0,1)', yay: 'cubic-bezier(.34,1.56,.64,1)' };
+    const an = (x, kf, o) => x.animate(kf, Object.assign({ fill: 'both', easing: E.cik }, o));
+    const ik = Math.min(92, innerWidth * 0.22); const yar = ik / 2; const kose = ik * 0.23;
+    const lw = logo.getBoundingClientRect().width || 200; const s0 = (ik * 0.68) / lw;
+    const tum = [];
+    tum.push(an(kat, [{ opacity: 0, transform: 'scale(.8)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: 60, easing: E.yay }));
+    tum.push(an(kat, [{ clipPath: 'inset(calc(50% - ' + yar + 'px) calc(50% - ' + yar + 'px) round ' + kose + 'px)' }, { clipPath: 'inset(0 0 0 0 round 0px)' }], { duration: 720, delay: 520, easing: E.cekmece }));
+    tum.push(an(logo, [{ transform: 'scale(' + s0.toFixed(3) + ')' }, { transform: 'none' }], { duration: 720, delay: 520, easing: E.cekmece }));
+    tum.push(an(nk, [{ transform: 'none' }, { transform: 'scale(1.7)', offset: 0.45 }, { transform: 'none' }], { duration: 420, delay: 1180, easing: 'ease-in-out', fill: 'none' }));
+    tum.push(an(el, [{ backgroundColor: zemin }, { backgroundColor: 'transparent' }], { duration: 1, delay: 1250, fill: 'forwards' }));
+    tum.push(an(logo, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-64px)', opacity: 0 }], { duration: 560, delay: 1560, easing: E.gec, fill: 'forwards' }));
+    tum.push(an(kat, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 680, delay: 1560, easing: E.gec, fill: 'forwards' }));
+    const ic = document.getElementById('app');
+    if (ic) ic.animate([{ transform: 'translateY(28px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 640, delay: 1720, easing: E.cik, fill: 'backwards' });
+    let bitti = false;
+    const kaldir = () => { if (bitti) return; bitti = true; el.remove(); };
+    el.addEventListener('click', () => { if (bitti) return; tum.forEach((x) => x.pause()); el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' }).onfinish = kaldir; if (ic) ic.getAnimations().forEach((x) => x.finish()); });
+    setTimeout(kaldir, 2350);
   }
 
   /* ---------- kas haritası: bu hafta hangi kas ne kadar çalıştı (birincil 1 set, ikincil 0,5) ---------- */

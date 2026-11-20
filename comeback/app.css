@@ -1556,3 +1556,9 @@ a.t:active,button.t:active{transform:scale(.985)}
 /* basınca tik büyür */
 .ap-bitir:active svg{transform:scale(1.15)}
 body.az-hareket .gec .od-kart>*,body.az-hareket .gec .mGrup,body.az-hareket .gec .haplar{animation:none}
+
+/* açılış: simgeden perdeye */
+.acilis2{position:fixed;inset:0;z-index:80;background:var(--ac-zemin);cursor:pointer}
+.ac-kat{position:absolute;inset:0;display:grid;place-items:center;background:var(--ac-bg)}
+.ac-logo{display:flex;flex-direction:column;font-family:var(--font);font-weight:900;font-size:clamp(60px,18vw,104px);line-height:.82;letter-spacing:-.025em;color:var(--ac-fg)}
+.ac-logo i{font-style:normal;display:inline-block;color:var(--ac-nk);margin-left:.02em}
