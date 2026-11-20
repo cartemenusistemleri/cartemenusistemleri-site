@@ -2068,7 +2068,10 @@
   const SIMGE = {
     kobalt: ['Kobalt', 'ikon-kobalt-192.png?v=20', 'apple-touch-icon-kobalt.png?v=20', 'manifest.webmanifest?v=10'],
     gece: ['Gece', 'ikon-192.png?v=20', 'apple-touch-icon.png?v=20', 'manifest-gece.webmanifest?v=10'],
-    gunduz: ['Gündüz', 'ikon-gunduz-192.png?v=20', 'apple-touch-icon-gunduz.png?v=20', 'manifest-gunduz.webmanifest?v=10']
+    krom: ['Krom', 'ikon-krom-192.png?v=20', 'apple-touch-icon-krom.png?v=20', 'manifest-krom.webmanifest?v=10'],
+    gunduz: ['Gündüz', 'ikon-gunduz-192.png?v=20', 'apple-touch-icon-gunduz.png?v=20', 'manifest-gunduz.webmanifest?v=10'],
+    beyaz: ['Beyaz', 'ikon-beyaz-192.png?v=20', 'apple-touch-icon-beyaz.png?v=20', 'manifest-beyaz.webmanifest?v=10'],
+    limon: ['Limon', 'ikon-limon-192.png?v=20', 'apple-touch-icon-limon.png?v=20', 'manifest-limon.webmanifest?v=10']
   };
   const simgeAyar = () => { const s = (S.ayar || {}).simge; return SIMGE[s] ? s : 'kobalt'; };
   function simgeUygula() {
