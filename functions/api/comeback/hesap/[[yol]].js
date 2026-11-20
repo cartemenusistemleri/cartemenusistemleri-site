@@ -131,6 +131,7 @@ async function uyelikTablo(db) {
   await db.prepare('CREATE TABLE IF NOT EXISTS uyelik (kullanici_id TEXT PRIMARY KEY, son TEXT, tarihler TEXT, uzatma INTEGER NOT NULL DEFAULT 0, mazeret_bitis TEXT, mazeret_tur TEXT, mazeretler TEXT, askida TEXT, cb_bas TEXT, cb_soz INTEGER, guncelleme INTEGER)').run();
   uyelikHazir = true;
 }
+const HOSGELDIN_GUN = 14;
 function uyelikDurum(u, bugun) {
   const tarihler = jsonOku(u.tarihler, []);
   const mazeretler = jsonOku(u.mazeretler, []);
@@ -153,10 +154,10 @@ function uyelikDurum(u, bugun) {
 }
 async function uyelikSatir(db, kim) {
   let u = await db.prepare('SELECT * FROM uyelik WHERE kullanici_id = ?').bind(kim.id).first();
-  if (!u) { // ilk kez: süre bugünden başlar
+  if (!u) { // ilk kez: süre bugünden başlar; yeni üyeye ilk antrenmana kadar HOSGELDIN_GUN ek süre (ilk antrenmanla sıfırlanır)
     const b = bugunTR();
-    await db.prepare('INSERT OR IGNORE INTO uyelik (kullanici_id, son, tarihler, uzatma, guncelleme) VALUES (?, ?, ?, 0, ?)').bind(kim.id, b, '[]', Date.now()).run();
-    u = { kullanici_id: kim.id, son: b, tarihler: '[]', uzatma: 0 };
+    await db.prepare('INSERT OR IGNORE INTO uyelik (kullanici_id, son, tarihler, uzatma, guncelleme) VALUES (?, ?, ?, ?, ?)').bind(kim.id, b, '[]', HOSGELDIN_GUN, Date.now()).run();
+    u = { kullanici_id: kim.id, son: b, tarihler: '[]', uzatma: HOSGELDIN_GUN };
   }
   return u;
 }

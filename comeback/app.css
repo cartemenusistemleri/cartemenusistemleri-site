@@ -1562,3 +1562,48 @@ body.az-hareket .gec .od-kart>*,body.az-hareket .gec .mGrup,body.az-hareket .gec
 .ac-kat{position:absolute;inset:0;display:grid;place-items:center;background:var(--ac-bg)}
 .ac-logo{display:flex;flex-direction:column;font-family:var(--font);font-weight:900;font-size:clamp(60px,18vw,104px);line-height:.82;letter-spacing:-.025em;color:var(--ac-fg)}
 .ac-logo i{font-style:normal;display:inline-block;color:var(--ac-nk);margin-left:.02em}
+
+/* ince halka: boş nokta yalnızca kılcal çerçeve, dolu nokta tam kobalt */
+:root{--halka:1px}
+.od-n i,.od-n.su:not(.bitti) i{box-shadow:inset 0 0 0 var(--halka) var(--kobalt)}
+.od-n.su:not(.bitti) i{box-shadow:inset 0 0 0 var(--halka) var(--kobalt),0 0 0 3px color-mix(in srgb,var(--kobalt) 16%,transparent)}
+.od-n.atla i{box-shadow:inset 0 0 0 var(--halka) var(--cizgi)}
+.od-n.ek i{box-shadow:inset 0 0 0 var(--halka) var(--ikincil)}
+.od-n.bitti i,.od-n.ek.bitti i{box-shadow:none}
+.od-sayac-nokta i,.od-giris .od-sayac-nokta i{box-shadow:inset 0 0 0 var(--halka) var(--kobalt)}
+.od-giris .od-sayac-nokta i.su:not(.ok){box-shadow:inset 0 0 0 var(--halka) var(--kobalt),0 0 0 3px color-mix(in srgb,var(--kobalt) 16%,transparent)}
+.od-sayac-nokta i.ok,.od-giris .od-sayac-nokta i.ok{box-shadow:none}
+.od-mn{box-shadow:inset 0 0 0 var(--halka) var(--kobalt)}
+.od-mn.bitti{box-shadow:none}
+.od-set.su{box-shadow:inset 0 0 0 1.5px var(--kobalt)}
+.acilis2{background:transparent}
+.ac-m{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.ac-m>span{display:inline-block}
+.kr-kural{margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.62);max-width:36ch;text-wrap:pretty}
+.kr-kural b{color:#fff;font-weight:800}
+
+/* nokta dili her yerde: boş halka (kılcal), dolu nokta */
+.nd{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:4px}
+.nd i{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 var(--halka) var(--nd-renk,var(--kobalt));transition:background-color .25s ease}
+.nd i.ok{background:var(--nd-renk,var(--kobalt));box-shadow:none}
+.gec .nd i.ok{animation:ndDol .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--s,0) * 35ms + 180ms)}
+@keyframes ndDol{from{transform:scale(.2)}to{transform:none}}
+.seri-kutu .nd{--nd-renk:#3D5CFF}
+.hk-gun.plan .hk-isaret{box-shadow:inset 0 0 0 var(--halka) var(--kobalt)}
+.hk-gun.kacti .hk-isaret{box-shadow:inset 0 0 0 var(--halka) var(--ikincil)}
+.aizgara{gap:4px}
+.aizgara i{border-radius:50%;background:none;box-shadow:inset 0 0 0 var(--halka) var(--cizgi)}
+.aizgara i.on{background:var(--kobalt);box-shadow:none}
+.aizgara i.gel{box-shadow:none}
+.aizgara i.bu{box-shadow:inset 0 0 0 var(--halka) var(--kobalt),0 0 0 2px color-mix(in srgb,var(--kobalt) 20%,transparent)}
+.uy-cubuk{gap:8px}
+.uy-cubuk i{flex:none;width:16px;height:16px;border-radius:50%;background:none;box-shadow:inset 0 0 0 var(--halka) rgba(255,255,255,.8)}
+.uy-cubuk i.ok{background:#fff;box-shadow:none}
+.hkart-gun{gap:8px}
+.hkart-gun i{flex:none;width:12px;height:12px;border-radius:50%;background:none;opacity:.35;box-shadow:inset 0 0 0 var(--halka) currentColor}
+.hkart-gun i.g1{opacity:.75}
+.hkart-gun i.g2{opacity:1;background:currentColor;box-shadow:none}
+.hkart.mini .hkart-gun{gap:3px}.hkart.mini .hkart-gun i{width:5px;height:5px}
+.od-giris .od-gecen{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.od-fark{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:12px;background:var(--kutu);color:var(--ikincil);font-size:12px;font-weight:800}
+.od-fark.art{background:var(--kobalt);color:#fff}

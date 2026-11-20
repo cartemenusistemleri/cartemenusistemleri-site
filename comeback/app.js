@@ -182,7 +182,7 @@
   }
   function ekranComeback() {
     const u = uyelik();
-    const kural = '<div class="t genis"><span class="k">Üyelik kuralları</span><ul class="madde"><li>30 gün antrenman kaydı olmazsa üyelik askıya alınır. Verilerin silinmez.</li><li>Askıdayken koç, topluluk ve fotoğraf analizi kapalı; antrenman ve öğün kaydı açık.</li><li>Geri dönüş: Comeback\'e başla, 7 gün içinde 2 antrenman yap.</li><li>Ara vereceksen önceden mazeret bildir: yılda 2 kez, her biri en çok 14 gün. Mazeret süresi askı tarihine eklenir.</li></ul></div>';
+    const kural = '<div class="t genis"><span class="k">Üyelik kuralları</span><ul class="madde"><li>30 gün antrenman kaydı olmazsa üyelik askıya alınır. Verilerin silinmez.</li><li>Yeni üyeye ilk antrenmana kadar 14 gün ek süre verilir.</li><li>Askıdayken koç, topluluk ve fotoğraf analizi kapalı; antrenman ve öğün kaydı açık.</li><li>Geri dönüş: Comeback\'e başla, 7 gün içinde 2 antrenman yap.</li><li>Ara vereceksen önceden mazeret bildir: yılda 2 kez, her biri en çok 14 gün. Mazeret süresi askı tarihine eklenir.</li></ul></div>';
     let ic;
     if (u.durum === 'askida') ic = '<div class="t kobalt genis cb-kutu"><span class="k">Üyeliğin askıda · ' + (u.askidaBas ? tarihKisa(u.askidaBas) + ' tarihinden beri' : '') + '</span><b class="cb-dev">Hiçbir zaman çok geç değil<span style="color:var(--koyu)">.</span></b><span class="uy-ik">Söz ver, 7 gün içinde 2 antrenman yap. İkinci antrenmanı kaydettiğin an her şey açılır.' + (u.comebackKacti ? ' Önceki denemenin süresi doldu; yeniden başlayabilirsin.' : '') + '</span>' +
         '<span class="k" style="margin-top:8px">Bu hafta kaç gün geliyorsun?</span><div class="haplar" role="radiogroup">' + [2, 3, 4, 5].map((n) => '<button type="button" class="hap cb-soz" role="radio" data-act="cb-soz" data-n="' + n + '" aria-checked="' + (cbSoz === n) + '" aria-pressed="' + (cbSoz === n) + '">' + n + ' gün</button>').join('') + '</div>' +
@@ -327,7 +327,12 @@
     const n = haftaSeri(); const b = haftaBasi(); const y = haftaYapilan(b); const h = haftaHedefi(b);
     const ic = n ? '<span class="k">' + etiket + '</span><span class="buyuk num"><span data-say="' + n + '">' + n + '</span><span style="color:var(--mavi-gece)">.</span></span><span class="ik">hafta üst üste hedefini tuttun</span>'
       : '<span class="k">' + etiket + '</span><span class="buyuk num">' + y + '<span class="ik" style="font-size:.4em"> / ' + h + '</span></span><span class="ik">Bu hafta ' + h + ' gün hedefini tutarsan seri başlar.</span>';
-    return ic;
+    return ic + noktaSira(h, y, 'Bu hafta ' + y + ' / ' + h);
+  }
+  // nokta dili: boş halka = yapılacak, dolu kobalt = yapıldı
+  function noktaSira(n, dolu, etiket) {
+    n = Math.max(0, Math.min(14, +n || 0)); dolu = Math.max(0, +dolu || 0);
+    return n ? '<span class="nd" role="img" aria-label="' + esc(etiket || '') + '">' + Array.from({ length: n }, (z, i) => '<i class="' + (i < dolu ? 'ok' : '') + '"></i>').join('') + '</span>' : '';
   }
   function seri() {
     let n = 0; const d = new Date();
@@ -364,6 +369,7 @@
     return '<div class="kr">' + '<header class="ust kr-ust">' + logo + '</header>' + gorsel +
       '<div class="kr-alt"><h1 class="kr-baslik"><span class="mk">Make the</span><span>COMEBACK<span class="nokta">.</span></span></h1>' +
       '<p class="kr-deger">Programın kurulur, her setin kaydedilir. En zor gününde bile yanında.</p>' +
+      '<p class="kr-kural"><b>Burada bırakmak yok.</b> 30 gün antrenman kaydı olmazsa üyelik askıya alınır; ara vereceksen haber vermen yeterli.</p>' +
       (basvuruVar ? '<div class="t kobalt" style="gap:6px"><span class="k">Başvurun alındı</span><span style="font-size:15px;font-weight:600;line-height:1.45">' + esc(S.basvuru.eposta) + ' ile başvurun inceleniyor. Onaylanınca aynı e-posta ve şifreyle giriş yap.</span></div>' : '') +
       '<div class="kr-eylem">' + (hesap || cevrimdisi ? '<a class="btn ana buyuk-btn" href="#/kurulum">Programımı oluştur' + IK.ok + '</a>'
         : (basvuruVar ? '' : '<a class="btn ana buyuk-btn" href="#/basvuru">Beta\'ya başvur' + IK.ok + '</a>') + '<a class="metin-btn kr-giris" href="#/giris">Zaten hesabım var ·&nbsp;<b>Giriş yap</b></a>') + '</div>' +
@@ -1796,14 +1802,22 @@
     const satir = (ad, deger, birim, d, etiket) => '<div class="od-adim"><button class="od-adim-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="-' + d + '" aria-label="' + etiket + ' azalt">−</button>' +
       '<div class="od-adim-d"><b class="num' + (String(deger).length >= 5 ? ' uzun' : '') + '" data-ap="' + ad + '">' + deger + '</b><span>' + birim + '</span></div>' +
       '<button class="od-adim-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="' + d + '" aria-label="' + etiket + ' artır">+</button></div>';
-    const gecen = once ? once.setler.filter((z) => z.tur !== 'isinma').map((z) => sayi(z.kg, 1) + '×' + z.tekrar) : [];
+    // geçen seferin aynı seti ile karşılaştır
+    const oCalis = once ? once.setler.filter((z) => z.tur !== 'isinma') : [];
+    const oSet = y.tur !== 'isinma' ? oCalis[calis.indexOf(y)] : null;
+    let gecenHtml = '';
+    if (oSet) {
+      const f = Math.round((kg - (oku(oSet.kg) || 0)) * 100) / 100;
+      const hap = !kg ? '' : f > 0 ? '<b class="od-fark art num">+' + sayi(f, 2) + ' kg</b>' : f < 0 ? '<b class="od-fark num">−' + sayi(-f, 2) + ' kg</b>' : '<b class="od-fark num">aynı kilo</b>';
+      gecenHtml = '<span class="od-gecen num">Geçen sefer bu set · ' + sayi(oSet.kg, 2) + ' × ' + esc(oSet.tekrar) + hap + '</span>';
+    } else if (!once) gecenHtml = '<span class="od-gecen">İlk kez yapıyorsun. Rahat bir kiloyla başla.</span>';
     return '<div class="od-giris" data-h="' + k + '">' +
       '<div class="od-giris-ust"><span class="od-giris-no num">' + no + '</span><span class="od-sayac-nokta" aria-hidden="true">' + calis.map((z, i) => '<i class="' + (i < bitti ? 'ok' : '') + (z === y ? ' su' : '') + '"></i>').join('') + '</span></div>' +
       (sec !== aktifIdx ? '<div class="od-panel-ust"><span class="k">' + (bitmis ? 'Bitti · düzenliyorsun' : 'Önceden yazıyorsun') + '</span>' + (aktifIdx >= 0 ? '<button class="metin-btn kucuk-metin" data-act="od-set-kapat">Sıradaki sete dön</button>' : '') + '</div>' : '') +
       satir('kg', kg ? sayi(kg, 2) : '—', 'kg', adim, 'Kiloyu ' + sayi(adim, 2)) +
       satir('tekrar', y.tekrar || x.alt || '—', 'tekrar', 1, 'Tekrarı') +
       (barbell ? plakaHtml(kg) : '') +
-      (sec === aktifIdx ? (gecen.length ? '<span class="od-gecen num">Geçen sefer · ' + gecen.join('  ') + '</span>' : '<span class="od-gecen">İlk kez yapıyorsun. Rahat bir kiloyla başla.</span>') : '') + '</div>';
+      gecenHtml + '</div>';
   }
   function odakBitirBtn(k, l, sec) {
     const y = l[sec]; const bitmis = y.ok && !y.atla;
@@ -2006,6 +2020,7 @@
   const MARKA_SES = {
     bitis: [[196, 0, 1.1, 'sine', 0.10], [1318, 0.12, 0.9, 'sine', 0.06], [1975, 0.12, 0.6, 'sine', 0.025]],
     sayim: [[880, 0, 0.12, 'sine', 0.07]],
+    set: [[1046, 0, 0.12, 'sine', 0.05], [1568, 0.07, 0.2, 'sine', 0.035]],
     git: [[1318, 0, 0.5, 'sine', 0.08], [1975, 0, 0.35, 'sine', 0.03]],
     rekor: [[98, 0, 1.3, 'sine', 0.16], [196, 0, 0.8, 'sine', 0.05], [1318, 0.32, 1.0, 'sine', 0.065], [1975, 0.32, 0.7, 'sine', 0.03]]
   };
@@ -3150,36 +3165,32 @@
     })(t0);
   }
 
-  /* ---------- açılış: simge büyüyüp ekranı kaplar, sonra perde yukarı çekilir (oturumda bir kez, dokununca geçer) ---------- */
+  /* ---------- açılış: kobalt perde, yazı maskeden yükselir, nokta düşer, perde yukarı çekilir (oturumda bir kez, dokununca geçer) ---------- */
   const AC_RENK = { kobalt: ['#2B48FF', '#FFFFFF', '#D8F53F'], gece: ['#000000', '#F3F1EC', '#3D5CFF'], krom: ['#000000', '#E6E6EA', '#3D5CFF'], gunduz: ['#ECECE8', '#16161A', '#2B48FF'], beyaz: ['#FFFFFF', '#2B48FF', '#16161A'], limon: ['#D8F53F', '#16161A', '#2B48FF'], tekrar: ['#000000', '#F3F1EC', '#3D5CFF'] };
   function acilisCiz() {
     try { if (sessionStorage.getItem('cb-acilis')) return; sessionStorage.setItem('cb-acilis', '1'); } catch (e) { return; }
     if (azHareket || !document.body.animate) return;
     let sg = 'kobalt'; try { sg = localStorage.getItem('comeback:simge') || 'kobalt'; } catch (e) { /* yok */ }
-    const r = AC_RENK[sg] || AC_RENK.kobalt; const zemin = r[0] === '#000000' ? '#1C1C21' : '#0B0B0D';
+    const r = AC_RENK[sg] || AC_RENK.kobalt;
     const el = document.createElement('div'); el.id = 'acilis'; el.className = 'acilis2'; el.setAttribute('aria-hidden', 'true');
-    el.style.cssText = '--ac-zemin:' + zemin + ';--ac-bg:' + r[0] + ';--ac-fg:' + r[1] + ';--ac-nk:' + r[2];
-    el.innerHTML = '<div class="ac-kat"><div class="ac-logo"><span>COME</span><span>BACK<i>.</i></span></div></div>';
+    el.style.cssText = '--ac-bg:' + r[0] + ';--ac-fg:' + r[1] + ';--ac-nk:' + r[2];
+    el.innerHTML = '<div class="ac-kat"><div class="ac-logo"><span class="ac-m"><span>COME</span></span><span class="ac-m"><span>BACK<i>.</i></span></span></div></div>';
     document.body.appendChild(el);
-    const kat = el.querySelector('.ac-kat'); const logo = el.querySelector('.ac-logo'); const nk = logo.querySelector('i');
-    const E = { cik: 'cubic-bezier(.23,1,.32,1)', gec: 'cubic-bezier(.77,0,.175,1)', cekmece: 'cubic-bezier(.32,.72,0,1)', yay: 'cubic-bezier(.34,1.56,.64,1)' };
+    const kat = el.querySelector('.ac-kat'); const logo = el.querySelector('.ac-logo'); const sp = el.querySelectorAll('.ac-m>span'); const nk = logo.querySelector('i');
+    const E = { cik: 'cubic-bezier(.23,1,.32,1)', gec: 'cubic-bezier(.77,0,.175,1)', yay: 'cubic-bezier(.34,1.56,.64,1)' };
     const an = (x, kf, o) => x.animate(kf, Object.assign({ fill: 'both', easing: E.cik }, o));
-    const ik = Math.min(92, innerWidth * 0.22); const yar = ik / 2; const kose = ik * 0.23;
-    const lw = logo.getBoundingClientRect().width || 200; const s0 = (ik * 0.68) / lw;
     const tum = [];
-    tum.push(an(kat, [{ opacity: 0, transform: 'scale(.8)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: 60, easing: E.yay }));
-    tum.push(an(kat, [{ clipPath: 'inset(calc(50% - ' + yar + 'px) calc(50% - ' + yar + 'px) round ' + kose + 'px)' }, { clipPath: 'inset(0 0 0 0 round 0px)' }], { duration: 720, delay: 520, easing: E.cekmece }));
-    tum.push(an(logo, [{ transform: 'scale(' + s0.toFixed(3) + ')' }, { transform: 'none' }], { duration: 720, delay: 520, easing: E.cekmece }));
-    tum.push(an(nk, [{ transform: 'none' }, { transform: 'scale(1.7)', offset: 0.45 }, { transform: 'none' }], { duration: 420, delay: 1180, easing: 'ease-in-out', fill: 'none' }));
-    tum.push(an(el, [{ backgroundColor: zemin }, { backgroundColor: 'transparent' }], { duration: 1, delay: 1250, fill: 'forwards' }));
-    tum.push(an(logo, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-64px)', opacity: 0 }], { duration: 560, delay: 1560, easing: E.gec, fill: 'forwards' }));
-    tum.push(an(kat, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 680, delay: 1560, easing: E.gec, fill: 'forwards' }));
+    tum.push(an(sp[0], [{ transform: 'translateY(110%)' }, { transform: 'none' }], { duration: 640, delay: 120 }));
+    tum.push(an(sp[1], [{ transform: 'translateY(110%)' }, { transform: 'none' }], { duration: 640, delay: 220 }));
+    tum.push(an(nk, [{ transform: 'translateY(-1.3em)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 520, delay: 700, easing: E.yay }));
+    tum.push(an(logo, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-64px)', opacity: 0 }], { duration: 560, delay: 1450, easing: E.gec, fill: 'forwards' }));
+    tum.push(an(kat, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: 680, delay: 1450, easing: E.gec, fill: 'forwards' }));
     const ic = document.getElementById('app');
-    if (ic) ic.animate([{ transform: 'translateY(28px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 640, delay: 1720, easing: E.cik, fill: 'backwards' });
+    if (ic) ic.animate([{ transform: 'translateY(28px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 640, delay: 1600, easing: E.cik, fill: 'backwards' });
     let bitti = false;
     const kaldir = () => { if (bitti) return; bitti = true; el.remove(); };
     el.addEventListener('click', () => { if (bitti) return; tum.forEach((x) => x.pause()); el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' }).onfinish = kaldir; if (ic) ic.getAnimations().forEach((x) => x.finish()); });
-    setTimeout(kaldir, 2350);
+    setTimeout(kaldir, 2250);
   }
 
   /* ---------- kas haritası: bu hafta hangi kas ne kadar çalıştı (birincil 1 set, ikincil 0,5) ---------- */
@@ -3435,6 +3446,7 @@
       const sY = window.scrollY; render(); window.scrollTo(0, gecti ? 0 : sY); if (gecti) odakKay(1);
       if (y.ok && odakMi()) odKutla(el.dataset.h, el.dataset.i, buI, gecti);
       if (y.ok) {
+        if (sesTur() !== 'yok') bip('set'); if (navigator.vibrate) navigator.vibrate(18);
         if (sonraki && sonraki.tur === 'drop') { dinlenme = null; dinlenmeCiz(); toast('Drop set: kiloyu düşür, hemen devam.'); }
         else if (sonraki) { // ısınma hafif: setler arası 30 sn, son ısınmadan ilk çalışma setine 60 sn
           const sn = y.tur === 'isinma' ? (sonraki.tur === 'isinma' ? 30 : Math.min(60, dinSn(dz) || 60)) : dinSn(dz); dinlenmeBaslat(sn); jamDinlen(sn); }
