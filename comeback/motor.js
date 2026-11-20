@@ -140,7 +140,9 @@
     const spor = SPOR[p.spor] || SPOR.fitness;
     const sporcu = p.spor !== 'fitness';
     const sezonIci = sporcu && p.sezon === 'ici';
-    const b = p.ortam !== 'salon' && BOLUNME_VUCUT[p.gun] ? BOLUNME_VUCUT[p.gun] : BOLUNME[p.gun];
+    // birden fazla çalışma yeri: günler yerlere sırayla paylaştırılır, her gün kendi yerinin ekipmanıyla kurulur
+    const yerler = Array.isArray(p.ortamlar) && p.ortamlar.length > 1 ? p.ortamlar.filter((o) => ORTAM[o]) : [p.ortam];
+    const b = yerler.every((o) => o !== 'salon') && BOLUNME_VUCUT[p.gun] ? BOLUNME_VUCUT[p.gun] : BOLUNME[p.gun];
     const notlar = [];
     const sayac = {};
 
@@ -150,11 +152,12 @@
       let slotlar = sab.slot.slice();
       if (spor.ust_azalt) slotlar = slotlar.filter((s) => ['biceps:izo', 'triceps:izo', 'yan_omuz:izo'].indexOf(s) < 0);
       if (sezonIci) slotlar = slotlar.filter((s) => !/:izo$/.test(s));
-      return { id: gid + '-' + i, gid, ad: sab.ad, hafta: b.hafta[i], bolge: sab.bolge, slotlar, hareketler: [], kullanilan: new Set() };
+      const ortam = yerler[(i + Math.floor(i / yerler.length)) % yerler.length]; // üst/alt günleri yerlere karışık düşsün
+      return { id: gid + '-' + i, gid, ad: sab.ad, hafta: b.hafta[i], bolge: sab.bolge, slotlar, hareketler: [], kullanilan: new Set(), ortam, p: Object.assign({}, p, { ortam }) };
     });
-    const ekle = (g, h, rol, blok) => { const d = doz(h, rol, p); d.blok = blok || rol; g.hareketler.push(d); g.kullanilan.add(h.id); return d; };
+    const ekle = (g, h, rol, blok) => { const d = doz(h, rol, g.p); d.blok = blok || rol; g.hareketler.push(d); g.kullanilan.add(h.id); return d; };
     const secVeEkle = (g, kalip, rol, blok) => {
-      const a = adaylar(kalip, p, g.kullanilan);
+      const a = adaylar(kalip, g.p, g.kullanilan);
       if (!a.length) return null;
       const k = kalip + ':' + rol; const n = sayac[k] || 0; sayac[k] = n + 1;
       let h;
@@ -200,14 +203,14 @@
         if (var_ && !g.hareketler.some((x) => x.blok === 'onleme' && HAREKET[x.id].kalip === h0.kalip)) {
           const d = doz(HAREKET[var_.id], 'onleme', p); d.blok = 'onleme'; Object.assign(var_, d); n++; return;
         }
-        const h = belirliYaDaYedek(id, p, g.kullanilan); if (h) { ekle(g, h, 'onleme', 'onleme'); n++; }
+        const h = belirliYaDaYedek(id, g.p, g.kullanilan); if (h) { ekle(g, h, 'onleme', 'onleme'); n++; }
       });
     });
     // 6) kondisyon / yağ yakımı bitirişi ve dövüş tur çalışması
-    const kardiyoSec = (g) => { const a = adaylar('kardiyo', p, g.kullanilan); return a[0] || null; };
+    const kardiyoSec = (g) => { const a = adaylar('kardiyo', g.p, g.kullanilan); return a[0] || null; };
     gunler.forEach((g, i) => {
       if (p.hedef === 'yag' || p.hedef === 'kondisyon') { const h = kardiyoSec(g); if (h) ekle(g, h, 'kardiyo', 'kardiyo'); }
-      else if (spor.finisaj && i < 2) { const h = belirliYaDaYedek(spor.finisaj, p, g.kullanilan); if (h) ekle(g, h, 'kardiyo', 'kardiyo'); }
+      else if (spor.finisaj && i < 2) { const h = belirliYaDaYedek(spor.finisaj, g.p, g.kullanilan); if (h) ekle(g, h, 'kardiyo', 'kardiyo'); }
     });
     // 7) sezon içi: ana ve yardımcı setleri azalt
     if (sezonIci) gunler.forEach((g) => g.hareketler.forEach((x) => { if (x.blok === 'ana' || x.blok === 'yard') x.set = Math.max(2, x.set - 1); }));
@@ -273,13 +276,14 @@
       }
       g.dk = dk;
       g.hareketler.forEach((x) => { x.tekrar = yaz(x); });
-      delete g.kullanilan; delete g.slotlar;
+      delete g.kullanilan; delete g.slotlar; delete g.p; if (yerler.length < 2) delete g.ortam;
     });
     hacim = hacimHesapla();
 
     // 11) notlar
     const eksik = ANA_KAS.filter((m) => hacim[m] < HEDEF_HACIM[0] * 0.6);
-    if (p.hedef === 'kas' && eksik.length && p.ortam !== 'salon') notlar.push('Seçtiğin ortamda ' + eksik.map((m) => KAS[m].toLowerCase()).join(', ') + ' için hareket seçeneği sınırlı; bir lastik bant ya da dambıl eklemek hacmi artırır.');
+    if (yerler.length > 1) notlar.push('Günleri ' + yerler.map((o) => ORTAM[o].ad.toLowerCase()).join(' ve ') + ' arasında sırayla paylaştırdık; her gün o yerin ekipmanına göre kuruldu.');
+    if (p.hedef === 'kas' && eksik.length && yerler.every((o) => o !== 'salon')) notlar.push('Seçtiğin ortamda ' + eksik.map((m) => KAS[m].toLowerCase()).join(', ') + ' için hareket seçeneği sınırlı; bir lastik bant ya da dambıl eklemek hacmi artırır.');
     const enUzun = Math.max.apply(null, gunler.map((g) => g.dk));
     if (enUzun > p.sure + 5) notlar.push('Bazı günler seçtiğin ' + p.sure + ' dakikayı aşıyor (en uzunu yaklaşık ' + enUzun + ' dk). Sakatlık önleme ve güç bölümlerini kısaltmadık; istersen seans süresini artır.');
     if (kardiyoAyri) notlar.push('Seans süresine sığmadığı için bazı günlerde kardiyo bitirişini çıkardık; 10–15 dakikalık kardiyoyu başka bir saatte ya da dinlenme gününde yap.');

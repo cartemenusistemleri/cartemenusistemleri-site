@@ -466,7 +466,7 @@
       '<fieldset class="t genis"><legend>Hedefin</legend><div class="haplar">' + tekli('hedef', [['kas', 'Kas kazanmak'], ['yag', 'Yağ yakmak'], ['guc', 'Güçlenmek'], ['kondisyon', 'Kondisyon']], p.hedef) + '</div></fieldset>' +
       '<fieldset class="t genis"><legend>Uğraştığın spor</legend><div class="haplar">' + tekli('spor', [['fitness', 'Fitness'], ['futbol', 'Futbol'], ['basketbol', 'Basketbol'], ['kosu', 'Koşu'], ['yuzme', 'Yüzme'], ['tenis', 'Tenis'], ['dovus', 'Dövüş sporları']], p.spor) + '</div><span class="ik">Spora özel güç, sürat ve sakatlık önleme hareketleri eklenir.</span></fieldset>' +
       '<fieldset class="t genis" id="sezonAlan"' + (p.spor === 'fitness' ? ' hidden' : '') + '><legend>Şu an sezonda mısın?</legend><div class="haplar">' + tekli('sezon', [['disi', 'Sezon dışı / hazırlık'], ['ici', 'Sezon içi, maçlar var']], p.sezon || 'disi') + '</div><span class="ik">Sezon içinde set sayısı azalır, amaç kuvveti korumak olur.</span></fieldset>' +
-      '<fieldset class="t genis"><legend>Nerede çalışacaksın?</legend><div class="haplar">' + tekli('ortam', [['salon', 'Spor salonu'], ['ev', 'Evde, dambılla'], ['vucut', 'Ekipmansız'], ['dis', 'Dışarıda, parkta']], p.ortam || 'salon') + '</div><span class="ik">' + 'Ev: dambıl ve lastik bant. Ekipmansız: yalnızca vücut ağırlığı ve bir sandalye. Park: barfiks ve paralel bar.' + '</span></fieldset>' +
+      '<fieldset class="t genis"><legend>Nerede çalışacaksın? · birden fazla seçebilirsin</legend><div class="haplar">' + [['salon', 'Spor salonu'], ['ev', 'Evde, dambılla'], ['vucut', 'Ekipmansız'], ['dis', 'Dışarıda, parkta']].map((x) => hap('ortam', x[0], x[1], ortamlar(p).indexOf(x[0]) >= 0, true)).join('') + '</div><span class="ik">' + 'Hem salonda hem dışarıda çalışıyorsan ikisini de seç; günleri bu yerlere paylaştırırız. Ev: dambıl ve lastik bant. Ekipmansız: yalnızca vücut ağırlığı ve bir sandalye. Park: barfiks ve paralel bar.' + '</span></fieldset>' +
       '<fieldset class="t genis"><legend>Bir antrenman ne kadar sürsün?</legend><div class="haplar">' + tekli('sure', [['45', '45 dk'], ['60', '60 dk'], ['75', '75 dk'], ['90', '90 dk']], String(p.sure || 60)) + '</div></fieldset>' +
       '<fieldset class="t"><legend>Deneyim</legend><div class="haplar">' + tekli('deneyim', [['baslangic', 'Yeni'], ['orta', 'Orta'], ['ileri', 'İleri']], p.deneyim) + '</div></fieldset>' +
       '<div class="t ara-sb"><span class="k">Haftada</span><div class="satir"><button type="button" class="yuvarlak" data-act="gun" data-yon="-1" aria-label="Gün azalt">−</button><span class="buyuk num" id="gunSay">' + p.gun + '</span><button type="button" class="yuvarlak" data-act="gun" data-yon="1" aria-label="Gün artır">+</button></div><span class="k">gün antrenman</span></div>' +
@@ -593,6 +593,10 @@
 
   /* ---------- hedef değiştirme ---------- */
   let hedefTaslak = null;
+  // çalışma yerleri: tek ortam (eski) ya da birden fazla (ör. hem salon hem dışarı)
+  const gunProfil = (g) => (g && g.ortam ? Object.assign({}, S.profil, { ortam: g.ortam }) : S.profil);
+  const ORTAM_KISA = { salon: 'Salon', ev: 'Ev', vucut: 'Ekipmansız', dis: 'Dışarıda' };
+  const ortamlar = (p) => (p && Array.isArray(p.ortamlar) && p.ortamlar.length ? p.ortamlar : [(p && p.ortam) || 'salon']);
   function ekranHedef() {
     if (!S.profil) return ekranKarsilama();
     const p = hedefTaslak || (hedefTaslak = JSON.parse(JSON.stringify(S.profil)));
@@ -605,7 +609,7 @@
       '<div class="t genis"><span class="k">Hedefin</span><div class="haplar">' + hp('hedef', [['kas', 'Kas kazanmak'], ['yag', 'Yağ yakmak'], ['guc', 'Güçlenmek'], ['kondisyon', 'Kondisyon']], p.hedef) + '</div></div>' +
       '<div class="t genis"><span class="k">Haftada kaç gün?</span><div class="haplar">' + hp('gun', [2, 3, 4, 5, 6].map((n) => [String(n), n + ' gün']), String(p.gun)) + '</div></div>' +
       '<div class="t genis"><span class="k">Üzerine gitmek istediğin bölge · en fazla 2</span><div class="haplar">' + hp('odak', Object.keys(M.ODAK).map((k) => [k, M.ODAK[k].ad]), p.odak || [], true) + '</div></div>' +
-      '<div class="t genis"><span class="k">Nerede çalışacaksın?</span><div class="haplar">' + hp('ortam', [['salon', 'Spor salonu'], ['ev', 'Evde, dambılla'], ['vucut', 'Ekipmansız'], ['dis', 'Dışarıda']], p.ortam || 'salon') + '</div></div>' +
+      '<div class="t genis"><span class="k">Nerede çalışacaksın? · birden fazla seçebilirsin</span><div class="haplar">' + hp('ortam', [['salon', 'Spor salonu'], ['ev', 'Evde, dambılla'], ['vucut', 'Ekipmansız'], ['dis', 'Dışarıda']], ortamlar(p), true) + '</div>' + (ortamlar(p).length > 1 ? '<span class="ik">Antrenman günlerini ' + ortamlar(p).map((o) => (K.ORTAM[o] || { ad: o }).ad.toLowerCase()).join(' ve ') + ' arasında sırayla paylaştırırız.</span>' : '') + '</div>' +
       '<div class="t genis"><span class="k">Bir antrenman ne kadar sürsün?</span><div class="haplar">' + hp('sure', [['45', '45 dk'], ['60', '60 dk'], ['75', '75 dk'], ['90', '90 dk']], String(p.sure || 60)) + '</div></div>' +
       '<div class="t genis"><span class="k">Günlük protein</span><div class="haplar">' + [['dusuk', 'Az'], ['orta', 'Orta'], ['yuksek', 'Yüksek']].map((x) => { const pp = Object.assign({}, p, { protSeviye: x[0] }); const h = M.hedefHesapla(pp); return '<button type="button" class="hap" data-act="hedef-sec" data-grup="protSeviye" data-deger="' + x[0] + '" aria-pressed="' + ((p.protSeviye || '') === x[0]) + '">' + x[1] + ' · ' + h.protein + ' g</button>'; }).join('') +
         '<button type="button" class="hap" data-act="hedef-sec" data-grup="protSeviye" data-deger="" aria-pressed="' + !p.protSeviye + '">Önerilen · ' + M.hedefHesapla(Object.assign({}, p, { protSeviye: '' })).protein + ' g</button>' +
@@ -1380,7 +1384,7 @@
   }
   function pdListe(g) {
     const PP = pProfil() || {};
-    const ekip = K.ORTAM[PP.ortam] ? K.ORTAM[PP.ortam].ekipman : null;
+    const gYer = (g && g.ortam) || PP.ortam; const ekip = K.ORTAM[gYer] ? K.ORTAM[gYer].ekipman : null;
     const sozcuk = normal(pAra).split(' ').filter(Boolean);
     const bol = PBOLGE.find((b) => b[0] === pBolge);
     const yer = pYer && K.ORTAM[pYer] ? K.ORTAM[pYer].ekipman : null;
@@ -1423,6 +1427,7 @@
       (pr.kaynaklar ? '<div class="t genis tum"><span class="k">Dayandığımız kaynaklar</span><ul class="madde kaynak">' + pr.kaynaklar.filter((k) => K.KAYNAK[k]).map((k) => '<li><a href="' + esc(K.KAYNAK[k].url) + '" target="_blank" rel="noopener">' + esc(K.KAYNAK[k].ad) + '</a></li>').join('') + '</ul></div>' : '') +
       '</div>' +
       uyarilar.map((u) => '<div class="uyari">' + esc(u) + '</div>').join('') +
+      '<a class="btn cerceve buyuk-btn" href="#/program">' + (pr.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle') + '</a>' +
       '<a class="btn ana buyuk-btn" href="#/">Başlayalım' + IK.ok + '</a>';
   }
 
@@ -1436,6 +1441,15 @@
     return '<div class="t genis off-kutu acik"><div class="satir"><span class="k">Bugün hangisini yapalım?</span><button class="metin-btn kucuk-metin" data-act="gd-ac" style="color:var(--ikincil)">Vazgeç</button></div><div class="gd-liste">' +
       l.map((g) => { const z = yakin.find((x) => x.gun && x.gun.id === g.id); return '<button data-act="gun-degis" data-id="' + g.id + '"><b>' + esc(g.ad) + '</b><span class="ik">' + g.hareketler.length + ' hareket' + (z ? ' · normalde ' + (z.d.getDate() === new Date(Date.now() + 864e5).getDate() ? 'yarın' : GUN_AD[haftaGunu(z.d)]) : '') + '</span></button>'; }).join('') + '</div>' +
       '<span class="ik">' + (bugunku ? esc(bugunku.ad) + ' seçtiğin antrenmanın gününe geçer; yer değiştirirler.' : 'Seçtiğin antrenmanın günü dinlenme olur.') + '</span></div>';
+  }
+  // ana sayfada tek beslenme kartı: halka, kalan kalori, protein ve fotoğrafla ekleme
+  function besKutu(tp, h, kalan) {
+    const tamam = hedefTamam(tp.k, h.kcal); const v = Math.round(tamam ? tp.k : Math.abs(kalan));
+    return '<div class="t genis bes-kutu' + (tamam ? ' limon' : '') + '"><a class="bes-ana" href="#/beslenme">' + halka(yuzde(tp.k, h.kcal)) +
+      '<span class="k">' + (tamam ? 'Hedef tamam' : kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span>' +
+      '<span class="buyuk num" data-say="' + v + '">' + sayi(v) + '</span>' +
+      '<span class="bes-alt num"><span>' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span><span class="bes-prot"><b>Protein ' + sayi(tp.p) + '</b> / ' + h.protein + ' g<i class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></i></span></span></a>' +
+      '<a class="bes-foto" href="#/ekle/foto" aria-label="Fotoğrafla öğün ekle">' + IK.kamera.replace('<svg', '<svg width="22" height="22" style="fill:none;stroke:currentColor;stroke-width:2"') + '<span>Öğün ekle</span></a></div>';
   }
   function ekranBugun() {
     if (!S.profil) return ekranKarsilama();
@@ -1451,7 +1465,7 @@
     } else if (bugunku && !bugunku.hareketler.length) {
       antr = '<a class="t kobalt genis ana-kutu h150" href="#/program" style="min-height:190px"><span class="k">Programın</span><span class="dev">Programını yaz<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
     } else if (bugunku) {
-      antr = '<a class="t kobalt genis ana-kutu h150 ' + gunTonu(bugunku) + '" href="#/antrenman" style="min-height:230px"><div class="k satir num"><span>Bugünün antrenmanı</span><span>' + bugunku.hareketler.length + ' hareket</span></div><span class="dev">' + esc(bugunku.ad) + '<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
+      antr = '<a class="t kobalt genis ana-kutu h150 ' + gunTonu(bugunku) + '" href="#/antrenman" style="min-height:230px"><div class="k satir num"><span>Bugünün antrenmanı' + (bugunku.ortam ? ' · ' + ORTAM_KISA[bugunku.ortam] : '') + '</span><span>' + bugunku.hareketler.length + ' hareket</span></div><span class="dev">' + esc(bugunku.ad) + '<span style="color:var(--koyu)">.</span></span><span class="btn beyaz" style="align-self:flex-start;min-height:44px">Başla' + IK.ok + '</span></a>';
     } else {
       antr = '<a class="t koyu genis ana-kutu h150" href="#/antrenman" style="min-height:190px"><span class="k">' + (offMu() ? 'Bugünü dinlenmeye ayırdın' : 'Bugün dinlenme günü') + '</span><span class="dev">Dinlen<span style="color:var(--mavi-gece)">.</span></span><span class="ik">' + (sonra ? 'Sıradaki: ' + (sonra.kac === 1 ? 'yarın' : GUN_AD[sonra.hafta]) + ' · ' + esc(sonra.gun.ad) : '') + '</span></a>';
       if (offMu()) antr += '<div class="t genis off-kutu"><span class="ik">Fikrini mi değiştirdin?</span><button class="btn cerceve kucuk" data-act="off-geri">Antrenmanı geri getir</button></div>';
@@ -1466,17 +1480,13 @@
           (yarinBos ? '<button class="btn cerceve kucuk" data-act="off" data-tur="kaydir">Yarına kaydır</button>' : (zincirVar() ? '<button class="btn cerceve kucuk" data-act="off" data-tur="zincir">Programı bir gün kaydır</button>' : '')) +
           '<button class="metin-btn" data-act="off-ac" style="color:var(--ikincil)">Vazgeç</button></div>' +
           (yarinBos ? '' : '<span class="ik">"Programı bir gün kaydır" bugünü ve sonraki antrenmanları ilk boş güne kadar birer gün ileri atar.</span>') + '</div>'
-        : '<div class="off-satir"><button class="metin-btn off-btn" data-act="off-ac">Bugün Zor · kısa yap ya da dinlen</button><button class="metin-btn off-btn" data-act="gd-ac">Bugün başka antrenman yap</button></div>';
+        : '<div class="off-satir"><button class="metin-btn off-btn" data-act="off-ac">Bugün zor</button><button class="metin-btn off-btn" data-act="gd-ac">Başka antrenman</button></div>';
     }
     if (!S.seans && !g.antrenman && S.program && S.program.gunler.length > (bugunku ? 1 : 0)) {
       if (gunDegisAcik) antr += gunDegisKutu(bugunku);
       else if (!bugunku && !offMu()) antr += '<button class="metin-btn off-btn" data-act="gd-ac">Bugün antrenman yapmak istiyorum</button>';
     }
     if (!S.seans && S.takvim && S.takvim[tarihKey()] && S.takvim[tarihKey()].gunId && !S.takvim[tarihKey()].off && !S.takvim[tarihKey()].plan) antr += '<button class="metin-btn off-btn" data-act="off-geri">Asıl programa dön</button>';
-    const ana = ['bench', 'squat', 'deadlift', 'ohp', 'db_bench', 'goblet', 'legpress'].find((x) => S.rekor[x]);
-    const rekorKutu = ana
-      ? '<a class="t h150" href="#/ilerleme"><span class="k">' + esc(D.HAREKET[ana].ad) + ' rekoru</span><span class="orta num">' + sayi(S.rekor[ana].kg, 1) + '<span class="ik" style="font-weight:600"> kg × ' + S.rekor[ana].tekrar + '</span></span><span class="ik">' + esc(S.rekor[ana].tarih) + '</span></a>'
-      : '<a class="t h150" href="#/ilerleme"><span class="k">Kilo</span><span class="orta num">' + sayi(S.kilo.length ? S.kilo[S.kilo.length - 1].kg : S.profil.kilo, 1) + '<span class="ik" style="font-weight:600"> kg</span></span><span class="ik">Tart, ekle, gelişimi gör</span></a>';
     const ara = S.seans ? null : sonAntrenmanAra();
     if (ara != null && ara >= 10 && !g.antrenman && antr.indexOf('Bugünün antrenmanı') >= 0) antr = antr.replace('<span class="btn beyaz"', '<span class="ik" style="color:rgba(255,255,255,.85)">Geri Dönüş Modu: ' + ara + ' gün aradan sonra yükleri biraz hafifletiyoruz. Bıraktığın yerden.</span><span class="btn beyaz"');
     const sa = new Date().getHours();
@@ -1484,14 +1494,10 @@
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
       '<div class="izgara">' + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (haftaPlanKutu(false) || '') + antr + (haftaPlanKutu(false) ? '' : (haftaKart() || sozKutu())) +
-      '<a class="' + (hedefTamam(tp.k, h.kcal) ? 't limon' : 't') + ' h150 kal-kutu" href="#/beslenme">' + halka(yuzde(tp.k, h.kcal)) + '<span class="k">' + (hedefTamam(tp.k, h.kcal) ? 'Hedef tamam' : kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '">' + sayi(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '</span><span class="k" style="display:inline-flex;align-items:center;gap:6px">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></a>' +
-      '<a class="t koyu h150" href="#/ilerleme">' + seriKart('Hafta serisi') + '</a>' +
-      '<a class="t h150" href="#/beslenme"><span class="k">Protein</span><span class="orta num">' + sayi(tp.p) + '<span class="ik" style="font-weight:600"> / ' + h.protein + ' g</span></span><div class="cubuk" role="img" aria-label="Protein hedefinin yüzde ' + yuzde(tp.p, h.protein) + '\'i"><span style="width:' + yuzde(tp.p, h.protein) + '%"></span></div></a>' +
-      rekorKutu +
-      siraKart() +
-      '<a class="t koyu genis koc-kutu" href="#/koc"><span class="k">' + (S.kocSec ? 'Koç ' + esc(S.kocSec.ad) : 'Koç') + '</span><b style="font-size:20px;letter-spacing:-.02em">Bir yerin mi ağrıyor, keyfin mi yok?</b><span class="ik" style="color:var(--koyu-ikincil)">Koça danış, programına göre cevap versin.</span></a>' +
+      besKutu(tp, h, kalan) +
+      '<a class="t koyu h150 seri-kutu" href="#/ilerleme">' + seriKart('Hafta serisi') + '</a>' +
+      '<a class="t h150 koc-mini" href="#/koc"><span class="k">' + (S.kocSec ? 'Koç ' + esc(S.kocSec.ad) : 'Koç') + '</span><b class="koc-mini-b">Bir yerin mi ağrıyor?</b><span class="ik">Sor, programına göre cevaplasın.</span></a>' +
       ekleKutu(false) +
-      '<div class="t genis tum"><span class="k">Öğün ekle</span><div class="haplar"><a class="hap" href="#/ekle/foto">' + IK.kamera.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2"') + 'Fotoğrafla</a><a class="hap" href="#/ekle/ara">Listeden</a><a class="hap" href="#/ekle/elle">Elle</a></div></div>' +
       '</div>';
   }
 
@@ -1513,7 +1519,7 @@
       '<div class="t genis" style="padding:4px 16px"><div class="liste">' + sg.hareketler.map((x, i) => {
         const hk = hedefKilo(x.id);
         const acik = degisAcik === sg.id + ':' + i;
-        const alt = acik ? M.alternatifler(S.profil, x, sg.hareketler.map((y) => y.id)) : [];
+        const alt = acik ? M.alternatifler(gunProfil(sg), x, sg.hareketler.map((y) => y.id)) : [];
         return '<div class="hareket-satir' + (acik ? ' acik' : '') + '"><div class="ad"><b>' + esc(D.HAREKET[x.id].ad) + '</b><span class="ik">' + (x.blok && ['ana', 'yard', 'izo'].indexOf(x.blok) < 0 ? BLOK[x.blok] + ' · ' : '') + esc(D.HAREKET[x.id].kas) + (x.not ? ' · ' + esc(x.not) : '') + '</span></div><span class="num" style="font-weight:800;font-size:14px;text-align:right">' + x.set + ' × ' + esc(x.tekrar) + (hk ? '<br><span class="ik" style="font-weight:600">' + sayi(hk, 1) + ' kg</span>' : '') + '</span>' +
           '<button class="degis-btn" data-act="degisac" data-id="' + sg.id + ':' + i + '" aria-expanded="' + acik + '" aria-label="' + esc(D.HAREKET[x.id].ad) + ' yerine başka hareket seç">' + IK.degis + '</button>' +
           (acik ? '<div class="degis-liste"><span class="ik">Bu hareket yoksa ya da yapamıyorsan, aynı kası çalıştıran biriyle değiştir:</span><div class="haplar">' +
@@ -1680,7 +1686,92 @@
       (barbell ? plakaHtml(kg) : '') +
       '<button class="btn ana buyuk-btn ap-bitir" data-act="tik" data-h="' + k + '" data-i="' + i + '">Seti bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button></div>';
   }
+  /* ---------- tam ekran odak: tek hareket, kaydırma yok ----------
+     Ekranı üstten alta kaplar: üstte gün ve süre, hareket adımları, ortada hareket ve setleri, altta büyük kilo/tekrar ve "Seti bitir".
+     Isınma, soğuma, set ekleme, hareket değiştirme, liste görünümü ve bitirme "⋯" menüsünde. */
+  let odMenu = false; let odIpucu = false;
+  function odakSetler(l, k, aktifIdx) {
+    return '<div class="od-setler" role="list" aria-label="Setler">' + l.map((y, i) => {
+      const et = setEtiket(l, i); const ok = y.ok && !y.atla;
+      const sinif = 'od-set' + (i === aktifIdx ? ' su' : '') + (ok ? ' ok' : '') + (y.atla ? ' atla' : '') + (y.tur ? ' ' + y.tur : '');
+      const ic = '<span class="od-set-no num">' + et + '</span><span class="od-set-d num">' + (y.atla ? 'atlandı' : (y.kg ? esc(y.kg) : '—') + '×' + (y.tekrar ? esc(y.tekrar) : '—')) + '</span>';
+      return ok ? '<button role="listitem" class="' + sinif + '" data-act="tik" data-h="' + k + '" data-i="' + i + '" aria-label="' + et + '. seti düzenle">' + ic + '</button>'
+        : y.atla ? '<button role="listitem" class="' + sinif + '" data-act="set-atla" data-h="' + k + '" data-i="' + i + '" aria-label="' + et + '. seti geri al">' + ic + '</button>'
+          : '<span role="listitem" class="' + sinif + '">' + ic + '</span>';
+    }).join('') + '</div>';
+  }
+  function odakMenuHtml(s, x, k, hl, l, aktifIdx, sg) {
+    const sat = (act, yazi, ek) => '<button class="od-m" data-act="' + act + '"' + (ek || '') + '>' + yazi + '</button>';
+    return '<div class="od-perde" data-act="od-menu" aria-hidden="true"></div><div class="od-sayfa" role="dialog" aria-modal="true" aria-label="Antrenman menüsü"><span class="od-tutamak" aria-hidden="true"></span>' +
+      (seAcik === k ? seSecenek(x, k, hl) : '') +
+      (dinAcik === k ? dinSecici(x, k) : '') +
+      '<div class="od-grup"><span class="k">Bu hareket</span>' +
+        sat('set-ekle', '+ Set ekle', ' data-h="' + k + '" data-tur="ek"') +
+        (takipSeviye() !== 'sade' ? sat('set-ekle', '+ Isınma seti', ' data-h="' + k + '" data-tur="isinma"') : '') +
+        (takipSeviye() === 'detayli' ? sat('set-ekle', '+ Drop set', ' data-h="' + k + '" data-tur="drop"') : '') +
+        (aktifIdx >= 0 ? sat('set-atla', 'Bu seti atla', ' data-h="' + k + '" data-i="' + aktifIdx + '"') : '') +
+        (seAcik === k ? '' : sat('se-ac', 'Değiştir ya da atla', ' data-h="' + k + '"')) +
+        (dinOneri(x) && dinAcik !== k ? sat('din-ac', 'Dinlenme süresi · ' + dakYaz(dinSn(x)), ' data-h="' + k + '"') : '') +
+      '</div>' +
+      '<details class="od-grup"><summary class="od-m">Isınma · ~7 dk</summary>' + rutinListe(ISINMA.genel.concat(ISINMA[gunBolge(sg)])) + '</details>' +
+      '<details class="od-grup"><summary class="od-m">Soğuma ve esneme · ~4 dk</summary>' + rutinListe(SOGUMA[gunBolge(sg)]) + '</details>' +
+      '<div class="od-grup">' +
+        '<a class="od-m" href="#/koc">Bir yerin mi ağrıdı? Koça danış</a>' +
+        sat('gorunum', 'Bütün hareketleri liste olarak gör', ' data-deger="liste"') +
+        (s.kisa ? sat('kisa-iptal', 'Tam antrenmana dön') : '') +
+      '</div>' +
+      '<button class="btn siyah buyuk-btn" data-act="bitir">Antrenmanı bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
+      '<button class="metin-btn" data-act="iptal" style="align-self:center;color:var(--ikincil)">' + (iptalOnay ? 'Emin misin? Kaydetmeden çıkmak için tekrar bas' : 'Kaydetmeden çık') + '</button></div>';
+  }
+  // görsel yoksa orta alan: büyük set sayacı ve geçen seferki setler
+  function odakOrta(x, k, l, aktifIdx, once) {
+    const calis = l.filter((y) => y.tur !== 'isinma'); const bitti = calis.filter((y) => y.ok && !y.atla).length;
+    const su = aktifIdx >= 0 ? l[aktifIdx] : null;
+    const no = su ? (su.tur === 'isinma' ? 'Isınma' : 'Set ' + (calis.indexOf(su) + 1)) : 'Bitti';
+    const gecen = once ? once.setler.filter((y) => y.tur !== 'isinma').map((y) => sayi(y.kg, 1) + '×' + y.tekrar) : [];
+    return '<div class="od-sayac"><span class="od-sayac-no num">' + no + (su && su.tur !== 'isinma' ? '<i> / ' + calis.length + '</i>' : '') + '</span>' +
+      '<span class="od-sayac-cubuk" aria-hidden="true">' + calis.map((y, i) => '<i class="' + (i < bitti ? 'ok' : '') + '"></i>').join('') + '</span>' +
+      (gecen.length ? '<span class="od-gecen num">Geçen sefer · ' + gecen.join('  ') + '</span>' : '<span class="od-gecen">İlk kez yapıyorsun. Rahat bir kiloyla başla.</span>') + '</div>';
+  }
+  function ekranOdak() {
+    const s = S.seans; const sg = S.program.gunler.find((x) => x.id === s.gunId) || { ad: s.ad || 'Antrenman', hareketler: seansHareket(s) };
+    const hl = seansHareket(s); const ks = seansAnahtar({ hareketler: hl });
+    const oi = odakIdx(s, hl, ks); const x = hl[oi]; const k = ks[oi]; const hr = D.HAREKET[x.id] || { ad: x.id };
+    const l = s.setler[k] || []; const aktifIdx = l.findIndex((y) => !y.ok && !y.atla);
+    const atlandi = s.atlanan && s.atlanan[k];
+    const hepsiBitti = ks.every((kk) => hareketBittiMi(s, kk));
+    const once = S.son[k] || S.son[x.id];
+    const sonKg = once ? Math.max.apply(null, once.setler.filter((y) => y.tur !== 'isinma').map((y) => y.kg || 0).concat([0])) : 0;
+    const oner = hedefKilo(k); const artir = sonKg && oner && oner > sonKg && aktifIdx >= 0;
+    const ipucu = hr.ipucu ? esc(hr.ipucu) + (x.not ? ' <b>' + esc(x.not) + '.</b>' : '') : '';
+    let alt;
+    if (atlandi) alt = '<div class="od-bos"><b>Bugün atlandı.</b><button class="btn cerceve" data-act="se-geri" data-h="' + k + '">Geri al</button></div>';
+    else if (aktifIdx >= 0 && (birimOf(x) === 'sn' || birimOf(x) === 'dk')) alt = kronoDugme(k, aktifIdx, l[aktifIdx], x);
+    else if (aktifIdx >= 0) alt = aktifPanel(x, k, aktifIdx, l[aktifIdx], setEtiket(l, aktifIdx));
+    else if (hepsiBitti) alt = '<div class="od-bos"><b>Hepsi bitti<span class="nokta">.</span></b><span class="ik">' + hl.length + ' hareketin hepsini tamamladın.</span><button class="btn ana buyuk-btn" data-act="bitir">Antrenmanı bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button></div>';
+    else { const n = ks.findIndex((kk) => !hareketBittiMi(s, kk)); alt = '<div class="od-bos"><b>' + esc(hr.ad) + ' tamam<span class="nokta">.</span></b><button class="btn ana buyuk-btn" data-act="odak-git" data-i="' + n + '">Sıradaki: ' + esc((D.HAREKET[hl[n].id] || { ad: hl[n].id }).ad) + IK.ok + '</button></div>'; }
+    return '<div class="od">' +
+      '<header class="od-ust"><a class="od-ikon" href="#/" aria-label="Ana sayfa">' + IK.geri + '</a>' +
+        '<div class="od-gun"><span>' + esc(sg.ad) + (sg.ortam ? ' · ' + ORTAM_KISA[sg.ortam] : '') + (s.kisa ? ' · kısa' : '') + '</span><b class="num" id="seansSure">' + sureYaz(Date.now() - s.baslangic) + '</b></div>' +
+        '<button class="od-ikon" data-act="od-menu" aria-label="Antrenman menüsü" aria-expanded="' + odMenu + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></header>' +
+      jamSerit() +
+      odakAdim(s, hl, ks, oi) +
+      '<section class="od-kart odak-kart" aria-label="' + esc(hr.ad) + '">' +
+        '<div class="od-bas"><a class="od-ad" href="#/hareket/' + encodeURIComponent(x.id) + '">' + esc(hr.ad) + '</a>' +
+        '<span class="od-hedef num">' + x.set + ' × ' + esc(x.tekrar) + (x.rir && takipSeviye() !== 'sade' ? ' · ' + esc(x.rir) : '') + (S.rekor[x.id] ? ' · rekor ' + sayi(S.rekor[x.id].kg, 1) + '×' + S.rekor[x.id].tekrar : '') + '</span>' +
+        '<div class="od-cipler">' + (dinOneri(x) ? '<button class="od-cip" data-act="din-ac" data-h="' + k + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><b class="num">' + dakYaz(dinSn(x)) + '</b></button>' : '') +
+          (ipucu ? '<button class="od-cip" data-act="od-ipucu" aria-expanded="' + odIpucu + '">Nasıl yapılır</button>' : '') +
+          '<button class="od-cip" data-act="se-ac" data-h="' + k + '">Değiştir</button></div></div>' +
+        (odIpucu && ipucu ? '<p class="od-ipucu">' + ipucu + '</p>' : artir ? '<p class="od-ipucu">Geçen sefer ' + sayi(sonKg, 1) + ' kg ile hedefi tuttun. Hazırsan <b>' + sayi(oner, 1) + ' kg</b> dene.</p>' : '') +
+        '<div class="od-orta">' + (hareketGorsel(x.id) || (atlandi ? '' : odakOrta(x, k, l, aktifIdx, once))) + '</div>' +
+        (atlandi ? '' : odakSetler(l, k, aktifIdx)) +
+        '<div class="od-alt">' + alt + '</div>' +
+      '</section>' +
+      (odMenu ? odakMenuHtml(s, x, k, hl, l, aktifIdx, sg) : '') +
+      '</div>';
+  }
   function ekranSeans() {
+    if (odakMi()) return ekranOdak();
     const s = S.seans; const sg = S.program.gunler.find((x) => x.id === s.gunId) || { ad: s.ad || 'Antrenman', hareketler: seansHareket(s) };
     const hl = seansHareket(s); const ks = seansAnahtar({ hareketler: hl });
     const sayilan = Object.keys(s.setler).filter((k) => !(s.atlanan && s.atlanan[k])).map((k) => s.setler[k]);
@@ -1732,7 +1823,8 @@
   }
   function seSecenek(x, k, hl) {
     const l = S.seans.setler[k] || []; const son = l[l.length - 1];
-    const alt = M.alternatifler(S.profil, x, hl.map((y) => y.id)).slice(0, 8);
+    const sg0 = S.seans && S.program ? S.program.gunler.find((g) => g.id === S.seans.gunId) : null;
+    const alt = M.alternatifler(gunProfil(sg0), x, hl.map((y) => y.id)).slice(0, 8);
     return '<div class="se-panel"><div class="haplar">' +
       '<button class="btn cerceve kucuk" data-act="se-atla" data-h="' + k + '">Hareketi atla</button>' +
       (son && son.tur && !son.ok ? '<button class="btn cerceve kucuk" data-act="set-cikar" data-h="' + k + '">Son eklenen seti kaldır</button>' : '') + '</div>' +
@@ -1849,6 +1941,7 @@
     const gece = t === 'gece' || (t === 'antrenman' && yer === 'antrenman' && !!S.seans) || (t === 'sistem' && !!sistemKaranlik && sistemKaranlik.matches);
     document.body.classList.toggle('gece', gece);
     document.documentElement.classList.remove('gece-erken');
+    document.documentElement.style.background = gece ? '#000' : '';
     if (temaRenk) temaRenk.setAttribute('content', gece ? '#000000' : '#ECECE8');
     try { localStorage.setItem('comeback:tema', t); } catch (e) { /* yok */ }
   }
@@ -2720,6 +2813,9 @@
     gizlilik: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
     kisi: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
     ses: '<path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 9a4 4 0 0 1 0 6"/>',
+    agirlik: '<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>',
+    gorunum: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/>',
+    zil: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
     veri: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>'
   };
   const OK_SAG = '<svg class="mn-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
@@ -2737,11 +2833,8 @@
     return ust(logo) + '<h1 class="baslik">Menü<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       '<a class="t genis mn-profil" href="#/profilim">' + benAvatar('buyuk') + '<span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · bilgiler, hedef, hesap</span></span>' + OK_SAG + '</a>' +
-      '<a class="t h130" href="#/hedef"><span class="k">Günlük hedef</span><span class="buyuk num" style="font-size:40px">' + sayi(S.hedef.kcal) + '</span><span class="k">kcal · ' + S.hedef.protein + ' g protein</span></a>' +
-      '<a class="t kobalt h130" href="#/plan"><span class="k">Program</span><span class="orta" style="font-size:22px">' + esc(S.program.ad) + '</span><span class="k">Ayrıntılar →</span></a>' +
       mGrup('Antrenman', [
-        mSatir('#/program', 'program', S.program && S.program.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle', 'Hareket ekle, çıkar, günleri değiştir'),
-        mSatir('#/plan', 'plan', 'Program ayrıntıları', 'Günler, setler, ilerleme kuralı'),
+        mSatir('#/plan', 'program', 'Programım', esc(S.program.ad) + ' · ayrıntılar ve düzenleme'),
         mSatir('#/haftaplan', 'plan', 'Haftalık plan', 'Bu hafta hangi günler geliyorsun'),
         mSatir('#/jam', 'jam', 'Ortak antrenman', 'Arkadaşınla aynı anda, Jam ile'),
         mSatir('#/paylas', 'gonder', 'Program gönder', 'Arkadaşına programını yolla')
@@ -2759,7 +2852,7 @@
         hesap ? mSatir('#/siralama', 'siralama', 'Sıralama', 'Haftalık ve aylık hacim tablosu') : ''
       ]) +
       hocaKutu().replace('class="t h130"', 'class="t genis"') +
-      ekleKutu(true) +
+      ayarGrup() +
       mGrup('COMEBACK.', [
         mSatir('#/gorus', 'gorus', 'Görüş bildir', 'Hata, öneri, beğendiğin bir şey'),
         hesap && hesap.rol === 'admin' ? mSatir('#/yonetim', 'yonetim', 'Yönetim', 'Yalnızca sen görürsün', 'koyu') : '',
@@ -2776,33 +2869,63 @@
     const ad = { kas: 'Kas kazanmak', yag: 'Yağ yakmak', guc: 'Güçlenmek', kondisyon: 'Kondisyon' }[p.hedef];
     const spor = { fitness: 'Fitness', futbol: 'Futbol', basketbol: 'Basketbol', kosu: 'Koşu', yuzme: 'Yüzme', dovus: 'Dövüş sporları' }[p.spor];
     const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
-    const veri = !veriAcik ? '<button class="mn-satir mn-dugme" data-act="veri-ac" aria-expanded="false"><span class="mn-ik"><svg viewBox="0 0 24 24" aria-hidden="true">' + MIK.veri + '</svg></span><span class="mn-yazi"><b>Hesap ve veriler</b><span>Hesabı silme, cihazı sıfırlama</span></span>' + OK_SAG + '</button>'
-      : '<div class="t genis" style="gap:12px"><div class="satir" style="flex-direction:row;align-items:center"><span class="k">Hesap ve veriler</span><button class="metin-btn kucuk-metin" data-act="veri-kapat" aria-expanded="true" style="color:var(--ikincil)">Kapat</button></div>' +
-        (hesap ? (silAcik ? '<form data-form="hesap-sil" novalidate style="display:flex;flex-direction:column;gap:10px"><span class="k" style="color:var(--hata)">Hesabı kalıcı sil</span><span style="font-size:14px;line-height:1.5">Hesabın, programın, öğün ve antrenman kayıtların ile sağlık verilerin sunucudan kalıcı olarak silinir. Bu geri alınamaz.</span>' + sifreAlani('sifre', 'current-password', 'Onay için şifren') + '<p class="hata" id="formHata" role="alert" hidden></p><div class="satir" style="flex-direction:row;gap:8px"><button type="button" class="btn cerceve" data-act="sil-kapat" style="flex:1">Vazgeç</button><button class="btn" id="formBtn" type="submit" style="flex:1;background:var(--hata);color:#fff">Kalıcı sil</button></div></form>'
-          : '<div class="yigin" style="gap:4px"><b>Hesabımı sil</b><span class="ik">Hesabın ve sunucudaki bütün kayıtların kalıcı olarak silinir.</span><button class="btn cerceve" data-act="sil-ac" style="align-self:flex-start;min-height:40px;color:var(--hata)">Hesabımı sil</button></div>') : '') +
-        '<div class="yigin" style="gap:4px;border-top:1px solid var(--zemin);padding-top:12px"><b>Bu cihazdaki verileri sıfırla</b><span class="ik">' + (hesap ? 'Programın ve bütün kayıtların sıfırlanır, hesabın da bu boş hâliyle eşitlenir. Hesabın açık kalır, baştan kurulum yaparsın.' : 'Bu telefondaki bütün kayıtlar silinir.') + '</span><button class="btn cerceve" data-act="sifirla" style="align-self:flex-start;min-height:40px;color:var(--hata)">' + (sifirOnay ? 'Emin misin? Tekrar bas' : 'Verileri sıfırla') + '</button></div></div>';
     return ust(geri('#/profil')) + '<h1 class="baslik">' + esc(p.ad || 'Profilim') + '<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       (hesap ? '<div class="t genis pf-resim">' + benAvatar('dev' + (avatarYuk ? ' yukleniyor' : '')) + '<div class="yigin" style="gap:8px;min-width:0"><span class="k">Profil resmi</span><span class="ik" style="line-height:1.45">Sıralamada, mesajlarda ve ortak antrenmanda görünür.</span><div class="haplar"><label class="btn ana kucuk" style="cursor:pointer"><input type="file" accept="image/*" data-in="avatar" class="gizli">' + (hesap.foto ? 'Değiştir' : 'Resim seç') + '</label>' + (hesap.foto ? '<button class="btn cerceve kucuk" data-act="avatar-sil">Kaldır</button>' : '') + '</div></div></div>' : '') +
       '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
-      '<a class="btn ana genis" href="#/kurulum">Bilgilerimi güncelle · kilo, boy, yaş, spor</a>' +
-      '<a class="btn cerceve genis" href="#/hedef">Hedefimi değiştir · kas, yağ yakma, gün, odak</a>' +
+      mGrup('Profil', [
+        mSatir('#/kurulum', 'kisi', 'Bilgilerimi güncelle', 'Kilo, boy, yaş, spor'),
+        mSatir('#/hedef', 'hedef', 'Hedefimi değiştir', 'Kas, yağ yakma, gün, odak, çalışma yeri')
+      ]) +
       kadiKutu() +
-      '<div class="t genis" style="gap:10px"><span class="k">Zil · dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div>' +
-        '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
-        '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
-        '</div>' +
-      temaSecici() +
-      simgeSecici() +
-      '<div class="t genis" style="gap:10px"><span class="k">Animasyonlar</span><div class="haplar">' + [['', 'Tam'], ['az', 'Az']].map((x) => '<button class="hap" data-act="anim-sec" data-deger="' + x[0] + '" aria-pressed="' + (((S.ayar || {}).anim || '') === x[0]) + '">' + x[1] + '</button>').join('') + '</div><span class="ik">' + (sistemAzHareket ? 'Telefonunda "hareketi azalt" açık; animasyonlar zaten sade.' : 'Az: açılış çizimi, geri sayım, kutlama ve süslü geçişler kapanır; sayaçlar ve gerekli geri bildirim kalır.') + '</span></div>' +
-      hatirlatKutu() +
+      ayarGrup() +
+      '</div>';
+  }
+  function ayarGrup() {
+    return mGrup('Ayarlar', [
+      mSatir('#/ayar/antrenman', 'agirlik', 'Antrenman', 'Takip detayı, zil, ekran açık kalsın'),
+      mSatir('#/ayar/gorunum', 'gorunum', 'Görünüm', 'Tema, uygulama simgesi, animasyonlar'),
+      mSatir('#/ayar/hatirlat', 'zil', 'Hatırlatıcılar', 'Su, takviye, antrenman'),
+      mSatir('#/ayar/hesap', 'veri', 'Hesap ve veriler', hesap ? esc(hesap.eposta) : 'Cihazı sıfırla')
+    ]);
+  }
+  function veriBolum() {
+    return !veriAcik ? '<button class="mn-satir mn-dugme" data-act="veri-ac" aria-expanded="false"><span class="mn-ik"><svg viewBox="0 0 24 24" aria-hidden="true">' + MIK.veri + '</svg></span><span class="mn-yazi"><b>Hesap ve veriler</b><span>Hesabı silme, cihazı sıfırlama</span></span>' + OK_SAG + '</button>'
+      : '<div class="t genis" style="gap:12px"><div class="satir" style="flex-direction:row;align-items:center"><span class="k">Hesap ve veriler</span><button class="metin-btn kucuk-metin" data-act="veri-kapat" aria-expanded="true" style="color:var(--ikincil)">Kapat</button></div>' +
+        (hesap ? (silAcik ? '<form data-form="hesap-sil" novalidate style="display:flex;flex-direction:column;gap:10px"><span class="k" style="color:var(--hata)">Hesabı kalıcı sil</span><span style="font-size:14px;line-height:1.5">Hesabın, programın, öğün ve antrenman kayıtların ile sağlık verilerin sunucudan kalıcı olarak silinir. Bu geri alınamaz.</span>' + sifreAlani('sifre', 'current-password', 'Onay için şifren') + '<p class="hata" id="formHata" role="alert" hidden></p><div class="satir" style="flex-direction:row;gap:8px"><button type="button" class="btn cerceve" data-act="sil-kapat" style="flex:1">Vazgeç</button><button class="btn" id="formBtn" type="submit" style="flex:1;background:var(--hata);color:#fff">Kalıcı sil</button></div></form>'
+          : '<div class="yigin" style="gap:4px"><b>Hesabımı sil</b><span class="ik">Hesabın ve sunucudaki bütün kayıtların kalıcı olarak silinir.</span><button class="btn cerceve" data-act="sil-ac" style="align-self:flex-start;min-height:40px;color:var(--hata)">Hesabımı sil</button></div>') : '') +
+        '<div class="yigin" style="gap:4px;border-top:1px solid var(--zemin);padding-top:12px"><b>Bu cihazdaki verileri sıfırla</b><span class="ik">' + (hesap ? 'Programın ve bütün kayıtların sıfırlanır, hesabın da bu boş hâliyle eşitlenir. Hesabın açık kalır, baştan kurulum yaparsın.' : 'Bu telefondaki bütün kayıtlar silinir.') + '</span><button class="btn cerceve" data-act="sifirla" style="align-self:flex-start;min-height:40px;color:var(--hata)">' + (sifirOnay ? 'Emin misin? Tekrar bas' : 'Verileri sıfırla') + '</button></div></div>';
+  }
+  // ayar alt sayfaları: her biri tek konu
+  function ekranAyar(bolum) {
+    if (!S.profil) return ekranKarsilama();
+    const B = { antrenman: 'Antrenman', gorunum: 'Görünüm', hatirlat: 'Hatırlatıcılar', hesap: 'Hesap' };
+    if (!B[bolum]) bolum = 'antrenman';
+    let ic = '';
+    if (bolum === 'antrenman') ic =
       '<div class="t genis" style="gap:10px"><span class="k">Antrenman takibi</span><div class="haplar">' + Object.keys(TAKIP).map((k) => '<button class="hap" data-act="takip-sec" data-deger="' + (k === takipVarsayilan() ? '' : k) + '" aria-pressed="' + (takipSeviye() === k) + '">' + TAKIP[k][0] + (k === takipVarsayilan() ? ' · seviyene göre' : '') + '</button>').join('') + '</div>' +
         '<span class="ik">' + TAKIP[takipSeviye()][1] + '</span>' +
         (kilitVar() ? '<button class="ayar-satir" data-act="ekran-acik" aria-pressed="' + ekranAcikAyar() + '" style="background:none;padding:12px 0 0;margin-top:6px;border-top:1px solid var(--zemin)"><span class="yigin" style="min-width:0"><b>Antrenmanda ekran açık kalsın</b><span class="ik">Antrenman sürerken telefon kendiliğinden kararmaz. Bitirince normale döner.</span></span><span class="anahtar" aria-hidden="true"><i></i></span></button>' : '') +
         '</div>' +
+      '<div class="t genis" style="gap:10px"><span class="k">Zil · dinlenme bitince çalan ses</span><div class="haplar">' + Object.keys(SESLER).map((k) => '<button class="hap" data-act="ses-sec" data-deger="' + k + '" aria-pressed="' + (sesTur() === k) + '">' + SESLER[k][0] + '</button>').join('') + '</div>' +
+        '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
+        '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
+        '</div>' +
+      '';
+    else if (bolum === 'gorunum') ic =
+      temaSecici() +
+      simgeSecici() +
+      '<div class="t genis" style="gap:10px"><span class="k">Animasyonlar</span><div class="haplar">' + [['', 'Tam'], ['az', 'Az']].map((x) => '<button class="hap" data-act="anim-sec" data-deger="' + x[0] + '" aria-pressed="' + (((S.ayar || {}).anim || '') === x[0]) + '">' + x[1] + '</button>').join('') + '</div><span class="ik">' + (sistemAzHareket ? 'Telefonunda "hareketi azalt" açık; animasyonlar zaten sade.' : 'Az: açılış çizimi, geri sayım, kutlama ve süslü geçişler kapanır; sayaçlar ve gerekli geri bildirim kalır.') + '</span></div>' +
+      '';
+    else if (bolum === 'hatirlat') ic = hatirlatKutu();
+    else {
+      const veri = veriBolum();
+      ic =
       (hesap ? '<div class="t genis satir" style="flex-direction:row"><div class="yigin" style="min-width:0"><span class="k">Hesap</span><b style="overflow:hidden;text-overflow:ellipsis">' + esc(hesap.eposta) + '</b><span class="ik">Kayıtların hesabında saklanıyor.</span></div><button class="btn cerceve" data-act="cikis" style="min-height:44px;flex-shrink:0">Çıkış yap</button></div>' : '') +
       '<div class="genis" style="display:flex;flex-direction:column;margin-top:18px">' + (veriAcik ? veri : '<div class="mn-kutu">' + veri + '</div>') + '</div>' +
-      '</div>';
+      '';
+    }
+    return ust(geri('#/profilim')) + '<h1 class="baslik">' + B[bolum] + '<span class="nokta">.</span></h1><div class="izgara">' + ic + '</div>';
   }
 
   /* ---------- hafta kartları ve haftalık kapanış ----------
@@ -2971,6 +3094,7 @@
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
     else if (parca[0] === 'haftaplan') { html = ekranHaftaPlan(); sekme = 'profil'; }
     else if (parca[0] === 'profilim') { if (sonRota !== 'profilim') { veriAcik = false; silAcik = false; sifirOnay = false; } html = ekranProfilim(); sekme = 'profil'; }
+    else if (parca[0] === 'ayar') { if (sonRota !== 'ayar/' + parca[1]) { veriAcik = false; silAcik = false; sifirOnay = false; } html = ekranAyar(parca[1]); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
     else if (parca[0] === 'topluluk') { html = ekranTopluluk(parca[1] || '', parca[2] ? decodeURIComponent(parca[2]) : null); sekme = 'profil'; }
     else if (parca[0] === 'mesajlar') { if (sonRota !== 'mesajlar') mk.liste = null; html = ekranMesajlar(); sekme = 'profil'; }
@@ -2994,7 +3118,9 @@
     temaUygula(); simgeUygula();
     if (hesap) okunmamisBaslat(); navRozet();
     const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme', 'sifre'].indexOf(parca[0]) < 0;
-    nav.hidden = !menu; app.classList.toggle('tam', !menu);
+    const odakTam = !!app.querySelector('.od');
+    document.body.classList.toggle('odak-tam', odakTam);
+    nav.hidden = !menu || odakTam; app.classList.toggle('tam', !menu || odakTam);
     app.classList.toggle('dar', ['kurulum', 'ekle', 'porsiyon', 'kayit', 'giris', 'bekleme', 'sifre'].indexOf(parca[0]) >= 0);
     nav.querySelectorAll('a[data-tab]').forEach((a) => {
       if (a.dataset.tab === sekme) {
@@ -3122,7 +3248,7 @@
     'odak-git'(el) {
       if (!S.seans) return; const hl = seansHareket(S.seans); const i = +el.dataset.i; if (!(i >= 0 && i < hl.length)) return;
       const yon = i > odakIdx(S.seans, hl, seansAnahtar({ hareketler: hl })) ? 1 : -1;
-      S.seans.odak = i; kaydet(); seAcik = null; render(); window.scrollTo(0, 0); odakKay(yon);
+      S.seans.odak = i; kaydet(); seAcik = null; dinAcik = null; odMenu = false; odIpucu = false; render(); window.scrollTo(0, 0); odakKay(yon);
     },
     'ap-deg'(el) {
       if (!S.seans) return; const y = (S.seans.setler[el.dataset.h] || [])[+el.dataset.i]; if (!y) return; const d = +el.dataset.d;
@@ -3170,7 +3296,7 @@
     },
     'dinlenme-ek'() { if (dinlenme) { dinlenme.bitis += 30000; dinlenme.toplam += 30; dinlenmeCiz(); jamDinlen(Math.round((dinlenme.bitis - Date.now()) / 1000)); } },
     'dinlenme-kapat'() { const e = document.getElementById('dinlenme'); if (e) e.remove(); },
-    'din-ac'(el) { dinAcik = dinAcik === el.dataset.h ? null : el.dataset.h; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'din-ac'(el) { dinAcik = dinAcik === el.dataset.h ? null : el.dataset.h; if (odakMi() && S.seans && dinAcik) odMenu = true; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'din-sec'(el) {
       S.ayar = S.ayar || {}; S.ayar.dinOzel = S.ayar.dinOzel || {}; const sn = +el.dataset.sn;
       if (sn) S.ayar.dinOzel[el.dataset.id] = sn; else delete S.ayar.dinOzel[el.dataset.id];
@@ -3550,7 +3676,9 @@
       const y = S.seans && (S.seans.setler[el.dataset.h] || [])[+el.dataset.i]; if (!y) return;
       y.atla = !y.atla; y.ok = false; kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY);
     },
-    'se-ac'(el) { seAcik = seAcik === el.dataset.h ? null : el.dataset.h; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'od-menu'() { odMenu = !odMenu; if (!odMenu) { seAcik = null; dinAcik = null; } iptalOnay = false; render(); },
+    'od-ipucu'() { odIpucu = !odIpucu; render(); },
+    'se-ac'(el) { seAcik = seAcik === el.dataset.h ? null : el.dataset.h; if (odakMi() && S.seans && seAcik) odMenu = true; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'se-atla'(el) {
       S.seans.atlanan = S.seans.atlanan || {}; S.seans.atlanan[el.dataset.h] = true; seAcik = null;
       (S.seans.setler[el.dataset.h] || []).forEach((y) => { if (!y.ok) y.atla = true; });
@@ -3711,7 +3839,8 @@
     'ekle-kapat'() { try { localStorage.setItem('cb-ekle-kapat', '1'); } catch (e) { /* yok */ } render(); },
     'hedef-sec'(el) {
       const g = el.dataset.grup; const d = el.dataset.deger; const p = hedefTaslak;
-      if (g === 'odak') { const l = p.odak || []; const i = l.indexOf(d); if (i >= 0) l.splice(i, 1); else { if (l.length >= 2) { toast('En fazla 2 bölge seçebilirsin.'); return; } l.push(d); } p.odak = l; }
+      if (g === 'ortam') { const l = ortamlar(p).slice(); const i = l.indexOf(d); if (i >= 0) { if (l.length === 1) return; l.splice(i, 1); } else l.push(d); p.ortam = l[0]; if (l.length > 1) p.ortamlar = l; else delete p.ortamlar; }
+      else if (g === 'odak') { const l = p.odak || []; const i = l.indexOf(d); if (i >= 0) l.splice(i, 1); else { if (l.length >= 2) { toast('En fazla 2 bölge seçebilirsin.'); return; } l.push(d); } p.odak = l; }
       else if (g === 'gun' || g === 'sure') p[g] = parseInt(d, 10); else p[g] = d;
       if (g === 'protSeviye' && d === 'ozel' && !p.protG) p.protG = M.hedefHesapla(Object.assign({}, p, { protSeviye: '' })).protein;
       const sY = window.scrollY; render(); window.scrollTo(0, sY);
@@ -3799,6 +3928,8 @@
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-act]'); if (!el) return;
     const f = EYLEM[el.dataset.act]; if (!f) return;
+    // tam ekran odak menüsü: içindeki bir işlem yapılınca menü kapanır (paneli açan işlemler hariç)
+    if (odMenu && el.closest('.od-sayfa') && ['se-ac', 'din-ac', 'iptal'].indexOf(el.dataset.act) < 0) odMenu = false;
     e.preventDefault(); f(el, e);
   });
   document.addEventListener('input', (e) => {
@@ -4061,9 +4192,11 @@
       gun: parseInt(document.getElementById('gunSay').textContent, 10),
       sakatlik: Array.from(f.querySelectorAll('[data-grup="sakatlik"][aria-pressed="true"]')).map((b) => b.dataset.deger),
       odak: Array.from(f.querySelectorAll('[data-grup="odak"][aria-pressed="true"]')).map((b) => b.dataset.deger).slice(0, 2),
-      ortam: secili('ortam') || 'salon', sure: parseInt(secili('sure') || '60', 10), sezon: secili('sezon') || 'disi', saglik: secili('saglik') === 'evet'
+      ortamlar: Array.from(f.querySelectorAll('[data-grup="ortam"][aria-pressed="true"]')).map((b) => b.dataset.deger), sure: parseInt(secili('sure') || '60', 10), sezon: secili('sezon') || 'disi', saglik: secili('saglik') === 'evet'
     };
     if (p.spor === 'fitness') p.sezon = 'disi';
+    if (!p.ortamlar.length) p.ortamlar = ['salon'];
+    p.ortam = p.ortamlar[0]; if (p.ortamlar.length < 2) delete p.ortamlar;
     const dG = parseInt(v.dgun, 10), dA = parseInt(v.day, 10), dY = parseInt(v.dyil, 10);
     const dTarih = new Date(dY, dA - 1, dG);
     const dogumOk = dY > 1900 && dA >= 1 && dA <= 12 && dG >= 1 && dTarih.getMonth() === dA - 1 && dTarih.getDate() === dG;
