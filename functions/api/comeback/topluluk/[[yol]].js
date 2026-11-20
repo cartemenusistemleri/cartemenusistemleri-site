@@ -38,13 +38,28 @@ async function kimDir(db, req) {
   const s = await db.prepare('SELECT k.id, k.ad, k.rol, o.bitis FROM oturumlar o JOIN kullanicilar k ON k.id = o.kullanici_id WHERE o.token_hash = ?').bind(await ozet(m[1])).first();
   return s && s.bitis > Date.now() ? { id: s.id, ad: s.ad, rol: s.rol } : null;
 }
+// tek ifadede artır-ve-oku: aynı anda gelen istekler sınırı aşamaz
 async function sinir(db, anahtar, n, sn) {
   const simdi = Date.now();
-  const r = await db.prepare('SELECT sayi, bitis FROM giris_deneme WHERE anahtar = ?').bind(anahtar).first();
-  if (r && r.bitis > simdi && r.sayi >= n) return false;
-  if (!r || r.bitis <= simdi) await db.prepare('INSERT OR REPLACE INTO giris_deneme (anahtar, sayi, bitis) VALUES (?, 1, ?)').bind(anahtar, simdi + sn * 1000).run();
-  else await db.prepare('UPDATE giris_deneme SET sayi = sayi + 1 WHERE anahtar = ?').bind(anahtar).run();
-  return true;
+  const r = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = CASE WHEN bitis <= ?3 THEN 1 ELSE sayi + 1 END, bitis = CASE WHEN bitis <= ?3 THEN ?2 ELSE bitis END RETURNING sayi')
+    .bind(anahtar, simdi + sn * 1000, simdi).first();
+  return !!r && r.sayi <= n;
+}
+// başka siteden gelen çerezli yazma isteklerini reddet (SameSite'a ek savunma)
+function yabanciKaynak(req) {
+  if (req.method === 'GET' || req.method === 'HEAD') return false;
+  const o = req.headers.get('origin'); if (!o) return false;
+  try { return new URL(o).host !== new URL(req.url).host; } catch (e) { return true; }
+}
+// üyelik askıdaysa (30 gün antrenman yok) topluluk kapalı; ayrıntı hesap/[[yol]].js
+async function askidaMi(db, kim) {
+  if (kim.rol === 'admin' || kim.rol === 'koc' || kim.rol === 'demo') return false;
+  try {
+    const u = await db.prepare('SELECT son, uzatma, askida, mazeret_bitis FROM uyelik WHERE kullanici_id = ?').bind(kim.id).first();
+    if (!u) return false; if (u.askida) return true;
+    const b = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); if (u.mazeret_bitis && u.mazeret_bitis >= b) return false;
+    return new Date(Date.parse(u.son + 'T00:00:00Z') + (30 + (u.uzatma || 0)) * 864e5).toISOString().slice(0, 10) < b;
+  } catch (e) { return false; }
 }
 const temiz = (v, n) => String(v == null ? '' : v).replace(/\u0000/g, '').trim().slice(0, n);
 const gorunen = (ad) => { const p = String(ad || 'Üye').trim().split(/\s+/); return p[0] + (p[1] ? ' ' + p[1][0] + '.' : ''); };
@@ -59,8 +74,11 @@ export async function onRequest(ctx) {
   const db = env.COMEBACK_DB; if (!db) return hata('Kapalı.', 503);
   const p = (Array.isArray(params.yol) ? params.yol : [params.yol]).filter(Boolean);
   const m = req.method; const url = new URL(req.url);
+  if (yabanciKaynak(req)) return hata('İzin verilmeyen kaynak.', 403);
   const kim = await kimDir(db, req); if (!kim) return hata('Giriş yapılmamış.', 401);
   const admin = kim.rol === 'admin';
+  // askıdayken yalnızca hocayla mesajlaşma ve profil resimleri açık
+  if (['foto', 'mesaj', 'mesaj-kutu', 'mesaj-ozet'].indexOf(p[0]) < 0 && await askidaMi(db, kim)) return json({ hata: 'Üyeliğin askıda. Comeback ile geri dönünce topluluk da açılır.', askida: true }, 403);
   const simdi = Date.now();
   try {
     /* ---------- ortak antrenman (jam) ---------- */
@@ -69,7 +87,7 @@ export async function onRequest(ctx) {
       const kodOk = (k) => /^[A-Z0-9]{5}$/.test(k);
       if (p[1] === 'olustur' && m === 'POST') {
         const g = await govde(req) || {};
-        if (!(await sinir(db, 'jam:' + kim.id, 20, 86400))) return hata('Bugün çok fazla ortak antrenman açtın.', 429);
+        if (!(await sinir(db, 'jam:' + kim.id, 5, 86400))) return hata('Bugün çok fazla ortak antrenman açtın.', 429);
         const harf = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let kod = '';
         for (let d = 0; d < 5; d++) { kod = Array.from(crypto.getRandomValues(new Uint8Array(5))).map((b) => harf[b % harf.length]).join(''); if (!(await db.prepare('SELECT 1 FROM jam WHERE kod = ?').bind(kod).first())) break; }
         const program = g.program && Array.isArray(g.program.hareketler) ? JSON.stringify({ ad: temiz(g.program.ad, 30), hareketler: g.program.hareketler.slice(0, 20).filter((x) => x && /^[a-z0-9_]{2,40}$/.test(String(x.id))).map((x) => ({ id: String(x.id), set: Math.max(1, Math.min(10, Math.round(Number(x.set) || 3))), tekrar: temiz(x.tekrar, 9), birim: ['tekrar', 'sn', 'dk', 'm'].indexOf(x.birim) >= 0 ? x.birim : 'tekrar', alt: Math.round(Number(x.alt) || 0), ust: Math.round(Number(x.ust) || 0), dinlenme: Math.max(0, Math.min(600, Math.round(Number(x.dinlenme) || 90))) })) }) : null;
@@ -82,7 +100,7 @@ export async function onRequest(ctx) {
       }
       const kod = String(p[1] || '').toUpperCase(); if (!kodOk(kod)) return hata('Kod 5 karakter olmalı.', 400);
       // kod tahminine karşı: saatte en fazla 30 katılma denemesi (yanlış kodlar da sayılır)
-      if (p[2] === 'katil' && m === 'POST' && !(await sinir(db, 'jamkatil:' + kim.id, 30, 3600))) return hata('Çok fazla deneme. Biraz sonra tekrar dene.', 429);
+      if (p[2] === 'katil' && m === 'POST' && !(await sinir(db, 'jamkatil:' + kim.id, 15, 3600))) return hata('Çok fazla deneme. Biraz sonra tekrar dene.', 429);
       const j = await db.prepare('SELECT * FROM jam WHERE kod = ? AND bitis > ?').bind(kod, simdi).first();
       if (!j) return hata('Bu kodla açık bir ortak antrenman yok ya da süresi doldu.', 404);
       const uyeMi = await db.prepare('SELECT 1 FROM jam_uye WHERE kod = ? AND kullanici_id = ?').bind(kod, kim.id).first();
@@ -167,7 +185,7 @@ export async function onRequest(ctx) {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const ben = await db.prepare('SELECT siralama FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       if (!ben || !ben.siralama) return json({ ok: true, katildi: false });
-      if (!(await sinir(db, 'skor:' + kim.id, 120, 3600))) return hata('Çok sık güncelleme.', 429);
+      if (!(await sinir(db, 'skor:' + kim.id, 60, 3600))) return hata('Çok sık güncelleme.', 429);
       const n = (v, ust) => Math.max(0, Math.min(ust, Math.round(Number(v) || 0)));
       const yaz = (k, d, c) => db.prepare('INSERT INTO skor (kullanici_id, donem, hacim, set_, antr, guncelleme) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(kullanici_id, donem) DO UPDATE SET hacim = excluded.hacim, set_ = excluded.set_, antr = excluded.antr, guncelleme = excluded.guncelleme')
         .bind(kim.id, k, n(d && d.hacim, 300000 * c), n(d && d.set, 400 * c), n(d && d.antr, 14 * c), simdi);
@@ -178,7 +196,7 @@ export async function onRequest(ctx) {
     /* ---------- program paylaşımı ---------- */
     const kadiTemiz = (v) => String(v || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').slice(0, 20);
     if (p[0] === 'kisi' && m === 'GET') {
-      if (!(await sinir(db, 'kisi:' + kim.id, 60, 3600))) return hata('Çok fazla arama. Biraz sonra tekrar dene.', 429);
+      if (!(await sinir(db, 'kisi:' + kim.id, 30, 3600))) return hata('Çok fazla arama. Biraz sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT id, ad, kullanici_adi FROM kullanicilar WHERE kullanici_adi = ?').bind(kadiTemiz(url.searchParams.get('ad'))).first();
       if (!k) return hata('Bu kullanıcı adında kimse yok.', 404);
       return json({ ad: gorunen(k.ad), kadi: k.kullanici_adi, ben: k.id === kim.id });
@@ -188,7 +206,7 @@ export async function onRequest(ctx) {
       const alici = await db.prepare('SELECT id FROM kullanicilar WHERE kullanici_adi = ?').bind(kadiTemiz(g.kime)).first();
       if (!alici) return hata('Bu kullanıcı adında kimse yok.', 404);
       if (alici.id === kim.id) return hata('Kendine program gönderemezsin.', 400);
-      if (!(await sinir(db, 'paylas:' + kim.id, 20, 86400))) return hata('Bugün çok fazla program gönderdin. Yarın tekrar dene.', 429);
+      if (!(await sinir(db, 'paylas:' + kim.id, 5, 86400))) return hata('Bugün çok fazla program gönderdin. Yarın tekrar dene.', 429);
       const n = (v, a, b) => Math.max(a, Math.min(b, Math.round(Number(v) || 0)));
       const BIR = ['tekrar', 'sn', 'dk', 'm'];
       const pr = {
@@ -231,7 +249,7 @@ export async function onRequest(ctx) {
       const mt = r && r.foto && String(r.foto).match(/^data:(image\/(?:jpeg|webp));base64,(.+)$/);
       if (!mt) return new Response('', { status: 404, headers: { 'cache-control': 'no-store' } });
       const bin = Uint8Array.from(atob(mt[2]), (c) => c.charCodeAt(0));
-      return new Response(bin, { headers: { 'content-type': mt[1], 'cache-control': 'private, max-age=31536000, immutable' } });
+      return new Response(bin, { headers: { 'content-type': mt[1], 'cache-control': 'private, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
     }
     if (p[0] === 'mesaj-kutu' && m === 'GET') {
       const r = await db.prepare("SELECT h.koc_id, h.ogrenci_id, k.id kid, k.ad, k.foto_v, (SELECT metin FROM mesajlar WHERE koc_id = h.koc_id AND ogrenci_id = h.ogrenci_id ORDER BY zaman DESC LIMIT 1) son, (SELECT zaman FROM mesajlar WHERE koc_id = h.koc_id AND ogrenci_id = h.ogrenci_id ORDER BY zaman DESC LIMIT 1) zaman, (SELECT gonderen_id FROM mesajlar WHERE koc_id = h.koc_id AND ogrenci_id = h.ogrenci_id ORDER BY zaman DESC LIMIT 1) gonderen, (SELECT COUNT(*) FROM mesajlar WHERE koc_id = h.koc_id AND ogrenci_id = h.ogrenci_id AND gonderen_id != ? AND okundu = 0) yeni FROM hoca_ogrenci h JOIN kullanicilar k ON k.id = CASE WHEN h.koc_id = ? THEN h.ogrenci_id ELSE h.koc_id END WHERE h.durum = 'aktif' AND (h.koc_id = ? OR h.ogrenci_id = ?) ORDER BY zaman DESC").bind(kim.id, kim.id, kim.id, kim.id).all();
@@ -254,7 +272,7 @@ export async function onRequest(ctx) {
       if (m === 'POST') {
         const g = await govde(req); const metin = temiz(g && g.metin, 2000);
         if (!metin) return hata('Bir şey yaz.', 400);
-        if (!(await sinir(db, 'mesaj:' + kim.id, 120, 3600))) return hata('Çok hızlı mesaj gönderiyorsun.', 429);
+        if (!(await sinir(db, 'mesaj:' + kim.id, 60, 3600))) return hata('Çok hızlı mesaj gönderiyorsun.', 429);
         await db.prepare('INSERT INTO mesajlar (koc_id, ogrenci_id, gonderen_id, metin, zaman) VALUES (?, ?, ?, ?, ?)').bind(cift.koc_id, cift.ogrenci_id, kim.id, metin, simdi).run();
         return json({ ok: true }, 201);
       }
@@ -275,7 +293,7 @@ export async function onRequest(ctx) {
       const baslik = temiz(g.baslik, 120), metin = temiz(g.metin, 4000), kat = KATEGORI.includes(g.kategori) ? g.kategori : 'genel';
       if (baslik.length < 4 || metin.length < 4) return hata('Başlık ve metin biraz daha uzun olmalı.', 400);
       if (YASAK.test(baslik + ' ' + metin)) return hata('Yazında topluluk kurallarına uymayan ifade var.', 400);
-      if (!(await sinir(db, 'konu:' + kim.id, 5, 3600))) return hata('Saatte en fazla 5 konu açabilirsin.', 429);
+      if (!(await sinir(db, 'konu:' + kim.id, 3, 3600)) || !(await sinir(db, 'konu-g:' + kim.id, 8, 86400))) return hata('Saatte en fazla 3, günde en fazla 8 konu açabilirsin.', 429);
       const r = await db.prepare('INSERT INTO konular (kullanici_id, kategori, baslik, metin, zaman, son) VALUES (?, ?, ?, ?, ?, ?)').bind(kim.id, kat, baslik, metin, simdi, simdi).run();
       return json({ ok: true, id: r.meta.last_row_id }, 201);
     }
@@ -295,7 +313,7 @@ export async function onRequest(ctx) {
         const g = await govde(req); const metin = temiz(g && g.metin, 3000);
         if (metin.length < 2) return hata('Bir şey yaz.', 400);
         if (YASAK.test(metin)) return hata('Yazında topluluk kurallarına uymayan ifade var.', 400);
-        if (!(await sinir(db, 'cevap:' + kim.id, 30, 3600))) return hata('Biraz yavaşla, saatte en fazla 30 cevap.', 429);
+        if (!(await sinir(db, 'cevap:' + kim.id, 20, 3600))) return hata('Biraz yavaşla, saatte en fazla 20 cevap.', 429);
         await db.batch([
           db.prepare('INSERT INTO cevaplar (konu_id, kullanici_id, metin, zaman) VALUES (?, ?, ?, ?)').bind(id, kim.id, metin, simdi),
           db.prepare('UPDATE konular SET cevap = cevap + 1, son = ? WHERE id = ?').bind(simdi, id)
@@ -306,9 +324,9 @@ export async function onRequest(ctx) {
     if (p[0] === 'sikayet' && m === 'POST') {
       const g = await govde(req); const tur = g && (g.tur === 'konu' || g.tur === 'cevap') ? g.tur : null; const id = parseInt(g && g.id, 10) || 0;
       if (!tur || !id) return hata('Geçersiz istek.', 400);
-      if (!(await sinir(db, 'sikayet:' + kim.id, 20, 3600))) return hata('Çok fazla şikâyet.', 429);
+      if (!(await sinir(db, 'sikayet:' + kim.id, 10, 3600))) return hata('Çok fazla şikâyet.', 429);
       await db.prepare('INSERT OR IGNORE INTO sikayet (tur, hedef_id, kullanici_id, neden, zaman) VALUES (?, ?, ?, ?, ?)').bind(tur, id, kim.id, temiz(g.neden, 200), simdi).run();
-      const n = await db.prepare("SELECT COUNT(*) n FROM sikayet WHERE tur = ? AND hedef_id = ? AND durum = 'acik'").bind(tur, id).first();
+      const n = await db.prepare("SELECT COUNT(DISTINCT kullanici_id) n FROM sikayet WHERE tur = ? AND hedef_id = ? AND durum = 'acik'").bind(tur, id).first();
       if (n && n.n >= 3) await db.prepare('UPDATE ' + (tur === 'konu' ? 'konular' : 'cevaplar') + ' SET gizli = 1 WHERE id = ?').bind(id).run();
       return json({ ok: true });
     }
@@ -335,11 +353,11 @@ export async function onRequest(ctx) {
       return json({ liste: (r.results || []).map((x) => Object.assign(x, { turAd: MTUR[x.tur] })) });
     }
     if (p[0] === 'meydan' && !p[1] && m === 'POST') {
-      const g = await govde(req); if (!g || !MTUR[g.tur]) return hata('Geçersiz istek.', 400);
+      const g = await govde(req); if (!g || !Object.prototype.hasOwnProperty.call(MTUR, g.tur)) return hata('Geçersiz istek.', 400);
       const ad = temiz(g.ad, 60); const hedef = Math.max(1, Math.min(10000, parseInt(g.hedef, 10) || 0)); const gun = Math.max(3, Math.min(90, parseInt(g.gun, 10) || 30));
       if (ad.length < 3) return hata('Meydan okumaya bir ad ver.', 400);
       if (YASAK.test(ad)) return hata('Adda uygun olmayan ifade var.', 400);
-      if (!(await sinir(db, 'meydan:' + kim.id, 10, 86400))) return hata('Günde en fazla 10 meydan okuma.', 429);
+      if (!(await sinir(db, 'meydan:' + kim.id, 3, 86400))) return hata('Günde en fazla 3 meydan okuma.', 429);
       const bas = new Date(simdi + 3 * 3600e3).toISOString().slice(0, 10); const bit = new Date(simdi + 3 * 3600e3 + (gun - 1) * 864e5).toISOString().slice(0, 10);
       let kod, id;
       for (let i = 0; i < 5 && !id; i++) { kod = kodUret(); try { const r = await db.prepare('INSERT INTO meydan (olusturan_id, ad, tur, hedef, baslangic, bitis, kod, zaman) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(kim.id, ad, g.tur, hedef, bas, bit, kod, simdi).run(); id = r.meta.last_row_id; } catch (e) { /* kod çakıştı */ } }
@@ -347,6 +365,7 @@ export async function onRequest(ctx) {
       return json({ ok: true, id, kod }, 201);
     }
     if (p[0] === 'meydan' && p[1] === 'katil' && m === 'POST') {
+      if (!(await sinir(db, 'meydankatil:' + kim.id, 15, 3600))) return hata('Çok fazla deneme. Biraz sonra tekrar dene.', 429);
       const g = await govde(req); const kod = temiz(g && g.kod, 6).toUpperCase();
       const md = await db.prepare('SELECT id, ad, bitis FROM meydan WHERE kod = ?').bind(kod).first();
       if (!md) return hata('Bu kodla bir meydan okuma yok.', 404);

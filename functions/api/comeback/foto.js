@@ -4,8 +4,8 @@
 //   COMEBACK_AI_KEY    Anthropic API anahtarı (yoksa uç 503 döner, uygulama elle eklemeye yönlendirir)
 //   COMEBACK_AI_MODEL  isteğe bağlı, varsayılan claude-haiku-5-5
 //   COMEBACK_FOTO_MODEL isteğe bağlı, yalnızca fotoğraf için ayrı model (ör. daha güçlü bir model)
-//   COMEBACK_FOTO_LIMIT isteğe bağlı, kişi (IP) başına günlük analiz sayısı, varsayılan 20
-// Günlük sayaç: KV COMEBACK_KV bağlıysa o, yoksa sitenin ODEME_LINKS KV'si; anahtar "comeback:foto:<ip>:<gün>"
+//   COMEBACK_FOTO_LIMIT isteğe bağlı, üye başına günlük analiz sayısı, varsayılan 10
+// Günlük sayaç: D1 giris_deneme tablosu (atomik), anahtar "ai-foto:<kullanıcı>:<gün>"
 
 const json = (veri, durum = 200) => new Response(JSON.stringify(veri), {
   status: durum, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
@@ -26,8 +26,45 @@ const ISTEM = [
   'Tabakta görünen her ayrı yiyeceği ayrı kalem yap, en fazla 8 kalem. Fotoğrafta yiyecek yoksa {"kalemler":[]} döndür.'
 ].join('\n');
 
+/* ---------- ortak: kimlik, askı, atomik günlük sayaç (koc.js ile foto.js aynı) ---------- */
+const MUAF_ROL = new Set(['admin', 'koc', 'demo']);
+const bugunTR = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+function yabanciKaynak(req) {
+  const o = req.headers.get('origin'); if (!o) return false;
+  try { return new URL(o).host !== new URL(req.url).host; } catch (e) { return true; }
+}
+async function kimlik(env, request) {
+  const cm = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cb_oturum=([A-Za-z0-9_-]+)/);
+  if (!cm || !env.COMEBACK_DB) return null;
+  const oz = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(cm[1])))).map((b) => b.toString(16).padStart(2, '0')).join('');
+  const o = await env.COMEBACK_DB.prepare('SELECT o.kullanici_id, o.bitis, k.rol FROM oturumlar o JOIN kullanicilar k ON k.id = o.kullanici_id WHERE o.token_hash = ?').bind(oz).first();
+  return o && o.bitis > Date.now() ? { id: o.kullanici_id, rol: o.rol } : null;
+}
+// üyelik askıdaysa (30 gün antrenman yok) yapay zekâ kapalı; ayrıntı hesap/[[yol]].js
+async function askidaMi(env, k) {
+  if (MUAF_ROL.has(k.rol)) return false;
+  try {
+    const u = await env.COMEBACK_DB.prepare('SELECT son, uzatma, askida, mazeret_bitis FROM uyelik WHERE kullanici_id = ?').bind(k.id).first();
+    if (!u) return false; if (u.askida) return true;
+    const b = bugunTR(); if (u.mazeret_bitis && u.mazeret_bitis >= b) return false;
+    const son = new Date(Date.parse(u.son + 'T00:00:00Z') + (30 + (u.uzatma || 0)) * 864e5).toISOString().slice(0, 10);
+    return son < b;
+  } catch (e) { return false; }
+}
+// tek ifadede artır-ve-oku (D1): aynı anda gelen istekler sınırı aşamaz; sayaç deposu yoksa kapalı kalır
+async function sinir(env, anahtar, limit) {
+  const db = env.COMEBACK_DB; if (!db) return false;
+  const yarin = Date.now() + 30 * 3600e3;
+  const r = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = sayi + 1 RETURNING sayi').bind(anahtar, yarin).first();
+  return !!r && r.sayi <= limit;
+}
+
 export async function onRequestPost(ctx) {
+  try { return await isle(ctx); } catch (e) { return json({ hata: 'Beklenmeyen bir sorun oldu. Biraz sonra tekrar dene.' }, 500); }
+}
+async function isle(ctx) {
   const { request, env } = ctx;
+  if (yabanciKaynak(request)) return json({ hata: 'İzin verilmeyen kaynak.' }, 403);
   if (!env.COMEBACK_AI_KEY) return json({ hata: 'Fotoğraf analizi yakında açılıyor. Şimdilik listeden ya da elle ekleyebilirsin.' }, 503);
 
   let govde;
@@ -37,29 +74,14 @@ export async function onRequestPost(ctx) {
   const not = String(govde.not || '').replace(/[<>]/g, '').slice(0, 300).trim();
   if (m[2].length > 3_000_000) return json({ hata: 'Fotoğraf çok büyük.' }, 413);
 
-  // Ücretli analiz yalnızca giriş yapmış üyelere: oturum çerezi D1'de doğrulanır
-  let kisi = request.headers.get('cf-connecting-ip') || 'yok';
-  if (env.COMEBACK_DB) {
-    const cm = (request.headers.get('cookie') || '').match(/(?:^|;\s*)cb_oturum=([A-Za-z0-9_-]+)/);
-    if (!cm) return json({ hata: 'Fotoğraf analizi için giriş yap.' }, 401);
-    const oz = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(cm[1])))).map((b) => b.toString(16).padStart(2, '0')).join('');
-    const o = await env.COMEBACK_DB.prepare('SELECT kullanici_id, bitis FROM oturumlar WHERE token_hash = ?').bind(oz).first();
-    if (!o || o.bitis < Date.now()) return json({ hata: 'Oturumun sona ermiş. Tekrar giriş yap.' }, 401);
-    kisi = 'u:' + o.kullanici_id;
-  }
-  const kv = env.COMEBACK_KV || env.ODEME_LINKS;
-  const limit = parseInt(env.COMEBACK_FOTO_LIMIT || '20', 10);
-  const anahtar = 'comeback:foto:' + kisi + ':' + new Date().toISOString().slice(0, 10);
-  if (kv) {
-    const n = parseInt((await kv.get(anahtar)) || '0', 10);
-    if (n >= limit) return json({ hata: 'Bugünkü fotoğraf analizi hakkın doldu. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
-    ctx.waitUntil(kv.put(anahtar, String(n + 1), { expirationTtl: 60 * 60 * 30 }));
-    // maliyet sigortası: koçla ortak günlük toplam yapay zekâ çağrısı
-    const tk = 'comeback:ai-toplam:' + new Date().toISOString().slice(0, 10);
-    const tn = parseInt((await kv.get(tk)) || '0', 10);
-    if (tn >= parseInt(env.COMEBACK_AI_GUNLUK || '3000', 10)) return json({ hata: 'Yapay zekâ bugün çok yoğun. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
-    ctx.waitUntil(kv.put(tk, String(tn + 1), { expirationTtl: 60 * 60 * 30 }));
-  }
+  // Ücretli analiz yalnızca giriş yapmış üyelere; oturum yoksa ya da veritabanı bağlı değilse kapalı
+  const ben = await kimlik(env, request);
+  if (!ben) return json({ hata: 'Fotoğraf analizi için giriş yap.' }, 401);
+  if (await askidaMi(env, ben)) return json({ hata: 'Üyeliğin askıda. Comeback ile geri dönünce fotoğraf analizi de açılır.', askida: true }, 403);
+  const gun = bugunTR();
+  if (!(await sinir(env, 'ai-foto:' + ben.id + ':' + gun, Math.min(parseInt(env.COMEBACK_FOTO_LIMIT || '10', 10) || 10, 10)))) return json({ hata: 'Bugünkü fotoğraf analizi hakkın doldu. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
+  // maliyet sigortası: koçla ortak günlük toplam yapay zekâ çağrısı
+  if (!(await sinir(env, 'ai-toplam:' + gun, Math.min(parseInt(env.COMEBACK_AI_GUNLUK || '1000', 10) || 1000, 1000)))) return json({ hata: 'Yapay zekâ bugün çok yoğun. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
 
   let yanit;
   const govdeOlustur = (ek) => JSON.stringify(Object.assign({

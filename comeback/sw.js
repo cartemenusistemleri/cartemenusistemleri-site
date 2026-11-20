@@ -1,6 +1,6 @@
 /* COMEBACK. — çevrimdışı çalışma: uygulama kabuğu önbellekte, veriler cihazda (localStorage) ve bağlantı gelince hesapla eşitlenir */
-const SURUM = 'cb-v56';
-const KABUK = ['./', 'app.css?v=44', 'data.js?v=9', 'kutuphane.js?v=11', 'motor.js?v=14', 'rehber.js?v=1', 'app.js?v=51', 'gizlilik.html', 'ikon-192.png?v=4'];
+const SURUM = 'cb-v57';
+const KABUK = ['./', 'app.css?v=45', 'data.js?v=9', 'kutuphane.js?v=11', 'motor.js?v=14', 'rehber.js?v=1', 'app.js?v=52', 'gizlilik.html', 'ikon-192.png?v=4'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(SURUM).then((c) => c.addAll(KABUK)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== SURUM).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

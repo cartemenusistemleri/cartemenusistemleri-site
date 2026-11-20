@@ -10,6 +10,14 @@
 
 const json = (veri, durum = 200) => new Response(JSON.stringify(veri), { status: durum, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
 const hata = (m, d) => json({ hata: m }, d);
+// yalnızca tarayıcıların gerçek push servisleri (başka adrese istek atılmasın)
+const PUSH_UC = /^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+(\.[a-z0-9-]+)*\.notify\.windows\.com|web\.push\.apple\.com|[a-z0-9-]+\.push\.apple\.com)\/[^\s]{8,880}$/;
+async function sinir(db, anahtar, n, sn) {
+  const simdi = Date.now();
+  const r = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = CASE WHEN bitis <= ?3 THEN 1 ELSE sayi + 1 END, bitis = CASE WHEN bitis <= ?3 THEN ?2 ELSE bitis END RETURNING sayi')
+    .bind(anahtar, simdi + sn * 1000, simdi).first();
+  return !!r && r.sayi <= n;
+}
 const enc = new TextEncoder();
 const hex = (buf) => Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
 const b64u = (a) => { const u = new Uint8Array(a); let s = ''; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
@@ -64,7 +72,8 @@ async function pushGonder(v, ab, veri) {
   const yuk = b64u(enc.encode(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: 'mailto:destek@comeback.com.tr' })));
   const ozel = await crypto.subtle.importKey('jwk', Object.assign({ ext: true }, v.jwk), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
   const imza = b64u(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, ozel, enc.encode(bas + '.' + yuk)));
-  return fetch(ab.uc, { method: 'POST', headers: { authorization: 'vapid t=' + bas + '.' + yuk + '.' + imza + ', k=' + v.genel, 'content-encoding': 'aes128gcm', 'content-type': 'application/octet-stream', ttl: '3600', urgency: 'normal' }, body: govde });
+  if (!PUSH_UC.test(ab.uc)) return new Response(null, { status: 410 }); // eski, izin dışı adres: kayıt silinsin
+  return fetch(ab.uc, { method: 'POST', signal: AbortSignal.timeout(6000), headers: { authorization: 'vapid t=' + bas + '.' + yuk + '.' + imza + ', k=' + v.genel, 'content-encoding': 'aes128gcm', 'content-type': 'application/octet-stream', ttl: '3600', urgency: 'normal' }, body: govde });
 }
 
 // saat dilimindeki yerel tarih/saat → UTC ms
@@ -108,6 +117,7 @@ export async function onRequest(ctx) {
   const db = env.COMEBACK_DB; if (!db) return hata('Kapalı.', 503);
   const yol = (Array.isArray(params.yol) ? params.yol : [params.yol]).filter(Boolean).join('/');
   const m = req.method;
+  if (m !== 'GET' && req.headers.get('origin')) { try { if (new URL(req.headers.get('origin')).host !== new URL(req.url).host) return hata('İzin verilmeyen kaynak.', 403); } catch (e) { return hata('İzin verilmeyen kaynak.', 403); } }
   try {
     await tablolar(db);
     if (yol === 'anahtar' && m === 'GET') return json({ anahtar: (await vapid(db)).genel });
@@ -119,8 +129,11 @@ export async function onRequest(ctx) {
       if (!k.meta.changes) { const var_ = await db.prepare("SELECT deger FROM ayar_kv WHERE anahtar = 'hatirlat_son'").first(); if (var_) return json({ ok: true, atlandi: true }); await db.prepare("INSERT OR IGNORE INTO ayar_kv (anahtar, deger) VALUES ('hatirlat_son', ?)").bind(String(simdi)).run(); }
       const v = await vapid(db);
       const l = await db.prepare('SELECT uc, p256dh, auth, plan, son FROM hatirlat WHERE hata < 5 LIMIT 2000').all();
-      let gonderilen = 0; const guncel = [];
+      let gonderilen = 0; let guncel = [];
+      const yaz = async () => { if (guncel.length) { const b = guncel; guncel = []; await db.batch(b); } };
       for (const ab of l.results || []) {
+        if (Date.now() - simdi > 40000) break; // bir sonraki çalışmada kaldığı yerden (son sütunu sayesinde)
+        if (guncel.length >= 25) await yaz();
         let plan; try { plan = JSON.parse(ab.plan); } catch (e) { continue; }
         const son = Math.max(ab.son, simdi - 30 * 60000); // aksama olursa en fazla 30 dk geriye bak
         const n = zamaniGelen(plan, son, simdi);
@@ -132,7 +145,7 @@ export async function onRequest(ctx) {
           else guncel.push(db.prepare('UPDATE hatirlat SET son = ?, hata = hata + 1 WHERE uc = ?').bind(simdi, ab.uc));
         } catch (e) { guncel.push(db.prepare('UPDATE hatirlat SET hata = hata + 1 WHERE uc = ?').bind(ab.uc)); }
       }
-      for (let i = 0; i < guncel.length; i += 50) await db.batch(guncel.slice(i, i + 50));
+      await yaz();
       return json({ ok: true, abone: (l.results || []).length, gonderilen });
     }
 
@@ -141,7 +154,8 @@ export async function onRequest(ctx) {
 
     if (yol === 'abone' && m === 'POST') {
       const a = g.abonelik || {}; const uc = String(a.endpoint || '');
-      if (!/^https:\/\/[^\s]{10,900}$/.test(uc) || !a.keys || !/^[A-Za-z0-9_-]{80,100}$/.test(a.keys.p256dh || '') || !/^[A-Za-z0-9_-]{16,30}$/.test(a.keys.auth || '')) return hata('Bildirim aboneliği geçersiz.', 400);
+      if (!(await sinir(db, 'hatabone:' + ben.id, 20, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
+      if (!PUSH_UC.test(uc) || !a.keys || !/^[A-Za-z0-9_-]{80,100}$/.test(a.keys.p256dh || '') || !/^[A-Za-z0-9_-]{16,30}$/.test(a.keys.auth || '')) return hata('Bildirim aboneliği geçersiz.', 400);
       const plan = planTemizle(g.plan); if (!plan) return hata('Plan eksik.', 400);
       const say = await db.prepare('SELECT COUNT(*) n FROM hatirlat WHERE kullanici_id = ? AND uc != ?').bind(ben.id, uc).first();
       if (say && say.n >= 5) await db.prepare('DELETE FROM hatirlat WHERE uc IN (SELECT uc FROM hatirlat WHERE kullanici_id = ? ORDER BY guncelleme LIMIT 1)').bind(ben.id).run();
@@ -154,8 +168,9 @@ export async function onRequest(ctx) {
     if (yol === 'dene' && m === 'POST') {
       const ab = await db.prepare('SELECT uc, p256dh, auth FROM hatirlat WHERE uc = ? AND kullanici_id = ?').bind(String(g.uc || ''), ben.id).first();
       if (!ab) return hata('Önce hatırlatıcıları aç.', 404);
+      if (!(await sinir(db, 'hatdene:' + ben.id, 5, 3600))) return hata('Saatte en fazla 5 deneme bildirimi.', 429);
       const r = await pushGonder(await vapid(db), ab, { tur: 'dene', baslik: 'COMEBACK.', metin: 'Hatırlatıcılar açık. Zamanı gelince buradan haber veririz.', url: '/comeback/#/profilim' });
-      return r.ok ? json({ ok: true }) : hata('Bildirim gönderilemedi (' + r.status + ').', 502);
+      return r.ok ? json({ ok: true }) : hata('Bildirim gönderilemedi. Biraz sonra tekrar dene.', 502);
     }
     return hata('Bulunamadı.', 404);
   } catch (e) { return hata('Bir sorun oluştu.', 500); }
