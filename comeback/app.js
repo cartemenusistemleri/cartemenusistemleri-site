@@ -347,7 +347,7 @@
 
   /* ---------- ortak parçalar ---------- */
   const ust = (sol, sag) => '<header class="ust">' + sol + (sag || '') + '</header>';
-  const logo = '<a class="logo" href="#/" aria-label="COMEBACK. ana sayfa">COMEBACK<i>.</i></a>';
+  const logo = '<a class="logo logo-yigin" href="#/" aria-label="COMEBACK. ana sayfa"><span aria-hidden="true">COME</span><span aria-hidden="true">BACK<i>.</i></span></a>';
   const geri = (h, etiket) => '<a class="ikon-btn" href="' + h + '" aria-label="' + (etiket || 'Geri') + '">' + IK.geri + '</a>';
 
   /* ---------- ekranlar ---------- */
@@ -1113,7 +1113,7 @@
   const bpMiktar = (x) => { const m = /^(\d+)\s+(.+)$/.exec(x.birim || ''); if (m && x.pg) { const n = Math.round((x.g / (x.pg / +m[1])) * 2) / 2; if (n > 0 && n <= 12 && Math.abs(n * (x.pg / +m[1]) - x.g) < x.g * 0.15) return String(n).replace('.5', '½').replace(/^0½/, '½') + ' ' + m[2] + ' · ' + x.g + ' g'; } return x.g + ' g'; };
   function bplanKutu(g) {
     const b = S.bplan;
-    if (!b) return '<a class="t genis bp-kutu" href="#/bplan" style="flex-direction:row;align-items:center;justify-content:space-between"><span class="yigin"><span class="k">Beslenme programı</span><b>Hedefine göre öğün planı hazırlayalım</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>';
+    if (!b) return '<a class="t genis bp-kutu bp-ince" href="#/bplan" style="flex-direction:row;align-items:center;justify-content:space-between"><span class="yigin"><span class="k">Beslenme programı</span><b>Hedefine göre öğün planı</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>';
     const i = bpBugunIdx(); const d = b.gunler[i]; const yap = (g.bplan || {});
     const n = d.ogunler.filter((o, j) => yap[j]).length;
     return '<div class="t genis bp-kutu"><div class="satir"><span class="k">Bugünkü planın · Gün ' + (i + 1) + ' · ' + n + '/' + d.ogunler.length + ' öğün</span><a class="metin-btn kucuk-metin" href="#/bplan">Tümü</a></div>' +
@@ -2027,7 +2027,7 @@
     if (!bildirimVar() || Notification.permission !== 'granted' || !document.hidden) return;
     try {
       const r = await navigator.serviceWorker.ready;
-      await r.showNotification('Dinlenme bitti', { body: 'Sıradaki sete geç. COMEBACK.', tag: 'cb-dinlenme', renotify: true, vibrate: [200, 100, 200, 100, 200], icon: '/comeback/ikon-192.png?v=3', badge: '/comeback/favicon-96.png?v=4', data: { url: '/comeback/#/antrenman' } });
+      await r.showNotification('Dinlenme bitti', { body: 'Sıradaki sete geç. COMEBACK.', tag: 'cb-dinlenme', renotify: true, vibrate: [200, 100, 200, 100, 200], icon: '/comeback/ikon-192.png?v=20', badge: '/comeback/favicon-96.png?v=20', data: { url: '/comeback/#/antrenman' } });
     } catch (e) { /* olmadı */ }
   }
   let iptalOnay = false;
@@ -2066,9 +2066,9 @@
   }
   // uygulama simgesi: ana ekrana eklerken kullanılan simge (logo her zaman tam COMEBACK.)
   const SIMGE = {
-    kobalt: ['Kobalt', 'ikon-kobalt-192.png?v=1', 'apple-touch-icon-kobalt.png?v=1', 'manifest.webmanifest?v=5'],
-    gece: ['Gece', 'ikon-192.png?v=4', 'apple-touch-icon.png?v=4', 'manifest-gece.webmanifest?v=1'],
-    gunduz: ['Gündüz', 'ikon-gunduz-192.png?v=1', 'apple-touch-icon-gunduz.png?v=1', 'manifest-gunduz.webmanifest?v=1']
+    kobalt: ['Kobalt', 'ikon-kobalt-192.png?v=20', 'apple-touch-icon-kobalt.png?v=20', 'manifest.webmanifest?v=10'],
+    gece: ['Gece', 'ikon-192.png?v=20', 'apple-touch-icon.png?v=20', 'manifest-gece.webmanifest?v=10'],
+    gunduz: ['Gündüz', 'ikon-gunduz-192.png?v=20', 'apple-touch-icon-gunduz.png?v=20', 'manifest-gunduz.webmanifest?v=10']
   };
   const simgeAyar = () => { const s = (S.ayar || {}).simge; return SIMGE[s] ? s : 'kobalt'; };
   function simgeUygula() {
@@ -2139,6 +2139,12 @@
   }
 
   /* --- beslenme --- */
+  // beslenme özeti: tek kart, halka + kalan + üç makro
+  function besOzet(tp, h, kalan) {
+    const tamam = hedefTamam(tp.k, h.kcal); const v = Math.round(tamam ? tp.k : Math.abs(kalan));
+    return '<div class="t genis bo-kutu' + (tamam ? ' limon' : '') + '"><div class="bo-ust">' + halka(yuzde(tp.k, h.kcal)) + '<span class="k">' + (tamam ? 'Hedef tamam' : kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + v + '">' + sayi(v) + '</span><span class="ik num">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></div>' +
+      '<div class="bo-makro num">' + [['Protein', tp.p, h.protein, 'p'], ['Karb.', tp.kh, h.karb, 'kh'], ['Yağ', tp.y, h.yag, 'y']].map((m) => '<div class="bo-m ' + m[3] + (m[1] > m[2] * 1.1 ? ' asim' : '') + '"><span>' + m[0] + '</span><b>' + sayi(m[1]) + '<i> / ' + m[2] + ' g</i></b><span class="bo-iz" role="img" aria-label="' + m[0] + ' hedefinin yüzde ' + yuzde(m[1], m[2]) + '\'i"><span style="width:' + yuzde(m[1], m[2]) + '%"></span></span></div>').join('') + '</div></div>';
+  }
   function ekranBeslenme() {
     if (!S.profil) return ekranKarsilama();
     const g = gun(); const tp = toplam(g.ogun); const h = S.hedef;
@@ -2151,8 +2157,7 @@
     return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
       '<h1 class="baslik">Beslenme<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      '<div class="' + (hedefTamam(tp.k, h.kcal) ? 't limon' : 't') + ' h150"><span class="k">' + (hedefTamam(tp.k, h.kcal) ? 'Hedef tamam' : kalan >= 0 ? 'Kalan' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + Math.round(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '">' + sayi(hedefTamam(tp.k, h.kcal) ? tp.k : Math.abs(kalan)) + '</span><span class="k num">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></div>' +
-      '<div class="t h150 num" style="gap:6px">' + [['Protein', tp.p, h.protein], ['Karb.', tp.kh, h.karb], ['Yağ', tp.y, h.yag]].map((m) => '<div class="yigin" style="gap:3px"><div class="satir" style="font-size:13px"><span>' + m[0] + '</span><b>' + sayi(m[1]) + '/' + m[2] + ' g</b></div><div class="cubuk' + (m[1] > m[2] * 1.1 ? ' asim' : '') + '" style="height:6px"><span style="width:' + yuzde(m[1], m[2]) + '%"></span></div></div>').join('') + '</div>' +
+      besOzet(tp, h, kalan) +
       '<a class="t kobalt genis" href="#/ekle/foto" style="flex-direction:row;align-items:center;justify-content:space-between;min-height:76px"><div class="yigin"><span class="k">Hızlı ekle</span><b style="font-size:18px">Tabağının fotoğrafını çek</b></div><span class="ikon-btn" style="background:#fff;color:var(--kobalt)">' + IK.kamera + '</span></a>' +
       '<div class="genis bes-ekle"><a class="hap" href="#/ekle/ara">' + IK.ara.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2.2"') + 'Listeden ara</a><a class="hap" href="#/ekle/elle">' + IK.arti.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2.2"') + 'Elle gir</a></div>' +
       (grup || '<div class="t bos genis" style="align-items:flex-start"><b class="be-baslik" style="font-size:22px">Tabak boş<span class="nokta">.</span></b><span class="ik">İlk öğününü fotoğrafla ya da listeden ekle.</span></div>') +
@@ -2164,12 +2169,11 @@
   const suHedef = () => Math.round(((S.kilo.length ? S.kilo[S.kilo.length - 1].kg : S.profil.kilo) * 35) / 250) * 250; // ~35 ml/kg
   function suKutu(g) {
     const ml = g.su || 0; const h = suHedef(); const bardak = Math.round(ml / 250);
-    return '<div class="t genis su-kutu"><div class="satir"><span class="k">Su</span><span class="ik num">hedef ~' + sayi(h / 1000, 1) + ' L</span></div>' +
-      '<div class="satir" style="align-items:center"><span class="orta num">' + sayi(ml / 1000, 2) + '<span class="ik" style="font-weight:600"> L · ' + bardak + ' bardak</span></span>' +
-      '<button class="yuvarlak" data-act="su" data-ml="-250" aria-label="Bir bardak çıkar"' + (ml ? '' : ' disabled') + '>−</button></div>' +
-      '<div class="haplar su-haplar"><button class="btn ana kucuk" data-act="su" data-ml="250">+ 1 bardak</button><button class="btn cerceve kucuk" data-act="su" data-ml="500">+ 0,5 L</button><button class="btn cerceve kucuk" data-act="su" data-ml="1000">+ 1 L</button>' +
-      '<form data-form="su" class="su-elle" novalidate><input name="miktar" inputmode="decimal" placeholder="1,5 L ya da 330 ml" aria-label="Su miktarı, litre ya da mililitre"><button class="btn siyah kucuk" type="submit">Ekle</button></form></div>' +
-      '<div class="cubuk" role="img" aria-label="Su hedefinin yüzde ' + yuzde(ml, h) + '\'i"><span style="width:' + yuzde(ml, h) + '%;background:var(--kobalt)"></span></div></div>';
+    return '<div class="t genis su-kutu"><div class="satir"><span class="k">Su</span><span class="ik num"><b style="color:var(--murekkep)">' + sayi(ml / 1000, 2) + ' L</b> / ~' + sayi(h / 1000, 1) + ' L · ' + bardak + ' bardak</span></div>' +
+      '<div class="su-satir"><div class="cubuk" role="img" aria-label="Su hedefinin yüzde ' + yuzde(ml, h) + '\'i"><span style="width:' + yuzde(ml, h) + '%;background:var(--kobalt)"></span></div>' +
+      '<button class="yuvarlak" data-act="su" data-ml="-250" aria-label="Bir bardak çıkar"' + (ml ? '' : ' disabled') + '>−</button><button class="btn ana kucuk" data-act="su" data-ml="250">+ Bardak</button></div>' +
+      '<details class="su-diger"><summary>Başka miktar</summary><div class="haplar su-haplar"><button class="btn cerceve kucuk" data-act="su" data-ml="500">+ 0,5 L</button><button class="btn cerceve kucuk" data-act="su" data-ml="1000">+ 1 L</button></div>' +
+      '<form data-form="su" class="su-elle" novalidate><input name="miktar" inputmode="decimal" placeholder="1,5 L ya da 330 ml" aria-label="Su miktarı, litre ya da mililitre"><button class="btn siyah kucuk" type="submit">Ekle</button></form></details></div>';
   }
   function dunKey() { const d = new Date(); d.setDate(d.getDate() - 1); return tarihKey(d); }
   function tekrarKutu(g) {

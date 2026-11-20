@@ -1467,3 +1467,29 @@ body.gece .halka .iz{stroke:var(--cizgi)}
 .rozet.rz-mini,.rozet.rz-mini.var{background:none;padding:0;border-radius:0;align-items:center;gap:6px}
 .rz-mini .rozet-svg{width:52px;height:52px;margin:0}
 .rz-mini.var .rozet-svg{filter:none}
+/* ana logo: altlı üstlü COMEBACK. (kalın, okunaklı) */
+.logo-yigin{display:inline-flex;flex-direction:column;font-size:21px;font-weight:900;line-height:.84;letter-spacing:-.03em;color:var(--murekkep)}
+.logo-yigin span{display:block}
+/* sade beslenme */
+.bo-kutu{gap:14px}
+.bo-ust{position:relative;display:flex;flex-direction:column;gap:2px}
+.bo-ust .halka{top:0;right:0;width:46px;height:46px}
+.bo-makro{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding-top:12px;border-top:1px solid var(--zemin)}
+.bo-m{display:flex;flex-direction:column;gap:4px;min-width:0}
+.bo-m>span:first-child{font-size:12px;font-weight:800;color:var(--ikincil)}
+.bo-m b{font-size:16px;font-weight:800;white-space:nowrap}
+.bo-m b i{font-style:normal;font-size:12px;font-weight:700;color:var(--ikincil)}
+.bo-iz{display:block;height:5px;border-radius:3px;background:var(--zemin);overflow:hidden}
+.bo-iz span{display:block;height:100%;border-radius:3px;background:var(--kobalt)}
+.bo-m.kh .bo-iz span{background:var(--murekkep)}
+.bo-m.y .bo-iz span{background:#E0B45C}
+.bo-m.asim b{color:var(--hata)}
+.bo-kutu.limon .bo-makro{border-color:rgba(22,22,26,.12)}
+.bo-kutu.limon .bo-m>span:first-child,.bo-kutu.limon .bo-m b i,.bo-kutu.limon .ik{color:#3E4410}
+.su-kutu{gap:10px}
+.su-satir{display:flex;align-items:center;gap:10px}
+.su-satir .cubuk{flex:1;margin:0}
+.su-diger summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ikincil);list-style:none;min-height:32px;display:flex;align-items:center}
+.su-diger summary::-webkit-details-marker{display:none}
+.su-diger[open]{display:flex;flex-direction:column;gap:8px}
+.bp-ince{min-height:0;padding-top:14px;padding-bottom:14px}

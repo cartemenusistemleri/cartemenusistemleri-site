@@ -1,6 +1,6 @@
 /* COMEBACK. — çevrimdışı çalışma: uygulama kabuğu önbellekte, veriler cihazda (localStorage) ve bağlantı gelince hesapla eşitlenir */
-const SURUM = 'cb-v59';
-const KABUK = ['./', 'app.css?v=47', 'data.js?v=9', 'kutuphane.js?v=11', 'motor.js?v=14', 'rehber.js?v=1', 'app.js?v=54', 'gizlilik.html', 'ikon-192.png?v=4'];
+const SURUM = 'cb-v60';
+const KABUK = ['./', 'app.css?v=48', 'data.js?v=9', 'kutuphane.js?v=11', 'motor.js?v=14', 'rehber.js?v=1', 'app.js?v=55', 'gizlilik.html', 'ikon-192.png?v=20'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(SURUM).then((c) => c.addAll(KABUK)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((l) => Promise.all(l.filter((k) => k !== SURUM).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
@@ -32,5 +32,5 @@ self.addEventListener('notificationclick', (e) => {
 // hatırlatıcılar (su, takviye, antrenman): sunucudan gelen Web Push
 self.addEventListener('push', (e) => {
   let v = {}; try { v = e.data ? e.data.json() : {}; } catch (x) { v = { metin: e.data ? e.data.text() : '' }; }
-  e.waitUntil(self.registration.showNotification(v.baslik || 'COMEBACK.', { body: v.metin || '', icon: 'ikon-kobalt-192.png?v=1', badge: 'favicon-96.png?v=6', tag: 'cb-' + (v.tur || 'hatirlat'), renotify: true, data: { url: v.url || '/comeback/' } }));
+  e.waitUntil(self.registration.showNotification(v.baslik || 'COMEBACK.', { body: v.metin || '', icon: 'ikon-kobalt-192.png?v=20', badge: 'favicon-96.png?v=20', tag: 'cb-' + (v.tur || 'hatirlat'), renotify: true, data: { url: v.url || '/comeback/' } }));
 });
