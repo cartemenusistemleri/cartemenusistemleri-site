@@ -1787,16 +1787,28 @@
       return '<button role="listitem" class="' + sinif + '" data-act="' + (y.atla ? 'set-atla' : 'od-set') + '" data-h="' + k + '" data-i="' + i + '" aria-pressed="' + (i === sec) + '" aria-label="' + et + '. set' + (ok ? ', bitti' : '') + (y.atla ? ', atlandı. Geri almak için dokun' : '') + '">' + ic + '</button>';
     }).join('') + '</div>';
   }
-  function odakPanel(x, k, l, sec, aktifIdx) {
+  // ortadaki giriş: hangi set, kilo ve tekrar
+  function odakGiris(x, k, l, sec, aktifIdx, once) {
     const y = l[sec]; const kg = oku(y.kg) || 0; const h = K.HAREKET[x.id] || {}; const barbell = (h.ekipman || []).indexOf('barbell') >= 0;
     const adim = h.artis && h.artis < 2.5 ? h.artis : 2.5; const bitmis = y.ok && !y.atla;
-    const alan = (ad, deger, birim, d, etiket) => '<div class="ap-alan"><button class="ap-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="-' + d + '" aria-label="' + etiket + ' azalt">−</button><div class="ap-deger"><b class="num" data-ap="' + ad + '">' + deger + '</b><span>' + birim + '</span></div><button class="ap-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="' + d + '" aria-label="' + etiket + ' artır">+</button></div>';
-    return '<div class="aktif-panel od-panel" data-h="' + k + '">' +
-      (sec !== aktifIdx ? '<div class="od-panel-ust"><span class="k">' + (y.tur === 'isinma' ? 'Isınma seti ' : 'Set ') + esc(setEtiket(l, sec)) + (bitmis ? ' · bitti, düzenliyorsun' : ' · önceden yazıyorsun') + '</span>' + (aktifIdx >= 0 ? '<button class="metin-btn kucuk-metin" data-act="od-set-kapat">Sıradaki sete dön</button>' : '') + '</div>' : '') +
-      '<div class="ap-satir">' + alan('kg', kg ? sayi(kg, 2) : '—', 'kg', adim, 'Kiloyu ' + sayi(adim, 2)) + alan('tekrar', y.tekrar || x.alt || '—', 'tekrar', 1, 'Tekrarı') + '</div>' +
+    const calis = l.filter((z) => z.tur !== 'isinma'); const bitti = calis.filter((z) => z.ok && !z.atla).length;
+    const no = y.tur === 'isinma' ? 'Isınma seti' : 'Set ' + (calis.indexOf(y) + 1) + '<i> / ' + calis.length + '</i>';
+    const satir = (ad, deger, birim, d, etiket) => '<div class="od-adim"><button class="od-adim-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="-' + d + '" aria-label="' + etiket + ' azalt">−</button>' +
+      '<div class="od-adim-d"><b class="num' + (String(deger).length >= 5 ? ' uzun' : '') + '" data-ap="' + ad + '">' + deger + '</b><span>' + birim + '</span></div>' +
+      '<button class="od-adim-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="' + d + '" aria-label="' + etiket + ' artır">+</button></div>';
+    const gecen = once ? once.setler.filter((z) => z.tur !== 'isinma').map((z) => sayi(z.kg, 1) + '×' + z.tekrar) : [];
+    return '<div class="od-giris" data-h="' + k + '">' +
+      '<div class="od-giris-ust"><span class="od-giris-no num">' + no + '</span><span class="od-sayac-nokta" aria-hidden="true">' + calis.map((z, i) => '<i class="' + (i < bitti ? 'ok' : '') + (z === y ? ' su' : '') + '"></i>').join('') + '</span></div>' +
+      (sec !== aktifIdx ? '<div class="od-panel-ust"><span class="k">' + (bitmis ? 'Bitti · düzenliyorsun' : 'Önceden yazıyorsun') + '</span>' + (aktifIdx >= 0 ? '<button class="metin-btn kucuk-metin" data-act="od-set-kapat">Sıradaki sete dön</button>' : '') + '</div>' : '') +
+      satir('kg', kg ? sayi(kg, 2) : '—', 'kg', adim, 'Kiloyu ' + sayi(adim, 2)) +
+      satir('tekrar', y.tekrar || x.alt || '—', 'tekrar', 1, 'Tekrarı') +
       (barbell ? plakaHtml(kg) : '') +
-      (bitmis ? '<button class="btn ana buyuk-btn ap-bitir" data-act="od-set-kapat">Tamam</button>'
-        : '<button class="btn ana buyuk-btn ap-bitir" data-act="tik" data-h="' + k + '" data-i="' + sec + '">Seti bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>') + '</div>';
+      (sec === aktifIdx ? (gecen.length ? '<span class="od-gecen num">Geçen sefer · ' + gecen.join('  ') + '</span>' : '<span class="od-gecen">İlk kez yapıyorsun. Rahat bir kiloyla başla.</span>') : '') + '</div>';
+  }
+  function odakBitirBtn(k, l, sec) {
+    const y = l[sec]; const bitmis = y.ok && !y.atla;
+    return bitmis ? '<button class="btn ana buyuk-btn ap-bitir" data-act="od-set-kapat">Tamam</button>'
+      : '<button class="btn ana buyuk-btn ap-bitir" data-act="tik" data-h="' + k + '" data-i="' + sec + '">Seti bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>';
   }
   // görsel yoksa orta alan: set sayacı ve geçen seferki setler
   function odakOrta(x, l, sec, once) {
@@ -1828,7 +1840,7 @@
       '<div class="od-grup">' + '<a class="od-m" href="#/koc">Bir yerin mi ağrıdı? Koça danış</a>' +
         sat('gorunum', 'Liste görünümüne geç', ' data-deger="liste"') + (s.kisa ? sat('kisa-iptal', 'Tam antrenmana dön') : '') + '</div>' +
       '<button class="btn siyah buyuk-btn" data-act="bitir">Antrenmanı bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
-      '<button class="metin-btn" data-act="iptal" style="align-self:center;color:var(--ikincil)">' + (iptalOnay ? 'Emin misin? Kaydetmeden çıkmak için tekrar bas' : 'Kaydetmeden çık') + '</button></div>';
+      '<button class="metin-btn" data-act="iptal" style="align-self:center;color:' + (iptalOnay ? 'var(--hata)' : 'var(--ikincil)') + '">' + (iptalOnay ? 'Emin misin? Kaydetmeden çıkmak için tekrar bas' : 'Kaydetmeden çık') + '</button></div>';
   }
   function ekranOdak() {
     const s = S.seans; const sg = S.program.gunler.find((x) => x.id === s.gunId) || { ad: s.ad || 'Antrenman', hareketler: seansHareket(s) };
@@ -1859,17 +1871,18 @@
     const oner = hedefKilo(k); const artir = sonKg && oner && oner > sonKg && aktifIdx >= 0;
     const ipucu = hr.ipucu ? esc(hr.ipucu) + (x.not ? ' <b>' + esc(x.not) + '.</b>' : '') : '';
     const sn = sonraki(oi); const sir0 = sn >= 0 ? sir(sn) : sir(hl.length);
+    const giris = !atlandi && sec >= 0 && birimOf(x) !== 'sn' && birimOf(x) !== 'dk';
     let alt;
     if (atlandi) alt = '<div class="od-bos"><b>Bugün atlandı.</b><button class="btn cerceve" data-act="se-geri" data-h="' + k + '">Geri al</button></div>';
     else if (sec >= 0 && (birimOf(x) === 'sn' || birimOf(x) === 'dk')) alt = kronoDugme(k, sec, l[sec], x);
-    else if (sec >= 0) alt = odakPanel(x, k, l, sec, aktifIdx);
+    else if (sec >= 0) alt = odakBitirBtn(k, l, sec);
     else alt = '<div class="od-bos"><b>' + esc(hr.ad) + ' tamam<span class="nokta">.</span></b>' + sir0.replace('od-siradaki', 'od-siradaki buyuk') + '</div>';
     govde = '<section class="od-kart odak-kart" aria-label="' + esc(hr.ad) + '">' +
       '<div class="od-bas"><div class="od-ad-satir"><a class="od-ad" href="#/hareket/' + encodeURIComponent(x.id) + '">' + esc(hr.ad) + '</a>' +
         (ipucu ? '<button class="od-soru" data-act="od-ipucu" aria-expanded="' + odIpucu + '" aria-label="Nasıl yapılır">?</button>' : '') + '</div>' +
       '<span class="od-hedef num">' + (+x.set || 0) + ' × ' + esc(x.tekrar) + (x.rir && takipSeviye() !== 'sade' ? ' · ' + esc(x.rir) : '') + (S.rekor[x.id] ? ' · rekor ' + sayi(S.rekor[x.id].kg, 1) + '×' + S.rekor[x.id].tekrar : '') + '</span></div>' +
       (odIpucu && ipucu ? '<p class="od-ipucu">' + ipucu + '</p>' : artir ? '<p class="od-ipucu">Geçen sefer ' + sayi(sonKg, 1) + ' kg ile hedefi tuttun. Hazırsan <b>' + sayi(oner, 1) + ' kg</b> dene.</p>' : '') +
-      '<div class="od-orta">' + (hareketGorsel(x.id) || (atlandi ? '' : odakOrta(x, l, sec, once))) + '</div>' +
+      '<div class="od-orta' + (giris ? ' od-orta-giris' : '') + '">' + (giris ? odakGiris(x, k, l, sec, aktifIdx, once) : (hareketGorsel(x.id) || (atlandi ? '' : odakOrta(x, l, sec, once)))) + '</div>' +
       (atlandi ? '' : odakSetler(l, k, sec, aktifIdx)) +
       '<div class="od-alt">' + alt + '</div>' +
       (sec >= 0 && !atlandi ? sir0 : '') +
@@ -1925,7 +1938,7 @@
       '<a class="t koyu" href="#/koc" style="flex-direction:row;align-items:center;justify-content:space-between;gap:12px"><span style="font-weight:700">Bir yerin mi ağrıdı? Koça danış</span>' + IK.ok.replace('<svg', '<svg width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>' +
       '<button class="metin-btn gorunum-btn" data-act="gorunum" data-deger="' + (odakMi() ? 'liste' : 'odak') + '">' + (odakMi() ? 'Bütün hareketleri liste olarak gör' : 'Tek tek göster') + '</button>' +
       '<button class="btn siyah buyuk-btn" data-act="bitir">Antrenmanı bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
-      '<button class="metin-btn" data-act="iptal" style="align-self:center;color:var(--ikincil)">' + (iptalOnay ? 'Emin misin? Kaydetmeden çıkmak için tekrar bas' : 'Kaydetmeden çık') + '</button>';
+      '<button class="metin-btn" data-act="iptal" style="align-self:center;color:' + (iptalOnay ? 'var(--hata)' : 'var(--ikincil)') + '">' + (iptalOnay ? 'Emin misin? Kaydetmeden çıkmak için tekrar bas' : 'Kaydetmeden çık') + '</button>';
   }
   function seSecenek(x, k, hl) {
     const l = S.seans.setler[k] || []; const son = l[l.length - 1];
@@ -2071,7 +2084,8 @@
     krom: ['Krom', 'ikon-krom-192.png?v=20', 'apple-touch-icon-krom.png?v=20', 'manifest-krom.webmanifest?v=10'],
     gunduz: ['Gündüz', 'ikon-gunduz-192.png?v=20', 'apple-touch-icon-gunduz.png?v=20', 'manifest-gunduz.webmanifest?v=10'],
     beyaz: ['Beyaz', 'ikon-beyaz-192.png?v=20', 'apple-touch-icon-beyaz.png?v=20', 'manifest-beyaz.webmanifest?v=10'],
-    limon: ['Limon', 'ikon-limon-192.png?v=20', 'apple-touch-icon-limon.png?v=20', 'manifest-limon.webmanifest?v=10']
+    limon: ['Limon', 'ikon-limon-192.png?v=20', 'apple-touch-icon-limon.png?v=20', 'manifest-limon.webmanifest?v=10'],
+    tekrar: ['Tekrar', 'ikon-tekrar-192.png?v=20', 'apple-touch-icon-tekrar.png?v=20', 'manifest-tekrar.webmanifest?v=10']
   };
   const simgeAyar = () => { const s = (S.ayar || {}).simge; return SIMGE[s] ? s : 'kobalt'; };
   function simgeUygula() {
@@ -2723,7 +2737,21 @@
   let navOnceki = null;
   // boş ekran: markanın sesiyle bir başlık, bir cümle, tek eylem
   const bosEkran = (baslik, metin, eylem) => '<div class="t genis bos-ekran"><b class="be-baslik">' + baslik + '<span class="nokta">.</span></b><span class="be-metin">' + metin + '</span>' + (eylem || '') + '</div>';
-  function odakKay(yon) { const e = document.querySelector('.od-kart'); if (e && e.animate && !azHareket) e.animate([{ transform: 'translateX(' + (yon * 28) + 'px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' }); }
+  // hareket değişince kart parça parça kayar, yeni nokta bir kez nabız atar
+  function odakKay(yon) {
+    const e = document.querySelector('.od-kart'); if (!e || !e.animate || azHareket) return;
+    Array.prototype.forEach.call(e.children, (c, i) => c.animate([{ transform: 'translateX(' + (yon * 24) + 'px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 340, delay: i * 35, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'backwards' }));
+    const n = document.querySelector('.od-n.su i'); if (n) n.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.9)', offset: 0.5 }, { transform: 'scale(1.35)' }], { duration: 420, easing: 'cubic-bezier(.34,1.5,.64,1)' });
+  }
+  // set bitince: set kartı, sayaç noktası ve (hareket bittiyse) üstteki nokta dolar
+  function odKutla(h, i, bu, gecti) {
+    if (azHareket) return;
+    const an = (el, kf, o) => { if (el && el.animate) el.animate(kf, Object.assign({ duration: 440, easing: 'cubic-bezier(.34,1.5,.64,1)' }, o || {})); };
+    an(document.querySelector('.od-set[data-h="' + h + '"][data-i="' + i + '"]'), [{ transform: 'scale(.86)' }, { transform: 'scale(1.06)', offset: 0.6 }, { transform: 'none' }]);
+    const d = document.querySelectorAll('.od-sayac-nokta i.ok'); an(d[d.length - 1], [{ transform: 'scale(.2)' }, { transform: 'scale(1.6)', offset: 0.6 }, { transform: 'none' }]);
+    if (gecti) an(document.querySelector('.od-n[data-i="' + bu + '"] i'), [{ transform: 'scale(.3)' }, { transform: 'scale(2)', offset: 0.55 }, { transform: 'none' }], { duration: 560, delay: 140 });
+  }
+  function odGirisGec() { const g = document.querySelector('.od-giris'); if (g && g.animate && !azHareket) g.animate([{ opacity: 0.35, transform: 'scale(.985)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.23,1,.32,1)' }); }
   (function () { let x0 = null, y0 = 0, t0 = 0;
     document.addEventListener('touchstart', (e) => { const k = e.target.closest('.odak-kart,.od-rutin'); if (!k || e.target.closest('input,button,a,.plaka')) { x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); }, { passive: true });
     document.addEventListener('touchend', (e) => { if (x0 == null || !S.seans) return; const dx = e.changedTouches[0].clientX - x0; const dy = e.changedTouches[0].clientY - y0; x0 = null;
@@ -3227,7 +3255,9 @@
     else if (parca[0] === 'gelen') { html = ekranGelen(parca[1]); sekme = 'bugun'; }
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
+    const odS0 = app.querySelector('.od-sayfa'); const odTop = odS0 ? odS0.scrollTop : -1;
     app.innerHTML = html;
+    if (odTop >= 0) { const o = app.querySelector('.od-sayfa'); if (o) { o.classList.add('kalici'); o.scrollTop = odTop; const pr = app.querySelector('.od-perde'); if (pr) pr.classList.add('kalici'); } }
     temaUygula(); simgeUygula();
     if (hesap) okunmamisBaslat(); navRozet();
     const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme', 'sifre'].indexOf(parca[0]) < 0;
@@ -3382,7 +3412,9 @@
       let gecti = false;
       odSec = null;
       if (y.ok && !sonraki && odakMi()) { const ks0 = seansAnahtar({ hareketler: hl0 }); const bu = ks0.indexOf(el.dataset.h); let n = -1; for (let j = 1; j <= ks0.length; j++) { const c = (bu + j) % ks0.length; if (!hareketBittiMi(S.seans, ks0[c])) { n = c; break; } } if (n >= 0 && n !== bu) { S.seans.odak = n; gecti = true; } else if (n < 0) { S.seans.odak = hl0.length; gecti = true; } }
+      const buI = seansAnahtar({ hareketler: hl0 }).indexOf(el.dataset.h);
       const sY = window.scrollY; render(); window.scrollTo(0, gecti ? 0 : sY); if (gecti) odakKay(1);
+      if (y.ok && odakMi()) odKutla(el.dataset.h, el.dataset.i, buI, gecti);
       if (y.ok) {
         if (sonraki && sonraki.tur === 'drop') { dinlenme = null; dinlenmeCiz(); toast('Drop set: kiloyu düşür, hemen devam.'); }
         else if (sonraki) { // ısınma hafif: setler arası 30 sn, son ısınmadan ilk çalışma setine 60 sn
@@ -3814,8 +3846,8 @@
     'sinir-kapat'() { const el = document.getElementById('sinirKart'); if (el) el.remove(); },
     'od-ipucu'() { odIpucu = !odIpucu; render(); },
     'od-isindim'() { if (!S.seans) return; S.seans.isindi = true; const hl = seansHareket(S.seans); const ks = seansAnahtar({ hareketler: hl }); const i = ks.findIndex((k) => !hareketBittiMi(S.seans, k)); S.seans.odak = i < 0 ? 0 : i; kaydet(); render(); odakKay(1); },
-    'od-set'(el) { if (!S.seans) return; const l = S.seans.setler[el.dataset.h] || []; const i = +el.dataset.i; const akt = l.findIndex((y) => !y.ok && !y.atla); odSec = i === akt ? null : { k: el.dataset.h, i }; render(); },
-    'od-set-kapat'() { odSec = null; render(); },
+    'od-set'(el) { if (!S.seans) return; const l = S.seans.setler[el.dataset.h] || []; const i = +el.dataset.i; const akt = l.findIndex((y) => !y.ok && !y.atla); odSec = i === akt ? null : { k: el.dataset.h, i }; render(); odGirisGec(); },
+    'od-set-kapat'() { odSec = null; render(); odGirisGec(); },
     'se-ac'(el) { seAcik = seAcik === el.dataset.h ? null : el.dataset.h; if (odakMi() && S.seans && seAcik) odMenu = true; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'se-atla'(el) {
       S.seans.atlanan = S.seans.atlanan || {}; S.seans.atlanan[el.dataset.h] = true; seAcik = null;

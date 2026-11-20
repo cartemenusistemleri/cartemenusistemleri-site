@@ -1,0 +1,37 @@
+{
+  "name": "COMEBACK.",
+  "short_name": "COMEBACK.",
+  "description": "Sana göre program, fotoğrafla kalori, set set antrenman kaydı.",
+  "lang": "tr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#ECECE8",
+  "icons": [
+    {
+      "src": "ikon-tekrar-192.png?v=20",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-tekrar-512.png?v=20",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-tekrar-maskable-192.png?v=20",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "ikon-tekrar-maskable-512.png?v=20",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
