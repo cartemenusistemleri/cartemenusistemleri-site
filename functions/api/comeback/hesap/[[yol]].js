@@ -66,11 +66,13 @@ async function kimDir(db, req) {
 }
 // basit sınır: anahtar başına pencere içinde en fazla n deneme
 // tek ifadede artır-ve-oku: aynı anda gelen istekler sınırı aşamaz
-async function sinir(db, anahtar, n, pencereSn) {
+async function sinir(db, R, anahtar, n, pencereSn) {
   const simdi = Date.now();
   const r = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = CASE WHEN bitis <= ?3 THEN 1 ELSE sayi + 1 END, bitis = CASE WHEN bitis <= ?3 THEN ?2 ELSE bitis END RETURNING sayi')
     .bind(anahtar, simdi + pencereSn * 1000, simdi).first();
-  return !!r && r.sayi <= n;
+  const ok = !!r && r.sayi <= n;
+  if (!ok && R) { const b = await db.prepare('SELECT bitis FROM giris_deneme WHERE anahtar = ?').bind(anahtar).first(); R.s = { limit: n, pencere: pencereSn, yenilenme: b ? b.bitis : simdi }; }
+  return ok;
 }
 // başka siteden gelen çerezli yazma isteklerini reddet (SameSite'a ek savunma)
 function yabanciKaynak(req) {
@@ -196,7 +198,7 @@ async function uyelikIsle(db, kim, veri) {
 const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan', 'kisa', 'giris_afis', 'giris_wa', 'giris_ig', 'giris_qr']);
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
-export async function onRequest(ctx) {
+async function onRequestIc(ctx, R) {
   const { request: req, env, params } = ctx;
   const db = env.COMEBACK_DB;
   if (!db) return hata('Hesap sistemi şu an kapalı.', 503);
@@ -223,7 +225,7 @@ export async function onRequest(ctx) {
       if (typeof g.json !== 'string' || g.json.length > 200000) return hata('Profil bilgilerin eksik.', 400);
       let st; try { st = JSON.parse(g.json); } catch (e) { return hata('Profil bilgilerin eksik.', 400); }
       if (!st || !st.profil || !st.program) return hata('Profil bilgilerin eksik.', 400);
-      if (!(await sinir(db, 'basvuru:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'basvuru:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
       const var_ = await db.prepare('SELECT id, rol FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
       if (var_) return hata(var_.rol === 'aday' ? 'Bu e-postayla başvurun zaten alındı. Onaylanınca giriş yapabilirsin.' : 'Bu e-postayla zaten bir hesap var. Giriş yap.', 409);
       const simdi = Date.now();
@@ -255,7 +257,7 @@ export async function onRequest(ctx) {
       if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
       if (g.riza !== true) return hata('Verilerinin hesabında saklanması için onay kutusunu işaretle.', 400);
       if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza kutusunu işaretle.', 400);
-      if (!(await sinir(db, 'kayit:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'kayit:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
       const beta = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
       if (!beta || beta.durum !== 'onayli') return json({ hata: beta ? 'Beta başvurun alındı, onaylanınca kayıt olabileceksin.' : 'COMEBACK. şu an kapalı betada. Önce bekleme listesine katıl.', beta: beta ? 'bekliyor' : 'yok' }, 403);
       const var_ = await db.prepare('SELECT id FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
@@ -270,7 +272,7 @@ export async function onRequest(ctx) {
     if (yol === 'giris' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const eposta = String(g.eposta || '').trim().toLowerCase(); const sifre = String(g.sifre || '');
-      if (!(await sinir(db, 'giris:' + ip, 10, 900)) || !(await sinir(db, 'giris-e:' + eposta, 8, 900))) return hata('Çok fazla hatalı deneme. 15 dakika sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'giris:' + ip, 10, 900)) || !(await sinir(db, R, 'giris-e:' + eposta, 8, 900))) return hata('Çok fazla hatalı deneme. 15 dakika sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT id, ad, eposta, rol, kullanici_adi, sifre_hash, tuz FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
       if (!k || !esit(await sifreHash(sifre, k.tuz), k.sifre_hash)) return hata('E-posta ya da şifre hatalı.', 401);
       if (k.rol === 'aday') {
@@ -290,7 +292,7 @@ export async function onRequest(ctx) {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const eposta = String(g.eposta || '').trim().toLowerCase();
       if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
-      if (!(await sinir(db, 'sifirla:' + ip, 5, 3600)) || !(await sinir(db, 'sifirla-e:' + eposta, 3, 3600))) return hata('Çok fazla istek yapıldı. Bir saat sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'sifirla:' + ip, 5, 3600)) || !(await sinir(db, R, 'sifirla-e:' + eposta, 3, 3600))) return hata('Çok fazla istek yapıldı. Bir saat sonra tekrar dene.', 429);
       const tamam = json({ ok: true, mesaj: 'Bu e-postayla bir hesap varsa şifre yenileme bağlantısı gönderdik. Gelen kutunu ve gereksiz klasörünü kontrol et.' });
       const k = await db.prepare("SELECT id, ad, rol FROM kullanicilar WHERE eposta = ? AND rol != 'demo'").bind(eposta).first();
       if (!k) return tamam;
@@ -316,7 +318,7 @@ export async function onRequest(ctx) {
       const token = String(g.token || ''); const sifre = String(g.sifre || '');
       if (!/^[A-Za-z0-9_-]{30,60}$/.test(token)) return hata('Bağlantı geçersiz. Yeni bir bağlantı iste.', 400);
       if (sifre.length < 8 || sifre.length > 200) return hata('Şifre en az 8 karakter olmalı.', 400);
-      if (!(await sinir(db, 'yenile:' + ip, 6, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'yenile:' + ip, 6, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
       const th = await ozet(token);
       const t = await db.prepare('SELECT kullanici_id, bitis FROM sifre_sifirla WHERE token_hash = ?').bind(th).first();
       if (!t || t.bitis < Date.now()) return hata('Bağlantının süresi dolmuş ya da kullanılmış. Yeni bir bağlantı iste.', 400);
@@ -343,7 +345,7 @@ export async function onRequest(ctx) {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const eposta = String(g.eposta || '').trim().toLowerCase();
       if (!EPOSTA.test(eposta)) return hata('Geçerli bir e-posta adresi yaz.', 400);
-      if (!(await sinir(db, 'bekleme:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Biraz sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'bekleme:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Biraz sonra tekrar dene.', 429);
       const kisa = (v, n) => String(v || '').trim().replace(/[<>]/g, '').slice(0, n);
       await db.prepare('INSERT OR IGNORE INTO bekleme (eposta, ad, hedef, kaynak, durum, zaman) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(eposta, kisa(g.ad, 40), kisa(g.hedef, 40), kisa(g.kaynak, 60), 'bekliyor', Date.now()).run();
@@ -357,14 +359,14 @@ export async function onRequest(ctx) {
       // kişisel veri olmadan günlük özellik sayaçları
       const g = await govde(req); const olay = String((g && g.olay) || '');
       if (!/^[a-z_]{2,30}$/.test(olay) || !OLAYLAR.has(olay)) return hata('Geçersiz.', 400);
-      if (!(await sinir(db, 'olay:' + (kim ? kim.id : ip), 120, 3600))) return json({ ok: true });
+      if (!(await sinir(db, R, 'olay:' + (kim ? kim.id : ip), 120, 3600))) return json({ ok: true });
       await db.prepare('INSERT INTO sayac (gun, olay, adet) VALUES (?, ?, 1) ON CONFLICT(gun, olay) DO UPDATE SET adet = adet + 1').bind(new Date().toISOString().slice(0, 10), olay).run();
       return json({ ok: true });
     }
 
     if (yol === 'hata' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
-      if (!(await sinir(db, 'hata:' + (kim ? kim.id : ip), 20, 3600))) return json({ ok: true });
+      if (!(await sinir(db, R, 'hata:' + (kim ? kim.id : ip), 20, 3600))) return json({ ok: true });
       const k = (v, n) => String(v || '').slice(0, n);
       await db.prepare('INSERT INTO hatalar (kullanici_id, mesaj, yer, ekran, surum, cihaz, zaman) VALUES (?, ?, ?, ?, ?, ?, ?)')
         .bind(kim ? kim.id : null, k(g.mesaj, 500), k(g.yer, 300), k(g.ekran, 60), k(g.surum, 20), k(req.headers.get('user-agent'), 200), Date.now()).run();
@@ -471,7 +473,7 @@ export async function onRequest(ctx) {
       if (!kim) return hata('Giriş yapılmamış.', 401);
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       const tur = String(g.tur || ''); if (['koc', 'yorum', 'yemek', 'foto', 'kur', 'bplan'].indexOf(tur) < 0) return hata('Geçersiz.', 400);
-      if (!(await sinir(db, 'aioy:' + kim.id, 40, 3600))) return hata('Çok fazla oy.', 429);
+      if (!(await sinir(db, R, 'aioy:' + kim.id, 40, 3600))) return hata('Çok fazla oy.', 429);
       await db.prepare('INSERT INTO ai_oy (kullanici_id, tur, oy, ornek, zaman) VALUES (?, ?, ?, ?, ?)').bind(kim.id, tur, Number(g.oy) > 0 ? 1 : -1, String(g.ornek || '').replace(/[<>]/g, '').slice(0, 300), Date.now()).run();
       return json({ ok: true });
     }
@@ -481,7 +483,7 @@ export async function onRequest(ctx) {
       const metin = String(g.metin || '').trim().slice(0, 2000);
       if (metin.length < 3) return hata('Birkaç kelime yaz.', 400);
       const tur = ['oneri', 'hata', 'begeni', 'diger'].includes(g.tur) ? g.tur : 'diger';
-      if (!(await sinir(db, 'gorus:' + (kim ? kim.id : ip), 10, 3600))) return hata('Çok fazla mesaj gönderildi. Biraz sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'gorus:' + (kim ? kim.id : ip), 10, 3600))) return hata('Çok fazla mesaj gönderildi. Biraz sonra tekrar dene.', 429);
       await db.prepare('INSERT INTO gorusler (kullanici_id, tur, metin, ekran, cihaz, zaman) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(kim ? kim.id : null, tur, metin, String(g.ekran || '').slice(0, 60), String(req.headers.get('user-agent') || '').slice(0, 200), Date.now()).run();
       return json({ ok: true }, 201);
@@ -520,7 +522,7 @@ export async function onRequest(ctx) {
     if (yol === 'foto' && m === 'POST') {
       const g = await govde(req); const f = String(g && g.foto || '');
       if (!/^data:image\/(jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f) || f.length > 60000) return hata('Resim okunamadı ya da çok büyük.', 400);
-      if (!(await sinir(db, 'foto:' + kim.id, 6, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'foto:' + kim.id, 6, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
       const v = Date.now();
       await db.prepare('UPDATE kullanicilar SET foto = ?, foto_v = ? WHERE id = ?').bind(f, v, kim.id).run();
       return json({ foto: v });
@@ -534,7 +536,7 @@ export async function onRequest(ctx) {
       const ad = String(g.ad || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c');
       if (!/^[a-z0-9_.]{3,20}$/.test(ad) || /^[._]|[._]$/.test(ad)) return hata('Kullanıcı adı 3–20 karakter olmalı; harf, rakam, nokta ve alt çizgi kullanabilirsin.', 400);
       if (['admin', 'comeback', 'destek', 'yonetim', 'hoca', 'koc', 'resmi', 'official'].indexOf(ad) >= 0) return hata('Bu kullanıcı adı ayrılmış, başka bir tane dene.', 409);
-      if (!(await sinir(db, 'kadi:' + kim.id, 5, 3600))) return hata('Çok fazla deneme. Biraz sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'kadi:' + kim.id, 5, 3600))) return hata('Çok fazla deneme. Biraz sonra tekrar dene.', 429);
       const var_ = await db.prepare('SELECT id FROM kullanicilar WHERE kullanici_adi = ? AND id != ?').bind(ad, kim.id).first();
       if (var_) return hata('Bu kullanıcı adı alınmış.', 409);
       await db.prepare('UPDATE kullanicilar SET kullanici_adi = ? WHERE id = ?').bind(ad, kim.id).run();
@@ -543,7 +545,7 @@ export async function onRequest(ctx) {
 
     if (yol === 'sil' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
-      if (!(await sinir(db, 'sil:' + kim.id, 5, 900))) return hata('Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'sil:' + kim.id, 5, 900))) return hata('Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT sifre_hash, tuz FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       if (!k || !esit(await sifreHash(String(g.sifre || ''), k.tuz), k.sifre_hash)) return hata('Şifre hatalı.', 401);
       await db.batch(hesapSilAdimlari(db, kim.id));
@@ -567,4 +569,13 @@ export async function onRequest(ctx) {
   } catch (e) {
     return hata('Sunucuda bir sorun oluştu. Biraz sonra tekrar dene.', 500);
   }
+}
+
+// sınıra takılınca istemciye ne kadar sonra yenileneceğini bildir (uygulama bilgilendirme kartı gösterir)
+export async function onRequest(ctx) {
+  const R = {};
+  const yanit = await onRequestIc(ctx, R);
+  if (yanit.status !== 429 || !R.s) return yanit;
+  let g = {}; try { g = await yanit.clone().json(); } catch (e) { /* boş */ }
+  return new Response(JSON.stringify(Object.assign(g, { sinir: R.s })), { status: 429, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'retry-after': String(Math.max(1, Math.ceil((R.s.yenilenme - Date.now()) / 1000))) } });
 }

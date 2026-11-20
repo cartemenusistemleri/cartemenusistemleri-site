@@ -12,11 +12,13 @@ const json = (veri, durum = 200) => new Response(JSON.stringify(veri), { status:
 const hata = (m, d) => json({ hata: m }, d);
 // yalnızca tarayıcıların gerçek push servisleri (başka adrese istek atılmasın)
 const PUSH_UC = /^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+(\.[a-z0-9-]+)*\.notify\.windows\.com|web\.push\.apple\.com|[a-z0-9-]+\.push\.apple\.com)\/[^\s]{8,880}$/;
-async function sinir(db, anahtar, n, sn) {
+async function sinir(db, R, anahtar, n, sn) {
   const simdi = Date.now();
   const r = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = CASE WHEN bitis <= ?3 THEN 1 ELSE sayi + 1 END, bitis = CASE WHEN bitis <= ?3 THEN ?2 ELSE bitis END RETURNING sayi')
     .bind(anahtar, simdi + sn * 1000, simdi).first();
-  return !!r && r.sayi <= n;
+  const ok = !!r && r.sayi <= n;
+  if (!ok && R) { const b = await db.prepare('SELECT bitis FROM giris_deneme WHERE anahtar = ?').bind(anahtar).first(); R.s = { limit: n, pencere: sn, yenilenme: b ? b.bitis : simdi }; }
+  return ok;
 }
 const enc = new TextEncoder();
 const hex = (buf) => Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -112,7 +114,7 @@ function planTemizle(p) {
   return o;
 }
 
-export async function onRequest(ctx) {
+async function onRequestIc(ctx, R) {
   const { request: req, env, params } = ctx;
   const db = env.COMEBACK_DB; if (!db) return hata('Kapalı.', 503);
   const yol = (Array.isArray(params.yol) ? params.yol : [params.yol]).filter(Boolean).join('/');
@@ -154,7 +156,7 @@ export async function onRequest(ctx) {
 
     if (yol === 'abone' && m === 'POST') {
       const a = g.abonelik || {}; const uc = String(a.endpoint || '');
-      if (!(await sinir(db, 'hatabone:' + ben.id, 20, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
+      if (!(await sinir(db, R, 'hatabone:' + ben.id, 20, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
       if (!PUSH_UC.test(uc) || !a.keys || !/^[A-Za-z0-9_-]{80,100}$/.test(a.keys.p256dh || '') || !/^[A-Za-z0-9_-]{16,30}$/.test(a.keys.auth || '')) return hata('Bildirim aboneliği geçersiz.', 400);
       const plan = planTemizle(g.plan); if (!plan) return hata('Plan eksik.', 400);
       const say = await db.prepare('SELECT COUNT(*) n FROM hatirlat WHERE kullanici_id = ? AND uc != ?').bind(ben.id, uc).first();
@@ -168,10 +170,19 @@ export async function onRequest(ctx) {
     if (yol === 'dene' && m === 'POST') {
       const ab = await db.prepare('SELECT uc, p256dh, auth FROM hatirlat WHERE uc = ? AND kullanici_id = ?').bind(String(g.uc || ''), ben.id).first();
       if (!ab) return hata('Önce hatırlatıcıları aç.', 404);
-      if (!(await sinir(db, 'hatdene:' + ben.id, 5, 3600))) return hata('Saatte en fazla 5 deneme bildirimi.', 429);
+      if (!(await sinir(db, R, 'hatdene:' + ben.id, 5, 3600))) return hata('Saatte en fazla 5 deneme bildirimi.', 429);
       const r = await pushGonder(await vapid(db), ab, { tur: 'dene', baslik: 'COMEBACK.', metin: 'Hatırlatıcılar açık. Zamanı gelince buradan haber veririz.', url: '/comeback/#/profilim' });
       return r.ok ? json({ ok: true }) : hata('Bildirim gönderilemedi. Biraz sonra tekrar dene.', 502);
     }
     return hata('Bulunamadı.', 404);
   } catch (e) { return hata('Bir sorun oluştu.', 500); }
+}
+
+// sınıra takılınca istemciye ne kadar sonra yenileneceğini bildir (uygulama bilgilendirme kartı gösterir)
+export async function onRequest(ctx) {
+  const R = {};
+  const yanit = await onRequestIc(ctx, R);
+  if (yanit.status !== 429 || !R.s) return yanit;
+  let g = {}; try { g = await yanit.clone().json(); } catch (e) { /* boş */ }
+  return new Response(JSON.stringify(Object.assign(g, { sinir: R.s })), { status: 429, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'retry-after': String(Math.max(1, Math.ceil((R.s.yenilenme - Date.now()) / 1000))) } });
 }

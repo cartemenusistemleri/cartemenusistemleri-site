@@ -84,7 +84,7 @@ export async function onRequest(ctx) {
       if (!/^[A-Z0-9]{6}$/.test(kod)) return hata('Kod 6 karakter olmalı.', 400);
       // kod tahminine karşı: saatte en fazla 5 bağlanma denemesi
       { const r0 = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = CASE WHEN bitis <= ?3 THEN 1 ELSE sayi + 1 END, bitis = CASE WHEN bitis <= ?3 THEN ?2 ELSE bitis END RETURNING sayi').bind('hocabag:' + kim.id, simdi + 3600000, simdi).first();
-        if (!r0 || r0.sayi > 5) return hata('Çok fazla deneme. Bir saat sonra tekrar dene.', 429); }
+        if (!r0 || r0.sayi > 5) { const b0 = await db.prepare('SELECT bitis FROM giris_deneme WHERE anahtar = ?').bind('hocabag:' + kim.id).first(); return json({ hata: 'Çok fazla deneme.', sinir: { limit: 5, pencere: 3600, yenilenme: b0 ? b0.bitis : simdi + 3600000 } }, 429); } }
       const h = await db.prepare('SELECT hk.koc_id, k.ad FROM hoca_kod hk JOIN kullanicilar k ON k.id = hk.koc_id WHERE hk.kod = ?').bind(kod).first();
       if (!h) return hata('Bu kodla bir hoca bulunamadı.', 404);
       if (h.koc_id === kim.id) return hata('Kendi kodunla bağlanamazsın.', 400);

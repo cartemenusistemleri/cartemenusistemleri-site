@@ -52,18 +52,25 @@ async function askidaMi(env, k) {
   } catch (e) { return false; }
 }
 // tek ifadede artır-ve-oku (D1): aynı anda gelen istekler sınırı aşamaz; sayaç deposu yoksa kapalı kalır
-async function sinir(env, anahtar, limit) {
+// gün İstanbul saatiyle gece yarısı yenilenir
+const geceYarisi = () => { const t = Date.now() + 3 * 3600e3; return t - (t % 864e5) + 864e5 - 3 * 3600e3; };
+async function sinir(env, anahtar, limit, R) {
   const db = env.COMEBACK_DB; if (!db) return false;
   const yarin = Date.now() + 30 * 3600e3;
   const r = await db.prepare('INSERT INTO giris_deneme (anahtar, sayi, bitis) VALUES (?1, 1, ?2) ON CONFLICT(anahtar) DO UPDATE SET sayi = sayi + 1 RETURNING sayi').bind(anahtar, yarin).first();
-  return !!r && r.sayi <= limit;
+  const ok = !!r && r.sayi <= limit;
+  if (!ok && R) R.s = { limit, pencere: 86400, yenilenme: geceYarisi() };
+  return ok;
 }
 
 export async function onRequestPost(ctx) {
-  try { return await isle(ctx); } catch (e) { return json({ hata: 'Beklenmeyen bir sorun oldu. Biraz sonra tekrar dene.' }, 500); }
+  ctx.R = {}; let y; try { y = await isle(ctx); } catch (e) { return json({ hata: 'Beklenmeyen bir sorun oldu. Biraz sonra tekrar dene.' }, 500); }
+  if (y.status !== 429 || !ctx.R.s) return y;
+  let g = {}; try { g = await y.clone().json(); } catch (e) { /* boş */ }
+  return json(Object.assign(g, { sinir: ctx.R.s }), 429);
 }
 async function isle(ctx) {
-  const { request, env } = ctx;
+  const { request, env } = ctx; const R = ctx.R || (ctx.R = {});
   if (yabanciKaynak(request)) return json({ hata: 'İzin verilmeyen kaynak.' }, 403);
   if (!env.COMEBACK_AI_KEY) return json({ hata: 'Fotoğraf analizi yakında açılıyor. Şimdilik listeden ya da elle ekleyebilirsin.' }, 503);
 
@@ -79,9 +86,9 @@ async function isle(ctx) {
   if (!ben) return json({ hata: 'Fotoğraf analizi için giriş yap.' }, 401);
   if (await askidaMi(env, ben)) return json({ hata: 'Üyeliğin askıda. Comeback ile geri dönünce fotoğraf analizi de açılır.', askida: true }, 403);
   const gun = bugunTR();
-  if (!(await sinir(env, 'ai-foto:' + ben.id + ':' + gun, Math.min(parseInt(env.COMEBACK_FOTO_LIMIT || '10', 10) || 10, 10)))) return json({ hata: 'Bugünkü fotoğraf analizi hakkın doldu. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
+  if (!(await sinir(env, 'ai-foto:' + ben.id + ':' + gun, Math.min(parseInt(env.COMEBACK_FOTO_LIMIT || '10', 10) || 10, 10), R))) return json({ hata: 'Bugünkü fotoğraf analizi hakkın doldu. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
   // maliyet sigortası: koçla ortak günlük toplam yapay zekâ çağrısı
-  if (!(await sinir(env, 'ai-toplam:' + gun, Math.min(parseInt(env.COMEBACK_AI_GUNLUK || '1000', 10) || 1000, 1000)))) return json({ hata: 'Yapay zekâ bugün çok yoğun. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
+  if (!(await sinir(env, 'ai-toplam:' + gun, Math.min(parseInt(env.COMEBACK_AI_GUNLUK || '1000', 10) || 1000, 1000), R))) return json({ hata: 'Yapay zekâ bugün çok yoğun. Yarın tekrar deneyebilir ya da elle ekleyebilirsin.' }, 429);
 
   let yanit;
   const govdeOlustur = (ek) => JSON.stringify(Object.assign({
