@@ -3274,23 +3274,28 @@
   }
 
   /* ---------- 3-2-1: antrenmana giriş ---------- */
+  // başlangıç sayımı: altta üç küçük nokta, her saniye biri dolar ve ortaya bir söz gelir (Hazır. Nefes al. Başla.)
   function geriSay(g) {
     if (azHareket) return; const eski = document.getElementById('gerisay'); if (eski) eski.remove();
     const ilk = g.hareketler[0]; const h = ilk && D.HAREKET[ilk.id];
-    const el = document.createElement('div'); el.id = 'gerisay'; el.className = 'gerisay'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'assertive');
-    const cent = Array.from({ length: 48 }, (_, i) => { const a = (-210 + i * (240 / 47)) * Math.PI / 180; const r1 = 118, r2 = i % 4 ? 110 : 102; return '<line x1="' + (130 + r1 * Math.cos(a)).toFixed(1) + '" y1="' + (130 + r1 * Math.sin(a)).toFixed(1) + '" x2="' + (130 + r2 * Math.cos(a)).toFixed(1) + '" y2="' + (130 + r2 * Math.sin(a)).toFixed(1) + '" data-i="' + i + '"/>'; }).join('');
-    el.innerHTML = '<span class="k">Antrenman başlıyor</span><span class="gs-ad">' + esc(g.ad) + '<span class="nokta">.</span></span><div class="gs-kadran"><svg viewBox="0 0 260 260" aria-hidden="true">' + cent + '</svg><span class="gs-no num">3</span></div>' +
-      (h ? '<span class="gs-ilk">Sıradaki · ' + esc(h.ad) + ' · ' + ilk.set + ' set</span>' : '') + '<span class="ik gs-atla">Geçmek için dokun</span>';
+    const SOZ = ['Hazır', 'Nefes al', 'Başla'];
+    const el = document.createElement('div'); el.id = 'gerisay'; el.className = 'gerisay gs2'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'assertive');
+    el.innerHTML = '<div class="gs-bas"><span class="k">Antrenman başlıyor</span><span class="gs-ad">' + esc(g.ad) + '<span class="nokta">.</span></span></div>' +
+      '<div class="gs-soz"></div>' +
+      '<div class="gs-alt"><span class="gs-noktalar" aria-hidden="true"><i></i><i></i><i></i></span>' + (h ? '<span class="gs-ilk">Sıradaki · <b>' + esc(h.ad) + '</b> · ' + ilk.set + ' set</span>' : '') + '<span class="gs-atla">Geçmek için dokun</span></div>';
     document.body.appendChild(el);
-    const cizgi = Array.from(el.querySelectorAll('line')); const no = el.querySelector('.gs-no'); const t0 = performance.now(); let son = 4; let bitti = false;
-    const kapat = () => { if (bitti) return; bitti = true; el.classList.add('git'); setTimeout(() => el.remove(), 380); };
+    const soz = el.querySelector('.gs-soz'); const nk = el.querySelectorAll('.gs-noktalar i'); let bitti = false; const zaman = [];
+    const kapat = () => { if (bitti) return; bitti = true; zaman.forEach(clearTimeout); el.classList.add('git'); setTimeout(() => el.remove(), 380); };
     el.addEventListener('click', kapat);
-    (function kare(t) {
-      if (bitti) return; const gecen = (t - t0) / 1000; const kalan = 3 - Math.floor(gecen);
-      const p = Math.min(1, gecen / 3); const n = Math.round(p * cizgi.length); cizgi.forEach((c, i) => c.classList.toggle('on', i < n));
-      if (kalan !== son) { son = kalan; if (kalan >= 1) { no.textContent = kalan; no.classList.remove('vur'); void no.offsetWidth; no.classList.add('vur'); if (sesTur() !== 'yok') bip('sayim'); if (navigator.vibrate) navigator.vibrate(15); } else { no.textContent = 'Başla'; no.classList.add('kelime'); if (sesTur() !== 'yok') bip('git'); if (navigator.vibrate) navigator.vibrate([30, 40, 60]); setTimeout(kapat, 650); return; } }
-      requestAnimationFrame(kare);
-    })(t0);
+    const adim = (i) => {
+      if (bitti) return;
+      nk[i].classList.add('dolu');
+      const eskiS = soz.querySelector('span'); if (eskiS) { eskiS.classList.add('cik'); setTimeout(() => eskiS.remove(), 320); }
+      const sp = document.createElement('span'); sp.className = 'gs-s' + (i === 2 ? ' son' : ''); sp.innerHTML = SOZ[i] + '<i>.</i>'; soz.appendChild(sp);
+      if (sesTur() !== 'yok') bip(i === 2 ? null : 'sayim'); if (navigator.vibrate) navigator.vibrate(i === 2 ? 40 : 15);
+    };
+    [0, 1, 2].forEach((i) => zaman.push(setTimeout(() => adim(i), 120 + i * 1000)));
+    zaman.push(setTimeout(kapat, 3150));
   }
 
   /* ---------- açılış: kobalt perde, yazı maskeden yükselir, nokta düşer, perde yukarı çekilir (oturumda bir kez, dokununca geçer) ---------- */
