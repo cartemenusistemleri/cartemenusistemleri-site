@@ -28,6 +28,7 @@
 <link rel="icon" type="image/png" sizes="48x48" href="/comeback/favicon-48.png?v=20">
 <link rel="apple-touch-icon" href="/comeback/apple-touch-icon-kobalt.png?v=20">
 <link rel="preload" href="font/sg-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>(function(){var h=document.documentElement;try{if(sessionStorage.getItem('cb-perde')||matchMedia('(prefers-reduced-motion: reduce)').matches){h.classList.add('perde-yok')}else{sessionStorage.setItem('cb-perde','1');h.classList.add('perde-var')}}catch(e){h.classList.add('perde-yok')}})();</script>
 <style>
 @font-face{font-family:'Schibsted Grotesk';src:url(font/sg-latin.woff2) format('woff2');font-weight:400 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Schibsted Grotesk';src:url(font/sg-latin-ext.woff2) format('woff2');font-weight:400 900;font-display:swap;unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
@@ -337,6 +338,89 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
 }
 @media (max-width:480px){.ayak .kare{font-size:12px}}
 
+
+/* altlı üstlü logo (uygulamayla aynı) */
+.logo-yigin{display:inline-flex;flex-direction:column;font-size:18px;line-height:.82;letter-spacing:-.03em}
+.logo-yigin span{display:block}
+
+/* açılış perdesi: uygulamadaki gibi kobalt perde, yazı maskeden yükselir, nokta düşer, perde yukarı çekilir */
+.perde{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:var(--kobalt);color:#fff;cursor:pointer}
+html.perde-var .perde{display:grid;animation:perdeKalk .68s var(--ease-io) 1.45s forwards}
+.perde-logo{display:flex;flex-direction:column;font-weight:900;font-size:clamp(64px,17vw,132px);line-height:.82;letter-spacing:-.025em}
+.perde-logo .pm{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.perde-logo .pm>span{display:inline-block;animation:satir .64s var(--ease) .12s both}
+.perde-logo .pm+.pm>span{animation-delay:.22s}
+.perde-logo i{font-style:normal;display:inline-block;color:var(--limon);animation:perdeNokta .52s cubic-bezier(.34,1.56,.64,1) .7s both}
+html.perde-var .perde-logo{animation:perdeLogo .56s var(--ease-io) 1.45s forwards}
+@keyframes perdeNokta{from{transform:translateY(-1.3em);opacity:0}}
+@keyframes perdeLogo{to{transform:translateY(-64px);opacity:0}}
+@keyframes perdeKalk{0%{clip-path:inset(0 0 0 0)}99%{clip-path:inset(0 0 100% 0);visibility:visible}100%{clip-path:inset(0 0 100% 0);visibility:hidden}}
+.perde.gec{animation:perdeGec .22s ease-out forwards!important}
+@keyframes perdeGec{to{opacity:0;visibility:hidden}}
+html.perde-var .giris h1 .sat>span{animation-delay:1.6s}
+html.perde-var .giris h1 .sat:nth-child(2)>span{animation-delay:1.7s}
+
+/* nokta dili: boş = kılcal halka, yapıldı = dolu */
+.nd{display:inline-block;width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--kobalt);flex:none}
+.nd.ok{background:var(--kobalt);box-shadow:none}
+.soz button i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--kobalt);margin-top:4px;transition:background-color .25s var(--ease),box-shadow .25s var(--ease)}
+.soz button[aria-pressed="true"] i{background:#fff;box-shadow:none}
+.donus-nokta{display:grid;grid-template-columns:110px minmax(0,1fr) 56px;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--koyu-ikincil)}
+.donus-nokta .sira{display:flex;gap:5px;flex-wrap:nowrap}
+.donus-nokta .sira i{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 1px #5a5a64;flex:none}
+.donus-nokta .sira i.ok{background:#F3F1EC;box-shadow:none}
+.donus-nokta.simdi .sira i.ok{background:var(--mavi-gece)}
+.donus-nokta em{font-style:normal;color:#fff;text-align:right}
+@media (max-width:520px){.donus-nokta{grid-template-columns:86px minmax(0,1fr) 44px;gap:8px}.donus-nokta .sira{gap:3px}.donus-nokta .sira i{width:7px;height:7px}}
+
+/* odak ekranı: gerçek uygulama ekranı telefon içinde */
+.ad-odak{align-items:center}
+.tel-sah{display:flex;justify-content:center;padding:8px 0}
+.tel{box-shadow:0 0 0 1px #2a2a30,0 40px 80px -40px rgba(22,22,26,.6)}
+.tel img{width:100%;height:100%;object-fit:cover;border-radius:38px;display:block;background:#000}
+.odak-liste{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:0;max-width:44ch}
+.odak-liste li{position:relative;display:flex;gap:12px;align-items:baseline;padding:12px 0;font-size:16px;line-height:1.45;color:var(--ikincil)}
+.odak-liste li+li::before{content:"";position:absolute;top:0;left:22px;right:0;height:1px;background:var(--cizgi)}
+.odak-liste li .nd{transform:translateY(1px)}
+.odak-liste b{color:var(--murekkep);font-weight:800}
+@media (max-width:900px){.tel{width:min(280px,78vw)}}
+
+/* senin simgen */
+.simge-sah{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center}
+.simge-buyuk{width:152px;height:152px;border-radius:36px;display:block;box-shadow:0 24px 48px -28px rgba(22,22,26,.55);transition:transform .3s var(--ease)}
+.simge-buyuk.deg{animation:simgeDeg .34s var(--ease)}
+@keyframes simgeDeg{from{transform:scale(.92);opacity:.4}}
+.simge-ad{font-size:15px;font-weight:800;margin-top:12px;text-align:center}
+.simge-dizi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.simge-dizi button{border:0;background:none;padding:6px;border-radius:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font:inherit;font-size:12px;font-weight:700;color:var(--ikincil);transition:background-color .2s ease,transform .14s var(--ease)}
+.simge-dizi button:active{transform:scale(.95)}
+.simge-dizi button img{width:56px;height:56px;border-radius:14px}
+.simge-dizi button[aria-pressed="true"]{background:var(--zemin);color:var(--murekkep)}
+@media (max-width:520px){.simge-sah{grid-template-columns:1fr;justify-items:center}.simge-dizi{width:100%}}
+
+/* burada bırakmak yok */
+.kural-bant{padding-top:24px}
+.kurallar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kural{background:var(--kutu);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;gap:14px}
+.kural h3{font-size:clamp(26px,2.6vw,34px);font-weight:900;letter-spacing:-.045em}
+.kural p{font-size:16px;color:var(--ikincil);line-height:1.5}
+.kural.kobalt{background:var(--kobalt);color:#fff}
+.kural.kobalt p{color:rgba(255,255,255,.86)}
+.kural.kobalt .nokta{color:var(--limon)}
+.kural-gorsel{min-height:96px;display:flex;align-items:center}
+.gun30{display:grid;grid-template-columns:repeat(10,10px);gap:7px}
+.gun30 i{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--kobalt)}
+.gun30 i.ok{background:var(--kobalt);box-shadow:none}
+.gun30 i.gun-son{box-shadow:inset 0 0 0 1px var(--kobalt),0 0 0 3px rgba(46,75,255,.18)}
+.mazeret{display:flex;flex-direction:column;gap:10px}
+.mazeret>span:first-child{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;min-height:34px;padding:0 14px;border-radius:17px;background:var(--limon);color:var(--murekkep);font-size:14px;font-weight:800}
+.mazeret .sira{display:flex;gap:6px}
+.mazeret .sira i{width:10px;height:10px;border-radius:50%;background:repeating-linear-gradient(45deg,var(--cizgi) 0 2px,transparent 2px 4px);box-shadow:inset 0 0 0 1px var(--cizgi)}
+.donus2{display:flex;align-items:center;gap:14px}
+.donus2 i{width:44px;height:44px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.75)}
+.donus2 i.ok{background:#fff;box-shadow:none}
+.donus2 b{font-size:15px;font-weight:800;color:rgba(255,255,255,.9)}
+@media (max-width:900px){.kurallar{grid-template-columns:1fr}.kural-gorsel{min-height:0}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
   html{scroll-behavior:auto}
@@ -345,10 +429,11 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
 </style>
 </head>
 <body class="ust-gece">
+<div class="perde" id="perde" aria-hidden="true"><div class="perde-logo"><span class="pm"><span>COME</span></span><span class="pm"><span>BACK<i>.</i></span></span></div></div>
 
 <header class="ust" id="ust">
   <div class="ic">
-    <a class="logo" href="#" aria-label="COMEBACK. ana sayfa">COMEBACK<span class="nokta">.</span></a>
+    <a class="logo logo-yigin" href="#" aria-label="COMEBACK. ana sayfa"><span aria-hidden="true">COME</span><span aria-hidden="true">BACK<span class="nokta">.</span></span></a>
     <nav aria-label="Sayfa içi">
       <a href="#ozellikler" data-i="nav1">Özellikler</a>
       <a href="#hocalar" data-i="nav3">Hocalar</a>
@@ -408,6 +493,16 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
       <p data-i="ozp">Programın, kalorin, her setin ve en zor günün. Hepsi bir yerde.</p>
     </div>
     <div class="adlar">
+      <article class="ad-kutu ad-genis ad-odak" aria-labelledby="ad-odak">
+        <div class="ad-yazi"><h3 id="ad-odak" data-i="o_b">Odak ekranı<span class="nokta">.</span></h3><p data-i="o_p">Antrenmanda her hareket tek ekranda. Kilo ve tekrar ortada, geçen seferki hazır gelir; seti bitir, sayaç başlasın.</p>
+          <ul class="odak-liste">
+            <li><i class="nd ok" aria-hidden="true"></i><span data-i="o_1"><b>Noktalar yolu gösterir.</b> Boş halka sıradaki, dolu nokta bitti.</span></li>
+            <li><i class="nd ok" aria-hidden="true"></i><span data-i="o_2"><b>Kiloyu yaz ya da ± ile ayarla.</b> Her makine 2,5 kg gitmez.</span></li>
+            <li><i class="nd" aria-hidden="true"></i><span data-i="o_3"><b>Makine dolu mu?</b> Antrenmanın ortasında hareket değiştir ya da ekle.</span></li>
+          </ul>
+        </div>
+        <div class="tel-sah"><div class="tel"><img src="img/odak.webp?v=1" width="585" height="1266" loading="lazy" decoding="async" alt="COMEBACK. odak ekranı: Bench press, 2. set, 52,5 kg ve 6 tekrar, altta Seti bitir düğmesi" data-i-alt="o_alt"></div></div>
+      </article>
       <article class="ad-kutu ad-genis" aria-labelledby="ad-zil">
         <div class="ad-yazi"><h3 id="ad-zil" data-i="z_b">Zil<span class="nokta">.</span></h3><p data-i="z_p">Seti bitir, dinlenme başlasın. Süre dolunca zil çalar: bir set daha.</p></div>
         <div class="zil" id="zil" aria-live="polite">
@@ -427,8 +522,8 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
         <div class="ad-yazi"><h3 id="ad-donus" data-i="d_b">Geri Dönüş Modu<span class="nokta">.</span></h3><p data-i="d_p">Ara verdin mi, ilk antrenmanlarda yük kendiliğinden düşer. Vücudun sana yetişir.</p></div>
         <div class="donus">
           <b data-i="d_s">23 gün oldu. Önemli değil.</b>
-          <div class="donus-cubuk num"><span data-i="d_once">Son kaldırdığın</span><i style="width:100%"></i><em>60 kg</em></div>
-          <div class="donus-cubuk num simdi"><span data-i="d_simdi">Bugün</span><i style="width:85%"></i><em>51 kg</em></div>
+          <div class="donus-nokta num"><span data-i="d_once">Son kaldırdığın</span><span class="sira" aria-hidden="true"><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i></span><em>60 kg</em></div>
+          <div class="donus-nokta num simdi"><span data-i="d_simdi">Bugün</span><span class="sira" aria-hidden="true"><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i></i><i></i></span><em>51 kg</em></div>
         </div>
       </article>
       <article class="ad-kutu" aria-labelledby="ad-zor">
@@ -443,6 +538,13 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
           <div class="foto-satir"><span data-i="f_y3">Cacık</span><b class="num">70 kcal</b></div>
         </div>
       </article>
+      <article class="ad-kutu ad-genis" aria-labelledby="ad-simge">
+        <div class="ad-yazi"><h3 id="ad-simge" data-i="sg_b">Senin simgen<span class="nokta">.</span></h3><p data-i="sg_p">Telefonunun ana ekranına uyanı seç. Uygulamanın içindeki logo ve açılış da seçtiğin renge bürünür.</p></div>
+        <div class="simge-sah">
+          <div><img class="simge-buyuk" id="simgeBuyuk" src="/comeback/ikon-kobalt-512.png?v=20" width="152" height="152" alt=""><p class="simge-ad" id="simgeAd" aria-live="polite">Kobalt</p></div>
+          <div class="simge-dizi" id="simgeDizi" role="group" aria-label="Uygulama simgeleri"></div>
+        </div>
+      </article>
     </div>
     <ul class="dahasi" aria-label="Diğer özellikler">
       <li><b data-i="x1b">Sana göre program.</b><span data-i="x1p">Hedefin, ortamın, sakatlıkların. Salon, ev ya da park.</span></li>
@@ -452,6 +554,20 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
       <li><b data-i="x5b">Rehber.</b><span data-i="x5p">Her kas grubu: nasıl çalışır, haftada kaç set.</span></li>
       <li><b data-i="x6b">Koç.</b><span data-i="x6p">Yapay zekâ programını yorumlar, sorunu cevaplar.</span></li>
     </ul>
+  </div>
+</section>
+
+<section class="bolum kural-bant" id="kural">
+  <div class="ic">
+    <div class="bolum-bas belir">
+      <h2 data-i="k_b">Burada bırakmak yok<span class="nokta">.</span></h2>
+      <p data-i="k_p">COMEBACK. sözünü tutanlar için. Kural basit; ara vermek serbest, haber vermeden kaybolmak değil.</p>
+    </div>
+    <div class="kurallar">
+      <div class="kural belir"><div class="kural-gorsel"><div class="gun30" aria-hidden="true"><i class="ok"></i><i class="ok"></i><i></i><i class="ok"></i><i class="ok"></i><i></i><i class="ok"></i><i></i><i class="ok"></i><i class="ok"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="gun-son"></i></div></div><h3 data-i="k1b">30 gün<span class="nokta">.</span></h3><p data-i="k1p">30 gün antrenman kaydı olmazsa üyelik askıya alınır. Verilerin silinmez, programın seni bekler.</p></div>
+      <div class="kural belir"><div class="kural-gorsel"><div class="mazeret" aria-hidden="true"><span data-i="k2e">Mazeret · 14 gün</span><span class="sira"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div></div><h3 data-i="k2b">Ara vereceksen söyle<span class="nokta">.</span></h3><p data-i="k2p">Tatil, hastalık, yoğun bir dönem. Yılda 2 kez, en çok 14 gün; o sürede süren işlemez.</p></div>
+      <div class="kural kobalt belir"><div class="kural-gorsel"><div class="donus2" aria-hidden="true"><i class="ok"></i><i></i><b data-i="k3e">7 gün içinde 2</b></div></div><h3 data-i="k3b">Comeback<span class="nokta">.</span></h3><p data-i="k3p">Askıdaysan 7 gün içinde 2 antrenman yap. Koç, topluluk ve her şey geri açılır. Bıraktığın yerden.</p></div>
+    </div>
   </div>
 </section>
 
@@ -588,7 +704,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   var soz = document.getElementById('soz'), sozNot = document.getElementById('sozNot');
   function sozCiz() {
     var G = sozDil === 'en' ? GUNLER_EN : GUNLER_TR;
-    soz.innerHTML = G.map(function (g, i) { return '<button type="button" data-i="' + i + '" aria-pressed="' + (sozSecili.indexOf(i) >= 0) + '">' + g + '<b>' + (sozSecili.indexOf(i) >= 0 ? '●' : '○') + '</b></button>'; }).join('');
+    soz.innerHTML = G.map(function (g, i) { return '<button type="button" data-i="' + i + '" aria-pressed="' + (sozSecili.indexOf(i) >= 0) + '">' + g + '<i aria-hidden="true"></i></button>'; }).join('');
     var n = sozSecili.length;
     sozNot.textContent = sozDil === 'en' ? (n ? 'Plan set: ' + n + ' days this week. The rest is on you.' : 'Tap the days you are coming.') : (n ? 'Plan hazır: bu hafta ' + n + ' gün. Gerisi sende.' : 'Geleceğin günlere dokun.');
   }
@@ -630,6 +746,29 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
     };
     requestAnimationFrame(tik);
   });
+
+  // açılış perdesi: dokununca geçilir, bitince kalkar
+  var perde = document.getElementById('perde');
+  if (perde && document.documentElement.classList.contains('perde-var')) {
+    var perdeBit = function () { if (perde.parentNode) perde.parentNode.removeChild(perde); };
+    perde.addEventListener('click', function () { perde.classList.add('gec'); setTimeout(perdeBit, 240); });
+    setTimeout(perdeBit, 2300);
+  } else if (perde) perde.parentNode.removeChild(perde);
+
+  // senin simgen: uygulamadaki yedi simge
+  var SIMGE = [['kobalt', 'Kobalt', 'ikon-kobalt'], ['gece', 'Gece', 'ikon'], ['krom', 'Krom', 'ikon-krom'], ['gunduz', 'Gündüz', 'ikon-gunduz'], ['beyaz', 'Beyaz', 'ikon-beyaz'], ['limon', 'Limon', 'ikon-limon'], ['tekrar', 'Tekrar', 'ikon-tekrar']];
+  var SIMGE_EN = { kobalt: 'Cobalt', gece: 'Night', krom: 'Chrome', gunduz: 'Day', beyaz: 'White', limon: 'Lime', tekrar: 'Reps' };
+  var simgeDizi = document.getElementById('simgeDizi'), simgeBuyuk = document.getElementById('simgeBuyuk'), simgeAd = document.getElementById('simgeAd'), simgeSec = 'kobalt';
+  function simgeCiz() {
+    simgeDizi.innerHTML = SIMGE.map(function (x) { var ad = sozDil === 'en' ? SIMGE_EN[x[0]] : x[1]; return '<button type="button" data-s="' + x[0] + '" aria-pressed="' + (x[0] === simgeSec) + '"><img src="/comeback/' + x[2] + '-192.png?v=20" width="56" height="56" alt="" loading="lazy">' + ad + '</button>'; }).join('');
+    var y = SIMGE.filter(function (x) { return x[0] === simgeSec; })[0]; simgeAd.textContent = sozDil === 'en' ? SIMGE_EN[y[0]] : y[1];
+  }
+  simgeDizi.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.dataset.s === simgeSec) return; simgeSec = b.dataset.s;
+    var y = SIMGE.filter(function (x) { return x[0] === simgeSec; })[0]; simgeBuyuk.src = '/comeback/' + y[2] + '-512.png?v=20';
+    simgeBuyuk.classList.remove('deg'); void simgeBuyuk.offsetWidth; simgeBuyuk.classList.add('deg'); simgeCiz();
+  });
+  simgeCiz();
 
   // dil: bayraklı seçici
   var BAYRAK = {
@@ -708,7 +847,15 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
     b2_b: 'Hard Day<span class="nokta">.</span>', b2_p: 'No energy? Do the short version. One set still counts.', b2_dk: 'min', b2_h: 'exercises', b2_s: 'sets',
     f_b: 'Calories from a photo<span class="nokta">.</span>', f_p: 'Snap your plate, we write the rest. It knows Turkish food.', f_y1: 'Lentil soup', f_y2: 'Bulgur pilaf', f_y3: 'Cacık',
     x1b: 'A program for you.', x1p: 'Your goal, your space, your injuries. Gym, home or park.', x2b: 'Set by set.', x2p: 'Last time\'s weight and reps are already there.', x3b: 'Progress.', x3p: 'Streak, records, weight and measurements on one screen.', x4b: 'Jam.', x4p: 'Same workout as your friend, same rest.', x5b: 'Guide.', x5p: 'Every muscle group: how it works, how many sets.', x6b: 'Coach.', x6p: 'AI reviews your program and answers your questions.',
-    son_p: 'The reps nobody sees are the ones that change you. Be one of the first.', fk1: 'Explore', fk2: 'Account'
+    son_p: 'The reps nobody sees are the ones that change you. Be one of the first.', fk1: 'Explore', fk2: 'Account',
+    o_b: 'Focus screen<span class="nokta">.</span>', o_p: 'During your workout every exercise gets its own screen. Weight and reps in the middle, last time\'s numbers ready; finish the set and the timer starts.',
+    o_1: '<b>Dots show the way.</b> An empty ring is next, a filled dot is done.', o_2: '<b>Type the weight or nudge it with ±.</b> Not every machine goes up by 2.5 kg.', o_3: '<b>Machine taken?</b> Swap or add an exercise mid-workout.',
+    o_alt: 'COMEBACK. focus screen: Bench press, set 2, 52.5 kg and 6 reps, Finish the set button at the bottom',
+    sg_b: 'Your icon<span class="nokta">.</span>', sg_p: 'Pick the one that fits your home screen. The logo inside the app and the opening take on your colour too.',
+    k_b: 'No quitting here<span class="nokta">.</span>', k_p: 'COMEBACK. is for people who keep their word. The rule is simple: taking a break is fine, disappearing without a word is not.',
+    k1b: '30 days<span class="nokta">.</span>', k1p: 'No workout logged in 30 days and your membership is paused. Your data stays, your program waits for you.',
+    k2e: 'Break · 14 days', k2b: 'Taking a break? Say so<span class="nokta">.</span>', k2p: 'Holiday, illness, a busy stretch. Twice a year, up to 14 days; the clock stops while you are away.',
+    k3e: '2 in 7 days', k3b: 'Comeback<span class="nokta">.</span>', k3p: 'Paused? Train twice within 7 days. Coach, community, everything opens again. Pick up where you left off.'
   };
 
   var TR = {};
@@ -718,7 +865,7 @@ footer{background:#000;color:#E8E6E0;padding:8px 0 calc(28px + env(safe-area-ins
   function uygula(d) {
     var s = d === 'en' ? EN : TR;
     document.querySelectorAll('[data-i]').forEach(function (el) { var k = el.getAttribute('data-i'); if (s[k] != null) el.innerHTML = s[k]; });
-    sozDil = d; sozCiz(); if (!zilCalisiyor && zilSetNo < 5) { zilBtn.textContent = zilMetin[d].btn; }
+    sozDil = d; sozCiz(); simgeCiz(); document.querySelectorAll('[data-i-alt]').forEach(function (im) { var k = im.getAttribute('data-i-alt'); if (!im._tr) im._tr = im.alt; im.alt = d === 'en' && EN[k] ? EN[k] : im._tr; }); if (!zilCalisiyor && zilSetNo < 5) { zilBtn.textContent = zilMetin[d].btn; }
     document.documentElement.lang = d; document.title = BASLIK[d];
     document.querySelector('meta[name=description]').content = ACIK[d];
     document.getElementById('dilBayrak').innerHTML = BAYRAK[d]; document.getElementById('dilKod').textContent = d.toUpperCase();

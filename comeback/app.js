@@ -2416,7 +2416,7 @@
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
       kasHaritasi() +
-      '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Rekorların</span><div class="liste">' + (rekorlar.length ? rekorlar.slice(0, 8).map((h) => '<div><div class="ad"><b>' + esc(D.HAREKET[h].ad) + '</b><span class="ik">' + esc(S.rekor[h].tarih) + '</span></div><b class="num">' + sayi(S.rekor[h].kg, 1) + ' kg × ' + S.rekor[h].tekrar + '</b></div>').join('') : '<div style="display:block;border:0">' + bosEkran('Henüz rekor yok', 'İlk seti kaydet. İlk rekor zaten o.', '<a class="btn ana kucuk" href="#/antrenman">Antrenmana git' + IK.ok + '</a>') + '</div>') + '</div></div>' +
+      (rekorlar.length ? rekorKutu(rekorlar) : '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Rekorların</span><div class="liste"><div style="display:block;border:0">' + bosEkran('Henüz rekor yok', 'İlk seti kaydet. İlk rekor zaten o.', '<a class="btn ana kucuk" href="#/antrenman">Antrenmana git' + IK.ok + '</a>') + '</div></div></div>') +
       antrenmanIzgara() + kartKoleksiyon() +
       rozetKutu() +
       mGrup('Daha fazlası', [mSatir('#/siralama', 'siralama', 'Sıralama', 'Bütün üyeler arasında haftalık ve aylık'), mSatir('#/olcu', 'hedef', 'Ölçüler', (S.olcu || []).length ? 'Bel ' + sayi(S.olcu[S.olcu.length - 1].bel || 0, 1) + ' cm' : 'Bel, göğüs, kol'), mSatir('#/rapor', 'plan', 'Aylık rapor', AY[new Date().getMonth()] + ' özeti')]) +
@@ -3233,14 +3233,46 @@
     return '<div class="t genis rz-kutu"><div class="satir"><span class="k">Rozetler</span><button class="metin-btn kucuk-metin" data-act="rozet-hepsi" aria-expanded="' + rozetHepsi + '">' + var_.length + ' / ' + l.length + (rozetHepsi ? ' · gizle' : ' · tümü') + '</button></div>' +
       (gos.length ? '<div class="rz-serit">' + gos.map((r) => '<div class="rozet rz-mini' + (r.var ? ' var' : '') + '" title="' + esc(r.acik) + '">' + rozetSvg(r.id, r.var) + '<b>' + esc(r.ad) + '</b>' + (rozetHepsi && !r.var ? '<span>' + esc(r.acik) + '</span>' : '') + '</div>').join('') + '</div>' : '<span class="ik">İlk antrenmanını bitirince ilk rozetin gelir.</span>') + '</div>';
   }
+  // noktalı vücut: her harf bir kas bölgesi (yarım satır, ortadan aynalanır); h baş, n boyun, f ön kol, x eklem/el/ayak
+  const VUCUT = {
+    on: ['.......hh', '......hhh', '......hhh', '.......hh', '.......nn', '...ooogg g'.replace(' ', ''), '..ooogggg', '..oo.gggg', '..kk.gggg', '..kk.cccc', '..kk.cccc', '..ff.cccc', '.ff...ccc', '.ff...ccc', '.f...xxxx', '.x...bbb.', '.....bbb.', '.....bbb.', '.....bbb.', '.....bbb.', '......xx.', '......ll.', '......ll.', '......l..', '......xx.'],
+    arka: ['.......hh', '......hhh', '......hhh', '.......hh', '.......nn', '...ooosss', '..ooossss', '..kk.ssss', '..kk.ssss', '..kk.ssss', '..kk.ssss', '..ff.ssss', '.ff...sss', '.ff...sss', '.f...rrrr', '.x...rrr.', '.....ppp.', '.....ppp.', '.....ppp.', '.....ppp.', '......xx.', '......ll.', '......ll.', '......l..', '......xx.']
+  };
+  const VUCUT_KOD = { g: 'Göğüs', s: 'Sırt', o: 'Omuz', k: 'Kol', b: 'Ön bacak', p: 'Arka bacak', r: 'Kalça', l: 'Baldır', c: 'Karın' };
+  const KAS_HEDEF = 10;
+  let kasSec = null; let rekorAcik = false;
+  function vucutSvg(yon, deger) {
+    const A = 11; const hucre = [];
+    VUCUT[yon].forEach((y0, y) => { (y0 + y0.slice(0, 8).split('').reverse().join('')).split('').forEach((c, x) => { if (c !== '.') hucre.push({ x, y, c }); }); });
+    const bolge = {}; hucre.forEach((h) => { (bolge[h.c] = bolge[h.c] || []).push(h); });
+    // bölge, haftalık setin hedefe oranı kadar alttan yukarı dolar
+    Object.keys(bolge).forEach((c) => { const g = VUCUT_KOD[c]; if (!g) return; const l = bolge[c].slice().sort((a, b) => b.y - a.y || Math.abs(a.x - 8) - Math.abs(b.x - 8)); const n = deger[g] || 0; const k = Math.round(Math.min(1, n / KAS_HEDEF) * l.length); l.forEach((h, i) => { h.dolu = i < k; h.var = n > 0; h.g = g; }); });
+    const ci = hucre.map((h) => {
+      const cx = h.x * A + A / 2, cy = h.y * A + A / 2;
+      if (!h.g) return '<circle cx="' + cx + '" cy="' + cy + '" r="1.8" class="vn-n"/>';
+      const sonuk = kasSec && kasSec !== h.g ? ' sonuk' : '';
+      return h.dolu ? '<circle cx="' + cx + '" cy="' + cy + '" r="3.6" class="vn-d' + sonuk + '"/>' : '<circle cx="' + cx + '" cy="' + cy + '" r="3.1" class="vn-b' + (h.var ? ' var' : '') + sonuk + '"/>';
+    }).join('');
+    return '<svg viewBox="0 0 ' + 17 * A + ' ' + 25 * A + '" class="vucut" aria-hidden="true">' + ci + '</svg>';
+  }
   function kasHaritasi() {
-    const v = haftaKasHacmi(); const HEDEF = 10;
-    const l = KAS_GRUBU.map((g) => { const n = Math.max.apply(null, g[1].map((m) => v[m] || 0)); return [g[0], Math.round(n)]; });
-    const top = l.reduce((a, x) => a + x[1], 0);
-    if (!top) return '<div class="t genis kc-kutu"><span class="k">Bu hafta kaslar</span><span class="ik">İlk antrenmanını bitirince her kas grubuna düşen set burada görünür.</span></div>';
-    const ust = Math.max(HEDEF * 1.6, Math.max.apply(null, l.map((x) => x[1])));
-    return '<div class="t genis kc-kutu"><div class="satir"><span class="k">Bu hafta kaslar</span><span class="k num">hedef kas başına ' + HEDEF + '+ set</span></div>' +
-      '<div class="kc-liste" role="list">' + l.map((x) => '<div class="kc-satir" role="listitem"><span class="kc-ad">' + x[0] + '</span><span class="kc-iz" aria-hidden="true"><i style="width:' + Math.min(100, (x[1] / ust) * 100) + '%"' + (x[1] >= HEDEF ? ' class="tam"' : '') + '></i><b style="left:' + (HEDEF / ust) * 100 + '%"></b></span><span class="kc-n num">' + x[1] + '</span></div>').join('') + '</div></div>';
+    const v = haftaKasHacmi(); const deger = {};
+    KAS_GRUBU.forEach((g) => { deger[g[0]] = Math.round(Math.max.apply(null, g[1].map((m) => v[m] || 0))); });
+    const top = Object.keys(deger).reduce((a, k) => a + deger[k], 0);
+    const tam = KAS_GRUBU.filter((g) => deger[g[0]] >= KAS_HEDEF).length;
+    const sec = kasSec ? deger[kasSec] || 0 : 0;
+    return '<div class="t genis kc-kutu"><div class="satir"><span class="k">Bu hafta kaslar</span><span class="k num">' + (top ? tam + ' / ' + KAS_GRUBU.length + ' hedefte' : 'hedef kas başına ' + KAS_HEDEF + '+ set') + '</span></div>' +
+      '<div class="vucut-ikili" role="img" aria-label="' + esc(KAS_GRUBU.map((g) => g[0] + ' ' + deger[g[0]] + ' set').join(', ')) + '"><figure>' + vucutSvg('on', deger) + '<figcaption>Ön</figcaption></figure><figure>' + vucutSvg('arka', deger) + '<figcaption>Arka</figcaption></figure></div>' +
+      '<p class="kc-ozet">' + (kasSec ? '<b>' + kasSec + '</b> · bu hafta <b class="num">' + sec + '</b> set' + (sec >= KAS_HEDEF ? '. Hedefte.' : ', hedefe ' + (KAS_HEDEF - sec) + ' set kaldı.') : top ? 'Dolu nokta hedefe ulaşan kas, halka henüz yolda. Bir kasa dokun, rekorların da ona göre süzülsün.' : 'İlk antrenmanını bitirince kaslar burada dolmaya başlar.') + '</p>' +
+      '<div class="haplar kc-cipler">' + KAS_GRUBU.map((g) => '<button class="hap kc-cip' + (deger[g[0]] >= KAS_HEDEF ? ' tam' : '') + '" data-act="kas-sec" data-g="' + g[0] + '" aria-pressed="' + (kasSec === g[0]) + '">' + g[0] + ' <b class="num">' + deger[g[0]] + '</b></button>').join('') + '</div></div>';
+  }
+  const kasGrubuOf = (id) => { const h = K.HAREKET[id]; const m = h && h.birincil && h.birincil[0]; const g = KAS_GRUBU.find((x) => x[1].indexOf(m) >= 0); return g ? g[0] : null; };
+  function rekorKutu(rekorlar) {
+    const rl = rekorlar.filter((h) => !kasSec || kasGrubuOf(h) === kasSec);
+    const gos = rekorAcik ? rl : rl.slice(0, 3);
+    return '<div class="t genis" style="padding:12px 16px 4px"><div class="satir"><span class="k">Rekorların' + (kasSec ? ' · ' + kasSec : '') + '</span>' + (rl.length ? '<span class="k num">' + rl.length + '</span>' : '') + '</div><div class="liste">' +
+      (gos.length ? gos.map((h) => '<div><div class="ad"><b>' + esc(D.HAREKET[h].ad) + '</b><span class="ik">' + esc(S.rekor[h].tarih) + '</span></div><b class="num">' + sayi(S.rekor[h].kg, 1) + ' kg × ' + S.rekor[h].tekrar + '</b></div>').join('') : '<div><span class="ik">' + (kasSec ? kasSec + ' için henüz rekor yok.' : 'Antrenman yaptıkça en iyi setlerin burada birikir.') + '</span></div>') + '</div>' +
+      (rl.length > 3 ? '<button class="metin-btn kucuk-metin rekor-ac" data-act="rekor-ac" aria-expanded="' + rekorAcik + '">' + (rekorAcik ? 'Daha az göster' : 'Tümünü göster · ' + rl.length) + '</button>' : '') + '</div>';
   }
 
   /* ---------- son 6 ay antrenman ızgarası (gün saymaz, yalnızca görür) ---------- */
@@ -3906,6 +3938,8 @@
     'od-set'(el) { if (!S.seans) return; const l = S.seans.setler[el.dataset.h] || []; const i = +el.dataset.i; const akt = l.findIndex((y) => !y.ok && !y.atla); odSec = i === akt ? null : { k: el.dataset.h, i }; render(); odGirisGec(); },
     'od-set-kapat'() { odSec = null; render(); odGirisGec(); },
     'jam-ac'() { jamAcik = !jamAcik; jamCiz(); },
+    'kas-sec'(el) { kasSec = kasSec === el.dataset.g ? null : el.dataset.g; rekorAcik = false; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'rekor-ac'() { rekorAcik = !rekorAcik; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'od-ekle-ac'() { odEkle = !odEkle; odAra = ''; render(); if (odEkle) { const i = document.getElementById('odAra'); if (i) { i.focus({ preventScroll: true }); i.scrollIntoView({ block: 'center', behavior: azHareket ? 'auto' : 'smooth' }); } } },
     'od-ekle-sec'(el) {
       const s = S.seans; if (!s) return; const hl = seansHareket(s); if (!s.hareketler) s.hareketler = JSON.parse(JSON.stringify(hl));
