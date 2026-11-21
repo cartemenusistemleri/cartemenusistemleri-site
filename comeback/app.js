@@ -1265,7 +1265,7 @@
     return ust('', '<span class="alt">Antrenman bitti</span>') +
       '<h1 class="baslik">Bugün de geldin<span class="nokta">.</span></h1>' +
       '<p class="bitti-soz">' + soz + '</p>' +
-      '<div class="izgara">' +
+      '<div class="izgara">' + bkKutu(b) +
       '<div class="t kobalt h130"><span class="k">' + esc(b.ad) + '</span><span class="orta num">' + b.set + ' set</span><span class="k num">' + sayi(b.hacim) + ' kg · ' + b.dk + ' dk' + (b.rekor ? ' · ' + b.rekor + ' rekor' : '') + '</span></div>' +
       '<div class="t koyu h130"><span class="k">Nasıl geçti?</span><b style="font-size:17px;line-height:1.35">Söyle, programını buna göre ayarlayalım</b><span class="ik" style="color:var(--koyu-ikincil)">30 saniye sürer</span></div>' +
       (b.jam && jamV && jamV.uyeler ? jamTablo(jamV.uyeler) + '<button class="metin-btn genis" data-act="jam-yenile">Sıralamayı yenile</button>' : '') +
@@ -2170,23 +2170,31 @@
     const kalan = Math.max(0, Math.round((dinlenme.bitis - Date.now()) / 1000));
     if (!el) {
       el = document.createElement('div'); el.id = 'dinlenme'; el.className = 'dinlenme'; el.setAttribute('role', 'timer'); el.setAttribute('aria-label', 'Dinlenme sayacı');
-      el.innerHTML = '<span class="sure"></span><div class="cubuk"><span></span></div><button data-act="dinlenme-ek">+30 sn</button><button data-act="dinlenme-atla">Atla</button>';
+      el.innerHTML = '<div class="cubuk"><span></span></div><span class="sure"></span><span class="din-et">dinlen</span><button data-act="dinlenme-ek">+30 sn</button><button data-act="dinlenme-atla">Atla</button>';
       document.body.appendChild(el);
     }
     dinKonum(el);
     el.querySelector('.sure').textContent = Math.floor(kalan / 60) + ':' + String(kalan % 60).padStart(2, '0');
     if (kalan >= 1 && kalan <= 3 && dinlenme.sonBip !== kalan && dinlenme.toplam > 10) { dinlenme.sonBip = kalan; if (sesTur() !== 'yok') { sesHazirla(); bip('sayim'); } if (navigator.vibrate) navigator.vibrate(12); }
     el.querySelector('.cubuk>span').style.width = (100 - yuzde(kalan, dinlenme.toplam)) + '%';
+    el.style.setProperty('--din', Math.max(0, Math.min(1, kalan / (dinlenme.toplam || 1))).toFixed(4));
     if (kalan === 0) {
       dinlenme = null; clearInterval(dinlenmeZaman);
       if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
       sesHazirla(); bip(null, 2);
-      dinlenmeBittiGoster(el);
+      if (el.classList.contains('od-yer')) odDinBitti(el); else dinlenmeBittiGoster(el);
     }
   }
   // dinlenme bitince çubuk "Dinlenme bitti. Bir set daha." kartına dönüşür; dokununca ya da 8 sn sonra kapanır
   let bittiZaman = null;
+  // odakta: düğme yeniden dolar, "Seti bitir" geri gelir; kısa bir an "Bir set daha." yazar
+  function odDinBitti(el) {
+    el.remove(); const b = document.querySelector('.od-alt .ap-bitir'); if (!b) return;
+    const eski = b.innerHTML; b.classList.add('din-bitti'); b.innerHTML = 'Dinlenme bitti. Bir set daha.';
+    setTimeout(() => { if (b.isConnected) { b.innerHTML = eski; b.classList.remove('din-bitti'); } }, 2200);
+  }
   function dinlenmeBittiGoster(el) {
+    ['top', 'left', 'width', 'height'].forEach((k) => { el.style[k] = ''; });
     el.className = 'dinlenme bitti'; el.setAttribute('role', 'status'); el.setAttribute('aria-label', 'Dinlenme bitti');
     el.innerHTML = '<span class="yigin"><b>Dinlenme bitti.</b><span>Bir set daha.</span></span><button data-act="dinlenme-kapat">Tamam</button>';
     clearTimeout(bittiZaman);
@@ -2296,7 +2304,7 @@
       '<div class="foto-secim"><label class="btn ana kucuk">' + 'Fotoğraf çek<input type="file" accept="image/*" capture="environment" data-in="foto" class="gizli-dosya" aria-label="Kamerayla fotoğraf çek"></label>' +
       '<label class="btn cerceve kucuk">Galeriden yükle<input type="file" accept="image/*" data-in="foto" class="gizli-dosya" aria-label="Galeriden fotoğraf seç"></label></div>' +
       '<p class="ik" style="margin:-4px 0 0">Tabak ya da paket: paketli üründe besin değeri tablosu ya da ürünün ön yüzü görünsün. Daha önce çektiğin fotoğrafı da yükleyebilirsin.</p>' +
-      '<label class="t alan foto-not"><span>Ne yiyorsun? · isteğe bağlı</span><input id="fotoNot" data-in="foto-not" maxlength="300" value="' + esc(fotoNot) + '" placeholder="Ör. tavuk sote ve pilav, yarısını yedim" autocomplete="off" style="font-size:17px"></label>' +
+      (fotoSonuc && fotoSonuc.kalemler ? '' : '<label class="t alan foto-not"><span>Ne yiyorsun? · isteğe bağlı</span><input id="fotoNot" data-in="foto-not" maxlength="300" value="' + esc(fotoNot) + '" placeholder="Ör. tavuk sote ve pilav, yarısını yedim" autocomplete="off" style="font-size:17px"></label>') +
       (fotoSonuc && fotoSonuc.resim && !fotoSonuc.kalemler && !/inceleniyor/.test(fotoSonuc.durum) ? '<button class="btn cerceve" data-act="foto-tekrar">Notla birlikte tekrar dene</button>' : '') +
       (fotoSonuc && fotoSonuc.kalemler ? fotoKalemler() : '<p class="not">Yapay zekâ tabağındaki yemekleri ve gramajları tahmin eder; sen düzeltip kaydedersin. Ne yediğini kısaca yazarsan tahmin çok daha isabetli olur.</p>');
   }
@@ -2348,9 +2356,15 @@
     const t = fotoSonuc.kalemler.reduce((a, x) => a + x.k, 0);
     return '<div class="izgara"><div class="t h130"><span class="k">Bu tabak</span><span class="buyuk num">' + sayi(t) + '</span><span class="k">kcal · tahmini</span></div>' +
       '<div class="t h130 num"><div class="satir"><span>Protein</span><b style="color:var(--kobalt)">' + sayi(fotoSonuc.kalemler.reduce((a, x) => a + x.p, 0)) + ' g</b></div><div class="satir"><span>Karb.</span><b>' + sayi(fotoSonuc.kalemler.reduce((a, x) => a + x.kh, 0)) + ' g</b></div><div class="satir"><span>Yağ</span><b>' + sayi(fotoSonuc.kalemler.reduce((a, x) => a + x.y, 0)) + ' g</b></div></div></div>' +
-      '<div class="t" style="padding:4px 16px"><div class="liste">' + fotoSonuc.kalemler.map((x, i) => '<div><div class="ad"><b>' + esc(x.ad) + '</b><span class="ik num">' + sayi(x.k) + ' kcal' + (x.veri ? ' · veriyle doğrulandı' : '') + (x.emin === 'dusuk' ? ' · emin değil, kontrol et' : '') + '</span><button class="metin-btn kucuk-metin" data-act="foto-sil-kalem" data-i="' + i + '" style="color:var(--ikincil);align-self:flex-start;padding:0">Bu yok, çıkar</button></div><button class="yuvarlak" data-act="foto-g" data-i="' + i + '" data-yon="-1" aria-label="' + esc(x.ad) + ' porsiyonunu azalt">−</button><span class="num" style="min-width:52px;text-align:center;font-weight:800">' + sayi(x.g) + ' g</span><button class="yuvarlak" data-act="foto-g" data-i="' + i + '" data-yon="1" aria-label="' + esc(x.ad) + ' porsiyonunu artır">+</button></div>').join('') + '</div></div>' +
+      '<div class="t fk-liste">' + fotoSonuc.kalemler.map((x, i) => '<div class="fk' + (x.emin === 'dusuk' ? ' supheli' : '') + '">' +
+        '<div class="fk-ust"><b class="fk-ad">' + esc(x.ad) + '</b><button class="fk-sil" data-act="foto-sil-kalem" data-i="' + i + '" aria-label="' + esc(x.ad) + ' tabakta yok, çıkar">' + IK.kapat + '</button></div>' +
+        '<div class="fk-alt"><span class="ik num">' + sayi(x.k) + ' kcal · ' + sayi(x.p) + ' g protein' + (x.veri ? ' · veriyle doğrulandı' : '') + '</span>' +
+        '<span class="fk-adim"><button class="yuvarlak" data-act="foto-g" data-i="' + i + '" data-yon="-1" aria-label="' + esc(x.ad) + ' porsiyonunu azalt">−</button><span class="num">' + sayi(x.g) + ' g</span><button class="yuvarlak" data-act="foto-g" data-i="' + i + '" data-yon="1" aria-label="' + esc(x.ad) + ' porsiyonunu artır">+</button></span></div>' +
+        (x.emin === 'dusuk' ? '<div class="fk-soru"><span><b>Emin değilim.</b> ' + esc(x.soru || 'Bu ne, anlatır mısın?') + '</span><button class="metin-btn kucuk-metin" data-act="foto-anlat" data-i="' + i + '">Anlat</button></div>' : '') +
+        '</div>').join('') + '</div>' +
+      '<label class="t alan fk-anlat' + (fotoSonuc.kalemler.some((x) => x.emin === 'dusuk') ? ' vurgu' : '') + '"><span>' + (fotoSonuc.kalemler.some((x) => x.emin === 'dusuk') ? 'Emin olamadıklarım var. Ne yediğini anlat, yeniden hesaplayayım.' : 'Yanlış mı? Yapay zekâya ne yediğini anlat.') + '</span><textarea id="fotoNot" data-in="foto-not" maxlength="300" rows="2" placeholder="Ör. köfte değil sucuk, pilav yarım porsiyon" autocomplete="off">' + esc(fotoNot) + '</textarea></label>' +
       aiOy('foto', 'f' + kisaKimlik(fotoSonuc.kalemler.map((x) => x.ad + x.g).join('|')), fotoSonuc.kalemler.map((x) => x.ad + ' ' + x.g + ' g').join(', ')) +
-      '<button class="btn cerceve" data-act="foto-tekrar">Yanlış mı? Notu düzelt, yeniden hesapla</button>' +
+      '<button class="btn cerceve" data-act="foto-tekrar">Anlattığıma göre yeniden hesapla</button>' +
       '<button class="btn ana buyuk-btn" data-act="foto-kaydet">Öğüne kaydet<span class="num" style="font-weight:600;color:var(--kobalt-yumusak)">' + sayi(S.hedef.kcal - toplam(gun().ogun).k - t) + ' kcal kalır</span></button>';
   }
 
@@ -2662,6 +2676,95 @@
     yaz('Make the', 90, 1640, 44, 700, '#B9B6AE', -1);
     const wC = yaz('COMEBACK', 86, 1760, 120, 900, '#F3F1EC', -6); yaz('.', 86 + wC + 2, 1760, 120, 900, '#4A63FF', 0);
     yaz('comeback.com.tr', 90, 1840, 30, 700, '#5A5960', 1);
+    return c;
+  }
+
+
+  /* ---------- antrenman sonu kartı: 4 tema, 1080×1920 ---------- */
+  const BK_TEMA = [['rakam', 'Rakam'], ['nokta', 'Noktalar'], ['rekor', 'Rekor'], ['hafta', 'Hafta']];
+  const bkTema = () => { const t = (S.ayar || {}).kartTema; return BK_TEMA.some((x) => x[0] === t) ? t : 'nokta'; };
+  let bkOn = { anahtar: '', url: '' };
+  function bkKutu(b) {
+    const t = bkTema(); setTimeout(bkOnizle, 0);
+    return '<div class="t genis bk-kutu"><div class="satir"><span class="k">Antrenman kartın</span><span class="ik">istediğin temayı seç</span></div>' +
+      '<div class="haplar bk-tema" role="radiogroup" aria-label="Kart teması">' + BK_TEMA.map((x) => '<button class="hap" role="radio" data-act="bk-tema" data-t="' + x[0] + '" aria-checked="' + (x[0] === t) + '" aria-pressed="' + (x[0] === t) + '">' + x[1] + '</button>').join('') + '</div>' +
+      '<div class="bk-onizle"><img id="bkImg" alt="Antrenman kartı önizlemesi: ' + esc(b.ad) + ', ' + b.set + ' set"' + (bkOn.anahtar === t + b.tarih + b.set ? ' src="' + bkOn.url + '"' : '') + '></div>' +
+      '<button class="btn ana" data-act="bk-paylas">Hikâyede paylaş' + IK.ok + '</button></div>';
+  }
+  function bkOnizle() {
+    const im = document.getElementById('bkImg'); const b = S.sonSeans; if (!im || !b) return; const t = bkTema(); const an = t + b.tarih + b.set;
+    if (bkOn.anahtar === an) { if (im.getAttribute('src') !== bkOn.url) im.src = bkOn.url; return; }
+    try { const c = bitisKarti(b, t); bkOn = { anahtar: an, url: c.toDataURL('image/jpeg', 0.86) }; im.src = bkOn.url; } catch (e) { /* çizilemedi */ }
+  }
+  function bitisKarti(b, tema) {
+    const W = 1080, H = 1920; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    const F = getComputedStyle(document.body).fontFamily; const P = 84;
+    const yaz = (t, X, Y, boyut, kal, renk, ls, hiza) => { x.fillStyle = renk; x.font = kal + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; x.textAlign = hiza || 'left'; x.fillText(t, X, Y); return x.measureText(t).width; };
+    const sigdir = (t, boyut, kal, gen, ls) => { let b2 = boyut; x.font = kal + ' ' + b2 + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; while (b2 > 30 && x.measureText(t).width > gen) { b2 -= 4; x.font = kal + ' ' + b2 + 'px ' + F; } return b2; };
+    const kisalt = (t, boyut, kal, gen) => { x.font = kal + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = '0px'; if (x.measureText(t).width <= gen) return t; let s2 = t; while (s2.length > 3 && x.measureText(s2 + '…').width > gen) s2 = s2.slice(0, -1); return s2.trim() + '…'; };
+    const logo = (X, Y, yazi, nokta) => { yaz('COME', X, Y, 54, 900, yazi, -2); const w = yaz('BACK', X, Y + 46, 54, 900, yazi, -2); yaz('.', X + w + 2, Y + 46, 54, 900, nokta, 0); };
+    const nokta = (cx, cy, r, dolu, renk, cizgi) => { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); if (dolu) { x.fillStyle = renk; x.fill(); } else { x.lineWidth = cizgi || 3; x.strokeStyle = renk; x.stroke(); } };
+    const tarih = (() => { const d = new Date(b.tarih); return isNaN(d) ? '' : d.getDate() + ' ' + AY[d.getMonth()]; })();
+    const kg = sayi(b.hacim); const hk = b.hk || [];
+    if (tema === 'rakam') {
+      x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+      logo(P, P + 46, '#F3F1EC', '#4A63FF'); yaz(tarih, W - P, P + 40, 39, 700, '#A3A098', 0, 'right');
+      yaz(b.ad, P, 720, sigdir(b.ad, 48, 700, W - 2 * P), 700, '#A3A098');
+      const wn = yaz(String(b.set), P - 10, 1150, 450, 900, '#F3F1EC', -28);
+      yaz('set', P + wn + 24, 1150, 84, 900, '#F3F1EC', -2); yaz('.', P + wn + 24 + x.measureText('set').width + 6, 1150, 84, 900, '#4A63FF', 0);
+      x.fillStyle = '#2C2C33'; x.fillRect(P, 1380, W - 2 * P, 3);
+      [[String(b.dk), 'dakika'], [String(hk.length || '—'), 'hareket'], [kg, 'kg kaldırdın']].forEach((k, i) => { const X = P + i * 304; yaz(k[0], X, 1500, 78, 900, '#F3F1EC', -3); yaz(k[1], X, 1556, 36, 700, '#A3A098'); });
+      yaz('Bugün de geldin. Kimse görmese de', P, 1740, 44, 500, '#B9B6AE'); yaz('bu setler sayıldı.', P, 1800, 44, 500, '#B9B6AE');
+      return c;
+    }
+    if (tema === 'nokta') {
+      x.fillStyle = '#2E4BFF'; x.fillRect(0, 0, W, H);
+      yaz(tarih + ' · ' + b.dk + ' dk', P, P + 40, 39, 700, '#DCE2FF'); logo(W - P - 290, P + 46, '#FFFFFF', '#D9F05A');
+      const bs = sigdir(b.ad + '.', 120, 900, W - 2 * P, -6); const wa = yaz(b.ad, P, 390, bs, 900, '#FFFFFF', -6); yaz('.', P + wa + 4, 390, bs, 900, '#D9F05A', 0);
+      const l = hk.slice(0, 8); const satir = 132; const top = Math.max(520, 520 + (8 - l.length) * satir / 2);
+      l.forEach((h, i) => {
+        const Y = top + i * satir; const dn = Math.min(h.top || h.ok, 6);
+        yaz(kisalt(h.ad, 46, 800, 420), P, Y + 58, 46, 800, '#FFFFFF');
+        for (let j = 0; j < dn; j++) nokta(560 + j * 44, Y + 42, 15, j < h.ok, '#FFFFFF', 3);
+        yaz(h.kg ? sayi(h.kg, 1) + ' × ' + h.tk : h.tk + ' tekrar', W - P, Y + 58, 40, 800, '#FFFFFF', 0, 'right');
+        if (i < l.length - 1) { x.fillStyle = 'rgba(255,255,255,.16)'; x.fillRect(P, Y + satir - 18, W - 2 * P, 2); }
+      });
+      yaz(b.set + ' set · ' + kg + ' kg', P, H - P - 10, 46, 800, '#FFFFFF');
+      return c;
+    }
+    if (tema === 'rekor') {
+      x.fillStyle = '#D9F05A'; x.fillRect(0, 0, W, H);
+      logo(P, P + 46, '#16161A', '#2E4BFF'); yaz(tarih, W - P, P + 40, 39, 700, '#3D4410', 0, 'right');
+      const r = (b.rk || [])[0]; const en = hk.reduce((a, h) => (e1rm(h.kg, h.tk) > e1rm(a.kg, a.tk) ? h : a), { kg: 0, tk: 0, ad: '' });
+      const v = r ? { ad: r.ad, kg: r.kg, tk: r.tk } : en;
+      const bas = r ? 'Yeni rekor' : 'Günün en iyi seti'; const bb = sigdir(bas + '.', 138, 900, W - 2 * P, -7);
+      const wb = yaz(bas, P, 760, bb, 900, '#16161A', -7); yaz('.', P + wb + 4, 760, bb, 900, '#2E4BFF', 0);
+      yaz(kisalt(v.ad || b.ad, 56, 800, W - 2 * P), P, 880, 56, 800, '#16161A');
+      if (v.kg) { const wk = yaz(sayi(v.kg, 1), P - 8, 1180, 290, 900, '#16161A', -18); yaz('kg × ' + v.tk, P + wk + 20, 1180, 90, 900, '#16161A', -2); }
+      else yaz(v.tk + ' tekrar', P, 1180, 200, 900, '#16161A', -10);
+      if (r && r.once) { const fark = Math.round((r.kg - r.once) * 100) / 100; if (fark > 0) { const ty = '+' + sayi(fark, 2) + ' kg önceki rekordan'; x.font = '800 42px ' + F; const tw = x.measureText(ty).width; x.fillStyle = '#16161A'; x.beginPath(); x.roundRect(P, 1250, tw + 64, 84, 42); x.fill(); yaz(ty, P + 32, 1306, 42, 800, '#D9F05A'); } }
+      x.fillStyle = 'rgba(22,22,26,.2)'; x.fillRect(P, 1640, W - 2 * P, 3);
+      yaz(kisalt(b.ad, 42, 800, 520), P, 1720, 42, 800, '#16161A'); yaz(b.set + ' set · ' + b.dk + ' dk', W - P, 1720, 42, 800, '#16161A', 0, 'right');
+      yaz(r ? 'Bunu sen yaptın.' : 'Bir set daha.', P, 1810, 46, 600, '#3D4410');
+      return c;
+    }
+    // hafta
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, W, H);
+    logo(P, P + 46, '#16161A', '#2E4BFF'); yaz(tarih, W - P, P + 40, 39, 700, '#5F5D57', 0, 'right');
+    const hb = haftaBasi(); const hbk = tarihKey(hb); const bu = tarihKey();
+    const n = Object.keys(S.gunluk).filter((k) => k >= hbk && S.gunluk[k].antrenman).length || 1;
+    yaz('Bu hafta', P, 640, 132, 900, '#16161A', -7); const w2 = yaz(n + '. antrenman', P, 780, 120, 900, '#16161A', -6); yaz('.', P + w2 + 4, 780, 120, 900, '#2E4BFF', 0);
+    let plan = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(hb); d.setDate(d.getDate() + i); const k = tarihKey(d); const v = !!(S.gunluk[k] && S.gunluk[k].antrenman); let pl = false; try { pl = !!gunIcin(d); } catch (e) { /* yok */ } if (pl || v) plan++;
+      const cx = P + 33 + i * ((W - 2 * P - 66) / 6), cy = 990;
+      if (k === bu) { nokta(cx, cy, 46, true, '#E6EAFF'); }
+      if (v) nokta(cx, cy, 33, true, '#2E4BFF'); else nokta(cx, cy, 32, false, pl && k > bu ? '#2E4BFF' : '#DEDDD7', 3);
+      yaz(GUN_KISA[i], cx, cy + 96, 36, 700, k === bu ? '#16161A' : '#5F5D57', 0, 'center');
+    }
+    yaz('Plan ' + plan + ' gün. ' + b.ad + ' tamam.', P, 1230, 44, 500, '#5F5D57');
+    x.fillStyle = '#ECECE8'; x.beginPath(); x.roundRect(P, 1500, W - 2 * P, 300, 60); x.fill();
+    [[String(b.set), 'set'], [String(b.dk), 'dakika'], [kg, 'kg']].forEach((k, i) => { const X = P + 48 + i * 300; yaz(k[0], X, 1650, 72, 900, '#16161A', -3); yaz(k[1], X, 1710, 36, 700, '#5F5D57'); });
     return c;
   }
 
@@ -3547,7 +3650,7 @@
     },
     bitir() {
       const s = S.seans; const g = S.program.gunler.find((x) => x.id === s.gunId) || { ad: s.ad || 'Ortak antrenman', hareketler: seansHareket(s) };
-      let set = 0, hacim = 0, yeni = 0;
+      let set = 0, hacim = 0, yeni = 0; const hk = []; const rk = {};
       const tarih = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
       const gecerli = new Set(seansAnahtar({ hareketler: seansHareket(s) }));
       Object.keys(s.setler).forEach((h) => {
@@ -3565,11 +3668,13 @@
           const en = calisan.reduce((a, x) => (x.kg > a.kg || (x.kg === a.kg && x.tekrar > a.tekrar) ? x : a), { kg: 0, tekrar: 0 });
           l0.push({ t: s.tarih, kg: en.kg, tk: en.tekrar, s: calisan.length, e1: en.kg && en.tekrar ? Math.round(en.kg * (1 + Math.min(en.tekrar, 12) / 30) * 10) / 10 : 0 });
           S.hgec[gid] = l0.slice(-40); }
+        { const en2 = calisan.reduce((a, x) => (x.kg > a.kg || (x.kg === a.kg && x.tekrar > a.tekrar) ? x : a), { kg: 0, tekrar: 0 }); const hd = D.HAREKET[hid ? hid.id : kh0];
+          if (calisan.length) hk.push({ ad: hd ? hd.ad : h, top: s.setler[h].filter((z) => z.tur !== 'isinma').length, ok: calisan.length, kg: en2.kg, tk: en2.tekrar }); }
         const kh = hid ? hid.id : kh0; if (!D.HAREKET[kh] || D.HAREKET[kh].tip === 's') return;
         calisan.forEach((x) => {
           if (!x.kg || !x.tekrar) return;
           const r = S.rekor[kh];
-          if (!r || e1rm(x.kg, x.tekrar) > e1rm(r.kg, r.tekrar) + 0.01) { if (r && r.tarih !== tarih) yeni++; S.rekor[kh] = { kg: x.kg, tekrar: x.tekrar, tarih }; }
+          if (!r || e1rm(x.kg, x.tekrar) > e1rm(r.kg, r.tekrar) + 0.01) { if (r && r.tarih !== tarih) { yeni++; rk[kh] = { ad: D.HAREKET[kh].ad, once: r.kg }; } S.rekor[kh] = { kg: x.kg, tekrar: x.tekrar, tarih }; if (rk[kh]) { rk[kh].kg = x.kg; rk[kh].tk = x.tekrar; } }
           S.ilk = S.ilk || {}; if (!S.ilk[kh] || (S.ilk[kh].tarih === s.tarih && e1rm(x.kg, x.tekrar) > e1rm(S.ilk[kh].kg, S.ilk[kh].tekrar))) S.ilk[kh] = { kg: x.kg, tekrar: x.tekrar, tarih: s.tarih };
         });
       });
@@ -3578,7 +3683,7 @@
       seansHareket(s).forEach((x, xi) => { if (!(s.setler[ksB[xi]] || []).some(setSayilir)) return; ((K.HAREKET[x.id] || {}).birincil || []).forEach((m) => { const gr = KAS_GRUP[m]; if (gr && kaslar.indexOf(gr) < 0) kaslar.push(gr); }); });
       const dkB = Math.max(1, Math.round((Date.now() - s.baslangic) / 60000));
       gun(s.tarih).antrenman = Object.assign({ ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, kaslar }, s.kisa ? { kisa: true } : {});
-      S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus, kisa: !!s.kisa }; fbTaslak = null;
+      S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus, kisa: !!s.kisa, hk: hk.slice(0, 8), rk: Object.keys(rk).map((k) => rk[k]).slice(0, 3) }; fbTaslak = null;
       if (S.jam) S.jamRekor = yeni;
       if (s.donus) S.donusYapildi = true;
       const yeniR = yeniRozetler();
@@ -3668,6 +3773,11 @@
       x.g = yeni; x.k *= o; x.p *= o; x.kh *= o; x.y *= o; render();
     },
     'foto-sil-kalem'(el) { fotoSonuc.kalemler.splice(+el.dataset.i, 1); if (!fotoSonuc.kalemler.length) fotoSonuc.kalemler = null; render(); },
+    'foto-anlat'(el) {
+      const x = fotoSonuc && fotoSonuc.kalemler && fotoSonuc.kalemler[+el.dataset.i]; const n = document.getElementById('fotoNot'); if (!x || !n) return;
+      const on = x.ad + ': '; if (n.value.indexOf(on) < 0) n.value = (n.value.trim() ? n.value.trim() + ', ' : '') + on; fotoNot = n.value;
+      n.scrollIntoView({ block: 'center', behavior: azHareket ? 'auto' : 'smooth' }); n.focus({ preventScroll: true }); try { n.setSelectionRange(n.value.length, n.value.length); } catch (e) { /* yok */ }
+    },
     'foto-tekrar'() { if (!fotoSonuc || !fotoSonuc.resim) return; const n = document.getElementById('fotoNot'); if (n) fotoNot = n.value; if (!fotoNot.trim()) { toast('Önce ne yediğini kısaca yaz.'); if (n) n.focus(); return; } fotoAnaliz(null, fotoSonuc.resim); },
     'foto-kaydet'() {
       const tur = ogunTuru();
@@ -3938,6 +4048,8 @@
     'od-set'(el) { if (!S.seans) return; const l = S.seans.setler[el.dataset.h] || []; const i = +el.dataset.i; const akt = l.findIndex((y) => !y.ok && !y.atla); odSec = i === akt ? null : { k: el.dataset.h, i }; render(); odGirisGec(); },
     'od-set-kapat'() { odSec = null; render(); odGirisGec(); },
     'jam-ac'() { jamAcik = !jamAcik; jamCiz(); },
+    'bk-tema'(el) { S.ayar = S.ayar || {}; S.ayar.kartTema = el.dataset.t; kaydet(); document.querySelectorAll('[data-act="bk-tema"]').forEach((b) => { const s2 = b.dataset.t === el.dataset.t; b.setAttribute('aria-checked', String(s2)); b.setAttribute('aria-pressed', String(s2)); }); bkOnizle(); const im = document.getElementById('bkImg'); if (im && im.animate && !azHareket) im.animate([{ opacity: 0.4, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' }); },
+    async 'bk-paylas'() { if (!S.sonSeans) return; try { await gorselPaylas(bitisKarti(S.sonSeans, bkTema()), 'comeback-antrenman.png', 'COMEBACK. antrenmanım'); } catch (e) { toast('Görsel hazırlanamadı.'); } },
     'kas-sec'(el) { kasSec = kasSec === el.dataset.g ? null : el.dataset.g; rekorAcik = false; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'rekor-ac'() { rekorAcik = !rekorAcik; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'od-ekle-ac'() { odEkle = !odEkle; odAra = ''; render(); if (odEkle) { const i = document.getElementById('odAra'); if (i) { i.focus({ preventScroll: true }); i.scrollIntoView({ block: 'center', behavior: azHareket ? 'auto' : 'smooth' }); } } },
@@ -4665,7 +4777,7 @@
       const j = await r.json().catch(() => ({}));
       if (!r.ok) { fotoSonuc.durum = j.hata || 'Analiz şu an yapılamıyor.'; render(); return; }
       if (!j.kalemler || !j.kalemler.length) { fotoSonuc.durum = 'Tabakta yemek bulamadık. Daha yakından çekmeyi dene.'; render(); return; }
-      fotoSonuc.kalemler = j.kalemler.map((x) => veriyeBagla({ emin: x.emin || 'orta', ad: String(x.ad || 'Yemek').slice(0, 50), en: String(x.en || ''), pisirme: x.pisirme || '', g: Math.max(1, +x.g || 100), k: Math.max(0, +x.k || 0), p: Math.max(0, +x.p || 0), kh: Math.max(0, +x.kh || 0), y: Math.max(0, +x.y || 0) }));
+      fotoSonuc.kalemler = j.kalemler.map((x) => veriyeBagla({ emin: x.emin || 'orta', soru: String(x.soru || '').slice(0, 90), ad: String(x.ad || 'Yemek').slice(0, 50), en: String(x.en || ''), pisirme: x.pisirme || '', g: Math.max(1, +x.g || 100), k: Math.max(0, +x.k || 0), p: Math.max(0, +x.p || 0), kh: Math.max(0, +x.kh || 0), y: Math.max(0, +x.y || 0) }));
       fotoSonuc.durum = fotoSonuc.kalemler.length + ' yemek bulundu';
       render();
     } catch (e) { fotoSonuc.durum = 'Bağlantı kurulamadı.'; render(); }

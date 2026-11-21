@@ -22,7 +22,8 @@ const ISTEM = [
   'PAKETLİ ÜRÜN: Fotoğrafta paketli bir ürün varsa (bisküvi, yoğurt, protein bar, içecek…) önce besin değeri tablosunu ara. Tablo görünüyorsa değerleri birebir oku (100 g ya da porsiyon başına yazanı, porsiyona göre çevir), emin: yuksek. Tablo yoksa marka ve ürün adını oku, o ürünün bilinen değerlerini kullan; adı ürünün tam adı olsun (ör. "Ülker Çikolatalı Gofret"). Paket boyutunu (g/ml) yazıdan oku, kullanıcı aksini yazmadıysa bir paket yediğini varsay.',
   'Kullanıcı bir not yazdıysa (ne yediği, miktar, "yarısını yedim" gibi) onu fotoğraftan üstün tut.',
   'Yalnızca şu biçimde geçerli JSON döndür, başka hiçbir şey yazma, ilk karakter { olsun:',
-  '{"kalemler":[{"ad":"Türkçe kısa ad","en":"English name","pisirme":"izgara|haslama|firin|kizartma|sote|cig|diger","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"emin":"yuksek|orta|dusuk"}]}',
+  '{"kalemler":[{"ad":"Türkçe kısa ad","en":"English name","pisirme":"izgara|haslama|firin|kizartma|sote|cig|diger","g":gram,"k":kcal,"p":protein_g,"kh":karbonhidrat_g,"y":yag_g,"emin":"yuksek|orta|dusuk","soru":"emin dusuk ise kullanıcıya tek kısa soru, yoksa boş"}]}',
+  'Bir kalemden emin değilsen (emin: dusuk) "soru" alanına kullanıcıya sorulacak tek, kısa, somut bir soru yaz (en çok 80 karakter, sen diye; ör. "Bu köfte mi, kızarmış patates mi?", "Sosun içinde ne var?"). Emin olduğun kalemlerde soru boş kalsın.',
   'Tabakta görünen her ayrı yiyeceği ayrı kalem yap, en fazla 8 kalem. Fotoğrafta yiyecek yoksa {"kalemler":[]} döndür.'
 ].join('\n');
 
@@ -124,6 +125,7 @@ async function isle(ctx) {
       g: sayi(x.g, 2000) || 100, k: sayi(x.k, 4000), p: sayi(x.p, 300), kh: sayi(x.kh, 500), y: sayi(x.y, 300),
       emin: ['yuksek', 'orta', 'dusuk'].indexOf(x.emin) >= 0 ? x.emin : 'orta'
     };
+    if (o.emin === 'dusuk') o.soru = String(x && x.soru || '').replace(/[<>]/g, '').slice(0, 90);
     // kalori makrolarla tutarsızsa (Atwater: 4·p + 4·kh + 9·y) makrolardan yeniden hesapla
     const hes = 4 * o.p + 4 * o.kh + 9 * o.y;
     if (hes > 0 && Math.abs(hes - o.k) / Math.max(hes, o.k) > 0.25) o.k = Math.round(hes);

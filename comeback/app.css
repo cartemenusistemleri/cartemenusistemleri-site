@@ -1742,3 +1742,57 @@ body.odak-tam .dinlenme.od-yer{min-height:0;padding:0 6px 0 20px;border-radius:3
 body.gece .vucut .vn-n{fill:#2a2a30}
 body.gece .vucut .vn-b{stroke:#3a3a42}
 body.gece .vucut .vn-b.var{stroke:var(--kobalt)}
+
+/* ---------- dinlenme: Seti bitir düğmesi boşalır (B) ---------- */
+.din-et{display:none}
+.dinlenme.od-yer{background:var(--kobalt);color:#fff;box-shadow:none;padding:0 6px 0 22px;gap:8px;overflow:hidden;isolation:isolate}
+.dinlenme.od-yer .cubuk{position:absolute;inset:0;z-index:-1;height:auto;border-radius:inherit;background:transparent;flex:none}
+.dinlenme.od-yer .cubuk>span{position:absolute;top:0;bottom:0;right:0;left:auto;border-radius:0;background:color-mix(in srgb,#000 52%,var(--kobalt))}
+.dinlenme.od-yer .sure{font-size:20px;min-width:0;letter-spacing:-.02em}
+.dinlenme.od-yer .din-et{display:inline;flex:1;font-size:15px;font-weight:700;color:rgba(255,255,255,.82)}
+.dinlenme.od-yer button{min-height:40px;border-radius:20px;padding:0 13px;font-size:13px;background:rgba(255,255,255,.16);color:#fff}
+body.gece .dinlenme.od-yer{background:var(--kobalt);box-shadow:none}
+body.gece .dinlenme.od-yer button{background:rgba(255,255,255,.16)}
+.ap-bitir.din-bitti{animation:dinDol .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes dinDol{from{transform:scale(.96);filter:brightness(1.25)}}
+/* yazılar bir tık küçük */
+.od-adim-in{font-size:clamp(34px,10vw,44px)}
+.od-adim-in.uzun{font-size:clamp(28px,8.5vw,36px)}
+.od-giris-no{font-size:20px}
+@media (max-height:700px){.od-adim-in{font-size:34px}.od-adim-in.uzun{font-size:28px}}
+@property --din{syntax:'<number>';inherits:false;initial-value:1}
+.dinlenme.od-yer,body.gece .dinlenme.od-yer{background:linear-gradient(90deg,var(--kobalt) calc(var(--din) * 100%),color-mix(in srgb,#000 55%,var(--kobalt)) calc(var(--din) * 100%));transition:--din 1s linear}
+.dinlenme.od-yer .cubuk{display:none}
+body.odak-tam .dinlenme.od-yer .sure{font-size:21px;min-width:0}
+/* uzun adlar kesilmesin: listelerde iki satıra kadar, fotoğraf sonucunda tamamı */
+.liste .ad b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25;text-wrap:pretty}
+.liste>*{padding-top:6px;padding-bottom:6px}
+.foto-liste .ad b{display:block;-webkit-line-clamp:unset;overflow:visible}
+.foto-liste>div{align-items:center}
+
+/* ---------- fotoğrafla kalori: ad tam görünür, emin olunamayanda soru ---------- */
+.fk-liste{padding:4px 16px;gap:0}
+.fk{position:relative;display:flex;flex-direction:column;gap:8px;padding:14px 0}
+.fk+.fk::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:var(--cizgi)}
+.fk-ust{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.fk-ad{font-size:16px;font-weight:800;line-height:1.3;white-space:normal;overflow-wrap:anywhere;text-wrap:pretty;min-width:0}
+.fk-sil{flex:none;width:32px;height:32px;margin:-4px -6px 0 0;border:0;border-radius:16px;background:none;color:var(--ikincil);display:grid;place-items:center;cursor:pointer}
+.fk-sil svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.fk-sil:active{background:var(--zemin)}
+.fk-alt{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fk-adim{display:inline-flex;align-items:center;gap:6px}
+.fk-adim .num{min-width:56px;text-align:center;font-weight:800}
+.fk-soru{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--kobalt) 9%,transparent);font-size:14px;line-height:1.4}
+.fk-soru b{font-weight:800}
+.fk-soru .metin-btn{flex:none}
+.fk.supheli .fk-ad::after{content:"";display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--kobalt);vertical-align:middle}
+.fk-anlat textarea{width:100%;box-sizing:border-box;border:0;background:var(--zemin);border-radius:14px;padding:12px 14px;font:inherit;font-size:16px;line-height:1.4;resize:vertical;color:var(--murekkep)}
+.fk-anlat.vurgu{box-shadow:inset 0 0 0 1.5px var(--kobalt)}
+.fk-anlat textarea::placeholder{color:var(--ikincil);opacity:1}
+
+/* ---------- antrenman sonu kartı ---------- */
+.bk-kutu{gap:12px}
+.bk-tema{gap:6px}
+.bk-onizle{display:flex;justify-content:center;padding:4px 0}
+.bk-onizle img{width:min(250px,62vw);aspect-ratio:9/16;border-radius:20px;background:var(--zemin);box-shadow:0 18px 40px -22px rgba(22,22,26,.55);object-fit:cover}
+body.gece .bk-onizle img{box-shadow:0 0 0 1px #2a2a30}
