@@ -56,16 +56,24 @@ const temizle = (p) => p.evaluate(() => { const k = document.getElementById('kap
     (await p.$('[data-act="od-isindim"]')) ? tamam(boy + ' · ısınma sayfası') : hata(boy + ' · ısınma sayfası yok');
     await p.click('[data-act="od-isindim"]'); await bekle(p, 600);
     const art = '.od-adim-btn[data-alan="kg"]:not([data-d^="-"])'; await p.click(art); await bekle(p, 200);
-    const c = await p.evaluate(() => { const d = document.querySelector('.od-adim'); if (!d) return null; const v = d.querySelector('b').getBoundingClientRect(); const bt = d.querySelectorAll('button');
-      return { kg: d.querySelector('b').textContent, cak: v.left < bt[0].getBoundingClientRect().right || v.right > bt[1].getBoundingClientRect().left, tasma: document.documentElement.scrollHeight > innerHeight + 1 }; });
+    const c = await p.evaluate(() => { const d = document.querySelector('.od-adim'); if (!d) return null; const v = d.querySelector('.od-adim-in').getBoundingClientRect(); const bt = d.querySelectorAll('button');
+      return { kg: d.querySelector('.od-adim-in').value, cak: v.left < bt[0].getBoundingClientRect().right || v.right > bt[1].getBoundingClientRect().left, tasma: document.documentElement.scrollHeight > innerHeight + 1 }; });
     if (!c) hata(boy + ' · kilo girişi yok'); else { c.cak ? hata(boy + ' · kilo ' + c.kg + ' butonlarla çakışıyor') : tamam(boy + ' · kilo ' + c.kg + ' çakışmıyor'); c.tasma ? hata(boy + ' · ekran kayıyor') : tamam(boy + ' · ekran tek sayfa'); }
-    await p.click('[data-act="tik"]'); await bekle(p, 300);
+    const kgIn = '.od-adim-in[data-in="kg"]'; await p.click(kgIn); await bekle(p, 80); await p.keyboard.type('47.5'); await p.keyboard.press('Enter'); await bekle(p, 250);
+    (await p.$eval(kgIn, (e) => e.value)) === '47,5' ? tamam(boy + ' · kilo elle yazıldı (47,5)') : hata(boy + ' · elle kilo yazılamadı');
+    await p.click('[data-act="tik"]'); await bekle(p, 500);
     (await p.$('.od-set.ok')) ? tamam(boy + ' · set bitti') : hata(boy + ' · set bitmedi');
+    const dn = await p.evaluate(() => { const d = document.getElementById('dinlenme'); const a = document.querySelector('.od-alt'); if (!d || !a) return null; const r1 = d.getBoundingClientRect(), r2 = a.getBoundingClientRect(); return Math.abs(r1.top - r2.top) < 2 && Math.abs(r1.height - r2.height) < 2; });
+    dn ? tamam(boy + ' · dinlenme sayacı Seti bitir yerinde') : hata(boy + ' · dinlenme sayacı yerinde değil');
     await p.evaluate(() => { const d = document.getElementById('dinlenme'); if (d) d.remove(); });
     await p.click('[data-act="od-menu"]'); await bekle(p, 450);
     await p.evaluate(() => { const s = document.querySelector('.od-sayfa'); s.scrollTop = s.scrollHeight; }); const once = await p.evaluate(() => document.querySelector('.od-sayfa').scrollTop);
     await p.click('.od-sayfa [data-act="iptal"]'); await bekle(p, 200); const sonra = await p.evaluate(() => document.querySelector('.od-sayfa').scrollTop);
     Math.abs(once - sonra) < 2 ? tamam(boy + ' · Kaydetmeden çık yerinde kalıyor') : hata(boy + ' · menü başa kaydı');
+    const n0 = await p.evaluate(() => document.querySelectorAll('.od-n').length);
+    await p.click('[data-act="od-ekle-ac"]'); await bekle(p, 400); await p.fill('#odAra', 'curl'); await bekle(p, 150);
+    await p.click('[data-act="od-ekle-sec"]'); await bekle(p, 500);
+    (await p.evaluate(() => document.querySelectorAll('.od-n').length)) === n0 + 1 ? tamam(boy + ' · antrenmana hareket eklendi') : hata(boy + ' · hareket eklenemedi');
     p.hatalar.length ? hata(boy + ' · JS hatası: ' + p.hatalar.join(' | ')) : tamam(boy + ' · hata yok'); await p.context().close();
   }
   await b.close(); sunucu.close();

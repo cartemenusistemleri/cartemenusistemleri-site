@@ -598,7 +598,7 @@
   function hocaKutu() {
     if (!hesap) return '';
     if (hocaDurum && hocaDurum.hoca) return '<div class="t h130"><span class="k">Hocam</span><b style="font-size:19px">' + esc(hocaDurum.hoca.ad) + '</b><span class="ik">Programını ve antrenmanlarını görebiliyor.</span><a class="btn siyah" href="#/mesaj/' + encodeURIComponent(hocaDurum.hoca.id) + '" style="min-height:40px;align-self:flex-start">Mesaj yaz</a><button class="metin-btn kucuk-metin" data-act="hoca-ayril" style="align-self:flex-start;color:var(--ikincil)">Hocamdan ayrıl</button></div>';
-    return '<form class="t h130" data-form="hoca-baglan" novalidate style="gap:8px"><span class="k">Hocam</span><input name="kod" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Hoca kodu" aria-label="Hocanın 6 haneli kodu" style="border:0;background:var(--zemin);border-radius:14px;min-height:44px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;width:100%"><label class="onay-mini"><input type="checkbox" name="riza"><span>Hocam programımı, antrenmanlarımı, kilomu ve kalori özetimi görebilir.</span></label><button class="btn siyah" type="submit" style="min-height:40px">Bağlan</button></form>';
+    return '<details class="t genis hoca-ac"><summary><span class="yigin"><b>Hocam</b><span class="ik">Hocanın verdiği kodla bağlan</span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><form data-form="hoca-baglan" novalidate class="hoca-form"><input name="kod" maxlength="6" autocapitalize="characters" autocomplete="off" placeholder="Hoca kodu" aria-label="Hocanın 6 haneli kodu" style="border:0;background:var(--zemin);border-radius:14px;min-height:44px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;width:100%"><label class="onay-mini"><input type="checkbox" name="riza"><span>Hocam programımı, antrenmanlarımı, kilomu ve kalori özetimi görebilir.</span></label><button class="btn siyah" type="submit" style="min-height:40px">Bağlan</button></form></details>';
   }
   function atananBant() {
     const a = hocaDurum && hocaDurum.atanan; if (!a) return '';
@@ -1068,14 +1068,16 @@
   }
   let jamSayac = 0;
   function jamBaslatZaman() { if (jamZaman) return; jamZaman = setInterval(() => { if (!S.jam) { clearInterval(jamZaman); jamZaman = null; return; } if (document.visibilityState !== 'visible') return; jamSayac++; const hizli = S.seans && jamOrtakMi(); if (hizli || jamSayac % 2 === 0) { if (jamSayac % 2 === 0) jamDurumGonder(); jamCek(); } }, 3000); }
+  let jamAcik = false;
   function jamSerit() {
     if (!S.jam) return '';
     const u = (jamV && jamV.uyeler) || [];
     const say = {}; u.forEach((x) => { if (x.durum.hareket && !x.durum.bitti) say[x.durum.hareket] = (say[x.durum.hareket] || 0) + 1; });
     const grup = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
-    return '<div id="jamSerit" class="t genis jam-serit"><div class="satir"><span class="k">Jam · ' + esc(S.jam.kod) + ' · ' + u.length + ' kişi' + (jamOrtakMi() ? ' · ortak dinlenme' : '') + '</span><a class="metin-btn kucuk-metin" href="#/jam" style="color:#fff">Aç</a></div>' +
-      (grup && u.length > 1 ? '<span style="font-weight:700">Grup şu an: ' + esc(grup) + '</span>' : '') +
-      (u.length ? '<div class="jam-uyeler">' + u.map((x) => '<div class="jam-uye' + (x.ben ? ' ben' : '') + '"><b>' + esc(x.ad) + (x.ben ? ' · sen' : '') + '</b><span>' + (x.durum.bitti ? 'Bitirdi' : x.durum.hareket ? esc(x.durum.hareket) + ' · ' + x.durum.set + '/' + x.durum.toplam + ' set' : x.once > 600 ? 'Bağlantı yok' : 'Hazırlanıyor') + (x.durum.dinlenme ? ' · dinleniyor ' + x.durum.dinlenme + ' sn' : '') + '</span></div>').join('') + '</div>' : '<span class="ik" style="color:rgba(255,255,255,.75)">Arkadaşların katılınca burada görünür.</span>') + '</div>';
+    const ozet = u.length + ' kişi' + (grup && u.length > 1 ? ' · grup: ' + grup : '') + (jamOrtakMi() ? ' · ortak dinlenme' : '');
+    return '<div id="jamSerit" class="jam-mini' + (jamAcik ? ' acik' : '') + '"><button class="jm-bas" data-act="jam-ac" aria-expanded="' + jamAcik + '" aria-controls="jamPanel"><i class="jm-canli" aria-hidden="true"></i><b>Jam</b><span>' + esc(ozet) + '</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+      (jamAcik ? '<div class="jm-panel" id="jamPanel">' + (u.length ? u.map((x) => '<div class="jm-uye' + (x.ben ? ' ben' : '') + '"><b>' + esc(x.ad) + (x.ben ? ' · sen' : '') + '</b><span>' + (x.durum.bitti ? 'Bitirdi' : x.durum.hareket ? esc(x.durum.hareket) + ' · ' + x.durum.set + '/' + x.durum.toplam + ' set' : x.once > 600 ? 'Bağlantı yok' : 'Hazırlanıyor') + (x.durum.dinlenme ? ' · dinleniyor ' + x.durum.dinlenme + ' sn' : '') + '</span></div>').join('') : '<span class="jm-bos">Arkadaşların katılınca burada görünür.</span>') +
+        '<a class="jm-link" href="#/jam">Jam sayfası · ' + esc(S.jam.kod) + '</a></div>' : '') + '</div>';
   }
   function ekranJam() {
     if (!S.profil) return ekranKarsilama();
@@ -1373,7 +1375,7 @@
         return '<div><button class="tk-tik" data-act="tk-al" data-id="' + x.id + '" aria-pressed="' + !!((g.takviye || {})[x.id]) + '" aria-label="' + esc(x.ad) + ' bugün alındı">' + IK.tik + '</button><div class="ad"><b>' + esc(x.ad) + '</b><span class="ik num">' + [x.doz, (TAKVIYE_ZAMAN.find((z) => z[0] === x.zaman) || ['', ''])[1], 'son 30 günde ' + say + ' gün'].filter(Boolean).join(' · ') + '</span></div><button class="metin-btn kucuk-metin" data-act="tk-duzen" data-id="' + x.id + '">Düzenle</button><button class="sil" data-act="tk-sil" data-id="' + x.id + '" aria-label="' + esc(x.ad) + ' listeden çıkar">' + IK.kapat + '</button></div>';
       }).join('') + '</div></div>' : '<div class="t genis bos" style="align-items:flex-start"><b>Henüz takviye eklemedin.</b><span class="ik">Aşağıdan seç ya da kendin yaz. Her gün aldığında işaretlersin.</span></div>') +
       '<div class="t genis"><span class="k">Hızlı ekle</span><div class="haplar">' + TAKVIYE_HAZIR.filter((h) => !l.some((x) => x.ad === h[0])).map((h) => '<button class="hap" data-act="tk-hazir" data-ad="' + esc(h[0]) + '" data-doz="' + esc(h[1]) + '">+ ' + esc(h[0]) + '</button>').join('') + '</div></div>' +
-      '<div class="t genis" style="gap:10px"><span class="k">Kendin ekle</span>' + tkForm(null) + '</div>' +
+      '<details class="t genis ac-kutu"><summary><b>Listede yok mu? Kendin ekle</b><span class="ik">Ad, etiketteki miktar, zaman</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>' + tkForm(null) + '</details>' +
       '<p class="not genis">Burası yalnızca takip içindir. Doz ve kullanım için ürün etiketine uy; ilaç kullanıyorsan ya da bir rahatsızlığın varsa önce doktoruna danış.</p>' +
       '</div>';
   }
@@ -1507,8 +1509,8 @@
       '<div class="t koyu genis tum num"><span class="k">Nasıl hesapladık</span><span style="font-size:14px;line-height:1.5">Bazal metabolizman ' + sayi(h.bmr) + ' kcal (Mifflin-St Jeor). Haftada ' + p.gun + ' gün antrenmanla günlük harcaman yaklaşık ' + sayi(h.tdee) + ' kcal. Hedefine göre ' + sayi(h.kcal) + ' kcal ayarladık' + (h.haftalikKg ? ' (haftada yaklaşık ' + sayi(Math.abs(h.haftalikKg), 2) + ' kg ' + (h.haftalikKg < 0 ? 'kayıp' : 'artış') + ')' : '') + '. Protein vücut ağırlığının kilosu başına ' + sayi(h.protein / p.kilo, 1) + ' g.</span></div>' +
       planHacim(pr) +
       (pr.notlar && pr.notlar.length ? '<div class="t genis"><span class="k">Senin için notlar</span><ul class="madde">' + pr.notlar.map((n) => '<li>' + esc(n) + '</li>').join('') + '</ul></div>' : '') +
-      (pr.kurallar ? '<div class="t genis"><span class="k">Antrenman kuralları</span><ul class="madde">' + pr.kurallar.map((n) => '<li>' + esc(n) + '</li>').join('') + '</ul></div>' : '') +
-      (pr.kaynaklar ? '<div class="t genis tum"><span class="k">Dayandığımız kaynaklar</span><ul class="madde kaynak">' + pr.kaynaklar.filter((k) => K.KAYNAK[k]).map((k) => '<li><a href="' + esc(K.KAYNAK[k].url) + '" target="_blank" rel="noopener">' + esc(K.KAYNAK[k].ad) + '</a></li>').join('') + '</ul></div>' : '') +
+      (pr.kurallar ? '<details class="t genis ac-kutu"><summary><b>Antrenman kuralları</b><span class="ik">Isınma, efor, ilerleme</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><ul class="madde">' + pr.kurallar.map((n) => '<li>' + esc(n) + '</li>').join('') + '</ul></details>' : '') +
+      (pr.kaynaklar ? '<details class="t genis tum ac-kutu"><summary><b>Dayandığımız kaynaklar</b><span class="ik">' + pr.kaynaklar.filter((k) => K.KAYNAK[k]).length + ' bilimsel kaynak</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><ul class="madde kaynak">' + pr.kaynaklar.filter((k) => K.KAYNAK[k]).map((k) => '<li><a href="' + esc(K.KAYNAK[k].url) + '" target="_blank" rel="noopener">' + esc(K.KAYNAK[k].ad) + '</a></li>').join('') + '</ul></details>' : '') +
       '</div>' +
       uyarilar.map((u) => '<div class="uyari">' + esc(u) + '</div>').join('') +
       '<a class="btn cerceve buyuk-btn" href="#/program">' + (pr.ozel ? 'Kendi programımı düzenle' : 'Programı düzenle') + '</a>' +
@@ -1771,7 +1773,17 @@
   /* ---------- odak v2: ısınma → hareketler → soğuma, tek ekran ----------
      Üstte COMEBACK noktaları: yapılmamış = kobalt çember, bitmiş = dolu kobalt nokta; ilki ısınma, sonuncusu soğuma.
      Her nokta, "Sıradaki" ve menüdeki hareket listesi bir adıma götürür. Setlerin hepsine dokunulur, kilo önceden yazılır. */
-  let odMenu = false; let odIpucu = false; let odSec = null;
+  let odMenu = false; let odIpucu = false; let odSec = null; let odEkle = false; let odAra = '';
+  // antrenman sırasında eklenecek hareketler: arama boşsa şu anki hareketin alternatifleri
+  function odEkleListe() {
+    if (!S.seans) return '';
+    const hl = seansHareket(S.seans); const soz = normal(odAra).split(' ').filter(Boolean);
+    let l;
+    if (!soz.length) { const x = hl[Math.max(0, Math.min(hl.length - 1, S.seans.odak || 0))]; l = (x ? M.alternatifler(S.profil, x, hl.map((y) => y.id)) : []).map((id) => K.HAREKET[id]).filter(Boolean); }
+    else l = Object.keys(K.HAREKET).map((id) => K.HAREKET[id]).filter((h) => soz.every((w) => hAra(h).indexOf(w) >= 0)).sort((a, b) => a.seviye - b.seviye).slice(0, 30);
+    return (soz.length ? '' : '<span class="k od-ekle-k">' + (l.length ? 'Bu harekete benzeyenler' : 'Aramaya başla') + '</span>') +
+      (l.length ? l.map((h) => '<button class="od-ekle-sec" data-act="od-ekle-sec" data-id="' + h.id + '"><span><b>' + esc(D.HAREKET[h.id].ad) + '</b><span class="ik">' + esc((D.HAREKET[h.id].kas || 'Kondisyon') + ' · ' + h.ekipman.map((e) => K.EKIPMAN[e]).join(', ')) + '</span></span>' + IK.arti.replace('<svg', '<svg width="18" height="18"') + '</button>').join('') : (soz.length ? '<p class="ik" style="padding:8px 4px">Bu aramada hareket yok.</p>' : ''));
+  }
   const odIsindi = (s) => !!s.isindi || Object.values(s.setler || {}).some((l) => l.some((y) => y.ok));
   function odakAdimNo(s, hl, ks) {
     if (typeof s.odak === 'number' && s.odak >= -1 && s.odak <= hl.length) return s.odak;
@@ -1800,7 +1812,7 @@
     const calis = l.filter((z) => z.tur !== 'isinma'); const bitti = calis.filter((z) => z.ok && !z.atla).length;
     const no = y.tur === 'isinma' ? 'Isınma seti' : 'Set ' + (calis.indexOf(y) + 1) + '<i> / ' + calis.length + '</i>';
     const satir = (ad, deger, birim, d, etiket) => '<div class="od-adim"><button class="od-adim-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="-' + d + '" aria-label="' + etiket + ' azalt">−</button>' +
-      '<div class="od-adim-d"><b class="num' + (String(deger).length >= 5 ? ' uzun' : '') + '" data-ap="' + ad + '">' + deger + '</b><span>' + birim + '</span></div>' +
+      '<label class="od-adim-d"><input class="od-adim-in num' + (String(deger).length >= 5 ? ' uzun' : '') + '" data-ap="' + ad + '" data-in="' + ad + '" data-h="' + k + '" data-i="' + sec + '" inputmode="' + (ad === 'kg' ? 'decimal' : 'numeric') + '" enterkeyhint="done" autocomplete="off" placeholder="0" value="' + esc(deger) + '" style="width:' + (Math.max(1, String(deger).length) + 0.4) + 'ch" aria-label="' + (ad === 'kg' ? 'Kilo' : 'Tekrar') + ', dokunup yazabilirsin"><span>' + birim + '</span></label>' +
       '<button class="od-adim-btn" data-act="ap-deg" data-h="' + k + '" data-i="' + sec + '" data-alan="' + ad + '" data-d="' + d + '" aria-label="' + etiket + ' artır">+</button></div>';
     // geçen seferin aynı seti ile karşılaştır
     const oCalis = once ? once.setler.filter((z) => z.tur !== 'isinma') : [];
@@ -1814,8 +1826,8 @@
     return '<div class="od-giris" data-h="' + k + '">' +
       '<div class="od-giris-ust"><span class="od-giris-no num">' + no + '</span><span class="od-sayac-nokta" aria-hidden="true">' + calis.map((z, i) => '<i class="' + (i < bitti ? 'ok' : '') + (z === y ? ' su' : '') + '"></i>').join('') + '</span></div>' +
       (sec !== aktifIdx ? '<div class="od-panel-ust"><span class="k">' + (bitmis ? 'Bitti · düzenliyorsun' : 'Önceden yazıyorsun') + '</span>' + (aktifIdx >= 0 ? '<button class="metin-btn kucuk-metin" data-act="od-set-kapat">Sıradaki sete dön</button>' : '') + '</div>' : '') +
-      satir('kg', kg ? sayi(kg, 2) : '—', 'kg', adim, 'Kiloyu ' + sayi(adim, 2)) +
-      satir('tekrar', y.tekrar || x.alt || '—', 'tekrar', 1, 'Tekrarı') +
+      satir('kg', kg ? sayi(kg, 2) : '', 'kg', adim, 'Kiloyu ' + sayi(adim, 2)) +
+      satir('tekrar', y.tekrar || x.alt || '', 'tekrar', 1, 'Tekrarı') +
       (barbell ? plakaHtml(kg) : '') +
       gecenHtml + '</div>';
   }
@@ -1850,7 +1862,9 @@
       '<div class="od-grup"><span class="k">Hareketler</span>' +
         '<button class="od-m od-sira" data-act="odak-git" data-i="-1"><i class="od-mn' + (odIsindi(s) ? ' bitti' : '') + '"></i>Isınma</button>' +
         hl.map((y, i) => '<button class="od-m od-sira' + (i === oi ? ' su' : '') + '" data-act="odak-git" data-i="' + i + '"><i class="od-mn' + (hareketBittiMi(s, ks[i]) ? ' bitti' : '') + '"></i><span>' + esc((D.HAREKET[y.id] || { ad: y.id }).ad) + '</span><span class="od-m-sag num">' + (+y.set || 0) + ' set</span></button>').join('') +
-        '<button class="od-m od-sira" data-act="odak-git" data-i="' + hl.length + '"><i class="od-mn"></i>Soğuma</button></div>' +
+        '<button class="od-m od-sira" data-act="odak-git" data-i="' + hl.length + '"><i class="od-mn"></i>Soğuma</button>' +
+        '<button class="od-m od-ekle-btn" data-act="od-ekle-ac" aria-expanded="' + odEkle + '">' + IK.arti.replace('<svg', '<svg width="18" height="18"') + 'Hareket ekle</button>' +
+        (odEkle ? '<div class="od-ekle"><input id="odAra" type="search" placeholder="Hareket ara: squat, makine, dambıl…" autocomplete="off" enterkeyhint="search" value="' + esc(odAra) + '" aria-label="Eklenecek hareketi ara"><div id="odEkleListe">' + odEkleListe() + '</div></div>' : '') + '</div>' +
       '<div class="od-grup">' + '<a class="od-m" href="#/koc">Bir yerin mi ağrıdı? Koça danış</a>' +
         sat('gorunum', 'Liste görünümüne geç', ' data-deger="liste"') + (s.kisa ? sat('kisa-iptal', 'Tam antrenmana dön') : '') + '</div>' +
       '<button class="btn siyah buyuk-btn" data-act="bitir">Antrenmanı bitir' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
@@ -2141,6 +2155,14 @@
     dinlenmeZaman = setInterval(dinlenmeCiz, 1000);
     dinlenmeCiz();
   }
+  // odak ekranında sayaç, Seti bitir düğmesinin tam üstüne aynı boyda oturur
+  function dinKonum(el) {
+    el = el || document.getElementById('dinlenme'); if (!el) return;
+    const b = document.body.classList.contains('odak-tam') && !odMenu && document.querySelector('.od-alt');
+    const r = b && b.getBoundingClientRect();
+    if (r && r.height > 30) { el.classList.add('od-yer'); el.style.top = r.top + 'px'; el.style.left = r.left + 'px'; el.style.width = r.width + 'px'; el.style.height = r.height + 'px'; }
+    else if (el.classList.contains('od-yer')) { el.classList.remove('od-yer'); ['top', 'left', 'width', 'height'].forEach((k) => { el.style[k] = ''; }); }
+  }
   function dinlenmeCiz() {
     let el = document.getElementById('dinlenme');
     if (!dinlenme || !S.seans) { if (el && (!S.seans || !el.classList.contains('bitti'))) el.remove(); clearInterval(dinlenmeZaman); return; }
@@ -2151,6 +2173,7 @@
       el.innerHTML = '<span class="sure"></span><div class="cubuk"><span></span></div><button data-act="dinlenme-ek">+30 sn</button><button data-act="dinlenme-atla">Atla</button>';
       document.body.appendChild(el);
     }
+    dinKonum(el);
     el.querySelector('.sure').textContent = Math.floor(kalan / 60) + ':' + String(kalan % 60).padStart(2, '0');
     if (kalan >= 1 && kalan <= 3 && dinlenme.sonBip !== kalan && dinlenme.toplam > 10) { dinlenme.sonBip = kalan; if (sesTur() !== 'yok') { sesHazirla(); bip('sayim'); } if (navigator.vibrate) navigator.vibrate(12); }
     el.querySelector('.cubuk>span').style.width = (100 - yuzde(kalan, dinlenme.toplam)) + '%';
@@ -2273,7 +2296,7 @@
       '<div class="foto-secim"><label class="btn ana kucuk">' + 'Fotoğraf çek<input type="file" accept="image/*" capture="environment" data-in="foto" class="gizli-dosya" aria-label="Kamerayla fotoğraf çek"></label>' +
       '<label class="btn cerceve kucuk">Galeriden yükle<input type="file" accept="image/*" data-in="foto" class="gizli-dosya" aria-label="Galeriden fotoğraf seç"></label></div>' +
       '<p class="ik" style="margin:-4px 0 0">Tabak ya da paket: paketli üründe besin değeri tablosu ya da ürünün ön yüzü görünsün. Daha önce çektiğin fotoğrafı da yükleyebilirsin.</p>' +
-      '<label class="t alan foto-not"><span>Ne yiyorsun? · isteğe bağlı</span><input id="fotoNot" data-in="foto-not" maxlength="300" value="' + esc(fotoNot) + '" placeholder="Ör. tavuk sote ve pilav · paketli üründe: 1 paket, yarısını yedim" autocomplete="off" style="font-size:17px"></label>' +
+      '<label class="t alan foto-not"><span>Ne yiyorsun? · isteğe bağlı</span><input id="fotoNot" data-in="foto-not" maxlength="300" value="' + esc(fotoNot) + '" placeholder="Ör. tavuk sote ve pilav, yarısını yedim" autocomplete="off" style="font-size:17px"></label>' +
       (fotoSonuc && fotoSonuc.resim && !fotoSonuc.kalemler && !/inceleniyor/.test(fotoSonuc.durum) ? '<button class="btn cerceve" data-act="foto-tekrar">Notla birlikte tekrar dene</button>' : '') +
       (fotoSonuc && fotoSonuc.kalemler ? fotoKalemler() : '<p class="not">Yapay zekâ tabağındaki yemekleri ve gramajları tahmin eder; sen düzeltip kaydedersin. Ne yediğini kısaca yazarsan tahmin çok daha isabetli olur.</p>');
   }
@@ -3008,7 +3031,7 @@
         hesap ? mSatir('#/mesajlar', 'mesaj', 'Mesajlar', okunmamis ? okunmamis + ' okunmamış mesaj' : (hocaMi() ? 'Öğrencilerinle yazış' : 'Hocanla yazış'), 'kobalt', okunmamis) : '',
         hesap ? mSatir('#/topluluk', 'topluluk', 'Forum ve meydan okuma', 'Sor, paylaş, arkadaşınla yarış', 'limon') : '',
         mSatir('#/topluluk/rehber', 'plan', 'Rehber', 'Her kas grubu için kısa yazılar'),
-        hesap ? mSatir('#/siralama', 'siralama', 'Sıralama', 'Haftalık ve aylık hacim tablosu') : ''
+        ''
       ]) +
       hocaKutu().replace('class="t h130"', 'class="t genis"') +
       ayarGrup() +
@@ -3074,7 +3097,7 @@
     else if (bolum === 'gorunum') ic =
       temaSecici() +
       simgeSecici() +
-      '<div class="t genis" style="gap:10px"><span class="k">Animasyonlar</span><div class="haplar">' + [['', 'Tam'], ['az', 'Az']].map((x) => '<button class="hap" data-act="anim-sec" data-deger="' + x[0] + '" aria-pressed="' + (((S.ayar || {}).anim || '') === x[0]) + '">' + x[1] + '</button>').join('') + '</div><span class="ik">' + (sistemAzHareket ? 'Telefonunda "hareketi azalt" açık; animasyonlar zaten sade.' : 'Az: açılış çizimi, geri sayım, kutlama ve süslü geçişler kapanır; sayaçlar ve gerekli geri bildirim kalır.') + '</span></div>' +
+      '<div class="t genis" style="gap:10px"><span class="k">Animasyonlar</span><div class="haplar">' + [['', 'Tam'], ['az', 'Az']].map((x) => '<button class="hap" data-act="anim-sec" data-deger="' + x[0] + '" aria-pressed="' + (((S.ayar || {}).anim || '') === x[0]) + '">' + x[1] + '</button>').join('') + '</div><span class="ik">' + (sistemAzHareket ? 'Telefonunda "hareketi azalt" açık; animasyonlar zaten sade.' : 'Az: açılış perdesi, geri sayım, kutlama ve geçiş hareketleri kapanır; sayaçlar ve gerekli geri bildirim kalır.') + '</span></div>' +
       '';
     else if (bolum === 'hatirlat') ic = hatirlatKutu();
     else {
@@ -3290,6 +3313,7 @@
     const odS0 = app.querySelector('.od-sayfa'); const odTop = odS0 ? odS0.scrollTop : -1;
     app.innerHTML = html;
     if (odTop >= 0) { const o = app.querySelector('.od-sayfa'); if (o) { o.classList.add('kalici'); o.scrollTop = odTop; const pr = app.querySelector('.od-perde'); if (pr) pr.classList.add('kalici'); } }
+    if (dinlenme) dinKonum();
     temaUygula(); simgeUygula();
     if (hesap) okunmamisBaslat(); navRozet();
     const menu = acik && !!S.profil && ['kurulum', 'kayit', 'giris', 'bekleme', 'sifre'].indexOf(parca[0]) < 0;
@@ -3873,7 +3897,7 @@
       if (!r.ok) { el.disabled = false; el.classList.remove('isliyor'); toast(r.j.hata || 'Bağlantı kurulamadı.'); return; }
       hesap.uyelik = r.j.uyelik; mzTur = ''; toast('Mazeretin kaydedildi. Geçmiş olsun, dönünce bekliyoruz.'); git('#/');
     },
-    'od-menu'() { odMenu = !odMenu; if (!odMenu) { seAcik = null; dinAcik = null; } iptalOnay = false; render(); },
+    'od-menu'() { odMenu = !odMenu; if (!odMenu) { seAcik = null; dinAcik = null; odEkle = false; odAra = ''; } iptalOnay = false; render(); },
     'degis-mod'() { degisMod = !degisMod; degisAcik = null; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'rozet-hepsi'() { rozetHepsi = !rozetHepsi; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'sinir-kapat'() { const el = document.getElementById('sinirKart'); if (el) el.remove(); },
@@ -3881,6 +3905,19 @@
     'od-isindim'() { if (!S.seans) return; S.seans.isindi = true; const hl = seansHareket(S.seans); const ks = seansAnahtar({ hareketler: hl }); const i = ks.findIndex((k) => !hareketBittiMi(S.seans, k)); S.seans.odak = i < 0 ? 0 : i; kaydet(); render(); odakKay(1); },
     'od-set'(el) { if (!S.seans) return; const l = S.seans.setler[el.dataset.h] || []; const i = +el.dataset.i; const akt = l.findIndex((y) => !y.ok && !y.atla); odSec = i === akt ? null : { k: el.dataset.h, i }; render(); odGirisGec(); },
     'od-set-kapat'() { odSec = null; render(); odGirisGec(); },
+    'jam-ac'() { jamAcik = !jamAcik; jamCiz(); },
+    'od-ekle-ac'() { odEkle = !odEkle; odAra = ''; render(); if (odEkle) { const i = document.getElementById('odAra'); if (i) { i.focus({ preventScroll: true }); i.scrollIntoView({ block: 'center', behavior: azHareket ? 'auto' : 'smooth' }); } } },
+    'od-ekle-sec'(el) {
+      const s = S.seans; if (!s) return; const hl = seansHareket(s); if (!s.hareketler) s.hareketler = JSON.parse(JSON.stringify(hl));
+      const yeni = M.ozelHareket(S.profil, el.dataset.id); if (!yeni) return;
+      const ks0 = seansAnahtar({ hareketler: s.hareketler }); const oi = s.odak; const yer = oi >= 0 && oi < s.hareketler.length ? oi + 1 : s.hareketler.length;
+      s.hareketler.splice(yer, 0, yeni); const ks1 = seansAnahtar({ hareketler: s.hareketler });
+      const eskiSet = s.setler; const eskiAtla = s.atlanan || {}; const ys = {}; const ya = {};
+      ks1.forEach((k1, i) => { if (i === yer) ys[k1] = setOlustur(yeni, k1, 1); else { const j = i < yer ? i : i - 1; ys[k1] = eskiSet[ks0[j]] || []; if (eskiAtla[ks0[j]]) ya[k1] = true; } });
+      s.setler = ys; s.atlanan = ya; s.odak = yer; odEkle = false; odAra = ''; odMenu = false; odSec = null;
+      kaydet(true); render(); window.scrollTo(0, 0); odakKay(1);
+      toast(D.HAREKET[yeni.id].ad + ' eklendi, sadece bugün.');
+    },
     'se-ac'(el) { seAcik = seAcik === el.dataset.h ? null : el.dataset.h; if (odakMi() && S.seans && seAcik) odMenu = true; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'se-atla'(el) {
       S.seans.atlanan = S.seans.atlanan || {}; S.seans.atlanan[el.dataset.h] = true; seAcik = null;
@@ -4132,11 +4169,12 @@
     const el = e.target.closest('[data-act]'); if (!el) return;
     const f = EYLEM[el.dataset.act]; if (!f) return;
     // tam ekran odak menüsü: içindeki bir işlem yapılınca menü kapanır (paneli açan işlemler hariç)
-    if (odMenu && el.closest('.od-sayfa') && ['se-ac', 'din-ac', 'iptal'].indexOf(el.dataset.act) < 0) odMenu = false;
+    if (odMenu && el.closest('.od-sayfa') && ['se-ac', 'din-ac', 'iptal', 'od-ekle-ac'].indexOf(el.dataset.act) < 0) { odMenu = false; odEkle = false; }
     e.preventDefault(); f(el, e);
   });
   document.addEventListener('input', (e) => {
     const el = e.target;
+    if (el.id === 'odAra') { odAra = el.value; const l = document.getElementById('odEkleListe'); if (l) l.innerHTML = odEkleListe(); return; }
     if (el.id === 'araQ') {
       aramaQ = el.value; aramaSonuc = null;
       document.getElementById('yerelListe').innerHTML = yerelListe(aramaQ);
@@ -4170,7 +4208,8 @@
     }
     if (!el.dataset || !el.dataset.in) return;
     if (el.dataset.in === 'kg' || el.dataset.in === 'tekrar') {
-      S.seans.setler[el.dataset.h][+el.dataset.i][el.dataset.in] = el.value; kaydet(); return;
+      let v = el.value; if (el.classList.contains('od-adim-in')) { v = el.dataset.in === 'kg' ? v.replace('.', ',').replace(/[^0-9,]/g, '').replace(/,(?=.*,)/g, '').slice(0, 6) : v.replace(/\D/g, '').slice(0, 3); if (v !== el.value) el.value = v; el.style.width = (Math.max(1, v.length) + 0.4) + 'ch'; el.classList.toggle('uzun', v.length >= 5); }
+      S.seans.setler[el.dataset.h][+el.dataset.i][el.dataset.in] = v; kaydet(); return;
     }
     if (el.dataset.in === 'porsiyon' && taslak) {
       const g = oku(el.value); taslak.secilenG = g > 0 ? g : 0;
@@ -4180,6 +4219,7 @@
     }
   });
   document.addEventListener('change', (e) => {
+    if (e.target.classList && e.target.classList.contains('od-adim-in') && S.seans) { const sY = window.scrollY; render(); window.scrollTo(0, sY); return; }
     if (e.target.dataset && e.target.dataset.hat && /^\d{2}:\d{2}$/.test(e.target.value)) { S.ayar = S.ayar || {}; const a = hatAyar(); a[e.target.dataset.hat] = e.target.value; S.ayar.hat = a; kaydet(true); hatEsitle(true); toast('Hatırlatıcı saati ' + e.target.value + '.'); return; }
     if (e.target.dataset && e.target.dataset.in === 'avatar' && e.target.files[0]) { kirpAc(e.target.files[0]); e.target.value = ''; return; }
     if (e.target.dataset && e.target.dataset.in === 'foto' && e.target.files[0]) fotoAnaliz(e.target.files[0]);
@@ -4189,7 +4229,9 @@
         .catch(() => toast('Fotoğraf kaydedilemedi.'));
     }
   });
+  document.addEventListener('focusin', (e) => { if (e.target.classList && e.target.classList.contains('od-adim-in')) setTimeout(() => { try { e.target.select(); } catch (z) { /* yok */ } }, 0); });
   document.addEventListener('keydown', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('od-adim-in') && e.key === 'Enter') { e.preventDefault(); e.target.blur(); return; }
     if (e.target && e.target.id === 'kocMetin' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); e.target.form.requestSubmit(); }
   });
   document.addEventListener('submit', (e) => {
