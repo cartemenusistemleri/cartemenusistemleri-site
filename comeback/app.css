@@ -1908,3 +1908,45 @@ body.gece .toast-geri{background:rgba(0,0,0,.08)}
 .nokta-son{display:flex;flex-direction:column;align-items:center;gap:6px;margin:28px 0 8px}
 .nokta-son canvas{display:block;width:100%;height:170px;touch-action:pan-y;cursor:crosshair}
 .nokta-son span{font-size:12px;font-weight:700;color:var(--ikincil)}
+
+/* ---------- antrenman geçmişi ---------- */
+.gc-ay{gap:6px;padding-bottom:6px}
+.gc-liste{display:flex;flex-direction:column}
+.gc-satir{display:flex;align-items:center;gap:14px;min-height:64px;color:inherit;text-decoration:none;position:relative}
+.gc-satir+.gc-satir::before{content:"";position:absolute;left:54px;right:0;top:0;height:1px;background:var(--cizgi)}
+.gc-tarih{display:flex;flex-direction:column;align-items:center;width:40px;flex:none;line-height:1}
+.gc-tarih b{font-size:22px;font-weight:900;letter-spacing:-.03em}
+.gc-tarih span{font-size:12px;font-weight:700;color:var(--ikincil);margin-top:3px}
+.gc-orta{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.gc-orta b{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gc-orta b small{font-size:12px;font-weight:700;color:var(--ikincil)}
+.gc-orta>span{font-size:13px;font-weight:600;color:var(--ikincil)}
+.gc-rek{flex:none;font-size:12px;font-weight:800;color:var(--kobalt);padding:4px 9px;border-radius:999px;background:var(--kobalt-acik)}
+.gc-satir .mn-ok{width:18px;height:18px;flex:none;fill:none;stroke:var(--ikincil);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gc-son{gap:6px;color:inherit;text-decoration:none}
+.gc-son .gc-tum{color:var(--kobalt)}
+.gc-son-ad{font-size:24px;font-weight:900;letter-spacing:-.035em;line-height:1.05}
+.gc-kafa{gap:10px}
+.gc-ad{font-size:30px;font-weight:900;letter-spacing:-.04em;line-height:1}
+.gc-sayilar{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:12px;margin-top:6px}
+.gc-sayilar div{display:flex;flex-direction:column;gap:2px}
+.gc-sayilar b{font-size:20px;font-weight:900;letter-spacing:-.02em}
+.gc-sayilar span{font-size:12px;font-weight:700;color:var(--koyu-ikincil)}
+.gc-h{gap:8px}
+.gc-h>.satir{align-items:center;gap:10px}
+.gc-h-ad{font-size:17px;font-weight:800;color:inherit;text-decoration:none;min-width:0}
+.gc-cip{display:flex;align-items:center;gap:6px;flex:none;font-size:13px;font-weight:700;color:var(--ikincil)}
+.gc-cip i{font-style:normal;font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--cizgi);color:var(--murekkep)}
+.gc-cip i.rek{background:var(--kobalt);color:#fff;box-shadow:none}
+.gc-setler{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.gc-setler li{display:flex;align-items:center;justify-content:space-between;min-height:34px;font-size:15px;position:relative}
+.gc-setler li+li::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--cizgi);opacity:.7}
+.gc-setler li span{font-size:13px;font-weight:700;color:var(--ikincil)}
+.gc-setler li b{font-weight:800}
+.gc-setler li.isn b{color:var(--ikincil);font-weight:700}
+.gc-setler li.drop span{color:var(--kobalt)}
+.gc-his{gap:6px}
+.gc-his b{font-size:17px;font-weight:800}
+.gc-not{margin:4px 0 0;font-size:15px;line-height:1.5}
+.gc-yok{gap:6px}
+.gc-gez{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;margin-top:4px}

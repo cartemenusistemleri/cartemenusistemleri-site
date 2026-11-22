@@ -92,6 +92,7 @@ function hesapSilAdimlari(db, id) {
     db.prepare('DELETE FROM bekleme WHERE eposta = (SELECT eposta FROM kullanicilar WHERE id = ?)').bind(id),
     db.prepare('DELETE FROM uyelik WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM antrenman_gecmis WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM paylasim WHERE gonderen_id = ? OR alici_id = ?').bind(id, id),
     db.prepare('DELETE FROM skor WHERE kullanici_id = ?').bind(id),
     db.prepare('UPDATE ai_oy SET kullanici_id = NULL WHERE kullanici_id = ?').bind(id),
@@ -129,6 +130,8 @@ let uyelikHazir = false;
 async function uyelikTablo(db) {
   if (uyelikHazir) return;
   await db.prepare('CREATE TABLE IF NOT EXISTS uyelik (kullanici_id TEXT PRIMARY KEY, son TEXT, tarihler TEXT, uzatma INTEGER NOT NULL DEFAULT 0, mazeret_bitis TEXT, mazeret_tur TEXT, mazeretler TEXT, askida TEXT, cb_bas TEXT, cb_soz INTEGER, guncelleme INTEGER)').run();
+  // antrenman geçmişi: gün başına bir satır, o günün seansları set set (aylık/yıllık rapor da buradan okur)
+  await db.prepare('CREATE TABLE IF NOT EXISTS antrenman_gecmis (kullanici_id TEXT NOT NULL, tarih TEXT NOT NULL, json TEXT NOT NULL, zaman INTEGER NOT NULL, PRIMARY KEY (kullanici_id, tarih))').run();
   uyelikHazir = true;
 }
 const HOSGELDIN_GUN = 14;
@@ -553,6 +556,23 @@ async function onRequestIc(ctx, R) {
       return json({ ok: true }, 200, { 'set-cookie': cerezYaz('', 0) });
     }
 
+    // Antrenman geçmişi: cihaz son 120 günü kendinde tutar, hepsi burada saklanır
+    if (yol === 'gecmis' && m === 'PUT') {
+      if (!(await sinir(db, R, 'gecmis:' + kim.id, 120, 3600))) return hata('Çok fazla kayıt gönderildi. Biraz sonra tekrar dene.', 429);
+      const g = await govde(req); if (!g || !/^\d{4}-\d{2}-\d{2}$/.test(String(g.tarih || '')) || !Array.isArray(g.seanslar)) return hata('Geçersiz istek.', 400);
+      const j = JSON.stringify(g.seanslar.slice(0, 6)); if (j.length > 40000) return hata('Kayıt çok büyük.', 413);
+      await db.prepare('INSERT INTO antrenman_gecmis (kullanici_id, tarih, json, zaman) VALUES (?, ?, ?, ?) ON CONFLICT(kullanici_id, tarih) DO UPDATE SET json = excluded.json, zaman = excluded.zaman')
+        .bind(kim.id, g.tarih, j, Date.now()).run();
+      return json({ ok: true });
+    }
+    if (yol === 'gecmis' && m === 'GET') {
+      const u = new URL(req.url); const ay = u.searchParams.get('ay') || ''; const t = u.searchParams.get('tarih') || '';
+      let r;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(t)) r = await db.prepare('SELECT tarih, json FROM antrenman_gecmis WHERE kullanici_id = ? AND tarih = ?').bind(kim.id, t).all();
+      else if (/^\d{4}-\d{2}$/.test(ay)) r = await db.prepare('SELECT tarih, json FROM antrenman_gecmis WHERE kullanici_id = ? AND tarih >= ? AND tarih <= ? ORDER BY tarih DESC').bind(kim.id, ay + '-01', ay + '-31').all();
+      else return hata('Geçersiz istek.', 400);
+      return json({ liste: (r.results || []).map((x) => ({ tarih: x.tarih, seanslar: jsonOku(x.json, []) })) });
+    }
     if (yol === 'veri' && m === 'GET') {
       const v = await db.prepare('SELECT json, guncelleme FROM veriler WHERE kullanici_id = ?').bind(kim.id).first();
       return json(v ? { json: v.json, guncelleme: v.guncelleme } : { json: null, guncelleme: 0 });
