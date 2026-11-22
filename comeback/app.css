@@ -1818,3 +1818,10 @@ body.gece .bk-onizle img{box-shadow:0 0 0 1px #2a2a30}
 .gs2 .gs-ilk{font-size:15px;font-weight:600;color:#a3a098}
 .gs2 .gs-ilk b{color:#f3f1ec;font-weight:800}
 .gs2 .gs-atla{font-size:12px;font-weight:700;color:#5a5960;margin:0}
+
+/* dinlenme düğmesi hareketler arasında gezerken zıplamaz, yumuşakça kayar */
+.dinlenme.od-yer.od-hazir{transition:top .42s cubic-bezier(.23,1,.32,1),left .42s cubic-bezier(.23,1,.32,1),width .42s cubic-bezier(.23,1,.32,1),height .42s cubic-bezier(.23,1,.32,1),--din 1s linear}
+body.az-hareket .dinlenme.od-yer.od-hazir{transition:--din 1s linear}
+/* basılı tutma: seçim ve uzun basma menüsü çıkmasın */
+.od-adim-btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.dinlenme.od-bekle{opacity:0;pointer-events:none}
