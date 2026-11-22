@@ -2156,7 +2156,6 @@
     dinlenmeCiz();
   }
   // odak ekranında sayaç, Seti bitir düğmesinin tam üstüne aynı boyda oturur
-  let dinH = 60;
   function dinKonum(el) {
     el = el || document.getElementById('dinlenme'); if (!el) return;
     const alt = document.body.classList.contains('odak-tam') && !odMenu && document.querySelector('.od-alt');
@@ -2165,9 +2164,8 @@
     el.classList.remove('od-bekle');
     const btn = alt && alt.querySelector('.buyuk-btn'); const r = alt && (btn || alt).getBoundingClientRect();
     if (r && r.height > 30) {
-      if (btn) dinH = r.height;
-      const top = btn ? r.top : Math.max(8, r.top - dinH - 10);
-      el.classList.add('od-yer'); el.style.top = top + 'px'; el.style.left = r.left + 'px'; el.style.width = r.width + 'px'; el.style.height = dinH + 'px';
+      // bitmemiş harekette Seti bitir düğmesinin yerinde; bitmiş harekette alttaki kutunun tamamını kaplar ve yazı ortalanır
+      el.classList.add('od-yer'); el.classList.toggle('genis', !btn); el.style.top = r.top + 'px'; el.style.left = r.left + 'px'; el.style.width = r.width + 'px'; el.style.height = r.height + 'px';
       if (!el.classList.contains('od-hazir')) requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('od-hazir')));
     } else if (el.classList.contains('od-yer')) { el.classList.remove('od-yer', 'od-hazir'); ['top', 'left', 'width', 'height'].forEach((k) => { el.style[k] = ''; }); }
   }
@@ -2178,7 +2176,7 @@
     const kalan = Math.max(0, Math.round((dinlenme.bitis - Date.now()) / 1000));
     if (!el) {
       el = document.createElement('div'); el.id = 'dinlenme'; el.className = 'dinlenme'; el.setAttribute('role', 'timer'); el.setAttribute('aria-label', 'Dinlenme sayacı');
-      el.innerHTML = '<div class="cubuk"><span></span></div><span class="sure"></span><span class="din-et">dinlen</span><button data-act="dinlenme-ek">+30 sn</button><button data-act="dinlenme-atla">Atla</button>';
+      el.innerHTML = '<div class="cubuk"><span></span></div><span class="sure"></span><span class="din-et">dinlen</span><i class="din-ara" aria-hidden="true"></i><button data-act="dinlenme-ek">+30 sn</button><button data-act="dinlenme-atla">Atla</button>';
       document.body.appendChild(el);
     }
     dinKonum(el);
@@ -3601,7 +3599,6 @@
       if (!adimDegis(el.dataset)) return; const d = +el.dataset.d;
       kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY);
       const b = document.querySelector('[data-ap="' + el.dataset.alan + '"]'); if (b && b.animate && !azHareket) b.animate([{ transform: 'translateY(' + (d > 0 ? 6 : -6) + 'px)', opacity: 0.4 }, { transform: 'none', opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.23,1,.32,1)' });
-      if (navigator.vibrate) navigator.vibrate(6);
     },
     'anim-sec'(el) { S.ayar = S.ayar || {}; S.ayar.anim = el.dataset.deger; kaydet(true); azHareket = sistemAzHareket || S.ayar.anim === 'az'; document.body.classList.toggle('az-hareket', azHareket && !sistemAzHareket); const sY = window.scrollY; render(); window.scrollTo(0, sY); toast(S.ayar.anim === 'az' ? 'Animasyonlar sade.' : 'Animasyonlar tam.'); },
     'gorunum'(el) { S.ayar = S.ayar || {}; S.ayar.seansGorunum = el.dataset.deger === 'liste' ? 'liste' : ''; kaydet(true); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
@@ -4340,7 +4337,6 @@
     const adim = () => {
       if (!basili) return; basili.adet++; const yeni = adimDegis(v); if (yeni === false) return basiliBitir();
       const inp = document.querySelector('.od-adim-in[data-in="' + v.alan + '"]'); if (inp) { inp.value = yeni === '0' ? '' : yeni; inp.style.width = (Math.max(1, inp.value.length) + 0.4) + 'ch'; inp.classList.toggle('uzun', inp.value.length >= 5); }
-      if (navigator.vibrate && basili.adet % 2) navigator.vibrate(4);
       basili.t = setTimeout(adim, basili.adet < 5 ? 150 : basili.adet < 15 ? 85 : 45);
     };
     basili.t = setTimeout(adim, 380);

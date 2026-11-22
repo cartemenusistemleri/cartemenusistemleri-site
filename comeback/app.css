@@ -1825,3 +1825,16 @@ body.az-hareket .dinlenme.od-yer.od-hazir{transition:--din 1s linear}
 /* basılı tutma: seçim ve uzun basma menüsü çıkmasın */
 .od-adim-btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .dinlenme.od-bekle{opacity:0;pointer-events:none}
+
+/* dinlenme baloncuğu: bitmiş harekette büyür ve ortalanır, geri dönünce küçülür (yumuşak) */
+.din-ara{display:none}
+.dinlenme.od-yer{justify-content:center}
+.dinlenme.od-yer .din-et{flex:none;margin-right:4px}
+.dinlenme.od-yer .din-ara{display:block;flex:1 1 0;min-width:0;transition:flex-grow .42s cubic-bezier(.23,1,.32,1)}
+.dinlenme.od-yer.genis .din-ara{flex-grow:0;min-width:14px}
+body.odak-tam .dinlenme.od-yer .sure{transition:font-size .42s cubic-bezier(.23,1,.32,1)}
+body.odak-tam .dinlenme.od-yer.genis .sure{font-size:40px;letter-spacing:-.04em}
+.dinlenme.od-yer .din-et{transition:font-size .42s cubic-bezier(.23,1,.32,1)}
+.dinlenme.od-yer.genis .din-et{font-size:17px}
+.dinlenme.od-yer.genis{border-radius:30px;padding:0 18px}
+body.az-hareket .dinlenme.od-yer .din-ara,body.az-hareket .dinlenme.od-yer .sure,body.az-hareket .dinlenme.od-yer .din-et{transition:none}
