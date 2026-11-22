@@ -41,16 +41,21 @@ export async function onRequest(ctx) {
 
   if (request.method === 'POST') {
     if (!AD.test(yol)) return json({ hata: 'Geçersiz dosya adı.' }, 400, ek);
-    const anahtar = request.headers.get('x-yukleme') || '';
-    if (!env.COMEBACK_DB || anahtar.length < 24) return json({ hata: 'Yetkisiz.' }, 401, ek);
+    // Form ile gönderim (Dreamina sayfası artık pencere bağlantısını kesiyor): alanlar tok + dosya, cevap kısa bir sayfa
+    const form = (request.headers.get('content-type') || '').indexOf('multipart/form-data') === 0;
+    let fd = null; if (form) { try { fd = await request.formData(); } catch (e) { return json({ hata: 'Form okunamadı.' }, 400, ek); } }
+    const sayfa = (m, d) => new Response('<!doctype html><meta charset="utf-8"><title>Aktarım</title><p style="font:16px system-ui">' + m + '</p>', { status: d || 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
+    const anahtar = (fd ? String(fd.get('tok') || '') : request.headers.get('x-yukleme')) || '';
+    if (!env.COMEBACK_DB || anahtar.length < 24) return fd ? sayfa('Yetkisiz.', 401) : json({ hata: 'Yetkisiz.' }, 401, ek);
     const s = await env.COMEBACK_DB.prepare('SELECT bitis FROM yukleme_anahtar WHERE hash = ?').bind(await ozet(anahtar)).first();
-    if (!s || s.bitis < Date.now()) return json({ hata: 'Yetkisiz.' }, 401, ek);
-    const tur = (request.headers.get('content-type') || '').split(';')[0];
-    if (!/^image\/(webp|png|jpeg)$/.test(tur)) return json({ hata: 'Yalnızca görsel.' }, 415, ek);
-    const veri = await request.arrayBuffer();
-    if (veri.byteLength < 1000 || veri.byteLength > 4_000_000) return json({ hata: 'Boyut uygun değil.' }, 413, ek);
+    if (!s || s.bitis < Date.now()) return fd ? sayfa('Yetkisiz.', 401) : json({ hata: 'Yetkisiz.' }, 401, ek);
+    const dosya = fd ? fd.get('dosya') : null;
+    const tur = fd ? String((dosya && dosya.type) || '') : (request.headers.get('content-type') || '').split(';')[0];
+    if (!/^image\/(webp|png|jpeg)$/.test(tur)) return fd ? sayfa('Yalnızca görsel.', 415) : json({ hata: 'Yalnızca görsel.' }, 415, ek);
+    const veri = fd ? await dosya.arrayBuffer() : await request.arrayBuffer();
+    if (veri.byteLength < 1000 || veri.byteLength > 4_000_000) return fd ? sayfa('Boyut uygun değil.', 413) : json({ hata: 'Boyut uygun değil.' }, 413, ek);
     await kv.put(ONEK + yol, veri, { metadata: { tur, boyut: veri.byteLength, zaman: Date.now() } });
-    return json({ tamam: true, ad: yol, boyut: veri.byteLength }, 200, ek);
+    return fd ? sayfa(yol + ' kaydedildi (' + Math.round(veri.byteLength / 1024) + ' KB). Bu sekmeyi kapatabilirsin.') : json({ tamam: true, ad: yol, boyut: veri.byteLength }, 200, ek);
   }
   return json({ hata: 'Desteklenmeyen istek.' }, 405, ek);
 }
