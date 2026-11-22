@@ -4,10 +4,11 @@
 // POST /api/comeback/gorsel/<ad>       → görseli kaydet (gövde: image/webp|png|jpeg)
 //      Başlık x-yukleme: tek kullanımlık olmayan yükleme anahtarı; SHA-256 özeti D1 "yukleme_anahtar" tablosunda olmalı (bitis > şimdi)
 // Saklama: KV (COMEBACK_KV yoksa ODEME_LINKS), anahtar "comeback:gorsel:<ad>"
-// Dosya adı: <hareket>_<e|k>_<bas|bit|tut|hata>
+// Dosya adı: <hareket>_<e|k>_<bas|bit|tut|hata> ya da rozet_<ad>
 
 const ONEK = 'comeback:gorsel:';
-const AD = /^[a-z0-9_]{2,40}_(e|k)_(bas|bit|tut|hata)$/;
+const AD = /^(?:[a-z0-9_]{2,40}_(e|k)_(bas|bit|tut|hata)|rozet_[a-z0-9_]{2,40})$/;
+// rozet_<ad>: rozet sahneleri (Dreamina'dan aktarılan, 22 Kasım)
 const IZINLI = ['https://dreamina.capcut.com'];
 
 function cors(request) {
