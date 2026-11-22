@@ -249,7 +249,7 @@
   async function hesapYukle() {
     try {
       const r = await istek('ben');
-      if (r.ok) { hesap = r.j.kullanici; await veriCek(); if (hesap.rol === 'demo' && !S.profil) { demoDoldur(); kaydet(true); } hocaYukle(); paylasimYukle(); setTimeout(gecmisGonder, 2500); if (S.profil) skorGonder(); setTimeout(() => { try { if (hatAcikMi()) hatEsitle(true); } catch (e) { /* yok */ } }, 3000); }
+      if (r.ok) { hesap = r.j.kullanici; await veriCek(); if (S.profil) { let d = false; if (hesap.bio && !S.profil.bio) { S.profil.bio = hesap.bio; d = true; } if (hesap.ilgi && hesap.ilgi.length && !(S.profil.ilgi || []).length) { S.profil.ilgi = hesap.ilgi; d = true; } if (hesap.vitrin && !S.profil.vitrin) { S.profil.vitrin = hesap.vitrin; d = true; } if (d) kaydet(true); } if (hesap.rol === 'demo' && !S.profil) { demoDoldur(); kaydet(true); } hocaYukle(); paylasimYukle(); setTimeout(gecmisGonder, 2500); if (S.profil) skorGonder(); setTimeout(() => { try { if (hatAcikMi()) hatEsitle(true); } catch (e) { /* yok */ } }, 3000); }
       else if (r.durum >= 500) cevrimdisi = true;
     } catch (e) { cevrimdisi = true; }
   }
@@ -323,6 +323,7 @@
     ['a10', '10 antrenman', 'On antrenman tamam', (o) => o.antr >= 10],
     ['a25', '25 antrenman', 'Artık alışkanlık', (o) => o.antr >= 25],
     ['a50', '50 antrenman', 'Yarım yüz', (o) => o.antr >= 50],
+    ['a100', '100 antrenman', 'Üç haneli', (o) => o.antr >= 100],
     ['h4', '4 hafta', 'Dört hafta üst üste haftalık hedefini tuttun', (o) => o.seri >= 4],
     ['h12', '12 hafta', 'Üç ay boyunca her hafta sözünü tuttun', (o) => o.seri >= 12],
     ['r1', 'İlk rekor', 'Kendini geçtin', (o) => o.rekor >= 1],
@@ -343,6 +344,53 @@
     if (o.seri > (S.enIyiHafta || 0)) S.enIyiHafta = o.seri;
     if (o.tamHafta) S.tamHaftaOldu = true;
     return ROZET.map((r) => ({ id: r[0], ad: r[1], acik: r[2], var: r[3](o) }));
+  }
+  // Açık profil: biyografi, ilgi alanları (branş), öne çıkan rozet. Başkaları forumda ve sıralamada görür.
+  // renk: k kobalt (güç), l limon (dayanıklılık), s siyah (oyun ve dövüş). takip: bugün ölçebildiğimiz branşlar.
+  const ILGI = [['fitness', 'Fitness', 'k'], ['kalistenik', 'Kalistenik', 'k'], ['crossfit', 'CrossFit', 'k'], ['hiit', 'HIIT', 'k'], ['kosu', 'Koşu', 'l'], ['yuruyus', 'Yürüyüş', 'l'], ['bisiklet', 'Bisiklet', 'l'], ['yuzme', 'Yüzme', 'l'], ['yoga', 'Yoga', 'l'], ['pilates', 'Pilates', 'l'], ['kayak', 'Kayak', 'l'],
+    ['futbol', 'Futbol', 's'], ['basketbol', 'Basketbol', 's'], ['voleybol', 'Voleybol', 's'], ['tenis', 'Tenis', 's'], ['padel', 'Padel', 's'], ['boks', 'Boks', 's'], ['kickboks', 'Kickboks', 's'], ['dovus', 'Dövüş sporları', 's'], ['tirmanis', 'Tırmanış', 's']];
+  const PROGRAM_SPOR = ['futbol', 'basketbol', 'kosu', 'yuzme', 'tenis', 'dovus'];
+  const BRANS_ESIK = [10, 50, 150, 500];
+  const benimRozet = (id) => rozetDurum().some((r) => r.id === id && r.var);
+  function bransSayi(id) {
+    if (id === 'fitness') return Object.keys(S.gunluk).filter((k) => S.gunluk[k].antrenman).length;
+    if (PROGRAM_SPOR.indexOf(id) < 0) return null;
+    const g = gOku().gun; let n = 0; Object.keys(g).forEach((k) => (g[k] || []).forEach((x) => { if (x.spor === id) n++; })); return n;
+  }
+  let pfAcikZaman = 0;
+  function profilAcikGonder() {
+    if (!hesap) return; clearTimeout(pfAcikZaman);
+    pfAcikZaman = setTimeout(() => { const p = S.profil || {}; istek('profil-acik', 'PUT', { bio: p.bio || '', ilgi: p.ilgi || [], vitrin: p.vitrin || '' }).catch(() => {}); }, 900);
+  }
+  let pfBio = false, pfIlgi = false;
+  function profilHero() {
+    const p = S.profil; const vt = p.vitrin && benimRozet(p.vitrin) ? p.vitrin : ''; const un = hesap && hesap.unvan;
+    const ilgi = (p.ilgi && p.ilgi.length ? p.ilgi : [p.spor || 'fitness']).filter((x) => ILGI.some((y) => y[0] === x));
+    const cip = (i, sec) => { const d = ILGI.find((y) => y[0] === i); return '<button class="pf-cip r' + d[2] + (sec ? ' sec' : '') + '" data-act="pf-ilgi" data-id="' + i + '" aria-pressed="' + !!sec + '">' + esc(d[1]) + '</button>'; };
+    return '<section class="t genis pf-hero" aria-label="Profil">' +
+      (hesap && hesap.kadi ? '<span class="k">@' + esc(hesap.kadi) + '</span>' : '') +
+      '<div class="pf-isim">' + benAvatar('buyuk') + '<h1 class="pf-ad">' + esc((p.ad || 'Ben').split(' ')[0]) + '<i class="isim-nk kd' + (vt ? rozetKademe(vt) : 2) + '" aria-hidden="true"></i></h1>' + (un ? unvanSvg(un, 30) : '') + (vt ? rozetGorsel(vt, true, 32, true) : '') + '</div>' +
+      (pfBio ? '<div class="pf-bio-duzen"><textarea id="pfBio" maxlength="160" rows="3" placeholder="Kendini bir iki cümleyle anlat: ne yapıyorsun, neye çalışıyorsun?">' + esc(p.bio || '') + '</textarea><div class="satir"><span class="ik">En çok 160 harf · forumda ve sıralamada görünür</span><button class="btn ana kucuk" data-act="pf-bio-kaydet">Kaydet</button></div></div>'
+        : '<button class="pf-bio' + (p.bio ? '' : ' bos') + '" data-act="pf-bio">' + (p.bio ? esc(p.bio) : 'Kendini bir cümleyle anlat') + '</button>') +
+      '<div class="pf-cipler">' + (pfIlgi ? ILGI.map((d) => cip(d[0], ilgi.indexOf(d[0]) >= 0)).join('') + '<button class="pf-cip ekle" data-act="pf-ilgi-ac">Tamam</button>' : ilgi.map((i) => cip(i, true).replace('data-act="pf-ilgi"', 'data-act="pf-ilgi-ac"').replace(' aria-pressed="true"', '')).join('') + '<button class="pf-cip ekle" data-act="pf-ilgi-ac">+ Ekle</button>') + '</div>' +
+      '</section>';
+  }
+  function profilSayilar() {
+    const o = { antr: Object.keys(S.gunluk).filter((k) => S.gunluk[k].antrenman).length, seri: Math.max(haftaSeri(), S.enIyiHafta || 0), rekor: Object.keys(S.rekor).length };
+    return '<div class="t genis pf-sayi num"><div><b>' + o.antr + '</b><span>antrenman</span></div><div><b>' + o.seri + '</b><span>hafta seri</span></div><div><b>' + o.rekor + '</b><span>rekor</span></div></div>';
+  }
+  function profilBrans() {
+    const p = S.profil; const ilgi = (p.ilgi && p.ilgi.length ? p.ilgi : [p.spor || 'fitness']);
+    const sat = ilgi.map((i) => { const d = ILGI.find((y) => y[0] === i); if (!d) return ''; const n = bransSayi(i);
+      const dolu = n == null ? 0 : BRANS_ESIK.filter((e) => n >= e).length; const sonraki = n == null ? null : BRANS_ESIK.find((e) => n < e);
+      return '<div class="pf-brans"><span class="pf-b-ad"><b>' + esc(d[1]) + '</b><span class="ik num">' + (n == null ? 'Ölçüm mağaza sürümünde' : n + ' antrenman' + (sonraki ? ' · sonraki rozet ' + sonraki : ' · hepsi tamam')) + '</span></span><span class="pf-nk r' + d[2] + '">' + BRANS_ESIK.map((e, j) => '<i class="' + (j < dolu ? 'dolu' : '') + '"></i>').join('') + '</span></div>'; }).join('');
+    return '<div class="t genis pf-branslar"><span class="k">Branşlar</span>' + sat + '</div>';
+  }
+  function profilRozetler() {
+    const l = rozetDurum(); const vt = S.profil.vitrin; const n = l.filter((r) => r.var).length; const sec = l.find((r) => r.id === vt && r.var);
+    return '<div class="t genis pf-rozet"><div class="satir"><span class="k">Rozetler · ' + n + ' / ' + l.length + '</span><span class="k pf-vt">' + (sec ? 'İsmimin yanında: ' + esc(sec.ad) : n ? 'Birine dokun, isminin yanına koy' : '') + '</span></div>' +
+      '<div class="pf-rz-izgara">' + l.map((r) => (r.var ? '<button class="pf-rz' + (r.id === vt ? ' sec' : '') + '" data-act="pf-vitrin" data-id="' + r.id + '" aria-pressed="' + (r.id === vt) + '" title="' + esc(r.acik) + '">' : '<div class="pf-rz kilitli" title="' + esc(r.acik) + '">') +
+        rozetGorsel(r.id, r.var, 56) + '<span>' + esc(r.ad) + '</span>' + (r.var ? '</button>' : '</div>')).join('') + '</div></div>';
   }
   function yeniRozetler() {
     const once = new Set(S.rozetler || []); const simdi = rozetDurum().filter((r) => r.var);
@@ -870,8 +918,8 @@
       if (tp.konu.hata) return ust(geri('#/topluluk')) + '<div class="t"><span>' + esc(tp.konu.hata) + '</span></div>';
       const k = tp.konu.konu;
       return ust(geri('#/topluluk'), '<span class="alt">' + esc((FKAT.find((x) => x[0] === k.kategori) || ['', ''])[1]) + '</span>') +
-        '<article class="t" style="gap:10px">' + (k.gizli ? '<span class="etiket">Gizlendi (şikâyet)</span>' : '') + '<div class="satir" style="align-items:flex-start"><h1 style="font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1.1">' + esc(k.baslik) + '</h1><div class="tp-menu-kap">' + menuDugme('konu', k.id, k.yazarId, k.benim) + '</div></div><span class="ik">' + esc(k.yazar) + ' · ' + zamanOnce(k.zaman) + '</span><p style="white-space:pre-wrap;line-height:1.55">' + esc(k.metin) + '</p></article>' +
-        tp.konu.cevaplar.map((c) => '<div class="t tp-cevap"><div class="satir"><span class="ik"><b style="color:var(--murekkep)">' + esc(c.yazar) + '</b> · ' + zamanOnce(c.zaman) + (c.gizli ? ' · gizli' : '') + '</span><div class="tp-menu-kap">' + menuDugme('cevap', c.id, c.yazarId, c.benim) + '</div></div><p style="white-space:pre-wrap;line-height:1.5">' + esc(c.metin) + '</p></div>').join('') +
+        '<article class="t" style="gap:10px">' + (k.gizli ? '<span class="etiket">Gizlendi (şikâyet)</span>' : '') + '<div class="satir" style="align-items:flex-start"><h1 style="font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1.1">' + esc(k.baslik) + '</h1><div class="tp-menu-kap">' + menuDugme('konu', k.id, k.yazarId, k.benim) + '</div></div><span class="ik">' + esc(k.yazar) + isimEk(k.yrz) + ' · ' + zamanOnce(k.zaman) + '</span><p style="white-space:pre-wrap;line-height:1.55">' + esc(k.metin) + '</p></article>' +
+        tp.konu.cevaplar.map((c) => '<div class="t tp-cevap"><div class="satir"><span class="ik"><b style="color:var(--murekkep)">' + esc(c.yazar) + isimEk(c.yrz) + '</b> · ' + zamanOnce(c.zaman) + (c.gizli ? ' · gizli' : '') + '</span><div class="tp-menu-kap">' + menuDugme('cevap', c.id, c.yazarId, c.benim) + '</div></div><p style="white-space:pre-wrap;line-height:1.5">' + esc(c.metin) + '</p></div>').join('') +
         '<form data-form="tp-cevap" class="koc-yaz" novalidate><label class="gizli" for="tpCevap">Cevabın</label><textarea id="tpCevap" name="metin" rows="1" maxlength="3000" placeholder="Cevap yaz"></textarea><button class="btn ana" type="submit" aria-label="Gönder">' + IK.ok + '</button></form>';
     }
     if (alt === 'meydan-yeni') return ust(geri('#/topluluk/meydan'), '<span class="alt">Meydan okuma</span>') + '<h1 class="baslik">Meydan oku<span class="nokta">.</span></h1>' +
@@ -900,7 +948,7 @@
     return ust(logo, '<span class="alt">Topluluk</span>') + '<h1 class="baslik">Topluluk<span class="nokta">.</span></h1>' + sekmeler +
       '<div class="yatay">' + [['', 'Hepsi']].concat(FKAT).map((k) => '<button class="hap" data-act="tp-kat" data-deger="' + k[0] + '" aria-pressed="' + (tp.kat === k[0]) + '">' + k[1] + '</button>').join('') + '</div>' +
       '<a class="btn ana buyuk-btn" href="#/topluluk/yeni">Konu aç' + IK.ok + '</a>' +
-      (!tp.liste ? iskelet(3) : tp.liste.length ? tp.liste.map((x) => '<a class="t tp-konu" href="#/topluluk/konu/' + x.id + '"><span class="ik">' + esc((FKAT.find((k) => k[0] === x.kategori) || ['', ''])[1]) + ' · ' + esc(x.yazar) + ' · ' + zamanOnce(x.son) + '</span><b>' + esc(x.baslik) + '</b><span class="ik" style="color:var(--ikincil)">' + esc(x.ozet) + '</span><span class="etiket">' + x.cevap + ' cevap</span></a>').join('') : '<div class="t bos"><b>İlk konuyu sen aç.</b><span class="ik">Soru sor, ilerlemeni paylaş, motivasyon ver.</span></div>');
+      (!tp.liste ? iskelet(3) : tp.liste.length ? tp.liste.map((x) => '<a class="t tp-konu" href="#/topluluk/konu/' + x.id + '"><span class="ik">' + esc((FKAT.find((k) => k[0] === x.kategori) || ['', ''])[1]) + ' · ' + esc(x.yazar) + isimEk(x.yrz) + ' · ' + zamanOnce(x.son) + '</span><b>' + esc(x.baslik) + '</b><span class="ik" style="color:var(--ikincil)">' + esc(x.ozet) + '</span><span class="etiket">' + x.cevap + ' cevap</span></a>').join('') : '<div class="t bos"><b>İlk konuyu sen aç.</b><span class="ik">Soru sor, ilerlemeni paylaş, motivasyon ver.</span></div>');
   }
   function mesajAkis() {
     const L = tp.mesaj.liste; const sonBen = L.map((x) => x.ben).lastIndexOf(true);
@@ -1432,6 +1480,33 @@
     s7: ['alev', '7', 'GÜN SERİ', 1], s30: ['alev', '30', 'GÜN SERİ', 3], r1: ['kupa', '', '', 1], r10: ['kupa', '10', 'REKOR', 3],
     donus: ['donus', '', '', 2], hafta: ['takvim', '', '', 2], beslenme: ['tabak', '7', 'GÜN ÖĞÜN', 2]
   };
+  /* Sahne rozetleri (23 Kasım): her branşa bir illüstrasyon; sayı ve kademe halkası kodda.
+     kademe: 1 limon, 2 kobalt, 3 siyah (gecede beyaz), 4 krom. Sahnesi olmayan rozet eski plakayla çizilir. */
+  const RZ_SAHNE = { ilk: ['fitness', '1', 1], a10: ['fitness', '10', 1], a25: ['fitness', '25', 2], a50: ['fitness', '50', 3], a100: ['fitness', '100', 4] };
+  const RZ_NOKTA = (() => { let h = ''; for (let i = 0; i < 24; i++) { const a = i * Math.PI / 12; h += '<circle cx="' + (50 + 46.4 * Math.cos(a)).toFixed(2) + '" cy="' + (50 + 46.4 * Math.sin(a)).toFixed(2) + '" r=".9"/>'; } return '<svg class="rzs-nk" viewBox="0 0 100 100" aria-hidden="true">' + h + '</svg>'; })();
+  const rozetKademe = (id) => (RZ_SAHNE[id] ? RZ_SAHNE[id][2] : (ROZET_GORSEL[id] || [0, 0, 0, 2])[3]);
+  function rozetGorsel(id, acik, boy, mini) {
+    const z = RZ_SAHNE[id];
+    if (!z) return '<span class="rzs-eski' + (mini ? ' mini' : '') + '" style="--b:' + boy + 'px">' + rozetSvg(id, acik) + '</span>';
+    return '<span class="rzs kd' + z[2] + (acik ? '' : ' kilit') + (mini ? ' mini' : '') + '" style="--b:' + boy + 'px">' + (mini ? '' : RZ_NOKTA) + '<img src="rozet/' + z[0] + '.webp?v=1" alt="" loading="lazy" decoding="async">' + (mini ? '' : '<b class="num">' + z[1] + '</b>') + '</span>';
+  }
+  // Unvan işaretleri: kazanılmaz, verilir. Seçilen rozetten ayrı, her zaman isim yanında.
+  const UNVAN = { kurucu: 'Kurucu', ekip: 'COMEBACK. ekibi', koc: 'Koç' };
+  function unvanSvg(un, boy) {
+    if (!UNVAN[un]) return '';
+    const kucuk = boy < 40; const id = 'uy' + un + boy;
+    const yazi = { kurucu: 'KURUCU · COMEBACK. · KURUCU · COMEBACK. ·', ekip: 'COMEBACK. EKİBİ · COMEBACK. EKİBİ ·', koc: 'KOÇ · COMEBACK. · KOÇ · COMEBACK. ·' }[un];
+    const ic = { kurucu: '<path class="uv-dolu" d="M50 31l5.4 11.9 12.9 1.4-9.6 8.7 2.8 12.7L50 59.2 38.5 65.7l2.8-12.7-9.6-8.7 12.9-1.4z"/>',
+      ekip: kucuk ? '<circle class="uv-dolu" cx="50" cy="50" r="15"/>' : '<text class="uv-dolu" x="50" y="53.5" text-anchor="middle" font-size="10" font-weight="900" letter-spacing="-.4">COMEBACK.</text>',
+      koc: '<g class="uv-cizgi"><path d="M34 45h21a10.5 10.5 0 1 1-10.5 10.5"/><path d="M34 45v8h10.5"/><path d="M55 45l8-5.5"/></g><circle class="uv-dolu" cx="55" cy="55.5" r="2.8"/>' }[un];
+    const halka = kucuk ? '' : '<defs><path id="' + id + '" d="M50 50m-39.5 0a39.5 39.5 0 1 1 79 0a39.5 39.5 0 1 1-79 0"/></defs><text class="uv-dolu" font-size="6.4" font-weight="800"><textPath href="#' + id + '" textLength="246" lengthAdjust="spacing">' + yazi + '</textPath></text><circle class="uv-ic" cx="50" cy="50" r="31"/>';
+    return '<span class="uv uv-' + un + '" style="--b:' + boy + 'px" role="img" aria-label="' + UNVAN[un] + '" title="' + UNVAN[un] + '"><svg viewBox="0 0 100 100">' + halka + ic + '</svg></span>';
+  }
+  // isim + kademe renginde nokta + unvan + öne çıkan rozet (forum, sıralama, profil)
+  function isimEk(o) {
+    o = o || {}; const vt = o.vt && (RZ_SAHNE[o.vt] || ROZET_GORSEL[o.vt]) ? o.vt : '';
+    return '<i class="isim-nk kd' + (vt ? rozetKademe(vt) : 2) + '" aria-hidden="true"></i>' + (o.un ? unvanSvg(o.un, 18) : '') + (vt ? rozetGorsel(vt, true, 18, true) : '');
+  }
   function rozetSvg(id, acik) {
     const g = ROZET_GORSEL[id] || ['bayrak', '', '', 1];
     // plakanın kenarındaki tutma çentikleri
@@ -2704,7 +2779,7 @@
     const OLC = [['hacim', 'Hacim'], ['set', 'Set'], ['antr', 'Antrenman']];
     const deg = (x) => sira.olcut === 'hacim' ? sayi(x.hacim) + ' kg' : sira.olcut === 'set' ? (+x.set || 0) + ' set' : x.antr + ' antrenman';
     const govde = !V ? iskelet(3) : V.hata ? '<p class="ik" style="padding:12px 4px">' + esc(V.hata) + '</p>' :
-      (V.liste.length ? '<div class="liste sira-liste">' + V.liste.map((x) => '<div class="' + (x.ben ? 'ben' : '') + '"><span class="sira-no num' + (x.sira <= 3 ? ' ust' + x.sira : '') + '">' + x.sira + '</span>' + avatar(x.ad, x.fid, x.fv, 'kucuk') + '<div class="ad"><b>' + esc(x.ad) + (x.ben ? ' · sen' : '') + '</b><span class="ik num">' + [sayi(x.hacim) + ' kg', (+x.set || 0) + ' set', x.antr + ' antrenman'].join(' · ') + '</span></div><b class="num">' + deg(x) + '</b></div>').join('') + '</div>' : '<p class="ik" style="padding:12px 4px">' + (sira.donem === 'hafta' ? 'Bu hafta' : 'Bu ay') + ' henüz kimse sıralamada değil. İlk sen ol.</p>');
+      (V.liste.length ? '<div class="liste sira-liste">' + V.liste.map((x) => '<div class="' + (x.ben ? 'ben' : '') + '"><span class="sira-no num' + (x.sira <= 3 ? ' ust' + x.sira : '') + '">' + x.sira + '</span>' + avatar(x.ad, x.fid, x.fv, 'kucuk') + '<div class="ad"><b>' + esc(x.ad) + isimEk(x) + (x.ben ? ' · sen' : '') + '</b><span class="ik num">' + [sayi(x.hacim) + ' kg', (+x.set || 0) + ' set', x.antr + ' antrenman'].join(' · ') + '</span></div><b class="num">' + deg(x) + '</b></div>').join('') + '</div>' : '<p class="ik" style="padding:12px 4px">' + (sira.donem === 'hafta' ? 'Bu hafta' : 'Bu ay') + ' henüz kimse sıralamada değil. İlk sen ol.</p>');
     return ust(geri('#/ilerleme'), '<span class="alt">Bütün üyeler</span>') +
       '<h1 class="baslik">Sıralama<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
@@ -3272,7 +3347,7 @@
     const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
     return ust(logo) + '<h1 class="baslik">Menü<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
-      '<a class="t genis mn-profil" href="#/profilim">' + benAvatar('buyuk') + '<span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · bilgiler, hedef, hesap</span></span>' + OK_SAG + '</a>' +
+      '<a class="t genis mn-profil" href="#/profilim">' + benAvatar('buyuk') + '<span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + isimEk({ vt: p.vitrin && benimRozet(p.vitrin) ? p.vitrin : '', un: hesap && hesap.unvan }) + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · bilgiler, hedef, hesap</span></span>' + OK_SAG + '</a>' +
       mGrup('Antrenman', [
         mSatir('#/plan', 'program', 'Programım', esc(S.program.ad) + ' · ayrıntılar ve düzenleme'),
         mSatir('#/haftaplan', 'plan', 'Haftalık plan', 'Bu hafta hangi günler geliyorsun'),
@@ -3310,8 +3385,8 @@
     const ad = { kas: 'Kas kazanmak', yag: 'Yağ yakmak', guc: 'Güçlenmek', kondisyon: 'Kondisyon' }[p.hedef];
     const spor = { fitness: 'Fitness', futbol: 'Futbol', basketbol: 'Basketbol', kosu: 'Koşu', yuzme: 'Yüzme', dovus: 'Dövüş sporları' }[p.spor];
     const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
-    return ust(geri('#/profil')) + '<h1 class="baslik">' + esc(p.ad || 'Profilim') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' +
+    return ust(geri('#/profil'), '<span class="alt">Profilim</span>') +
+      '<div class="izgara">' + profilHero() + profilSayilar() + profilBrans() + profilRozetler() +
       (hesap ? '<div class="t genis pf-resim">' + benAvatar('dev' + (avatarYuk ? ' yukleniyor' : '')) + '<div class="yigin" style="gap:8px;min-width:0"><span class="k">Profil resmi</span><span class="ik" style="line-height:1.45">Sıralamada, mesajlarda ve ortak antrenmanda görünür.</span><div class="haplar"><label class="btn ana kucuk" style="cursor:pointer"><input type="file" accept="image/*" data-in="avatar" class="gizli">' + (hesap.foto ? 'Değiştir' : 'Resim seç') + '</label>' + (hesap.foto ? '<button class="btn cerceve kucuk" data-act="avatar-sil">Kaldır</button>' : '') + '</div></div></div>' : '') +
       '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
       mGrup('Profil', [
@@ -3496,7 +3571,7 @@
   function rozetKutu() {
     const l = rozetDurum(); const var_ = l.filter((r) => r.var); const gos = rozetHepsi ? l : var_;
     return '<div class="t genis rz-kutu"><div class="satir"><span class="k">Rozetler</span><button class="metin-btn kucuk-metin" data-act="rozet-hepsi" aria-expanded="' + rozetHepsi + '">' + var_.length + ' / ' + l.length + (rozetHepsi ? ' · gizle' : ' · tümü') + '</button></div>' +
-      (gos.length ? '<div class="rz-serit">' + gos.map((r) => '<div class="rozet rz-mini' + (r.var ? ' var' : '') + '" title="' + esc(r.acik) + '">' + rozetSvg(r.id, r.var) + '<b>' + esc(r.ad) + '</b>' + (rozetHepsi && !r.var ? '<span>' + esc(r.acik) + '</span>' : '') + '</div>').join('') + '</div>' : '<span class="ik">İlk antrenmanını bitirince ilk rozetin gelir.</span>') + '</div>';
+      (gos.length ? '<div class="rz-serit">' + gos.map((r) => '<div class="rozet rz-mini' + (r.var ? ' var' : '') + '" title="' + esc(r.acik) + '">' + rozetGorsel(r.id, r.var, 64) + '<b>' + esc(r.ad) + '</b>' + (rozetHepsi && !r.var ? '<span>' + esc(r.acik) + '</span>' : '') + '</div>').join('') + '</div>' : '<span class="ik">İlk antrenmanını bitirince ilk rozetin gelir.</span>') + '</div>';
   }
   // noktalı vücut: her harf bir kas bölgesi (yarım satır, ortadan aynalanır); h baş, n boyun, f ön kol, x eklem/el/ayak
   const VUCUT = {
@@ -3896,7 +3971,7 @@
       seansHareket(s).forEach((x, xi) => { if (!(s.setler[ksB[xi]] || []).some(setSayilir)) return; ((K.HAREKET[x.id] || {}).birincil || []).forEach((m) => { const gr = KAS_GRUP[m]; if (gr && kaslar.indexOf(gr) < 0) kaslar.push(gr); }); });
       const dkB = Math.max(1, Math.round((Date.now() - s.baslangic) / 60000));
       gun(s.tarih).antrenman = Object.assign({ ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, kaslar }, s.kisa ? { kisa: true } : {});
-      { const gg = gOku(); (gg.gun[s.tarih] = gg.gun[s.tarih] || []).push(Object.assign({ ad: g.ad, bas: s.baslangic, bit: Date.now(), dk: dkB, set, hacim: Math.round(hacim), isn, kaslar, h: detay, rk: Object.keys(rk) }, s.kisa ? { kisa: 1 } : {}, S.jam ? { jam: 1 } : {}));
+      { const gg = gOku(); (gg.gun[s.tarih] = gg.gun[s.tarih] || []).push(Object.assign({ ad: g.ad, bas: s.baslangic, bit: Date.now(), dk: dkB, set, hacim: Math.round(hacim), isn, kaslar, h: detay, rk: Object.keys(rk), spor: (S.profil && S.profil.spor) || 'fitness' }, s.kisa ? { kisa: 1 } : {}, S.jam ? { jam: 1 } : {}));
         if (gg.bek.indexOf(s.tarih) < 0) gg.bek.push(s.tarih); gYaz(); gecmisGonder(); }
       S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus, kisa: !!s.kisa, hk: hk.slice(0, 8), rk: Object.keys(rk).map((k) => rk[k]).slice(0, 3) }; fbTaslak = null;
       if (S.jam) S.jamRekor = yeni;
@@ -4264,6 +4339,13 @@
     'od-set'(el) { if (!S.seans) return; const l = S.seans.setler[el.dataset.h] || []; const i = +el.dataset.i; const akt = l.findIndex((y) => !y.ok && !y.atla); odSec = i === akt ? null : { k: el.dataset.h, i }; render(); odGirisGec(); },
     'od-set-kapat'() { odSec = null; render(); odGirisGec(); },
     'jam-ac'() { jamAcik = !jamAcik; jamCiz(); },
+    'pf-bio'() { pfBio = true; render(); const t = document.getElementById('pfBio'); if (t) t.focus(); },
+    'pf-bio-kaydet'() { const t = document.getElementById('pfBio'); S.profil.bio = t ? t.value.replace(/\s+/g, ' ').trim().slice(0, 160) : ''; pfBio = false; kaydet(true); profilAcikGonder(); render(); },
+    'pf-ilgi-ac'() { pfIlgi = !pfIlgi; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'pf-ilgi'(el) { const p = S.profil; const l = (p.ilgi && p.ilgi.length ? p.ilgi : [p.spor || 'fitness']).slice(); const i = l.indexOf(el.dataset.id);
+      if (i >= 0) { if (l.length > 1) l.splice(i, 1); } else if (l.length < 6) l.push(el.dataset.id); else { toast('En çok 6 ilgi alanı.'); return; }
+      p.ilgi = l; kaydet(true); profilAcikGonder(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'pf-vitrin'(el) { const id = el.dataset.id; S.profil.vitrin = S.profil.vitrin === id ? '' : id; kaydet(true); profilAcikGonder(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'hs-metrik'(el) { hsMetrik = el.dataset.m === 'e1' ? 'e1' : 'kg'; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'bk-tema'(el) { S.ayar = S.ayar || {}; S.ayar.kartTema = el.dataset.t; kaydet(); document.querySelectorAll('[data-act="bk-tema"]').forEach((b) => { const s2 = b.dataset.t === el.dataset.t; b.setAttribute('aria-checked', String(s2)); b.setAttribute('aria-pressed', String(s2)); }); bkOnizle(); const im = document.getElementById('bkImg'); if (im && im.animate && !azHareket) im.animate([{ opacity: 0.4, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' }); },
     async 'bk-paylas'() { if (!S.sonSeans) return; try { await gorselPaylas(bitisKarti(S.sonSeans, bkTema()), 'comeback-antrenman.png', 'COMEBACK. antrenmanım'); } catch (e) { toast('Görsel hazırlanamadı.'); } },

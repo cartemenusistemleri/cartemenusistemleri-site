@@ -64,6 +64,8 @@ async function askidaMi(db, kim) {
   } catch (e) { return false; }
 }
 const temiz = (v, n) => String(v == null ? '' : v).replace(/\u0000/g, '').trim().slice(0, n);
+// isim yanı: öne çıkan rozet (vt) ve unvan (un: kurucu, ekip, koc)
+const rz = (x) => { const o = {}; if (x && x.vitrin) o.vt = x.vitrin; const un = x && (x.unvan || (x.rol === 'koc' ? 'koc' : '')); if (un) o.un = un; return o; };
 const gorunen = (ad) => { const p = String(ad || 'Üye').trim().split(/\s+/); return p[0] + (p[1] ? ' ' + p[1][0] + '.' : ''); };
 // basit küfür / iletişim bilgisi süzgeci: ilk savunma hattı, asıl koruma şikâyet + yönetici
 const YASAK = /(amk|aq\b|orospu|siktir|sikerim|piç|yarrak|göt(ü|ün)|ibne|\bsik\b)/i;
@@ -156,8 +158,8 @@ async function onRequestIc(ctx, R) {
     if (p[0] === 'siralama' && !p[1] && m === 'GET') {
       const donem = url.searchParams.get('donem') === 'ay' ? ayK : haftaK;
       const olc = { hacim: 'hacim', set: 'set_', antr: 'antr' }[url.searchParams.get('olcut')] || 'hacim';
-      const r = await db.prepare('SELECT s.kullanici_id id, s.hacim, s.set_, s.antr, k.ad, k.foto_v FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.' + olc + ' > 0 ORDER BY s.' + olc + ' DESC, s.guncelleme ASC LIMIT 200').bind(donem).all();
-      const l = (r.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, set: x.set_, antr: x.antr, ben: x.id === kim.id, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined }));
+      const r = await db.prepare('SELECT s.kullanici_id id, s.hacim, s.set_, s.antr, k.ad, k.foto_v, k.vitrin, k.unvan, k.rol FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.' + olc + ' > 0 ORDER BY s.' + olc + ' DESC, s.guncelleme ASC LIMIT 200').bind(donem).all();
+      const l = (r.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, set: x.set_, antr: x.antr, ben: x.id === kim.id, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined, ...rz(x) }));
       const ben = await db.prepare('SELECT siralama FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       return json({ liste: l.slice(0, 50), benim: l.find((x) => x.ben) || null, toplam: l.length, katildi: !!(ben && ben.siralama), donem });
     }
@@ -166,7 +168,7 @@ async function onRequestIc(ctx, R) {
       const ben = await db.prepare('SELECT siralama FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       const katildi = !!(ben && ben.siralama);
       const t = await db.prepare('SELECT COUNT(*) n FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.hacim > 0').bind(haftaK).first();
-      const uc = await db.prepare('SELECT s.kullanici_id id, s.hacim, k.ad, k.foto_v FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.hacim > 0 ORDER BY s.hacim DESC, s.guncelleme ASC LIMIT 3').bind(haftaK).all();
+      const uc = await db.prepare('SELECT s.kullanici_id id, s.hacim, k.ad, k.foto_v, k.vitrin, k.unvan, k.rol FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.hacim > 0 ORDER BY s.hacim DESC, s.guncelleme ASC LIMIT 3').bind(haftaK).all();
       let benim = null;
       if (katildi) {
         const b = await db.prepare('SELECT hacim, guncelleme FROM skor WHERE kullanici_id = ? AND donem = ?').bind(kim.id, haftaK).first();
@@ -175,7 +177,7 @@ async function onRequestIc(ctx, R) {
           benim = { sira: (ust ? ust.n : 0) + 1, hacim: b.hacim };
         }
       }
-      return json({ katildi, toplam: t ? t.n : 0, benim, ilk: (uc.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, ben: x.id === kim.id, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined })) });
+      return json({ katildi, toplam: t ? t.n : 0, benim, ilk: (uc.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, ben: x.id === kim.id, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined, ...rz(x) })) });
     }
     if (p[0] === 'siralama' && p[1] === 'katil' && m === 'POST') {
       const g = await govde(req) || {};
@@ -286,9 +288,9 @@ async function onRequestIc(ctx, R) {
       const kat = KATEGORI.includes(url.searchParams.get('kategori')) ? url.searchParams.get('kategori') : null;
       const sayfa = Math.max(0, parseInt(url.searchParams.get('sayfa') || '0', 10) || 0);
       const eng = await engelliler();
-      const r = await db.prepare('SELECT k.id, k.kategori, k.baslik, substr(k.metin, 1, 160) ozet, k.zaman, k.son, k.cevap, k.kullanici_id, u.ad FROM konular k JOIN kullanicilar u ON u.id = k.kullanici_id WHERE k.gizli = 0' + (kat ? ' AND k.kategori = ?' : '') + ' ORDER BY k.son DESC LIMIT 30 OFFSET ?')
+      const r = await db.prepare('SELECT k.id, k.kategori, k.baslik, substr(k.metin, 1, 160) ozet, k.zaman, k.son, k.cevap, k.kullanici_id, u.ad, u.vitrin, u.unvan, u.rol FROM konular k JOIN kullanicilar u ON u.id = k.kullanici_id WHERE k.gizli = 0' + (kat ? ' AND k.kategori = ?' : '') + ' ORDER BY k.son DESC LIMIT 30 OFFSET ?')
         .bind(...(kat ? [kat, sayfa * 30] : [sayfa * 30])).all();
-      return json({ liste: (r.results || []).filter((x) => eng.indexOf(x.kullanici_id) < 0).map((x) => ({ id: x.id, kategori: x.kategori, baslik: x.baslik, ozet: x.ozet, zaman: x.zaman, son: x.son, cevap: x.cevap, yazar: gorunen(x.ad), benim: x.kullanici_id === kim.id })) });
+      return json({ liste: (r.results || []).filter((x) => eng.indexOf(x.kullanici_id) < 0).map((x) => ({ id: x.id, kategori: x.kategori, baslik: x.baslik, ozet: x.ozet, zaman: x.zaman, son: x.son, cevap: x.cevap, yazar: gorunen(x.ad), yrz: rz(x), benim: x.kullanici_id === kim.id })) });
     }
     if (p[0] === 'forum' && !p[1] && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
@@ -301,14 +303,14 @@ async function onRequestIc(ctx, R) {
     }
     if (p[0] === 'forum' && p[1]) {
       const id = parseInt(p[1], 10) || 0;
-      const konu = await db.prepare('SELECT k.*, u.ad FROM konular k JOIN kullanicilar u ON u.id = k.kullanici_id WHERE k.id = ?').bind(id).first();
+      const konu = await db.prepare('SELECT k.*, u.ad, u.vitrin, u.unvan, u.rol FROM konular k JOIN kullanicilar u ON u.id = k.kullanici_id WHERE k.id = ?').bind(id).first();
       if (!konu || (konu.gizli && !admin)) return hata('Konu bulunamadı.', 404);
       if (m === 'GET') {
         const eng = await engelliler();
-        const c = await db.prepare('SELECT c.id, c.metin, c.zaman, c.kullanici_id, c.gizli, u.ad FROM cevaplar c JOIN kullanicilar u ON u.id = c.kullanici_id WHERE c.konu_id = ? ORDER BY c.zaman LIMIT 300').bind(id).all();
+        const c = await db.prepare('SELECT c.id, c.metin, c.zaman, c.kullanici_id, c.gizli, u.ad, u.vitrin, u.unvan, u.rol FROM cevaplar c JOIN kullanicilar u ON u.id = c.kullanici_id WHERE c.konu_id = ? ORDER BY c.zaman LIMIT 300').bind(id).all();
         return json({
-          konu: { id: konu.id, kategori: konu.kategori, baslik: konu.baslik, metin: konu.metin, zaman: konu.zaman, yazar: gorunen(konu.ad), yazarId: konu.kullanici_id, benim: konu.kullanici_id === kim.id, gizli: !!konu.gizli },
-          cevaplar: (c.results || []).filter((x) => (!x.gizli || admin) && eng.indexOf(x.kullanici_id) < 0).map((x) => ({ id: x.id, metin: x.metin, zaman: x.zaman, yazar: gorunen(x.ad), yazarId: x.kullanici_id, benim: x.kullanici_id === kim.id, gizli: !!x.gizli }))
+          konu: { id: konu.id, kategori: konu.kategori, baslik: konu.baslik, metin: konu.metin, zaman: konu.zaman, yazar: gorunen(konu.ad), yrz: rz(konu), yazarId: konu.kullanici_id, benim: konu.kullanici_id === kim.id, gizli: !!konu.gizli },
+          cevaplar: (c.results || []).filter((x) => (!x.gizli || admin) && eng.indexOf(x.kullanici_id) < 0).map((x) => ({ id: x.id, metin: x.metin, zaman: x.zaman, yazar: gorunen(x.ad), yrz: rz(x), yazarId: x.kullanici_id, benim: x.kullanici_id === kim.id, gizli: !!x.gizli }))
         });
       }
       if (m === 'POST') {

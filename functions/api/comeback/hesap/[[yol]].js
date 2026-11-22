@@ -132,6 +132,8 @@ async function uyelikTablo(db) {
   await db.prepare('CREATE TABLE IF NOT EXISTS uyelik (kullanici_id TEXT PRIMARY KEY, son TEXT, tarihler TEXT, uzatma INTEGER NOT NULL DEFAULT 0, mazeret_bitis TEXT, mazeret_tur TEXT, mazeretler TEXT, askida TEXT, cb_bas TEXT, cb_soz INTEGER, guncelleme INTEGER)').run();
   // antrenman geçmişi: gün başına bir satır, o günün seansları set set (aylık/yıllık rapor da buradan okur)
   await db.prepare('CREATE TABLE IF NOT EXISTS antrenman_gecmis (kullanici_id TEXT NOT NULL, tarih TEXT NOT NULL, json TEXT NOT NULL, zaman INTEGER NOT NULL, PRIMARY KEY (kullanici_id, tarih))').run();
+  // açık profil (23 Kasım): biyografi, ilgi alanları, öne çıkan rozet, unvan (kurucu/ekip; koç rolden gelir)
+  for (const kol of ['bio TEXT', 'ilgi TEXT', 'vitrin TEXT', 'unvan TEXT']) { try { await db.prepare('ALTER TABLE kullanicilar ADD COLUMN ' + kol).run(); } catch (e) { /* zaten var */ } }
   uyelikHazir = true;
 }
 const HOSGELDIN_GUN = 14;
@@ -493,7 +495,11 @@ async function onRequestIc(ctx, R) {
       return json({ ok: true }, 201);
     }
 
-    if (yol === 'ben' && m === 'GET') return kim ? json({ kullanici: Object.assign({}, kim, { uyelik: await uyelikOku(db, kim) }) }) : hata('Giriş yapılmamış.', 401);
+    if (yol === 'ben' && m === 'GET') {
+      if (!kim) return hata('Giriş yapılmamış.', 401);
+      let ek = {}; try { const p = await db.prepare('SELECT bio, ilgi, vitrin, unvan FROM kullanicilar WHERE id = ?').bind(kim.id).first(); if (p) ek = { bio: p.bio || '', ilgi: jsonOku(p.ilgi, []), vitrin: p.vitrin || '', unvan: p.unvan || (kim.rol === 'koc' ? 'koc' : '') }; } catch (e) { /* sütunlar henüz yok */ }
+      return json({ kullanici: Object.assign({}, kim, ek, { uyelik: await uyelikOku(db, kim) }) });
+    }
     if (!kim) return hata('Giriş yapılmamış.', 401);
 
     // Üyelik: 30 gün antrenman yoksa askı; ara vermeden önce mazeret; askıdan Comeback ile dönülür
@@ -557,6 +563,17 @@ async function onRequestIc(ctx, R) {
     }
 
     // Antrenman geçmişi: cihaz son 120 günü kendinde tutar, hepsi burada saklanır
+    // Açık profil: başkalarının göreceği kısım. Rozet kimliği biçimce denetlenir (kazanılıp kazanılmadığı cihazdaki kayıtlardan gelir).
+    if (yol === 'profil-acik' && m === 'PUT') {
+      if (!(await sinir(db, R, 'profilacik:' + kim.id, 40, 3600))) return hata('Çok sık değiştirdin. Biraz sonra tekrar dene.', 429);
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const bio = String(g.bio || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 160);
+      const ILGI = ['fitness', 'kalistenik', 'crossfit', 'kosu', 'yuruyus', 'bisiklet', 'yuzme', 'futbol', 'basketbol', 'voleybol', 'tenis', 'padel', 'boks', 'kickboks', 'dovus', 'yoga', 'pilates', 'hiit', 'tirmanis', 'kayak'];
+      const ilgi = (Array.isArray(g.ilgi) ? g.ilgi : []).map(String).filter((x, i, a) => ILGI.indexOf(x) >= 0 && a.indexOf(x) === i).slice(0, 6);
+      const vitrin = /^[a-z0-9_]{1,24}$/.test(String(g.vitrin || '')) ? String(g.vitrin) : '';
+      await db.prepare('UPDATE kullanicilar SET bio = ?, ilgi = ?, vitrin = ? WHERE id = ?').bind(bio || null, ilgi.length ? JSON.stringify(ilgi) : null, vitrin || null, kim.id).run();
+      return json({ ok: true });
+    }
     if (yol === 'gecmis' && m === 'PUT') {
       if (!(await sinir(db, R, 'gecmis:' + kim.id, 120, 3600))) return hata('Çok fazla kayıt gönderildi. Biraz sonra tekrar dene.', 429);
       const g = await govde(req); if (!g || !/^\d{4}-\d{2}-\d{2}$/.test(String(g.tarih || '')) || !Array.isArray(g.seanslar)) return hata('Geçersiz istek.', 400);
