@@ -383,7 +383,8 @@
     const p = S.profil; const ilgi = (p.ilgi && p.ilgi.length ? p.ilgi : [p.spor || 'fitness']);
     const sat = ilgi.map((i) => { const d = ILGI.find((y) => y[0] === i); if (!d) return ''; const n = bransSayi(i);
       const dolu = n == null ? 0 : BRANS_ESIK.filter((e) => n >= e).length; const sonraki = n == null ? null : BRANS_ESIK.find((e) => n < e);
-      return '<div class="pf-brans"><span class="pf-b-ad"><b>' + esc(d[1]) + '</b><span class="ik num">' + (n == null ? 'Ölçüm mağaza sürümünde' : n + ' antrenman' + (sonraki ? ' · sonraki rozet ' + sonraki : ' · hepsi tamam')) + '</span></span><span class="pf-nk r' + d[2] + '">' + BRANS_ESIK.map((e, j) => '<i class="' + (j < dolu ? 'dolu' : '') + '"></i>').join('') + '</span></div>'; }).join('');
+      const sh = BRANS_SAHNE[i];
+      return '<div class="pf-brans">' + (sh ? bransRozet(sh, dolu, dolu ? String(BRANS_ESIK[dolu - 1]) : '', 44) : '<span class="pf-b-bos"></span>') + '<span class="pf-b-ad"><b>' + esc(d[1]) + '</b><span class="ik num">' + (n == null ? 'Ölçüm mağaza sürümünde' : n + ' antrenman' + (sonraki ? ' · sonraki rozet ' + sonraki : ' · hepsi tamam')) + '</span></span><span class="pf-nk r' + d[2] + '">' + BRANS_ESIK.map((e, j) => '<i class="' + (j < dolu ? 'dolu' : '') + '"></i>').join('') + '</span></div>'; }).join('');
     return '<div class="t genis pf-branslar"><span class="k">Branşlar</span>' + sat + '</div>';
   }
   function profilRozetler() {
@@ -1482,13 +1483,19 @@
   };
   /* Sahne rozetleri (23 Kasım): her branşa bir illüstrasyon; sayı ve kademe halkası kodda.
      kademe: 1 limon, 2 kobalt, 3 siyah (gecede beyaz), 4 krom. Sahnesi olmayan rozet eski plakayla çizilir. */
-  const RZ_SAHNE = { ilk: ['fitness', '1', 1], a10: ['fitness', '10', 1], a25: ['fitness', '25', 2], a50: ['fitness', '50', 3], a100: ['fitness', '100', 4] };
+  const RZ_SAHNE = { ilk: ['fitness', '1', 1], a10: ['fitness', '10', 1], a25: ['fitness', '25', 2], a50: ['fitness', '50', 3], a100: ['fitness', '100', 4],
+    h4: ['seri', '4', 2], h12: ['seri', '12', 3], r1: ['rekor', '1', 1], r10: ['rekor', '10', 3], donus: ['donus', '', 2], hafta: ['hafta', '', 2], beslenme: ['beslenme', '7', 1] };
+  // branş → sahne (ilgi alanları)
+  const BRANS_SAHNE = { fitness: 'fitness', kalistenik: 'kalistenik', crossfit: 'hiit', hiit: 'hiit', kosu: 'kosu', yuruyus: 'kosu', yuzme: 'yuzme', yoga: 'yoga', pilates: 'yoga', futbol: 'futbol', basketbol: 'basketbol', tenis: 'tenis', padel: 'tenis', boks: 'boks', kickboks: 'boks', dovus: 'boks' };
+  function bransRozet(sahne, kd, no, boy) {
+    return '<span class="rzs kd' + Math.max(1, kd) + (kd ? '' : ' kilit') + '" style="--b:' + boy + 'px">' + RZ_NOKTA + '<img src="rozet/' + sahne + '.webp?v=1" alt="" loading="lazy" decoding="async">' + (no ? '<b class="num">' + no + '</b>' : '') + '</span>';
+  }
   const RZ_NOKTA = (() => { let h = ''; for (let i = 0; i < 24; i++) { const a = i * Math.PI / 12; h += '<circle cx="' + (50 + 46.4 * Math.cos(a)).toFixed(2) + '" cy="' + (50 + 46.4 * Math.sin(a)).toFixed(2) + '" r=".9"/>'; } return '<svg class="rzs-nk" viewBox="0 0 100 100" aria-hidden="true">' + h + '</svg>'; })();
   const rozetKademe = (id) => (RZ_SAHNE[id] ? RZ_SAHNE[id][2] : (ROZET_GORSEL[id] || [0, 0, 0, 2])[3]);
   function rozetGorsel(id, acik, boy, mini) {
     const z = RZ_SAHNE[id];
     if (!z) return '<span class="rzs-eski' + (mini ? ' mini' : '') + '" style="--b:' + boy + 'px">' + rozetSvg(id, acik) + '</span>';
-    return '<span class="rzs kd' + z[2] + (acik ? '' : ' kilit') + (mini ? ' mini' : '') + '" style="--b:' + boy + 'px">' + (mini ? '' : RZ_NOKTA) + '<img src="rozet/' + z[0] + '.webp?v=1" alt="" loading="lazy" decoding="async">' + (mini ? '' : '<b class="num">' + z[1] + '</b>') + '</span>';
+    return '<span class="rzs kd' + z[2] + (acik ? '' : ' kilit') + (mini ? ' mini' : '') + '" style="--b:' + boy + 'px">' + (mini ? '' : RZ_NOKTA) + '<img src="rozet/' + z[0] + '.webp?v=1" alt="" loading="lazy" decoding="async">' + (mini || !z[1] ? '' : '<b class="num">' + z[1] + '</b>') + '</span>';
   }
   // Unvan işaretleri: kazanılmaz, verilir. Seçilen rozetten ayrı, her zaman isim yanında.
   const UNVAN = { kurucu: 'Kurucu', ekip: 'COMEBACK. ekibi', koc: 'Koç' };

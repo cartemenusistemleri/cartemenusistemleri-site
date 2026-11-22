@@ -2030,3 +2030,9 @@ body.gece .pf-cip.rs{background:#f3f1ec;color:#16161a}
 .pf-rz:focus-visible{outline:2px solid var(--kobalt);outline-offset:2px}
 .pf-hero{border:0}
 .rzs.kilit,body.gece .rzs.kilit{background:var(--cizgi);color:var(--ikincil)}
+.pf-brans{justify-content:flex-start}
+.pf-brans .pf-b-ad{flex:1}
+.pf-brans>.rzs,.pf-b-bos{flex:none;width:44px;height:44px}
+.pf-b-bos{border-radius:50%;box-shadow:inset 0 0 0 1px var(--cizgi)}
+.pf-brans{min-height:64px}
+body .t.pf-hero,body.gece .t.pf-hero{background:transparent;border:0;box-shadow:none;outline:0}
