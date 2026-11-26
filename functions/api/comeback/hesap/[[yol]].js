@@ -2,7 +2,10 @@
 import { gmailGonder } from '../../eposta.js';
 //   POST /api/comeback/hesap/basvuru { ad, eposta, sifre, yetiskin, riza, saglikRiza, kaynak, json } → beta başvurusu (hesap + profil; onaylanınca giriş)
 //   POST /api/comeback/hesap/kayit   { ad, eposta, sifre, yetiskin, riza, saglikRiza }
-//   POST /api/comeback/hesap/sil     { sifre }  → hesap ve bütün kayıtlar kalıcı silinir
+//   POST /api/comeback/hesap/sil     { sifre, neden? }  → hesap ve bütün kayıtlar kalıcı silinir (neden isimsiz görüş olarak kalır)
+//   POST /api/comeback/hesap/sifre-degistir { eski, yeni } → şifre değişir, diğer oturumlar kapanır, eski adrese haber gider
+//   POST /api/comeback/hesap/eposta-degistir { sifre, eposta } → yeni adrese 60 dk geçerli onay bağlantısı gider
+//   POST /api/comeback/hesap/eposta-onay { token } → e-posta değişir (girişsiz de olur), eski adrese haber gider
 //   POST /api/comeback/hesap/gorus   { tur, metin, ekran }  (girişsiz de olur)
 //   POST /api/comeback/hesap/bekleme { ad, eposta, hedef, kaynak }  → kapalı beta bekleme listesi
 //   POST /api/comeback/hesap/hata    { mesaj, yer, ekran, surum }  → istemci hata kaydı
@@ -121,6 +124,7 @@ function hesapSilAdimlari(db, id) {
     db.prepare('UPDATE gorusler SET kullanici_id = NULL WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM sifre_sifirla WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM eposta_degis WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM hatirlat WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM kullanicilar WHERE id = ?').bind(id)
   ];
@@ -145,7 +149,8 @@ async function uyelikTablo(db) {
   await db.prepare('CREATE TABLE IF NOT EXISTS etkinlik_katilim (etkinlik_id TEXT NOT NULL, kullanici_id TEXT NOT NULL, zaman INTEGER NOT NULL, PRIMARY KEY (etkinlik_id, kullanici_id))').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS antrenman_gecmis (kullanici_id TEXT NOT NULL, tarih TEXT NOT NULL, json TEXT NOT NULL, zaman INTEGER NOT NULL, PRIMARY KEY (kullanici_id, tarih))').run();
   // açık profil (23 Kasım): biyografi, ilgi alanları, öne çıkan rozet, unvan (kurucu/ekip; koç rolden gelir)
-  for (const kol of ['bio TEXT', 'ilgi TEXT', 'vitrin TEXT', 'unvan TEXT', 'acik TEXT']) { try { await db.prepare('ALTER TABLE kullanicilar ADD COLUMN ' + kol).run(); } catch (e) { /* zaten var */ } }
+  await db.prepare('CREATE TABLE IF NOT EXISTS eposta_degis (token_hash TEXT PRIMARY KEY, kullanici_id TEXT NOT NULL, yeni TEXT NOT NULL, bitis INTEGER NOT NULL, olusturma INTEGER NOT NULL)').run();
+  for (const kol of ['bio TEXT', 'ilgi TEXT', 'vitrin TEXT', 'unvan TEXT', 'acik TEXT', 'kosul_onay INTEGER']) { try { await db.prepare('ALTER TABLE kullanicilar ADD COLUMN ' + kol).run(); } catch (e) { /* zaten var */ } }
   uyelikHazir = true;
 }
 const HOSGELDIN_GUN = 14;
@@ -214,6 +219,16 @@ async function uyelikIsle(db, kim, veri) {
   return o;
 }
 const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan', 'kisa', 'giris_afis', 'giris_wa', 'giris_ig', 'giris_qr']);
+// Hesap güvenliği bildirimi (şifre / e-posta değişti). Gönderilemezse işlem yine tamamlanır.
+async function bilgiPostasi(env, kime, ad0, konu, metin) {
+  try {
+    const ad = String(ad0 || '').replace(/[<>&"]/g, '');
+    const html = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#16161A">' +
+      '<p style="font-size:26px;font-weight:900;letter-spacing:-1px;margin:0 0 20px">COMEBACK<span style="color:#2E4BFF">.</span></p>' +
+      '<p style="font-size:16px;line-height:1.5">Merhaba ' + ad + ',</p><p style="font-size:16px;line-height:1.5">' + String(metin).replace(/[<>&]/g, '') + '</p></div>';
+    await gmailGonder(env, { to: kime, subject: konu, html, text: 'Merhaba ' + ad + ',\n\n' + metin + '\n\nCOMEBACK.', name: 'COMEBACK.' });
+  } catch (e) { /* bildirim gitmese de işlem tamam */ }
+}
 const EPOSTA = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 
 async function onRequestIc(ctx, R) {
@@ -240,6 +255,7 @@ async function onRequestIc(ctx, R) {
       if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
       if (g.riza !== true) return hata('Verilerinin hesabında saklanması için onay kutusunu işaretle.', 400);
       if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza kutusunu işaretle.', 400);
+      if (g.kosul !== true) return hata('Kullanım koşullarını kabul etmen gerekiyor.', 400);
       if (typeof g.json !== 'string' || g.json.length > 200000) return hata('Profil bilgilerin eksik.', 400);
       let st; try { st = JSON.parse(g.json); } catch (e) { return hata('Profil bilgilerin eksik.', 400); }
       if (!st || !st.profil || !st.program) return hata('Profil bilgilerin eksik.', 400);
@@ -257,9 +273,14 @@ async function onRequestIc(ctx, R) {
       await db.batch([
         db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, saglik_onay, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
           .bind(id, eposta, ad, await sifreHash(sifre, tuz), tuz, onayli ? 'uye' : 'aday', simdi, simdi, simdi),
-        db.prepare('INSERT INTO veriler (kullanici_id, json, guncelleme) VALUES (?, ?, ?)').bind(id, g.json, simdi)
+        db.prepare('INSERT INTO veriler (kullanici_id, json, guncelleme) VALUES (?, ?, ?)').bind(id, g.json, simdi),
+        db.prepare('UPDATE kullanicilar SET kosul_onay = ? WHERE id = ?').bind(simdi, id)
       ]);
-      if (!onayli) return json({ ok: true, durum: 'bekliyor' }, 201);
+      if (!onayli) {
+        const s1 = await db.prepare("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor' AND zaman <= (SELECT zaman FROM bekleme WHERE eposta = ?)").bind(eposta).first();
+        const s2 = await db.prepare("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor'").first();
+        return json({ ok: true, durum: 'bekliyor', sira: s1 ? s1.n : null, toplam: s2 ? s2.n : null }, 201);
+      }
       const token = await oturumAc(db, id);
       return json({ ok: true, durum: 'onayli', kullanici: { id, ad, eposta, rol: 'uye' } }, 201, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
     }
@@ -275,6 +296,7 @@ async function onRequestIc(ctx, R) {
       if (g.yetiskin !== true) return hata('COMEBACK. 18 yaş ve üstü içindir.', 400);
       if (g.riza !== true) return hata('Verilerinin hesabında saklanması için onay kutusunu işaretle.', 400);
       if (g.saglikRiza !== true) return hata('Sağlık verilerin için açık rıza kutusunu işaretle.', 400);
+      if (g.kosul !== true) return hata('Kullanım koşullarını kabul etmen gerekiyor.', 400);
       if (!(await sinir(db, R, 'kayit:' + ip, 5, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
       const beta = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
       if (!beta || beta.durum !== 'onayli') return json({ hata: beta ? 'Beta başvurun alındı, onaylanınca kayıt olabileceksin.' : 'COMEBACK. şu an kapalı betada. Önce bekleme listesine katıl.', beta: beta ? 'bekliyor' : 'yok' }, 403);
@@ -283,6 +305,7 @@ async function onRequestIc(ctx, R) {
       const id = crypto.randomUUID(); const tuz = hex(rastgele(16)); const simdi = Date.now();
       await db.prepare('INSERT INTO kullanicilar (id, eposta, ad, sifre_hash, tuz, rol, onay_zamani, saglik_onay, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
         .bind(id, eposta, ad, await sifreHash(sifre, tuz), tuz, 'uye', simdi, simdi, simdi).run();
+      await db.prepare('UPDATE kullanicilar SET kosul_onay = ? WHERE id = ?').bind(simdi, id).run();
       const token = await oturumAc(db, id);
       return json({ kullanici: { id, ad, eposta, rol: 'uye' } }, 201, { 'set-cookie': cerezYaz(token, OTURUM_SN) });
     }
@@ -367,8 +390,37 @@ async function onRequestIc(ctx, R) {
       const kisa = (v, n) => String(v || '').trim().replace(/[<>]/g, '').slice(0, n);
       await db.prepare('INSERT OR IGNORE INTO bekleme (eposta, ad, hedef, kaynak, durum, zaman) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(eposta, kisa(g.ad, 40), kisa(g.hedef, 40), kisa(g.kaynak, 60), 'bekliyor', Date.now()).run();
-      const r = await db.prepare('SELECT durum FROM bekleme WHERE eposta = ?').bind(eposta).first();
-      return json({ ok: true, durum: r ? r.durum : 'bekliyor' }, 201);
+      const r = await db.prepare('SELECT durum, zaman FROM bekleme WHERE eposta = ?').bind(eposta).first();
+      // sıra: senden önce başvurup hâlâ bekleyenler + sen; toplam: bekleyenler (kişisel bilgi dönmez, yalnızca sayı)
+      let sira = null, toplam = null;
+      if (r && r.durum === 'bekliyor') {
+        const s1 = await db.prepare("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor' AND zaman <= ?").bind(r.zaman).first();
+        const s2 = await db.prepare("SELECT COUNT(*) n FROM bekleme WHERE durum = 'bekliyor'").first();
+        sira = s1 ? s1.n : null; toplam = s2 ? s2.n : null;
+      }
+      return json({ ok: true, durum: r ? r.durum : 'bekliyor', sira, toplam }, 201);
+    }
+
+    // E-posta değişikliği onayı: bağlantıyı yeni adrese gelen kişi açar; giriş gerekmez
+    if (yol === 'eposta-onay' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      const token = String(g.token || '');
+      if (!/^[A-Za-z0-9_-]{30,60}$/.test(token)) return hata('Bağlantı geçersiz.', 400);
+      if (!(await sinir(db, R, 'eonay:' + ip, 10, 3600))) return hata('Çok fazla deneme yapıldı. Bir saat sonra tekrar dene.', 429);
+      const t = await db.prepare('SELECT kullanici_id, yeni, bitis FROM eposta_degis WHERE token_hash = ?').bind(await ozet(token)).first();
+      if (!t || t.bitis < Date.now()) return hata('Bağlantının süresi dolmuş ya da kullanılmış. Uygulamadan yeniden iste.', 400);
+      const k = await db.prepare('SELECT id, ad, eposta FROM kullanicilar WHERE id = ?').bind(t.kullanici_id).first();
+      if (!k) return hata('Bağlantı geçersiz.', 400);
+      const dolu = await db.prepare('SELECT id FROM kullanicilar WHERE eposta = ? AND id != ?').bind(t.yeni, k.id).first();
+      if (dolu) { await db.prepare('DELETE FROM eposta_degis WHERE kullanici_id = ?').bind(k.id).run(); return hata('Bu e-postayla başka bir hesap açılmış. Başka bir adres dene.', 409); }
+      await db.batch([
+        db.prepare('UPDATE kullanicilar SET eposta = ? WHERE id = ?').bind(t.yeni, k.id),
+        db.prepare('UPDATE bekleme SET eposta = ? WHERE eposta = ? AND NOT EXISTS (SELECT 1 FROM bekleme WHERE eposta = ?)').bind(t.yeni, k.eposta, t.yeni),
+        db.prepare('DELETE FROM eposta_degis WHERE kullanici_id = ?').bind(k.id),
+        db.prepare('DELETE FROM sifre_sifirla WHERE kullanici_id = ?').bind(k.id)
+      ]);
+      await bilgiPostasi(env, k.eposta, k.ad, 'COMEBACK. e-posta adresin değişti', 'Hesabının e-posta adresi ' + t.yeni + ' olarak değiştirildi. Bunu sen yapmadıysan hemen bize uygulamadaki Görüş bildir ekranından yaz.');
+      return json({ ok: true, eposta: t.yeni });
     }
 
     const kim = await kimDir(db, req);
@@ -434,9 +486,16 @@ async function onRequestIc(ctx, R) {
         const eposta = String(g.eposta || '').trim().toLowerCase();
         const durum = ['onayli', 'bekliyor', 'reddedildi'].includes(g.durum) ? g.durum : null;
         if (!EPOSTA.test(eposta) || !durum) return hata('Geçersiz istek.', 400);
+        const once = await db.prepare('SELECT durum, ad FROM bekleme WHERE eposta = ?').bind(eposta).first();
         await db.prepare('INSERT INTO bekleme (eposta, durum, zaman, onay_zamani) VALUES (?, ?, ?, ?) ON CONFLICT(eposta) DO UPDATE SET durum = excluded.durum, onay_zamani = excluded.onay_zamani')
           .bind(eposta, durum, Date.now(), durum === 'onayli' ? Date.now() : null).run();
         if (durum === 'onayli') await db.prepare("UPDATE kullanicilar SET rol = 'uye' WHERE eposta = ? AND rol = 'aday'").bind(eposta).run();
+        // ilk kez onaylanınca haber ver: hesabı varsa giriş, yoksa kayıt bağlantısı
+        if (durum === 'onayli' && (!once || once.durum !== 'onayli')) {
+          const k = await db.prepare('SELECT ad FROM kullanicilar WHERE eposta = ?').bind(eposta).first();
+          const site = new URL(req.url).origin + '/comeback/#/' + (k ? 'giris' : 'kayit');
+          await bilgiPostasi(env, eposta, (k && k.ad) || (once && once.ad) || '', 'COMEBACK. · içeridesin', 'Kapalı beta başvurun onaylandı. ' + (k ? 'Başvururken belirlediğin e-posta ve şifreyle giriş yapabilirsin: ' : 'Bu e-postayla hesabını oluşturabilirsin: ') + site + ' · Make the COMEBACK.');
+        }
         return json({ ok: true });
       }
       if (alt === 'rol' && m === 'POST') {
@@ -565,11 +624,63 @@ async function onRequestIc(ctx, R) {
       return json({ kadi: ad });
     }
 
+    // Şifre değiştirme (girişliyken): mevcut şifre şart; bu oturum açık kalır, diğer cihazlardaki oturumlar kapanır
+    if (yol === 'sifre-degistir' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      if (kim.rol === 'demo') return hata('Demo hesabın şifresi buradan değişmez.', 403);
+      const eski = String(g.eski || ''); const yeni = String(g.yeni || '');
+      if (yeni.length < 8 || yeni.length > 200) return hata('Yeni şifre en az 8 karakter olmalı.', 400);
+      if (yeni === eski) return hata('Yeni şifre eskisiyle aynı olamaz.', 400);
+      if (!(await sinir(db, R, 'sdegis:' + kim.id, 5, 900))) return hata('Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
+      const k = await db.prepare('SELECT sifre_hash, tuz FROM kullanicilar WHERE id = ?').bind(kim.id).first();
+      if (!k || !esit(await sifreHash(eski, k.tuz), k.sifre_hash)) return hata('Mevcut şifren hatalı.', 401);
+      const tuz = hex(rastgele(16)); const bu = await ozet(cerezOku(req) || '');
+      await db.batch([
+        db.prepare('UPDATE kullanicilar SET sifre_hash = ?, tuz = ? WHERE id = ?').bind(await sifreHash(yeni, tuz), tuz, kim.id),
+        db.prepare('DELETE FROM oturumlar WHERE kullanici_id = ? AND token_hash != ?').bind(kim.id, bu),
+        db.prepare('DELETE FROM sifre_sifirla WHERE kullanici_id = ?').bind(kim.id)
+      ]);
+      await bilgiPostasi(env, kim.eposta, kim.ad, 'COMEBACK. şifren değişti', 'Hesabının şifresi az önce değiştirildi ve diğer cihazlardaki oturumların kapatıldı. Bunu sen yapmadıysan girişteki "Şifremi unuttum" ile şifreni hemen yenile.');
+      return json({ ok: true });
+    }
+
+    // E-posta değiştirme: şifreyle onay; değişiklik yeni adrese gelen bağlantı açılınca olur (adres gerçekten senin mi)
+    if (yol === 'eposta-degistir' && m === 'POST') {
+      const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
+      if (kim.rol === 'demo') return hata('Demo hesabın e-postası değişmez.', 403);
+      const yeni = String(g.eposta || '').trim().toLowerCase();
+      if (!EPOSTA.test(yeni)) return hata('Geçerli bir e-posta adresi yaz.', 400);
+      if (yeni === kim.eposta) return hata('Bu zaten şu anki e-postan.', 400);
+      if (!(await sinir(db, R, 'edegis:' + kim.id, 4, 3600))) return hata('Çok fazla deneme. Bir saat sonra tekrar dene.', 429);
+      const k = await db.prepare('SELECT sifre_hash, tuz FROM kullanicilar WHERE id = ?').bind(kim.id).first();
+      if (!k || !esit(await sifreHash(String(g.sifre || ''), k.tuz), k.sifre_hash)) return hata('Şifre hatalı.', 401);
+      const dolu = await db.prepare('SELECT id FROM kullanicilar WHERE eposta = ?').bind(yeni).first();
+      if (dolu) return hata('Bu e-postayla başka bir hesap var.', 409);
+      const token = b64url(rastgele(32)); const simdi = Date.now();
+      await db.batch([
+        db.prepare('DELETE FROM eposta_degis WHERE kullanici_id = ? OR bitis < ?').bind(kim.id, simdi),
+        db.prepare('INSERT INTO eposta_degis (token_hash, kullanici_id, yeni, bitis, olusturma) VALUES (?, ?, ?, ?, ?)').bind(await ozet(token), kim.id, yeni, simdi + 60 * 60 * 1000, simdi)
+      ]);
+      const baglanti = new URL(req.url).origin + '/comeback/#/eposta/' + token;
+      const ad = String(kim.ad || '').replace(/[<>&"]/g, '');
+      const html = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#16161A">' +
+        '<p style="font-size:26px;font-weight:900;letter-spacing:-1px;margin:0 0 20px">COMEBACK<span style="color:#2E4BFF">.</span></p>' +
+        '<p style="font-size:16px;line-height:1.5">Merhaba ' + ad + ',</p><p style="font-size:16px;line-height:1.5">COMEBACK. hesabının e-postasını bu adres yapmak için aşağıdaki düğmeye dokun. Bağlantı 60 dakika geçerli ve tek kullanımlık.</p>' +
+        '<p style="margin:24px 0"><a href="' + baglanti + '" style="display:inline-block;background:#2E4BFF;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:26px">E-postamı onayla</a></p>' +
+        '<p style="font-size:13px;line-height:1.5;color:#6B6A66">Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin; hiçbir şey değişmez.</p></div>';
+      const text = 'Merhaba ' + ad + ',\n\nCOMEBACK. hesabının e-postasını bu adres yapmak için bağlantıyı aç (60 dakika geçerli, tek kullanımlık):\n' + baglanti + '\n\nBu isteği sen yapmadıysan yok sayabilirsin.\n\nCOMEBACK.';
+      await gmailGonder(env, { to: yeni, subject: 'COMEBACK. e-posta onayı', html, text, name: 'COMEBACK.' });
+      return json({ ok: true, mesaj: yeni + ' adresine onay bağlantısı gönderdik. Bağlantıyı açınca e-postan değişir.' });
+    }
+
     if (yol === 'sil' && m === 'POST') {
       const g = await govde(req); if (!g) return hata('Geçersiz istek.', 400);
       if (!(await sinir(db, R, 'sil:' + kim.id, 5, 900))) return hata('Çok fazla deneme. 15 dakika sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT sifre_hash, tuz FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       if (!k || !esit(await sifreHash(String(g.sifre || ''), k.tuz), k.sifre_hash)) return hata('Şifre hatalı.', 401);
+      // ayrılma nedeni isteğe bağlı; isimsiz görüş olarak kalır (kimseyle eşleşmez)
+      const neden = String(g.neden || '').trim().replace(/[<>]/g, '').slice(0, 600);
+      if (neden) { try { await db.prepare('INSERT INTO gorusler (kullanici_id, tur, metin, ekran, cihaz, zaman) VALUES (NULL, ?, ?, ?, ?, ?)').bind('diger', 'Hesabını sildi · ' + neden, 'hesap-sil', '', Date.now()).run(); } catch (e) { /* görüş yazılamasa da silme sürer */ } }
       await db.batch(hesapSilAdimlari(db, kim.id));
       return json({ ok: true }, 200, { 'set-cookie': cerezYaz('', 0) });
     }

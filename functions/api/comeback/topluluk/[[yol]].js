@@ -28,7 +28,8 @@
 // Sıralama: GET siralama?donem=hafta|ay&olcut=hacim|set|antr · POST siralama/katil { acik } · POST siralama/skor { hafta, ay }
 // Profil resmi: GET foto/<id>?v= (resim) · Mesaj kutusu: GET mesaj-kutu · Ana sayfa: GET siralama/ozet
 // Sosyal: GET ara?q= · GET arkadas · POST arkadas/<id> { islem: ekle|kabul|sil } · GET akis|kesfet?once= · POST gonderi { tur, veri, metin, gorunur, gorsel } · GET gonderi/<id>[/gorsel] · POST gonderi/<id>/saygi|sil|sikayet
-// Gruplar (2–8 kişi): GET grup · POST grup { ad, hedef } · POST grup/katil { kod } · GET grup/<id> · POST grup/<id>/durt|jam|ekle|duzen|ayril
+// Gelenler: GET bildirim → { istek, durt }
+// Gruplar (2–8 kişi): GET grup · POST grup { ad, hedef } · POST grup/katil { kod } · GET grup/<id> · POST grup/<id>/durt|jam|ekle|kod|duzen|ayril
 // Yönetim (admin): GET sikayetler · POST moderasyon { tur, id, gizli }
 
 const json = (v, d = 200) => new Response(JSON.stringify(v), { status: d, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
@@ -227,6 +228,12 @@ async function onRequestIc(ctx, R) {
       for (const x of l) out.push(Object.assign(kisiYaz(x), { ark: await arkDurum(x.id) }));
       return json({ liste: out });
     }
+    // Gelenler kutusu: bekleyen arkadaşlık istekleri + son 3 günde gruptan "Bekliyoruz." diyenler (yalnızca sayı ve adlar)
+    if (p[0] === 'bildirim' && m === 'GET') {
+      const i = await db.prepare("SELECT COUNT(*) n FROM arkadas WHERE b = ? AND durum != 'tamam'").bind(kim.id).first();
+      const d = await db.prepare('SELECT d.grup_id, g.ad grup, k.ad, d.zaman FROM grup_durt d JOIN grup g ON g.id = d.grup_id JOIN kullanicilar k ON k.id = d.kimden WHERE d.kime = ? AND d.zaman > ? ORDER BY d.zaman DESC LIMIT 10').bind(kim.id, simdi - 3 * 864e5).all();
+      return json({ istek: i ? i.n : 0, durt: (d.results || []).map((x) => ({ grup: x.grup_id, grupAd: x.grup, ad: gorunen(x.ad), zaman: x.zaman })) });
+    }
     if (p[0] === 'arkadas' && !p[1] && m === 'GET') {
       const r = await db.prepare('SELECT a.a, a.b, a.durum, a.zaman, ' + KSEC + " FROM arkadas a JOIN kullanicilar k ON k.id = CASE WHEN a.a = ?1 THEN a.b ELSE a.a END WHERE a.a = ?1 OR a.b = ?1 ORDER BY a.zaman DESC LIMIT 300").bind(kim.id).all();
       const l = r.results || [];
@@ -375,6 +382,13 @@ async function onRequestIc(ctx, R) {
         if (n.g >= 8) return hata('Grup dolu (8 kişi).', 400); if (n.b >= 5) return hata('O kişi zaten 5 grupta.', 400);
         await db.prepare('INSERT OR IGNORE INTO grup_uye (grup_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(gid, kime, simdi).run();
         return json({ ok: true });
+      }
+      // davet kodunu yenile: eski kod ve paylaşılmış bağlantılar geçersiz olur (yalnızca kuran)
+      if (p[2] === 'kod' && m === 'POST') {
+        if (gr.sahip !== kim.id) return hata('Yalnızca kuran yenileyebilir.', 403);
+        if (!(await sinir(db, R, 'grkod:' + kim.id, 10, 86400))) return hata('Bugün yeterince yeniledin.', 429);
+        let kod = ''; for (let d = 0; d < 5; d++) { kod = kodUret(); if (!(await db.prepare('SELECT 1 FROM grup WHERE kod = ?').bind(kod).first())) break; }
+        await db.prepare('UPDATE grup SET kod = ? WHERE id = ?').bind(kod, gid).run(); return json({ kod });
       }
       if (p[2] === 'duzen' && m === 'POST') {
         if (gr.sahip !== kim.id) return hata('Yalnızca kuran değiştirebilir.', 403);

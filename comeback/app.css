@@ -2162,3 +2162,45 @@ body.gece .et-yer{color:var(--mavi-gece)}
 .gr-durt{gap:2px}
 .gr-kart{gap:6px}
 .bk-akis{display:flex;flex-direction:column;gap:8px;padding:0 4px}
+/* şifre gücü (26 Kasım) */
+.sifre-guc{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.sg-cubuk{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.sg-cubuk i{height:4px;border-radius:2px;background:var(--zemin);transition:background-color .2s ease}
+.sg-yazi{font-size:13px;font-weight:600;color:var(--ikincil)}
+.sifre-guc[data-s="1"] .sg-cubuk i:nth-child(-n+1){background:var(--hata)}
+.sifre-guc[data-s="2"] .sg-cubuk i:nth-child(-n+2){background:#E8A317}
+.sifre-guc[data-s="3"] .sg-cubuk i:nth-child(-n+3),.sifre-guc[data-s="4"] .sg-cubuk i{background:var(--kobalt)}
+.sifre-guc[data-s="1"] .sg-yazi{color:var(--hata)}
+@media (prefers-reduced-motion:reduce){.sg-cubuk i{transition:none}}
+/* hesap ayarları, veda, sürüm (26 Kasım) */
+.hf-form{display:flex;flex-direction:column;gap:10px;padding:4px 0 14px}
+.hf-form .t.alan{background:var(--zemin)}
+.hesap-alt{display:flex;flex-wrap:wrap;gap:6px 18px;padding:18px 4px 0;font-size:14px;font-weight:600}
+.hesap-alt a{color:var(--ikincil);text-decoration:none;min-height:32px;display:inline-flex;align-items:center}
+.surum-not{margin:22px 0 0;text-align:center;font-size:12px;font-weight:600;color:var(--ikincil);letter-spacing:.02em}
+.veda{min-height:80vh;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:24px 4px}
+.veda-logo{margin:0 0 8px}
+.veda .baslik{padding-left:0;margin-left:0}
+/* aşağı çekip yenile (26 Kasım) */
+.cek-yenile{position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;width:34px;height:34px;border-radius:50%;background:var(--kutu);box-shadow:0 4px 14px rgba(0,0,0,.12);opacity:0;transform:translate(-50%,0);pointer-events:none;display:grid;place-items:center;transition:opacity .15s ease}
+.cek-yenile i{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--cizgi);border-top-color:var(--kobalt)}
+.cek-yenile.hazir i{border-color:var(--kobalt);border-top-color:transparent}
+.cek-yenile.donuyor{transition:transform .2s ease,opacity .2s ease}
+.cek-yenile.donuyor i{animation:cyDon .7s linear infinite}
+@keyframes cyDon{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.cek-yenile.donuyor i{animation:none}}
+.yuk-hata b{color:var(--murekkep)}
+/* arama: temizle ve son aramalar (26 Kasım) */
+.ara-kap{position:relative;display:block;width:100%;min-width:0;flex:1}
+.ara-kap>input{padding-right:44px!important}
+.ara-temizle{position:absolute;right:0;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:var(--zemin);color:var(--ikincil);display:grid;place-items:center;cursor:pointer;padding:0}
+.ara-temizle[hidden]{display:none}
+.ara-temizle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.ara-son{align-items:center;gap:6px}
+.ara-son[hidden]{display:none}
+.ara-son .ik{font-size:12px;font-weight:600;margin-right:2px}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+/* kurulum ilerleme çizgisi (26 Kasım) */
+.kr-ilerleme{position:fixed;z-index:30;left:0;right:0;top:0;background:transparent;pointer-events:none;padding-top:env(safe-area-inset-top,0px)}
+.kr-ilerleme i{display:block;height:3px;background:var(--kobalt);transform-origin:left center;transform:scaleX(.04)}
+.t:has(.hf-form input:focus),.t:has(form[data-form="hesap-sil"] input:focus){box-shadow:none}
