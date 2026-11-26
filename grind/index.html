@@ -38,7 +38,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-of
 input{font-size:16px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 12px}
 .lbl{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.08em;color:var(--ink3)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--line)}
-.logo{font:400 34px/1 "Libre Caslon Display",Georgia,serif;letter-spacing:.04em;color:var(--brand);margin:0}
+.logo{font:400 38px/1 "Libre Caslon Display",Georgia,serif;letter-spacing:.01em;color:var(--brand);margin:0}
 .topr{text-align:right}
 .hi{margin:0;font-size:15px;color:var(--ink2)}
 h2{font-size:32px;line-height:1.1;margin:0;font-weight:300;letter-spacing:-.02em}
@@ -188,7 +188,7 @@ tfoot td{font-weight:500;color:var(--ink);border-top:1px solid var(--ink)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .scroll{overflow-x:auto}
 @media(max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.logo{font-size:30px}.mh h2{font-size:26px}.mh{gap:6px}table{font-size:13px}.c{min-height:62px;padding:6px;border-radius:10px}.c .h{font-size:13px}.c .n{font-size:11px}.c.act::after{top:7px;right:7px;width:5px;height:5px}.cal{gap:4px}.cal .wd{padding:0 2px 4px;letter-spacing:.02em}.bars{--h:170px}.row{grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) auto;gap:8px}.row .ix{width:24px;height:24px;font-size:11px}.row .t{font-size:20px}.row .d{font-size:13px;padding:3px 9px}.gap{padding-left:32px}.er{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.er .nt{grid-column:1/-1;order:5}}
+@media(max-width:600px){.logo{font-size:33px}.mh h2{font-size:26px}.mh{gap:6px}table{font-size:13px}.c{min-height:62px;padding:6px;border-radius:10px}.c .h{font-size:13px}.c .n{font-size:11px}.c.act::after{top:7px;right:7px;width:5px;height:5px}.cal{gap:4px}.cal .wd{padding:0 2px 4px;letter-spacing:.02em}.bars{--h:170px}.row{grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) auto;gap:8px}.row .ix{width:24px;height:24px;font-size:11px}.row .t{font-size:20px}.row .d{font-size:13px;padding:3px 9px}.gap{padding-left:32px}.er{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.er .nt{grid-column:1/-1;order:5}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:color .2s,background-color .2s,opacity .2s!important}}
 body{transition:background-color .35s ease,color .35s ease}
 .punch,.tc,.wk,.stats div,.tblw,.panel,.c,input{transition:background-color .35s ease,border-color .35s ease,color .35s ease}
@@ -255,12 +255,19 @@ body{transition:background-color .35s ease,color .35s ease}
 @keyframes rm{to{opacity:0;transform:translateX(18px)}}
 .mh h2.anim{animation:fade .5s ease both}
 @media(max-width:860px){.sgrid{grid-template-columns:minmax(0,1fr)}}
+
+html{-webkit-tap-highlight-color:transparent}
+button,a,input,label{-webkit-tap-highlight-color:transparent}
+button:focus,a:focus{outline:none}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.seg button:focus-visible,.tsw button:focus-visible{outline-offset:-2px;border-radius:999px}
+button{-webkit-user-select:none;user-select:none;touch-action:manipulation}
 </style>
 </head>
 <body>
 <div class="band"><div class="wrap">
   <header class="top">
-    <h1 class="logo">GRIND.</h1>
+    <h1 class="logo">Grind.</h1>
     <div class="topr"><p class="hi" id="hi">Merhaba</p><span class="mute" id="today"></span><span class="sync" id="sync"><i></i><span>Bu cihazda</span></span></div>
   </header>
 
