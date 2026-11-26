@@ -4010,7 +4010,7 @@
   function geriSay(g) {
     if (azHareket) return; const eski = document.getElementById('gerisay'); if (eski) eski.remove();
     const ilk = g.hareketler[0]; const h = ilk && D.HAREKET[ilk.id];
-    const SOZ = ['Hazır', 'Nefes al', 'Başla'];
+    const SOZ = ['Hazır', 'Nefes al', 'GO'];
     const el = document.createElement('div'); el.id = 'gerisay'; el.className = 'gerisay gs2'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'assertive');
     el.innerHTML = '<div class="gs-bas"><span class="k">Antrenman başlıyor</span><span class="gs-ad">' + esc(g.ad) + '<span class="nokta">.</span></span></div>' +
       '<div class="gs-soz"></div>' +
@@ -4024,10 +4024,11 @@
       nk[i].classList.add('dolu');
       const eskiS = soz.querySelector('span'); if (eskiS) { eskiS.classList.add('cik'); setTimeout(() => eskiS.remove(), 320); }
       const sp = document.createElement('span'); sp.className = 'gs-s' + (i === 2 ? ' son' : ''); sp.innerHTML = SOZ[i] + '<i>.</i>'; soz.appendChild(sp);
+      if (i === 2) el.classList.add('go'); // son an: ekran kobalta döner, dev GO.
       if (sesTur() !== 'yok') bip(i === 2 ? null : 'sayim'); if (navigator.vibrate) navigator.vibrate(i === 2 ? 40 : 15);
     };
     [0, 1, 2].forEach((i) => zaman.push(setTimeout(() => adim(i), 120 + i * 1000)));
-    zaman.push(setTimeout(kapat, 3150));
+    zaman.push(setTimeout(kapat, 3350));
   }
 
   /* ---------- açılış: kobalt perde, yazı maskeden yükselir, nokta düşer, perde yukarı çekilir (oturumda bir kez, dokununca geçer) ---------- */
