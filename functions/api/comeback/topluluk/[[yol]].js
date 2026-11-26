@@ -159,7 +159,7 @@ async function onRequestIc(ctx, R) {
       const donem = url.searchParams.get('donem') === 'ay' ? ayK : haftaK;
       const olc = { hacim: 'hacim', set: 'set_', antr: 'antr' }[url.searchParams.get('olcut')] || 'hacim';
       const r = await db.prepare('SELECT s.kullanici_id id, s.hacim, s.set_, s.antr, k.ad, k.foto_v, k.vitrin, k.unvan, k.rol FROM skor s JOIN kullanicilar k ON k.id = s.kullanici_id WHERE s.donem = ? AND k.siralama = 1 AND s.' + olc + ' > 0 ORDER BY s.' + olc + ' DESC, s.guncelleme ASC LIMIT 200').bind(donem).all();
-      const l = (r.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, set: x.set_, antr: x.antr, ben: x.id === kim.id, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined, ...rz(x) }));
+      const l = (r.results || []).map((x, i) => ({ sira: i + 1, ad: gorunen(x.ad), hacim: x.hacim, set: x.set_, antr: x.antr, ben: x.id === kim.id, kid: x.id, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined, ...rz(x) }));
       const ben = await db.prepare('SELECT siralama FROM kullanicilar WHERE id = ?').bind(kim.id).first();
       return json({ liste: l.slice(0, 50), benim: l.find((x) => x.ben) || null, toplam: l.length, katildi: !!(ben && ben.siralama), donem });
     }
@@ -199,6 +199,66 @@ async function onRequestIc(ctx, R) {
 
     /* ---------- program paylaşımı ---------- */
     const kadiTemiz = (v) => String(v || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').slice(0, 20);
+    // Açık profil: başkasının profili (biyografi, ilgi, rozetler ve kazanma tarihleri). Engellenen görünmez.
+    /* ---------- etkinlikler: "Bostanlı'da koşu", "halı saha", herkes görür, isteyen katılır ---------- */
+    if (p[0] === 'etkinlik') {
+      const BRANS = ['fitness', 'kalistenik', 'crossfit', 'hiit', 'kosu', 'yuruyus', 'bisiklet', 'yuzme', 'yoga', 'pilates', 'kayak', 'futbol', 'basketbol', 'voleybol', 'tenis', 'padel', 'boks', 'kickboks', 'dovus', 'tirmanis'];
+      const kisiler = async (id) => (await db.prepare('SELECT k.id, k.ad, k.vitrin, k.unvan, k.rol FROM etkinlik_katilim e JOIN kullanicilar k ON k.id = e.kullanici_id WHERE e.etkinlik_id = ? ORDER BY e.zaman LIMIT 200').bind(id).all()).results || [];
+      if (!p[1] && m === 'GET') {
+        const r = await db.prepare('SELECT e.*, k.ad, k.vitrin, k.unvan, k.rol, (SELECT COUNT(*) FROM etkinlik_katilim WHERE etkinlik_id = e.id) n, (SELECT 1 FROM etkinlik_katilim WHERE etkinlik_id = e.id AND kullanici_id = ?) ben FROM etkinlik e JOIN kullanicilar k ON k.id = e.kullanici_id WHERE e.iptal = 0 AND e.zaman > ? AND e.kullanici_id NOT IN (SELECT engellenen_id FROM engel WHERE kullanici_id = ?) ORDER BY e.zaman LIMIT 60')
+          .bind(kim.id, simdi - 3 * 3600e3, kim.id).all();
+        return json({ liste: (r.results || []).map((x) => ({ id: x.id, brans: x.brans, baslik: x.baslik, yer: x.yer, zaman: x.zaman, kontenjan: x.kontenjan, n: x.n, katildim: !!x.ben, benim: x.kullanici_id === kim.id, acan: gorunen(x.ad), acanId: x.kullanici_id, arz: rz(x) })) });
+      }
+      if (!p[1] && m === 'POST') {
+        if (!(await sinir(db, R, 'etkinlik:' + kim.id, 5, 86400))) return hata('Bugün yeterince etkinlik açtın.', 429);
+        const g = await req.json().catch(() => ({}));
+        const brans = BRANS.indexOf(g.brans) >= 0 ? g.brans : '';
+        const baslik = String(g.baslik || '').replace(/[<>]/g, '').trim().slice(0, 60); const yer = String(g.yer || '').replace(/[<>]/g, '').trim().slice(0, 80);
+        const aciklama = String(g.aciklama || '').replace(/[<>]/g, '').trim().slice(0, 300); const zaman = Math.floor(Number(g.zaman));
+        const kont = g.kontenjan ? Math.max(2, Math.min(200, Math.floor(Number(g.kontenjan)) || 0)) : null;
+        if (!brans || baslik.length < 3 || yer.length < 2) return hata('Branş, başlık ve yer gerekli.', 400);
+        if (!(zaman > simdi && zaman < simdi + 60 * 864e5)) return hata('Tarih bugünden sonra ve en çok 60 gün içinde olmalı.', 400);
+        if (YASAK.test(baslik + ' ' + yer + ' ' + aciklama)) return hata('Uygunsuz ifade var.', 400);
+        const id = crypto.randomUUID();
+        await db.batch([db.prepare('INSERT INTO etkinlik (id, kullanici_id, brans, baslik, yer, zaman, kontenjan, aciklama, olusturma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(id, kim.id, brans, baslik, yer, zaman, kont, aciklama || null, simdi),
+          db.prepare('INSERT INTO etkinlik_katilim (etkinlik_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(id, kim.id, simdi)]);
+        return json({ id });
+      }
+      const e = await db.prepare('SELECT e.*, k.ad, k.vitrin, k.unvan, k.rol FROM etkinlik e JOIN kullanicilar k ON k.id = e.kullanici_id WHERE e.id = ?').bind(String(p[1]).slice(0, 64)).first();
+      if (!e || (e.iptal && e.kullanici_id !== kim.id)) return hata('Etkinlik bulunamadı.', 404);
+      if (!p[2] && m === 'GET') {
+        const l = await kisiler(e.id);
+        return json({ etkinlik: { id: e.id, brans: e.brans, baslik: e.baslik, yer: e.yer, zaman: e.zaman, kontenjan: e.kontenjan, aciklama: e.aciklama || '', iptal: !!e.iptal, benim: e.kullanici_id === kim.id, acan: gorunen(e.ad), acanId: e.kullanici_id, arz: rz(e),
+          katilimci: l.map((x) => Object.assign({ id: x.id, ad: gorunen(x.ad) }, rz(x))), katildim: l.some((x) => x.id === kim.id) } });
+      }
+      if (p[2] === 'katil' && m === 'POST') {
+        if (!(await sinir(db, R, 'etkatil:' + kim.id, 40, 3600))) return hata('Biraz yavaş.', 429);
+        if (e.iptal || e.zaman < simdi) return hata('Bu etkinliğe artık katılınamaz.', 400);
+        const n = await db.prepare('SELECT COUNT(*) n FROM etkinlik_katilim WHERE etkinlik_id = ?').bind(e.id).first();
+        if (e.kontenjan && n && n.n >= e.kontenjan) return hata('Kontenjan doldu.', 400);
+        await db.prepare('INSERT OR IGNORE INTO etkinlik_katilim (etkinlik_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(e.id, kim.id, simdi).run();
+        return json({ ok: true });
+      }
+      if (p[2] === 'ayril' && m === 'POST') {
+        if (e.kullanici_id === kim.id) return hata('Açan kişi ayrılamaz; istersen iptal et.', 400);
+        await db.prepare('DELETE FROM etkinlik_katilim WHERE etkinlik_id = ? AND kullanici_id = ?').bind(e.id, kim.id).run(); return json({ ok: true });
+      }
+      if (p[2] === 'iptal' && m === 'POST') {
+        if (e.kullanici_id !== kim.id && !admin) return hata('Yetkin yok.', 403);
+        await db.prepare('UPDATE etkinlik SET iptal = 1 WHERE id = ?').bind(e.id).run(); return json({ ok: true });
+      }
+      return hata('Bulunamadı.', 404);
+    }
+    if (p[0] === 'profil' && m === 'GET') {
+      const id = String(url.searchParams.get('id') || '').slice(0, 64);
+      const k = await db.prepare('SELECT id, ad, kullanici_adi, foto_v, bio, ilgi, vitrin, unvan, rol, acik FROM kullanicilar WHERE id = ?').bind(id).first();
+      if (!k) return hata('Bulunamadı.', 404);
+      const eng = await db.prepare('SELECT 1 FROM engel WHERE (kullanici_id = ? AND engellenen_id = ?) OR (kullanici_id = ? AND engellenen_id = ?)').bind(kim.id, k.id, k.id, kim.id).first();
+      if (eng) return hata('Bulunamadı.', 404);
+      let ac = {}; try { ac = JSON.parse(k.acik || '{}') || {}; } catch (e) { /* bozuk */ }
+      let ilgi = []; try { ilgi = JSON.parse(k.ilgi || '[]') || []; } catch (e) { /* bozuk */ }
+      return json({ kisi: Object.assign({ id: k.id, ad: gorunen(k.ad), kadi: k.kullanici_adi || null, bio: k.bio || '', ilgi, rozet: ac.rozet || {}, ozet: ac.ozet || {}, ben: k.id === kim.id, fid: k.foto_v ? k.id : undefined, fv: k.foto_v || undefined }, rz(k)) });
+    }
     if (p[0] === 'kisi' && m === 'GET') {
       if (!(await sinir(db, R, 'kisi:' + kim.id, 30, 3600))) return hata('Çok fazla arama. Biraz sonra tekrar dene.', 429);
       const k = await db.prepare('SELECT id, ad, kullanici_adi FROM kullanicilar WHERE kullanici_adi = ?').bind(kadiTemiz(url.searchParams.get('ad'))).first();

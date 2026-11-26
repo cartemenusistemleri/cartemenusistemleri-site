@@ -93,6 +93,8 @@ function hesapSilAdimlari(db, id) {
     db.prepare('DELETE FROM uyelik WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM veriler WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM antrenman_gecmis WHERE kullanici_id = ?').bind(id),
+    db.prepare('DELETE FROM etkinlik_katilim WHERE kullanici_id = ? OR etkinlik_id IN (SELECT id FROM etkinlik WHERE kullanici_id = ?)').bind(id, id),
+    db.prepare('DELETE FROM etkinlik WHERE kullanici_id = ?').bind(id),
     db.prepare('DELETE FROM paylasim WHERE gonderen_id = ? OR alici_id = ?').bind(id, id),
     db.prepare('DELETE FROM skor WHERE kullanici_id = ?').bind(id),
     db.prepare('UPDATE ai_oy SET kullanici_id = NULL WHERE kullanici_id = ?').bind(id),
@@ -131,9 +133,11 @@ async function uyelikTablo(db) {
   if (uyelikHazir) return;
   await db.prepare('CREATE TABLE IF NOT EXISTS uyelik (kullanici_id TEXT PRIMARY KEY, son TEXT, tarihler TEXT, uzatma INTEGER NOT NULL DEFAULT 0, mazeret_bitis TEXT, mazeret_tur TEXT, mazeretler TEXT, askida TEXT, cb_bas TEXT, cb_soz INTEGER, guncelleme INTEGER)').run();
   // antrenman geçmişi: gün başına bir satır, o günün seansları set set (aylık/yıllık rapor da buradan okur)
+  await db.prepare('CREATE TABLE IF NOT EXISTS etkinlik (id TEXT PRIMARY KEY, kullanici_id TEXT NOT NULL, brans TEXT NOT NULL, baslik TEXT NOT NULL, yer TEXT NOT NULL, zaman INTEGER NOT NULL, kontenjan INTEGER, aciklama TEXT, olusturma INTEGER NOT NULL, iptal INTEGER NOT NULL DEFAULT 0)').run();
+  await db.prepare('CREATE TABLE IF NOT EXISTS etkinlik_katilim (etkinlik_id TEXT NOT NULL, kullanici_id TEXT NOT NULL, zaman INTEGER NOT NULL, PRIMARY KEY (etkinlik_id, kullanici_id))').run();
   await db.prepare('CREATE TABLE IF NOT EXISTS antrenman_gecmis (kullanici_id TEXT NOT NULL, tarih TEXT NOT NULL, json TEXT NOT NULL, zaman INTEGER NOT NULL, PRIMARY KEY (kullanici_id, tarih))').run();
   // açık profil (23 Kasım): biyografi, ilgi alanları, öne çıkan rozet, unvan (kurucu/ekip; koç rolden gelir)
-  for (const kol of ['bio TEXT', 'ilgi TEXT', 'vitrin TEXT', 'unvan TEXT']) { try { await db.prepare('ALTER TABLE kullanicilar ADD COLUMN ' + kol).run(); } catch (e) { /* zaten var */ } }
+  for (const kol of ['bio TEXT', 'ilgi TEXT', 'vitrin TEXT', 'unvan TEXT', 'acik TEXT']) { try { await db.prepare('ALTER TABLE kullanicilar ADD COLUMN ' + kol).run(); } catch (e) { /* zaten var */ } }
   uyelikHazir = true;
 }
 const HOSGELDIN_GUN = 14;
@@ -571,7 +575,10 @@ async function onRequestIc(ctx, R) {
       const ILGI = ['fitness', 'kalistenik', 'crossfit', 'kosu', 'yuruyus', 'bisiklet', 'yuzme', 'futbol', 'basketbol', 'voleybol', 'tenis', 'padel', 'boks', 'kickboks', 'dovus', 'yoga', 'pilates', 'hiit', 'tirmanis', 'kayak'];
       const ilgi = (Array.isArray(g.ilgi) ? g.ilgi : []).map(String).filter((x, i, a) => ILGI.indexOf(x) >= 0 && a.indexOf(x) === i).slice(0, 6);
       const vitrin = /^[a-z0-9_]{1,24}$/.test(String(g.vitrin || '')) ? String(g.vitrin) : '';
-      await db.prepare('UPDATE kullanicilar SET bio = ?, ilgi = ?, vitrin = ? WHERE id = ?').bind(bio || null, ilgi.length ? JSON.stringify(ilgi) : null, vitrin || null, kim.id).run();
+      // açık özet: kazanılan rozetler ve tarihleri, antrenman/seri/rekor sayıları (profil sayfasında görünür)
+      const rz = {}; if (g.rozet && typeof g.rozet === 'object') Object.keys(g.rozet).slice(0, 80).forEach((k) => { if (/^[a-z0-9_]{1,24}$/.test(k)) rz[k] = /^\d{4}-\d{2}-\d{2}$/.test(String(g.rozet[k])) ? String(g.rozet[k]) : ''; });
+      const oz = {}; ['antr', 'seri', 'rekor'].forEach((k) => { const n = Math.floor(Number(g.ozet && g.ozet[k])); if (n >= 0 && n < 100000) oz[k] = n; });
+      await db.prepare('UPDATE kullanicilar SET bio = ?, ilgi = ?, vitrin = ?, acik = ? WHERE id = ?').bind(bio || null, ilgi.length ? JSON.stringify(ilgi) : null, vitrin || null, JSON.stringify({ rozet: rz, ozet: oz }), kim.id).run();
       return json({ ok: true });
     }
     if (yol === 'gecmis' && m === 'PUT') {
