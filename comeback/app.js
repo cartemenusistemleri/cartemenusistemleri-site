@@ -249,11 +249,11 @@
   async function hesapYukle() {
     try {
       const r = await istek('ben');
-      if (r.ok) { hesap = r.j.kullanici; await veriCek(); if (S.profil) { let d = false; if (hesap.bio && !S.profil.bio) { S.profil.bio = hesap.bio; d = true; } if (hesap.ilgi && hesap.ilgi.length && !(S.profil.ilgi || []).length) { S.profil.ilgi = hesap.ilgi; d = true; } if (hesap.vitrin && !S.profil.vitrin) { S.profil.vitrin = hesap.vitrin; d = true; } if (d) kaydet(true); } if (hesap.rol === 'demo' && !S.profil) { demoDoldur(); kaydet(true); } hocaYukle(); paylasimYukle(); setTimeout(gecmisGonder, 2500); if (S.profil) skorGonder(); setTimeout(() => { try { if (hatAcikMi()) hatEsitle(true); } catch (e) { /* yok */ } }, 3000); }
+      if (r.ok) { hesap = r.j.kullanici; await veriCek(); if (S.profil) { let d = false; if (hesap.bio && !S.profil.bio) { S.profil.bio = hesap.bio; d = true; } if (hesap.ilgi && hesap.ilgi.length && !(S.profil.ilgi || []).length) { S.profil.ilgi = hesap.ilgi; d = true; } if (hesap.vitrin && !S.profil.vitrin) { S.profil.vitrin = hesap.vitrin; d = true; } if (d) kaydet(true); } if (hesap.rol === 'demo' && !S.profil) { demoDoldur(); kaydet(true); } hocaYukle(); paylasimYukle(); setTimeout(gecmisGonder, 2500); setTimeout(akisGonder, 3500); if (S.profil) skorGonder(); setTimeout(() => { try { if (hatAcikMi()) hatEsitle(true); } catch (e) { /* yok */ } }, 3000); }
       else if (r.durum >= 500) cevrimdisi = true;
     } catch (e) { cevrimdisi = true; }
   }
-  window.addEventListener('online', () => { gecmisGonder(); });
+  window.addEventListener('online', () => { gecmisGonder(); akisGonder(); });
   window.addEventListener('pagehide', () => { if (hesap && senkronZaman) { clearTimeout(senkronZaman); try { fetch(API + 'veri', { method: 'PUT', keepalive: true, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ json: JSON.stringify(S), guncelleme: S.guncelleme }) }); } catch (e) { /* yok */ } } });
   const gun = (k) => { const key = k || tarihKey(); if (!S.gunluk[key]) S.gunluk[key] = { ogun: [], antrenman: null }; return S.gunluk[key]; };
 
@@ -407,9 +407,11 @@
       '<div class="pf-isim">' + avatar(k.ad, k.fid, k.fv, 'buyuk') + '<h1 class="pf-ad">' + esc(k.ad.split(' ')[0]) + '<i class="isim-nk" aria-hidden="true"></i></h1>' + (k.un ? unvanSvg(k.un, 30) : '') + (vt ? rozetGorsel(vt, true, 32, true) : '') + '</div>' +
       (k.bio ? '<p class="pf-bio">' + esc(k.bio) + '</p>' : '') +
       (ilgi.length ? '<div class="pf-cipler">' + ilgi.map((i) => { const d = ILGI.find((y) => y[0] === i); return '<span class="pf-cip r' + d[2] + '">' + esc(d[1]) + '</span>'; }).join('') + '</div>' : '') + '</section>' +
+      '<div class="genis kisi-ark">' + (k.ark === 'tamam' ? '<button class="btn cerceve" data-act="ark" data-is="sil" data-id="' + esc(k.id) + '" data-onayli="1">Arkadaşsınız ✓</button>' : k.ark === 'giden' ? '<button class="btn cerceve" data-act="ark" data-is="sil" data-id="' + esc(k.id) + '">İstek gitti · geri al</button>' : k.ark === 'gelen' ? '<button class="btn ana" data-act="ark" data-is="kabul" data-id="' + esc(k.id) + '">İsteğini kabul et</button>' : '<button class="btn ana" data-act="ark" data-is="ekle" data-id="' + esc(k.id) + '">Arkadaş ekle</button>') + '<span class="ik num">' + (k.arkSayi || 0) + ' arkadaş</span></div>' +
       '<div class="t genis pf-sayi num"><div><b>' + (o.antr || 0) + '</b><span>antrenman</span></div><div><b>' + (o.seri || 0) + '</b><span>hafta seri</span></div><div><b>' + (o.rekor || 0) + '</b><span>rekor</span></div></div>' +
       '<div class="t genis pf-rozet"><div class="satir"><span class="k">Rozetler · ' + l.filter((r) => r.var).length + ' / ' + l.length + '</span></div><div class="pf-rz-izgara">' +
       l.map((r) => '<button class="pf-rz' + (r.var ? '' : ' kilitli') + '" data-act="rz-ac" data-id="' + r.id + '">' + rozetGorsel(r.id, r.var, 56) + '<span>' + esc(r.ad) + '</span></button>').join('') + '</div></div>' +
+      ((k.gonderi || []).length ? '<span class="k genis" style="padding:8px 4px 0">Paylaşımlar</span><div class="genis yigin" style="gap:12px">' + k.gonderi.map((x) => gonderiKart(Object.assign({}, x, { fid: k.fid, fv: k.fv, vt: k.vt, un: k.un }))).join('') + '</div>' : k.ark !== 'tamam' ? '<p class="ik genis" style="padding:4px">Arkadaş olunca paylaşımlarını görürsün.</p>' : '') +
       (det ? rozetSayfa(det, (k.rozet || {})[det.id] || '', false, false) : '') + '</div>';
   }
   function rozetSayfa(r, tarih, kendi, vitrinde) {
@@ -931,7 +933,7 @@
   // Rehber: kas grubu yazıları (rehber.js), girişsiz de okunur
   function ekranRehber(id) {
     const RB = window.COMEBACK_REHBER; if (!RB) return ust(geri('#/topluluk')) + '<div class="t"><span>Rehber yüklenemedi. Sayfayı yenile.</span></div>';
-    const sek = '<div class="yatay">' + [['forum', 'Forum', '#/topluluk'], ['etkinlik', 'Etkinlik', '#/topluluk/etkinlik'], ['meydan', 'Meydan okuma', '#/topluluk/meydan'], ['rehber', 'Rehber', '#/topluluk/rehber']].map((x) => '<a class="hap" href="' + x[2] + '" aria-pressed="' + (x[0] === 'rehber') + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '</div>';
+    const sek = hesap ? sosSekme('rehber') : '';
     const y = id && RB.R.find((x) => x.id === id);
     if (y) {
       const hl = y.hareketler.filter((h) => D.HAREKET[h]);
@@ -948,6 +950,164 @@
     return ust(geri(hesap ? '#/profil' : '#/'), '<span class="alt">Topluluk</span>') + '<h1 class="baslik">Rehber<span class="nokta">.</span></h1>' + sek +
       '<p class="ik" style="padding:2px 4px 8px;max-width:56ch">Her kas grubu için kısa ve net: nasıl çalışır, haftada kaç set, en sık hatalar.</p>' +
       '<div class="izgara">' + RB.R.map((x, i) => '<a class="t rh-kart' + (i === 0 ? ' kobalt' : i === 6 ? ' limon' : '') + '" href="#/topluluk/rehber/' + x.id + '"><span class="k">' + x.sure + ' okuma</span><b>' + esc(x.ad) + '</b><span class="rh-kisa">' + esc(x.ozet) + '</span></a>').join('') + '</div>';
+  }
+  /* ---------- sosyal: arkadaşlar, akış, keşfet, gruplar ---------- */
+  // Akışa yalnızca uygulamanın ürettiği şeyler düşer: biten antrenmanın özeti ve uygulamanın çizdiği kartlar.
+  let sos = { akis: null, akisSon: null, kesfet: null, kesfetSon: null, istek: 0, ark: null, ara: '', araL: null, gruplar: null, grup: null, grupId: null, menu: null, yuk: {}, durtuldu: {} };
+  const GORUNUR = [['arkadas', 'Arkadaşlar ve grubum'], ['herkes', 'Herkes (Keşfet\'te de)'], ['grup', 'Sadece grubum'], ['kapali', 'Kimse']];
+  const akisAyar = () => { const v = S.ayar && S.ayar.akis; return GORUNUR.some((x) => x[0] === v) ? v : 'arkadas'; };
+  async function sosYukle(ne, id, devam) {
+    const k = ne + (id || ''); if (sos.yuk[k]) return; sos.yuk[k] = true;
+    try {
+      if (ne === 'akis' || ne === 'kesfet') {
+        const once = devam ? sos[ne + 'Son'] : null;
+        const r = await tistek(ne + (once ? '?once=' + once : ''));
+        const l = r.ok ? r.j.liste : [];
+        sos[ne] = devam && sos[ne] ? sos[ne].concat(l) : l; sos[ne + 'Son'] = r.ok ? r.j.son : null;
+        if (ne === 'akis' && r.ok && !devam) sos.istek = r.j.istek || 0;
+      } else if (ne === 'ark') { const r = await tistek('arkadas'); sos.ark = r.ok ? r.j : { liste: [], gelen: [], giden: [] }; sos.istek = sos.ark.gelen.length; }
+      else if (ne === 'gruplar') { const r = await tistek('grup'); sos.gruplar = r.ok ? r.j.liste : []; }
+      else if (ne === 'grup') { const r = await tistek('grup/' + encodeURIComponent(id)); sos.grup = r.ok ? r.j.grup : { hata: r.j.hata || 'Grup bulunamadı.' }; sos.grupId = id; }
+    } catch (e) { if (ne === 'akis' || ne === 'kesfet') sos[ne] = sos[ne] || []; if (ne === 'gruplar') sos.gruplar = []; }
+    sos.yuk[k] = false; render();
+  }
+  // biten antrenman akışa düşer (ayar "Kimse" değilse); çevrimdışıysa sonra denenir
+  const AKIS_BEK = 'comeback:akis-bek';
+  function akisBekOku() { try { return JSON.parse(localStorage.getItem(AKIS_BEK) || '[]') || []; } catch (e) { return []; } }
+  function akisBekYaz(l) { try { localStorage.setItem(AKIS_BEK, JSON.stringify(l.slice(-5))); } catch (e) { /* depolama kapalı */ } }
+  function antrenmanAkisa(b) {
+    if (!hesap || akisAyar() === 'kapali') return;
+    const l = akisBekOku(); l.push({ tur: 'antrenman', gorunur: akisAyar(), veri: { ad: b.ad, dk: b.dk, set: b.set, hacim: b.hacim, rekor: b.rekor || 0, hareket: (b.hk || []).slice(0, 3).map((x) => x.ad) }, z: Date.now() });
+    akisBekYaz(l); akisGonder();
+  }
+  let akisGonderiyor = false;
+  async function akisGonder() {
+    if (!hesap || akisGonderiyor || navigator.onLine === false) return; let l = akisBekOku(); if (!l.length) return;
+    akisGonderiyor = true;
+    for (const x of l.slice()) {
+      if (Date.now() - x.z > 2 * 864e5) { l = l.filter((y) => y !== x); continue; }
+      try { const r = await tistek('gonderi', 'POST', x); if (r.ok || (r.j && r.j.hata && !r.j.sinir)) l = l.filter((y) => y !== x); else break; } catch (e) { break; }
+    }
+    akisBekYaz(l); akisGonderiyor = false; sos.akis = null;
+  }
+  // uygulamanın çizdiği kartı (canvas) akışa koy: 720 px genişliğe küçültülmüş JPEG
+  async function kartAkisa(c, baslik, gor) {
+    if (!hesap) { toast('Akış için giriş yap.'); return; }
+    const g = gor === 'herkes' ? 'herkes' : 'arkadas';
+    const k = document.createElement('canvas'); const o = 720 / c.width; k.width = 720; k.height = Math.round(c.height * o);
+    const x = k.getContext('2d'); x.drawImage(c, 0, 0, k.width, k.height);
+    let veri = k.toDataURL('image/jpeg', 0.82); if (veri.length > 650000) veri = k.toDataURL('image/jpeg', 0.66);
+    const r = await tistek('gonderi', 'POST', { tur: 'kart', gorunur: g, veri: { baslik }, gorsel: veri });
+    if (!r.ok) { toast(r.j.hata || 'Paylaşılamadı.'); return; }
+    sos.akis = null; sos.kesfet = null; toast(g === 'herkes' ? 'Akışa ve Keşfet\'e kondu.' : 'Akışa kondu.');
+  }
+  const gorunurAd = (g) => (g === 'herkes' ? 'Herkese açık' : g === 'grup' ? 'Grubuna' : 'Arkadaşlarına');
+  function gonderiKart(x, grupMod) {
+    const v = x.veri || {}; const mk = 'g' + x.id;
+    const menu = '<button class="pd-ikon" data-act="gn-menu" data-id="' + x.id + '" aria-label="Seçenekler" aria-expanded="' + (sos.menu === mk) + '"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>' +
+      (sos.menu === mk ? '<div class="tp-menu">' + (x.benim || (hesap && hesap.rol === 'admin') ? '<button data-act="gn-sil" data-id="' + x.id + '">Sil</button>' : '') + (!x.benim ? '<button data-act="gn-sikayet" data-id="' + x.id + '">Şikâyet et</button><button data-act="gn-engel" data-k="' + esc(x.kid) + '">Bu kişiyi engelle</button>' : '') + '</div>' : '');
+    let govde = '';
+    if (x.tur === 'antrenman') govde = '<div class="gn-antr"><span class="gn-ne">' + esc(v.ad || 'Antrenman') + '<span class="nokta">.</span></span><span class="gn-sayi num">' + [v.dk ? v.dk + ' dk' : '', v.set ? v.set + ' set' : '', v.hacim ? sayi(v.hacim) + ' kg' : '', v.rekor ? v.rekor + ' rekor' : ''].filter(Boolean).join(' · ') + '</span>' + (v.hareket && v.hareket.length ? '<span class="gn-hareket">' + v.hareket.map(esc).join(' · ') + '</span>' : '') + '</div>';
+    else if (x.tur === 'kart' && x.gorsel) govde = '<div class="gn-kart"><img src="' + TAPI + 'gonderi/' + x.id + '/gorsel" alt="' + esc(v.baslik || 'COMEBACK. kartı') + '" loading="lazy" decoding="async"></div>';
+    return '<article class="t gn" data-gn="' + x.id + '"><div class="gn-ust"><a class="gn-kisi" href="#/kisi/' + encodeURIComponent(x.kid) + '">' + avatar(x.ad, x.fid, x.fv, 'orta') + '<span class="yigin"><b>' + esc(x.ad) + isimEk(x) + '</b><span class="ik">' + (x.tur === 'antrenman' ? 'Antrenmanını bitirdi' : 'Kart paylaştı') + ' · ' + zamanOnce(x.zaman) + (x.benim && !grupMod ? ' · ' + gorunurAd(x.gorunur) : '') + '</span></span></a><div class="tp-menu-kap">' + menu + '</div></div>' +
+      govde + (x.metin ? '<p class="gn-metin">' + esc(x.metin) + '</p>' : '') +
+      '<div class="gn-alt">' + (x.benim ? '<span class="gn-saygi-say">' + (x.saygi ? x.saygi + ' saygı' : '') + '</span>' : '<button class="gn-saygi" data-act="gn-saygi" data-id="' + x.id + '" aria-pressed="' + !!x.sen + '">Saygı<span class="nokta">.</span>' + (x.saygi ? '<span class="num"> ' + x.saygi + '</span>' : '') + '</button>') + '</div></article>';
+  }
+  const sosSekme = (aktif) => '<div class="yatay">' + [['akis', 'Akış', '#/topluluk'], ['kesfet', 'Keşfet', '#/topluluk/kesfet'], ['grup', 'Grup', '#/topluluk/grup'], ['etkinlik', 'Etkinlik', '#/topluluk/etkinlik'], ['forum', 'Forum', '#/topluluk/forum'], ['meydan', 'Meydan okuma', '#/topluluk/meydan'], ['rehber', 'Rehber', '#/topluluk/rehber']].map((x) => '<a class="hap" href="' + x[2] + '" aria-pressed="' + (aktif === x[0]) + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '</div>';
+  const sosBas = (aktif) => ust(logo, '<a class="ust-ik" href="#/arkadas" aria-label="Arkadaşlar' + (sos.istek ? ', ' + sos.istek + ' yeni istek' : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M3 19c.6-3.4 3-5.2 6-5.2s5.4 1.8 6 5.2M16 5.5a3 3 0 010 5.6M18 14.2c1.6.6 2.7 2.2 3 4.8"/></svg>' + (sos.istek ? '<span class="ust-ik-say num">' + sos.istek + '</span>' : '') + '</a>') + '<h1 class="baslik">Topluluk<span class="nokta">.</span></h1>' + sosSekme(aktif);
+  function ekranAkis(ne) {
+    if (!sos[ne]) sosYukle(ne);
+    const l = sos[ne] || [];
+    const bos = ne === 'akis'
+      ? '<div class="t bos"><b>Akışın boş.</b><span class="ik">Arkadaşlarını ekle; bitirdikleri antrenmanlar burada görünsün. Senin antrenmanların da onlara düşer.</span><a class="btn ana" href="#/arkadas" style="align-self:flex-start;margin-top:6px">Arkadaş ekle</a></div>'
+      : '<div class="t bos"><b>Keşfet daha boş.</b><span class="ik">Herkese açık paylaşılan kartlar burada çıkar. Bir antrenman kartını "Herkes" seçerek paylaşan ilk kişi sen ol.</span></div>';
+    return sosBas(ne) +
+      (ne === 'akis' && sos.istek ? '<a class="t limon gn-istek" href="#/arkadas"><b>' + sos.istek + ' arkadaşlık isteği</b><span class="ik">Bak, kabul et</span></a>' : '') +
+      (ne === 'akis' ? '<div class="gn-gorunur ik">Antrenmanların ' + (akisAyar() === 'kapali' ? 'kimseye düşmüyor' : esc(GORUNUR.find((x) => x[0] === akisAyar())[1]).toLocaleLowerCase('tr') + ' görüyor') + ' · <a href="#/ayar/antrenman">Değiştir</a></div>' : '') +
+      (!sos[ne] ? iskelet(3) : l.length ? l.map((x) => gonderiKart(x)).join('') + (sos[ne + 'Son'] ? '<button class="btn cerceve" data-act="gn-daha" data-ne="' + ne + '" style="align-self:center">Daha fazla</button>' : '') : bos);
+  }
+  const kisiGonderiler = () => { const h = location.hash.match(/^#\/kisi\/(.+)$/); const k = h && kisiOnbellek[decodeURIComponent(h[1])]; return k && k.gonderi; };
+  function sosTemizle(id) { ['akis', 'kesfet'].forEach((n) => { if (sos[n]) sos[n] = sos[n].filter((x) => x.id !== id); }); if (sos.grup && sos.grup.akis) sos.grup.akis = sos.grup.akis.filter((x) => x.id !== id); const l = kisiGonderiler(); if (l) l.splice(0, l.length, ...l.filter((x) => x.id !== id)); }
+  let araZaman = null;
+  function ekranArkadas() {
+    if (!S.profil) return ekranKarsilama();
+    if (!hesap) return ust(geri('#/topluluk')) + '<div class="t"><b>Arkadaş eklemek için giriş yap.</b></div>';
+    if (!sos.ark) sosYukle('ark');
+    const a = sos.ark || { liste: [], gelen: [], giden: [] };
+    const satir = (x, dugme) => '<div class="ark-satir"><a class="gn-kisi" href="#/kisi/' + encodeURIComponent(x.id) + '">' + avatar(x.ad, x.fid, x.fv, 'orta') + '<span class="yigin"><b>' + esc(x.ad) + isimEk(x) + '</b>' + (x.kadi ? '<span class="ik">@' + esc(x.kadi) + '</span>' : '') + '</span></a>' + (dugme || '') + '</div>';
+    const arkDugme = (x) => x.ark === 'tamam' ? '<span class="etiket">Arkadaşsınız</span>' : x.ark === 'giden' ? '<span class="etiket">İstek gitti</span>' : x.ark === 'gelen' ? '<button class="btn ana kucuk" data-act="ark" data-is="kabul" data-id="' + esc(x.id) + '">Kabul et</button>' : '<button class="btn ana kucuk" data-act="ark" data-is="ekle" data-id="' + esc(x.id) + '">Ekle</button>';
+    return ust(geri('#/topluluk'), '<span class="alt">Arkadaşlar</span>') + '<h1 class="baslik">Arkadaşlar<span class="nokta">.</span></h1>' +
+      '<label class="t alan"><span>İsim ya da kullanıcı adı</span><input id="arkAra" data-in="ark-ara" value="' + esc(sos.ara) + '" placeholder="@kullaniciadi" autocomplete="off" autocapitalize="off" style="font-size:19px"></label>' +
+      '<div id="arkSonuc">' + arkSonuc(satir, arkDugme) + '</div>' +
+      (a.gelen.length ? '<div class="t" style="gap:4px"><span class="k">İstekler · ' + a.gelen.length + '</span>' + a.gelen.map((x) => satir(x, '<span class="ark-iki"><button class="btn ana kucuk" data-act="ark" data-is="kabul" data-id="' + esc(x.id) + '">Kabul</button><button class="btn cerceve kucuk" data-act="ark" data-is="sil" data-id="' + esc(x.id) + '">Sil</button></span>')).join('') + '</div>' : '') +
+      '<div class="t" style="gap:4px"><span class="k">Arkadaşların · ' + a.liste.length + '</span>' + (a.liste.length ? a.liste.map((x) => satir(x)).join('') : '<span class="ik" style="padding:6px 0">Henüz kimse yok. Yukarıdan ara ya da profilindeki kullanıcı adını paylaş.</span>') + '</div>' +
+      (a.giden.length ? '<div class="t" style="gap:4px"><span class="k">Gönderdiğin istekler</span>' + a.giden.map((x) => satir(x, '<button class="btn cerceve kucuk" data-act="ark" data-is="sil" data-id="' + esc(x.id) + '">Geri al</button>')).join('') + '</div>' : '') +
+      (hesap.kadi ? '<button class="btn cerceve" data-act="ark-davet" style="align-self:flex-start">Beni eklesinler: @' + esc(hesap.kadi) + '</button>' : '');
+  }
+  function arkSonuc(satir, arkDugme) {
+    if (!sos.ara || sos.ara.length < 2) return '';
+    if (!sos.araL) return '<div class="t"><span class="ik">Aranıyor…</span></div>';
+    return '<div class="t" style="gap:4px">' + (sos.araL.length ? sos.araL.map((x) => satir(x, arkDugme(x))).join('') : '<span class="ik" style="padding:6px 0">Bu isimde kimse yok.</span>') + '</div>';
+  }
+  async function arkAra(q) {
+    sos.ara = q; sos.araL = null; clearTimeout(araZaman);
+    const kutu = () => document.getElementById('arkSonuc');
+    if (q.length < 2) { const k = kutu(); if (k) k.innerHTML = ''; return; }
+    araZaman = setTimeout(async () => {
+      const r = await tistek('ara?q=' + encodeURIComponent(q)); if (sos.ara !== q) return;
+      sos.araL = r.ok ? r.j.liste : []; if (!r.ok) toast(r.j.hata || 'Aranamadı.');
+      const k = kutu(); if (k) { render(); const i = document.getElementById('arkAra'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
+    }, 320);
+  }
+  // Grup: 2–8 arkadaştan kapalı grup. Biten antrenman gruba düşer, tek tepki "Saygı."
+  const GUN_HARF = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'];
+  function ekranGrup(id) {
+    if (id === 'yeni') return ust(geri('#/topluluk/grup'), '<span class="alt">Yeni grup</span>') + '<h1 class="baslik">Grup kur<span class="nokta">.</span></h1>' +
+      '<form data-form="gr-yeni" class="izgara" novalidate><label class="t genis alan"><span>Grubun adı</span><input name="ad" maxlength="30" required placeholder="Demir Kafa" style="font-size:22px"></label>' +
+      '<label class="t genis alan"><span>Haftalık hedef, hep birlikte kaç antrenman?</span><input name="hedef" inputmode="numeric" value="12" style="font-size:22px"></label>' +
+      '<p class="ik genis" style="padding:0 4px">2–8 kişi. Kod ile katılınır; arkadaşlarını doğrudan da ekleyebilirsin. Bitirdiğin antrenmanlar gruba düşer, tek tepki "Saygı."</p>' +
+      '<button class="btn ana buyuk-btn genis" type="submit">Grubu kur' + IK.ok + '</button></form>';
+    if (id) {
+      if (!sos.grup || sos.grupId !== id) { sos.grup = null; sosYukle('grup', id); return ust(geri('#/topluluk/grup')) + iskelet(3); }
+      const g = sos.grup; if (g.hata) return ust(geri('#/topluluk/grup')) + '<div class="t"><span>' + esc(g.hata) + '</span></div>';
+      const bugunI = Math.min(6, Math.floor((Date.now() - g.haftaBas) / 864e5));
+      const kalanGun = 6 - bugunI;
+      const yok = g.uyeler.filter((u) => !u.ben && (!u.son || Date.now() - u.son > 4 * 864e5));
+      const jamBen = S.jam && g.jam && S.jam.kod === g.jam.kod;
+      return ust(geri('#/topluluk/grup'), '<span class="alt">' + g.uyeler.length + ' kişi</span>') + '<h1 class="baslik">' + esc(g.ad) + '<span class="nokta">.</span></h1>' +
+        (g.durt.length ? '<div class="t limon gr-durt"><b>' + esc(g.durt[0].ad.split(' ')[0]) + ': Bekliyoruz.</b><span class="ik">' + (g.durt.length > 1 ? 've ' + (g.durt.length - 1) + ' kişi daha · ' : '') + 'Bugün bir set bile sayılır.</span></div>' : '') +
+        '<div class="t kobalt gr-hedef"><div class="satir"><span class="k">Bu hafta grupça</span><span class="k">' + (kalanGun ? kalanGun + ' gün kaldı' : 'Bugün biter') + '</span></div><span class="gr-hedef-say num">' + g.hafta + '<span> / ' + g.hedef + '</span></span><div class="cubuk beyaz"><span style="width:' + Math.min(100, Math.round(g.hafta / g.hedef * 100)) + '%"></span></div></div>' +
+        '<div class="t gr-tablo"><div class="gr-satir gr-bas"><span></span>' + GUN_HARF.map((h, i) => '<span class="' + (i === bugunI ? 'bugun' : '') + '">' + h + '</span>').join('') + '</div>' +
+          g.uyeler.map((u) => '<div class="gr-satir"><a class="gr-ad" href="#/kisi/' + encodeURIComponent(u.id) + '">' + esc(u.ben ? 'Sen' : u.ad.split(' ')[0]) + '</a>' + u.gunler.map((n, i) => '<i class="gr-n' + (n ? ' dolu' : '') + (i === bugunI ? ' bugun' : '') + (i > bugunI ? ' ileri' : '') + '" aria-label="' + GUN_HARF[i] + (n ? ' antrenman' : '') + '"></i>').join('') + '</div>').join('') +
+          '<span class="ik gr-acik">Dolu: gitti · Kobalt halka: bugün</span></div>' +
+        yok.map((u) => '<div class="t gr-yok"><span><b>' + esc(u.ad.split(' ')[0]) + '</b> ' + (u.son ? Math.floor((Date.now() - u.son) / 864e5) + ' gündür yok.' : 'henüz gelmedi.') + '</span>' + (sos.durtuldu[g.id + u.id] ? '<span class="etiket">Haber verildi</span>' : '<button class="btn siyah kucuk" data-act="gr-durt" data-id="' + esc(u.id) + '">Bekliyoruz.</button>') + '</div>').join('') +
+        '<div class="t gr-jam">' + (g.jam ? '<span class="k">Ortak antrenman açık</span><b>Kod ' + esc(g.jam.kod) + ' · ' + zamanOnce(g.jam.zaman) + '</b>' + (jamBen ? '<a class="btn ana" href="#/jam" style="align-self:flex-start">Jam\'e git</a>' : '<button class="btn ana" data-act="gr-jam-katil" data-kod="' + esc(g.jam.kod) + '" style="align-self:flex-start">Katıl</button>')
+          : '<span class="k">Birlikte çalış</span><b>Grupla ortak antrenman aç</b><span class="ik">Herkes kodsuz katılır; kim hangi sette, canlı görürsünüz.</span><button class="btn ana" data-act="gr-jam-ac" style="align-self:flex-start"' + (S.jam ? ' disabled' : '') + '>' + (S.jam ? 'Zaten bir Jam\'desin' : 'Jam aç') + '</button>') + '</div>' +
+        '<span class="k" style="padding:8px 4px 0">Grupta son paylaşılanlar</span>' +
+        (g.akis.length ? g.akis.map((x) => gonderiKart(x, true)).join('') : '<div class="t bos"><b>Henüz kimse antrenman bitirmedi.</b><span class="ik">İlk antrenmanı bitiren gruba düşer.</span></div>') +
+        '<div class="t" style="gap:10px"><span class="k">Davet</span><div class="satir" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><button class="btn cerceve" data-act="gr-kod" data-kod="' + esc(g.kod) + '" data-ad="' + esc(g.ad) + '">Kodu paylaş · ' + esc(g.kod) + '</button><button class="btn cerceve" data-act="gr-ekle-ac">Arkadaşını ekle</button></div>' + (sos.grEkle ? grEkleListe(g) : '') + '</div>' +
+        '<button class="metin-btn" data-act="gr-ayril" style="align-self:center;color:var(--ikincil)">Gruptan ayrıl</button>';
+    }
+    if (!sos.gruplar) sosYukle('gruplar');
+    return sosBas('grup') +
+      '<a class="btn ana buyuk-btn" href="#/topluluk/grup/yeni">Grup kur' + IK.ok + '</a>' +
+      '<form data-form="gr-katil" class="t" novalidate style="flex-direction:row;gap:8px;align-items:center"><input name="kod" maxlength="6" placeholder="Grup kodu" aria-label="Grup davet kodu" style="flex:1;min-width:0;border:0;background:var(--zemin);border-radius:14px;min-height:46px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:.1em;text-transform:uppercase"><button class="btn siyah" type="submit" style="min-height:46px">Katıl</button></form>' +
+      (!sos.gruplar ? iskelet(2) : sos.gruplar.length ? sos.gruplar.map((x) => '<a class="t gr-kart" href="#/topluluk/grup/' + encodeURIComponent(x.id) + '"><div class="satir"><b>' + esc(x.ad) + '</b><span class="etiket">' + x.n + ' kişi</span></div><span class="ik num">Bu hafta ' + x.hafta + ' / ' + x.hedef + '</span><div class="cubuk"><span style="width:' + Math.min(100, Math.round(x.hafta / x.hedef * 100)) + '%"></span></div></a>').join('')
+        : '<div class="t bos"><b>Henüz bir grupta değilsin.</b><span class="ik">2–8 kişilik kapalı grup: haftalık ortak hedef, kim geldi kim gelmedi, tek dokunuşla "Bekliyoruz."</span></div>');
+  }
+  function grEkleListe(g) {
+    if (!sos.ark) { sosYukle('ark'); return '<span class="ik">Arkadaşların yükleniyor…</span>'; }
+    const l = sos.ark.liste.filter((x) => !g.uyeler.some((u) => u.id === x.id));
+    return l.length ? '<div class="yigin" style="gap:2px">' + l.map((x) => '<div class="ark-satir"><span class="gn-kisi">' + avatar(x.ad, x.fid, x.fv, 'orta') + '<b>' + esc(x.ad) + '</b></span><button class="btn ana kucuk" data-act="gr-ekle" data-id="' + esc(x.id) + '">Ekle</button></div>').join('') + '</div>' : '<span class="ik">Eklenecek arkadaşın yok. <a href="#/arkadas">Arkadaş ekle</a></span>';
+  }
+  // ana sayfadaki küçük akış kutusu: son paylaşılan, yoksa arkadaş ekle
+  function akisMini() {
+    if (!hesap) return '';
+    if (!sos.akis && !sos.yuk.akis && !sos.miniDenendi) { sos.miniDenendi = true; sosYukle('akis'); }
+    const x = (sos.akis || []).find((y) => !y.benim);
+    return '<a class="t genis akis-mini" href="#/topluluk"><span class="k">Akış' + (sos.istek ? ' · ' + sos.istek + ' istek' : '') + '</span>' +
+      (x ? '<b class="koc-mini-b">' + esc(x.ad.split(' ')[0]) + (x.tur === 'antrenman' ? ' ' + esc((x.veri && x.veri.ad) || 'antrenmanını') + ' bitirdi' : ' kart paylaştı') + '</b><span class="ik">' + zamanOnce(x.zaman) + (x.saygi ? ' · ' + x.saygi + ' saygı' : '') + '</span>'
+        : '<b class="koc-mini-b">Arkadaşların ne yapıyor?</b><span class="ik">Ekle, antrenmanlarınız birbirinize düşsün.</span>') + '</a>';
   }
   /* ---------- etkinlikler: koşu, halı saha, basket; açan açar, isteyen katılır ---------- */
   const etZaman = (z) => { const d = new Date(z); const bugun = tarihKey(); const yarin = tarihKey(new Date(Date.now() + 864e5)); const k = tarihKey(d); const gun = k === bugun ? 'Bugün' : k === yarin ? 'Yarın' : GUN_KISA[(d.getDay() + 6) % 7] + ' ' + d.getDate() + ' ' + AYLAR[d.getMonth()].slice(0, 3); return gun + ' · ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
@@ -996,19 +1156,22 @@
     if (!S.profil) return ekranKarsilama();
     if (!hesap) return ust(geri('#/profil')) + '<div class="t"><b>Topluluğa katılmak için giriş yap.</b></div>';
     const etSek = alt === 'etkinlik' || alt === 'etkinlik-yeni' ? 'etkinlik' : alt === 'meydan' || alt === 'meydan-yeni' ? 'meydan' : 'forum';
-    const sekmeler = '<div class="yatay">' + [['forum', 'Forum', '#/topluluk'], ['etkinlik', 'Etkinlik', '#/topluluk/etkinlik'], ['meydan', 'Meydan okuma', '#/topluluk/meydan'], ['rehber', 'Rehber', '#/topluluk/rehber']].map((x) => '<a class="hap" href="' + x[2] + '" aria-pressed="' + (etSek === x[0]) + '" style="text-decoration:none">' + x[1] + '</a>').join('') + '</div>';
+    if (!alt) return ekranAkis('akis');
+    if (alt === 'kesfet') return ekranAkis('kesfet');
+    if (alt === 'grup') return ekranGrup(id);
+    const sekmeler = sosSekme(etSek);
     if (alt === 'etkinlik' || alt === 'etkinlik-yeni') return ekranEtkinlik(alt === 'etkinlik-yeni' ? 'yeni' : id, sekmeler);
-    if (alt === 'yeni') return ust(geri('#/topluluk'), '<span class="alt">Yeni konu</span>') + '<h1 class="baslik">Konu aç<span class="nokta">.</span></h1>' +
+    if (alt === 'yeni') return ust(geri('#/topluluk/forum'), '<span class="alt">Yeni konu</span>') + '<h1 class="baslik">Konu aç<span class="nokta">.</span></h1>' +
       '<form data-form="tp-konu" class="izgara" novalidate><div class="t genis"><span class="k">Kategori</span><div class="haplar">' + FKAT.map((k, i) => '<button type="button" class="hap" data-act="hap" data-grup="fkat" data-deger="' + k[0] + '" aria-pressed="' + (i === 0) + '">' + k[1] + '</button>').join('') + '</div></div>' +
       '<label class="t genis alan"><span>Başlık</span><input name="baslik" maxlength="120" required placeholder="İlk ayımda neler öğrendim" style="font-size:20px"></label>' +
       '<label class="t genis alan"><span>Ne anlatmak istiyorsun?</span><textarea name="metin" rows="6" maxlength="4000" required style="font:inherit;font-size:17px;line-height:1.5;border:0;background:transparent;resize:vertical;outline:none;width:100%"></textarea></label>' +
       '<p class="ik genis" style="padding:0 4px">Saygılı ol; kişisel bilgi, reklam ve tıbbi iddia paylaşma. Kurallara uymayan yazılar şikâyetle gizlenir.</p>' +
       '<button class="btn ana buyuk-btn genis" type="submit">Yayınla' + IK.ok + '</button></form>';
     if (alt === 'konu') {
-      if (!tp.konu || tp.konuId !== id) { tp.konu = null; tpYukle('konu', id); return ust(geri('#/topluluk')) + iskelet(3); }
-      if (tp.konu.hata) return ust(geri('#/topluluk')) + '<div class="t"><span>' + esc(tp.konu.hata) + '</span></div>';
+      if (!tp.konu || tp.konuId !== id) { tp.konu = null; tpYukle('konu', id); return ust(geri('#/topluluk/forum')) + iskelet(3); }
+      if (tp.konu.hata) return ust(geri('#/topluluk/forum')) + '<div class="t"><span>' + esc(tp.konu.hata) + '</span></div>';
       const k = tp.konu.konu;
-      return ust(geri('#/topluluk'), '<span class="alt">' + esc((FKAT.find((x) => x[0] === k.kategori) || ['', ''])[1]) + '</span>') +
+      return ust(geri('#/topluluk/forum'), '<span class="alt">' + esc((FKAT.find((x) => x[0] === k.kategori) || ['', ''])[1]) + '</span>') +
         '<article class="t" style="gap:10px">' + (k.gizli ? '<span class="etiket">Gizlendi (şikâyet)</span>' : '') + '<div class="satir" style="align-items:flex-start"><h1 style="font-size:26px;font-weight:900;letter-spacing:-.03em;line-height:1.1">' + esc(k.baslik) + '</h1><div class="tp-menu-kap">' + menuDugme('konu', k.id, k.yazarId, k.benim) + '</div></div><span class="ik"><a class="kisi-bag" href="#/kisi/' + encodeURIComponent(k.yazarId || '') + '">' + esc(k.yazar) + isimEk(k.yrz) + '</a> · ' + zamanOnce(k.zaman) + '</span><p style="white-space:pre-wrap;line-height:1.55">' + esc(k.metin) + '</p></article>' +
         tp.konu.cevaplar.map((c) => '<div class="t tp-cevap"><div class="satir"><span class="ik"><b style="color:var(--murekkep)"><a class="kisi-bag" href="#/kisi/' + encodeURIComponent(c.yazarId || '') + '">' + esc(c.yazar) + isimEk(c.yrz) + '</a></b> · ' + zamanOnce(c.zaman) + (c.gizli ? ' · gizli' : '') + '</span><div class="tp-menu-kap">' + menuDugme('cevap', c.id, c.yazarId, c.benim) + '</div></div><p style="white-space:pre-wrap;line-height:1.5">' + esc(c.metin) + '</p></div>').join('') +
         '<form data-form="tp-cevap" class="koc-yaz" novalidate><label class="gizli" for="tpCevap">Cevabın</label><textarea id="tpCevap" name="metin" rows="1" maxlength="3000" placeholder="Cevap yaz"></textarea><button class="btn ana" type="submit" aria-label="Gönder">' + IK.ok + '</button></form>';
@@ -1451,6 +1614,7 @@
       '<button class="btn ana buyuk-btn genis" data-act="fb-kaydet">Kaydet' + IK.tik.replace('<svg', '<svg style="fill:none;stroke:currentColor;stroke-width:2.6"') + '</button>' +
       '<button class="metin-btn genis" data-act="fb-gec" style="color:var(--ikincil)">Şimdi değil</button>' +
       '<div class="genis bk-alt"><span class="k">Paylaşmak istersen</span><b>Bu antrenmanın kartı</b></div>' + bkKutu(b) +
+      (hesap ? '<div class="genis bk-akis"><span class="ik">Kartı akışa koy</span><div class="haplar"><button class="hap" data-act="kart-akis" data-kart="bitis" data-g="arkadas">Arkadaşlarıma</button><button class="hap" data-act="kart-akis" data-kart="bitis" data-g="herkes">Herkese, Keşfet\'te de</button></div></div>' : '') +
       '</div>';
   }
 
@@ -1810,6 +1974,7 @@
       besKutu(tp, h, kalan) +
       '<a class="t koyu h150 seri-kutu" href="#/ilerleme">' + seriKart('Hafta serisi') + '</a>' +
       '<a class="t h150 koc-mini" href="#/koc"><span class="k">' + (S.kocSec ? 'Koç ' + esc(S.kocSec.ad) : 'Koç') + '</span><b class="koc-mini-b">Bir yerin mi ağrıyor?</b><span class="ik">Sor, programına göre cevaplasın.</span></a>' +
+      akisMini() +
       ekleKutu(false) +
       '</div>';
   }
@@ -1841,7 +2006,7 @@
       }).join('') + '</div></div></div>' +
       (bitti ? '<div class="t limon"><span class="k">Bugün ' + esc(bitti.ad) + ' tamamlandı</span><span style="font-weight:700">İstersen yine de yeni bir antrenman başlatabilirsin.</span></div>' : '') +
       '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>' +
-      '<div class="ant-alt"><button class="metin-btn" data-act="basla" data-id="' + sg.id + '" data-kisa="1">Bugün zor · 20 dk</button><a class="metin-btn" href="#/program">Programı düzenle</a><button class="metin-btn" data-act="gun-paylas" data-id="' + sg.id + '">Bu günü paylaş</button><a class="metin-btn" href="#/gecmis">Geçmiş</a></div>' +
+      '<div class="ant-alt"><button class="metin-btn" data-act="basla" data-id="' + sg.id + '" data-kisa="1">Bugün zor · 20 dk</button><a class="metin-btn" href="#/program">Programı düzenle</a><button class="metin-btn" data-act="gun-paylas" data-id="' + sg.id + '">Bu günü paylaş</button>' + (hesap ? '<button class="metin-btn" data-act="kart-akis" data-kart="gun" data-id="' + sg.id + '" data-g="arkadas">Akışa koy</button>' : '') + '<a class="metin-btn" href="#/gecmis">Geçmiş</a></div>' +
       (S.jam ? '<a class="t koyu jam-giris" href="#/jam"><span class="k">Jam</span><b>Ortak antrenmandasın · ' + esc(S.jam.kod) + '</b></a>' : '');
   }
 
@@ -3531,7 +3696,8 @@
       ]) +
       mGrup('Topluluk', [
         hesap ? mSatir('#/mesajlar', 'mesaj', 'Mesajlar', okunmamis ? okunmamis + ' okunmamış mesaj' : (hocaMi() ? 'Öğrencilerinle yazış' : 'Hocanla yazış'), 'kobalt', okunmamis) : '',
-        hesap ? mSatir('#/topluluk', 'topluluk', 'Forum ve meydan okuma', 'Sor, paylaş, arkadaşınla yarış', 'limon') : '',
+        hesap ? mSatir('#/topluluk', 'topluluk', 'Akış ve gruplar', 'Arkadaşların, Keşfet, grup, etkinlik, forum', 'limon', sos.istek) : '',
+        hesap ? mSatir('#/arkadas', 'ogrenci', 'Arkadaşlar', 'Ekle, istekleri gör') : '',
         mSatir('#/topluluk/rehber', 'plan', 'Rehber', 'Her kas grubu için kısa yazılar'),
         ''
       ]) +
@@ -3596,6 +3762,8 @@
         '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
         '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
         '</div>' +
+      (hesap ? '<div class="t genis" style="gap:10px"><span class="k">Akış · bitirdiğin antrenmanı kimler görsün</span><div class="haplar">' + GORUNUR.map((x) => '<button class="hap" data-act="akis-ayar" data-deger="' + x[0] + '" aria-pressed="' + (akisAyar() === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
+        '<span class="ik">Antrenmanın adı, süresi, set sayısı, toplam kilo, ilk üç hareket ve rekor sayısı paylaşılır. Vücut ölçülerin, ağrıların ve notların paylaşılmaz.</span></div>' : '') +
       '';
     else if (bolum === 'gorunum') ic =
       temaSecici() +
@@ -3865,9 +4033,10 @@
     else if (parca[0] === 'profilim') { if (sonRota !== 'profilim') { veriAcik = false; silAcik = false; sifirOnay = false; } html = ekranProfilim(); sekme = 'profil'; }
     else if (parca[0] === 'comeback') { html = ekranComeback(); sekme = 'bugun'; }
     else if (parca[0] === 'mazeret') { html = ekranMazeret(); sekme = 'bugun'; }
-    else if (askidaMi() && (['koc', 'siralama', 'jam', 'bplan'].indexOf(parca[0]) >= 0 || (parca[0] === 'topluluk' && parca[1] !== 'rehber') || (parca[0] === 'ekle' && (parca[1] || 'foto') === 'foto'))) { html = ekranAskiKapi({ koc: 'Koç', siralama: 'Sıralama', jam: 'Ortak antrenman', bplan: 'Beslenme programı', topluluk: 'Topluluk', ekle: 'Fotoğraf analizi' }[parca[0]]); sekme = parca[0] === 'ekle' || parca[0] === 'bplan' ? 'beslenme' : 'bugun'; }
+    else if (askidaMi() && (['koc', 'siralama', 'jam', 'bplan', 'arkadas', 'kisi'].indexOf(parca[0]) >= 0 || (parca[0] === 'topluluk' && parca[1] !== 'rehber') || (parca[0] === 'ekle' && (parca[1] || 'foto') === 'foto'))) { html = ekranAskiKapi({ koc: 'Koç', siralama: 'Sıralama', jam: 'Ortak antrenman', bplan: 'Beslenme programı', topluluk: 'Topluluk', ekle: 'Fotoğraf analizi' }[parca[0]]); sekme = parca[0] === 'ekle' || parca[0] === 'bplan' ? 'beslenme' : 'bugun'; }
     else if (parca[0] === 'ayar') { if (sonRota !== 'ayar/' + parca[1]) { veriAcik = false; silAcik = false; sifirOnay = false; } html = ekranAyar(parca[1]); sekme = 'profil'; }
     else if (parca[0] === 'gorus') { html = ekranGorus(); sekme = 'profil'; }
+    else if (parca[0] === 'arkadas') { html = ekranArkadas(); sekme = 'profil'; }
     else if (parca[0] === 'topluluk') { html = ekranTopluluk(parca[1] || '', parca[2] ? decodeURIComponent(parca[2]) : null); sekme = 'profil'; }
     else if (parca[0] === 'mesajlar') { if (sonRota !== 'mesajlar') mk.liste = null; html = ekranMesajlar(); sekme = 'profil'; }
     else if (parca[0] === 'mesaj') { html = ekranMesaj(decodeURIComponent(parca[1] || '')); sekme = 'profil'; }
@@ -4144,6 +4313,7 @@
         if (gg.bek.indexOf(s.tarih) < 0) gg.bek.push(s.tarih); gYaz(); gecmisGonder(); }
       S.sonSeans = { tarih: s.tarih, ad: g.ad, set, hacim: Math.round(hacim), dk: dkB, rekor: yeni, kaslar, donus: !!s.donus, kisa: !!s.kisa, hk: hk.slice(0, 8), rk: Object.keys(rk).map((k) => rk[k]).slice(0, 3) }; fbTaslak = null;
       if (S.jam) S.jamRekor = yeni;
+      antrenmanAkisa(S.sonSeans);
       if (s.donus) S.donusYapildi = true;
       const yeniR = yeniRozetler();
       olay('antrenman_bitti');
@@ -4715,8 +4885,55 @@
     'tp-menu'(el) { const k = el.dataset.tur + el.dataset.id; tp.menu = tp.menu === k ? null : k; render(); },
     async 'tp-sikayet'(el) { const r = await tistek('sikayet', 'POST', { tur: el.dataset.tur, id: +el.dataset.id, neden: 'uygunsuz' }); tp.menu = null; toast(r.ok ? 'Şikâyetin alındı. İnceleyeceğiz.' : (r.j.hata || 'Olmadı. Bir daha dene.')); render(); },
     async 'tp-engel'(el) { const r = await tistek('engel', 'POST', { kullanici: el.dataset.k }); tp.menu = null; if (r.ok) { toast('Engellendi. Yazılarını artık görmeyeceksin.'); tp.konu = null; tp.liste = null; } render(); },
-    async 'tp-sil'(el) { const r = await tistek('sil', 'POST', { tur: el.dataset.tur, id: +el.dataset.id }); tp.menu = null; if (!r.ok) { toast(r.j.hata || 'Silinemedi.'); return; } toast('Silindi.'); tp.liste = null; if (el.dataset.tur === 'konu') { tp.konu = null; git('#/topluluk'); } else { tp.konu = null; render(); } },
+    async 'tp-sil'(el) { const r = await tistek('sil', 'POST', { tur: el.dataset.tur, id: +el.dataset.id }); tp.menu = null; if (!r.ok) { toast(r.j.hata || 'Silinemedi.'); return; } toast('Silindi.'); tp.liste = null; if (el.dataset.tur === 'konu') { tp.konu = null; git('#/topluluk/forum'); } else { tp.konu = null; render(); } },
     async 'tp-meydan-paylas'(el) { const t = 'COMEBACK. uygulamasında "' + el.dataset.ad + '" meydan okumasına katıl: Topluluk → Meydan okuma → kod ' + el.dataset.kod; try { if (navigator.share) { await navigator.share({ text: t }); return; } } catch (e) { if (e.name === 'AbortError') return; } try { await navigator.clipboard.writeText(t); toast('Kopyalandı.'); } catch (e) { toast(t); } },
+    'gn-menu'(el) { const k = 'g' + el.dataset.id; sos.menu = sos.menu === k ? null : k; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    async 'gn-sil'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; } const r = await tistek('gonderi/' + el.dataset.id + '/sil', 'POST'); sos.menu = null; if (!r.ok) { toast(r.j.hata || 'Silinemedi.'); return; } sosTemizle(+el.dataset.id); toast('Silindi.'); render(); },
+    async 'gn-sikayet'(el) { const r = await tistek('gonderi/' + el.dataset.id + '/sikayet', 'POST', { neden: 'uygunsuz' }); sos.menu = null; toast(r.ok ? 'Şikâyetin alındı. İnceleyeceğiz.' : (r.j.hata || 'Olmadı.')); render(); },
+    async 'gn-engel'(el) { const r = await tistek('engel', 'POST', { kullanici: el.dataset.k }); sos.menu = null; if (r.ok) { toast('Engellendi. Paylaşımlarını artık görmeyeceksin.'); sos.akis = null; sos.kesfet = null; sos.grup = null; tp.liste = null; } render(); },
+    async 'gn-saygi'(el) {
+      const id = +el.dataset.id; const on = el.getAttribute('aria-pressed') === 'true';
+      const guncelle = (sen, n) => { [sos.akis, sos.kesfet, sos.grup && sos.grup.akis, kisiGonderiler()].forEach((l) => (l || []).forEach((x) => { if (x.id === id) { x.sen = sen; x.saygi = n; } })); document.querySelectorAll('[data-act="gn-saygi"][data-id="' + id + '"]').forEach((b) => { b.setAttribute('aria-pressed', String(sen)); b.innerHTML = 'Saygı<span class="nokta">.</span>' + (n ? '<span class="num"> ' + n + '</span>' : ''); }); };
+      const say = +((el.querySelector('.num') || {}).textContent || 0); guncelle(!on, Math.max(0, say + (on ? -1 : 1)));
+      const r = await tistek('gonderi/' + id + '/saygi', 'POST'); if (r.ok && typeof r.j.sen === 'boolean') guncelle(r.j.sen, r.j.saygi); else if (!r.ok) { guncelle(on, say); toast(r.j.hata || 'Olmadı.'); }
+    },
+    'gn-daha'(el) { sosYukle(el.dataset.ne, null, true); el.disabled = true; },
+    async ark(el) {
+      if (el.dataset.onayli === '1' && el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Arkadaşlıktan çıkarılsın mı? Tekrar bas'; return; }
+      el.disabled = true; const id = el.dataset.id;
+      const r = await tistek('arkadas/' + encodeURIComponent(id), 'POST', { islem: el.dataset.is }); if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Olmadı.'); return; }
+      (sos.araL || []).forEach((x) => { if (x.id === id) x.ark = r.j.ark; }); if (kisiOnbellek[id]) kisiOnbellek[id].ark = r.j.ark;
+      if (el.dataset.is === 'ekle') toast(r.j.ark === 'tamam' ? 'Artık arkadaşsınız.' : 'İstek gönderildi.'); if (el.dataset.is === 'kabul') toast('Artık arkadaşsınız.');
+      sos.ark = null; sos.akis = null; const sY = window.scrollY; render(); window.scrollTo(0, sY);
+    },
+    async 'ark-davet'() { const t = 'COMEBACK. uygulamasında beni ekle: @' + hesap.kadi + '\n' + location.origin + '/comeback/'; try { if (navigator.share) { await navigator.share({ text: t }); return; } } catch (e) { if (e.name === 'AbortError') return; } try { await navigator.clipboard.writeText(t); toast('Kopyalandı.'); } catch (e) { toast(t); } },
+    async 'akis-ayar'(el) { S.ayar = S.ayar || {}; S.ayar.akis = el.dataset.deger; kaydet(); render(); },
+    async 'kart-akis'(el) {
+      el.disabled = true;
+      try {
+        if (el.dataset.kart === 'bitis') { if (!S.sonSeans) return; await kartAkisa(bitisKarti(S.sonSeans, bkTema()), S.sonSeans.ad, el.dataset.g); }
+        else { const g = S.program.gunler.find((x) => x.id === el.dataset.id); if (!g) return; await kartAkisa(gunKarti(g), 'Bugün ' + g.ad, el.dataset.g); }
+      } catch (e) { toast('Kart hazırlanamadı.'); } finally { el.disabled = false; }
+    },
+    async 'gr-durt'(el) { el.disabled = true; const r = await tistek('grup/' + encodeURIComponent(sos.grupId) + '/durt', 'POST', { kime: el.dataset.id }); if (!r.ok && !(r.j && r.j.sinir)) { el.disabled = false; toast(r.j.hata || 'Olmadı.'); return; } sos.durtuldu[sos.grupId + el.dataset.id] = 1; toast('Haber verildi: Bekliyoruz.'); render(); },
+    async 'gr-jam-ac'(el) {
+      if (S.jam) { git('#/jam'); return; }
+      el.disabled = true; const b = bugunkuGun();
+      const r = await tistek('jam/olustur', 'POST', { ad: b ? b.ad : 'Ortak antrenman', program: b ? { ad: b.ad, hareketler: b.hareketler } : null });
+      if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Açılamadı.'); return; }
+      S.jam = { kod: r.j.kod }; kaydet(); olay('jam'); jamV = null;
+      await tistek('grup/' + encodeURIComponent(sos.grupId) + '/jam', 'POST', { kod: r.j.kod }); sos.grup = null;
+      await jamCek(); jamBaslatZaman(); git('#/jam');
+    },
+    async 'gr-jam-katil'(el) {
+      const kod = el.dataset.kod; el.disabled = true;
+      const r = await tistek('jam/' + kod + '/katil', 'POST', {}); if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Katılamadın.'); return; }
+      S.jam = { kod }; kaydet(); olay('jam'); jamV = null; await jamCek(); jamBaslatZaman(); git('#/jam');
+    },
+    async 'gr-kod'(el) { const t = 'COMEBACK. uygulamasında "' + el.dataset.ad + '" grubuna katıl: Topluluk → Grup → kod ' + el.dataset.kod; try { if (navigator.share) { await navigator.share({ text: t }); return; } } catch (e) { if (e.name === 'AbortError') return; } try { await navigator.clipboard.writeText(t); toast('Kopyalandı.'); } catch (e) { toast(t); } },
+    'gr-ekle-ac'() { sos.grEkle = !sos.grEkle; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    async 'gr-ekle'(el) { el.disabled = true; const r = await tistek('grup/' + encodeURIComponent(sos.grupId) + '/ekle', 'POST', { kime: el.dataset.id }); if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Eklenemedi.'); return; } toast('Gruba eklendi.'); sos.grup = null; sos.gruplar = null; render(); },
+    async 'gr-ayril'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; } await tistek('grup/' + encodeURIComponent(sos.grupId) + '/ayril', 'POST'); sos.grup = null; sos.gruplar = null; git('#/topluluk/grup'); },
     async 'et-katil'(el) { el.disabled = true; const r = await tistek('etkinlik/' + encodeURIComponent(tp.etkinlikId) + '/katil', 'POST'); if (!r.ok) { el.disabled = false; toast(r.j.hata || 'Katılınamadı.'); return; } tp.etkinlik = null; tp.etkinlikler = null; render(); },
     async 'et-ayril'(el) { el.disabled = true; await tistek('etkinlik/' + encodeURIComponent(tp.etkinlikId) + '/ayril', 'POST'); tp.etkinlik = null; tp.etkinlikler = null; render(); },
     async 'et-iptal'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; el.textContent = 'Emin misin? Tekrar bas'; return; } const r = await tistek('etkinlik/' + encodeURIComponent(tp.etkinlikId) + '/iptal', 'POST'); if (!r.ok) { toast(r.j.hata || 'Olmadı.'); return; } tp.etkinlik = null; tp.etkinlikler = null; render(); },
@@ -4834,6 +5051,7 @@
     if (el.dataset && el.dataset.in === 'prot-g') { if (hedefTaslak) hedefTaslak.protG = parseInt(el.value, 10) || 0; return; }
     if (el.dataset && el.dataset.in === 'bp-not') { bpTaslak.not = el.value; return; }
     if (el.dataset && el.dataset.in === 'jam-kod') { jamKodGir = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); return; }
+    if (el.dataset && el.dataset.in === 'ark-ara') { arkAra(el.value.trim()); return; }
     if (el.dataset && el.dataset.in === 'fb-not') { if (fbTaslak) fbTaslak.not = el.value; return; }
     if (el.dataset && el.dataset.in === 'degis-kalici') { degisKalici = el.checked; return; }
     if (el.id === 'pdAra') {
@@ -4894,6 +5112,15 @@
     if (f.dataset.form === 'tp-konu') {
       const kat = (f.querySelector('[data-grup="fkat"][aria-pressed="true"]') || {}).dataset; const btn = f.querySelector('[type=submit]'); btn.disabled = true;
       tistek('forum', 'POST', { kategori: kat ? kat.deger : 'genel', baslik: v.baslik, metin: v.metin }).then((r) => { btn.disabled = false; if (!r.ok) { toast(r.j.hata || 'Yayınlanamadı.'); return; } tp.liste = null; git('#/topluluk/konu/' + r.j.id); });
+      return;
+    }
+    if (f.dataset.form === 'gr-yeni') {
+      const btn = f.querySelector('[type=submit]'); btn.disabled = true;
+      tistek('grup', 'POST', { ad: v.ad, hedef: v.hedef }).then((r) => { btn.disabled = false; if (!r.ok) { toast(r.j.hata || 'Kurulamadı.'); return; } sos.gruplar = null; toast('Grup hazır. Kod: ' + r.j.kod); git('#/topluluk/grup/' + r.j.id); });
+      return;
+    }
+    if (f.dataset.form === 'gr-katil') {
+      tistek('grup/katil', 'POST', { kod: String(v.kod || '').trim() }).then((r) => { if (!r.ok) { toast(r.j.hata || 'Katılınamadı.'); return; } sos.gruplar = null; toast(r.j.ad + ' grubuna katıldın.'); git('#/topluluk/grup/' + r.j.id); });
       return;
     }
     if (f.dataset.form === 'tp-etkinlik') {

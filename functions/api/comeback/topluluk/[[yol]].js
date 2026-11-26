@@ -27,6 +27,8 @@
 // Ortak antrenman: POST jam/olustur { ad, program } → { kod } · POST jam/<kod>/katil · GET jam/<kod> · POST jam/<kod>/durum · POST jam/<kod>/ayril
 // Sıralama: GET siralama?donem=hafta|ay&olcut=hacim|set|antr · POST siralama/katil { acik } · POST siralama/skor { hafta, ay }
 // Profil resmi: GET foto/<id>?v= (resim) · Mesaj kutusu: GET mesaj-kutu · Ana sayfa: GET siralama/ozet
+// Sosyal: GET ara?q= · GET arkadas · POST arkadas/<id> { islem: ekle|kabul|sil } · GET akis|kesfet?once= · POST gonderi { tur, veri, metin, gorunur, gorsel } · GET gonderi/<id>[/gorsel] · POST gonderi/<id>/saygi|sil|sikayet
+// Gruplar (2–8 kişi): GET grup · POST grup { ad, hedef } · POST grup/katil { kod } · GET grup/<id> · POST grup/<id>/durt|jam|ekle|duzen|ayril
 // Yönetim (admin): GET sikayetler · POST moderasyon { tur, id, gizli }
 
 const json = (v, d = 200) => new Response(JSON.stringify(v), { status: d, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
@@ -200,6 +202,194 @@ async function onRequestIc(ctx, R) {
     /* ---------- program paylaşımı ---------- */
     const kadiTemiz = (v) => String(v || '').trim().replace(/^@/, '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').slice(0, 20);
     // Açık profil: başkasının profili (biyografi, ilgi, rozetler ve kazanma tarihleri). Engellenen görünmez.
+    /* ---------- arkadaşlar, akış, keşfet, gruplar ---------- */
+    // arkadaşlık iki taraflı: a istek atar, b kabul edince durum 'tamam'
+    // gönderi görünürlüğü: herkes (keşfet dahil) · arkadas (arkadaşlar + grup üyeleri) · grup (yalnızca grup üyeleri)
+    const ARK_CTE = "WITH ark AS (SELECT CASE WHEN a = ?1 THEN b ELSE a END k FROM arkadas WHERE (a = ?1 OR b = ?1) AND durum = 'tamam'), grp AS (SELECT DISTINCT u2.kullanici_id k FROM grup_uye u1 JOIN grup_uye u2 ON u1.grup_id = u2.grup_id WHERE u1.kullanici_id = ?1) ";
+    const GORUR = "(g.kullanici_id = ?1 OR g.gorunur = 'herkes' OR (g.gorunur = 'arkadas' AND (g.kullanici_id IN (SELECT k FROM ark) OR g.kullanici_id IN (SELECT k FROM grp))) OR (g.gorunur = 'grup' AND g.kullanici_id IN (SELECT k FROM grp)))";
+    const ENGEL = '(g.kullanici_id NOT IN (SELECT engellenen_id FROM engel WHERE kullanici_id = ?1) AND g.kullanici_id NOT IN (SELECT kullanici_id FROM engel WHERE engellenen_id = ?1))';
+    const GSEC = 'SELECT g.id, g.kullanici_id, g.tur, g.veri, g.metin, g.gorunur, g.gorsel, g.zaman, g.saygi, g.gizli, k.ad, k.kullanici_adi, k.vitrin, k.unvan, k.rol, k.foto_v, (SELECT 1 FROM saygi WHERE gonderi_id = g.id AND kullanici_id = ?1) ben FROM gonderi g JOIN kullanicilar k ON k.id = g.kullanici_id ';
+    const gYaz = (x) => { let v = {}; try { v = JSON.parse(x.veri || '{}') || {}; } catch (e) { /* bozuk */ } return Object.assign({ id: x.id, kid: x.kullanici_id, ad: gorunen(x.ad), kadi: x.kullanici_adi || null, tur: x.tur, veri: v, metin: x.metin || '', gorunur: x.gorunur, gorsel: !!x.gorsel, zaman: x.zaman, saygi: x.saygi || 0, sen: !!x.ben, benim: x.kullanici_id === kim.id, fid: x.foto_v ? x.kullanici_id : undefined, fv: x.foto_v || undefined }, rz(x)); };
+    const kisiYaz = (x) => Object.assign({ id: x.id, ad: gorunen(x.ad), kadi: x.kullanici_adi || null, fid: x.foto_v ? x.id : undefined, fv: x.foto_v || undefined }, rz(x));
+    const KSEC = 'k.id, k.ad, k.kullanici_adi, k.vitrin, k.unvan, k.rol, k.foto_v';
+    const arkDurum = async (o) => { const r = await db.prepare('SELECT a, durum FROM arkadas WHERE (a = ? AND b = ?) OR (a = ? AND b = ?)').bind(kim.id, o, o, kim.id).first(); return !r ? 'yok' : r.durum === 'tamam' ? 'tamam' : r.a === kim.id ? 'giden' : 'gelen'; };
+    const engelli = async (o) => !!(await db.prepare('SELECT 1 FROM engel WHERE (kullanici_id = ? AND engellenen_id = ?) OR (kullanici_id = ? AND engellenen_id = ?)').bind(kim.id, o, o, kim.id).first());
+    const haftaBas = () => { const t = new Date(simdi + 3 * 3600e3); const gun = (t.getUTCDay() + 6) % 7; return Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()) - gun * 864e5 - 3 * 3600e3; };
+    const sayiN = (v, a, b) => { const n = Number(v); return Number.isFinite(n) ? Math.max(a, Math.min(b, Math.round(n))) : 0; };
+
+    if (p[0] === 'ara' && m === 'GET') {
+      if (!(await sinir(db, R, 'ara:' + kim.id, 60, 3600))) return hata('Çok fazla arama. Biraz sonra tekrar dene.', 429);
+      const q = temiz(url.searchParams.get('q'), 30).replace(/^@/, ''); if (q.length < 2) return json({ liste: [] });
+      const kq = kadiTemiz(q).replace(/[%_]/g, '');
+      const r = await db.prepare('SELECT ' + KSEC + " FROM kullanicilar k WHERE k.id != ?1 AND k.rol != 'demo' AND (k.kullanici_adi LIKE ?2 OR k.ad LIKE ?3) AND k.id NOT IN (SELECT engellenen_id FROM engel WHERE kullanici_id = ?1) AND k.id NOT IN (SELECT kullanici_id FROM engel WHERE engellenen_id = ?1) LIMIT 20")
+        .bind(kim.id, kq + '%', q.replace(/[%_]/g, '') + '%').all();
+      const l = r.results || []; const out = [];
+      for (const x of l) out.push(Object.assign(kisiYaz(x), { ark: await arkDurum(x.id) }));
+      return json({ liste: out });
+    }
+    if (p[0] === 'arkadas' && !p[1] && m === 'GET') {
+      const r = await db.prepare('SELECT a.a, a.b, a.durum, a.zaman, ' + KSEC + " FROM arkadas a JOIN kullanicilar k ON k.id = CASE WHEN a.a = ?1 THEN a.b ELSE a.a END WHERE a.a = ?1 OR a.b = ?1 ORDER BY a.zaman DESC LIMIT 300").bind(kim.id).all();
+      const l = r.results || [];
+      return json({ liste: l.filter((x) => x.durum === 'tamam').map(kisiYaz), gelen: l.filter((x) => x.durum !== 'tamam' && x.b === kim.id).map(kisiYaz), giden: l.filter((x) => x.durum !== 'tamam' && x.a === kim.id).map(kisiYaz) });
+    }
+    if (p[0] === 'arkadas' && p[1] && m === 'POST') {
+      const o = temiz(p[1], 64); const g = await govde(req) || {}; const is = g.islem;
+      if (!o || o === kim.id) return hata('Geçersiz.', 400);
+      const k = await db.prepare('SELECT id FROM kullanicilar WHERE id = ?').bind(o).first(); if (!k || await engelli(o)) return hata('Bulunamadı.', 404);
+      const d = await arkDurum(o);
+      if (is === 'ekle') {
+        if (d === 'tamam' || d === 'giden') return json({ ark: d });
+        if (d === 'gelen') { await db.prepare("UPDATE arkadas SET durum = 'tamam', zaman = ? WHERE a = ? AND b = ?").bind(simdi, o, kim.id).run(); return json({ ark: 'tamam' }); }
+        if (!(await sinir(db, R, 'ark:' + kim.id, 40, 86400))) return hata('Bugün çok fazla istek gönderdin.', 429);
+        const n = await db.prepare('SELECT COUNT(*) n FROM arkadas WHERE a = ? OR b = ?').bind(kim.id, kim.id).first(); if (n && n.n >= 500) return hata('Arkadaş sınırına ulaştın.', 400);
+        await db.prepare("INSERT OR IGNORE INTO arkadas (a, b, durum, zaman) VALUES (?, ?, 'bekle', ?)").bind(kim.id, o, simdi).run(); return json({ ark: 'giden' });
+      }
+      if (is === 'kabul') { if (d !== 'gelen') return json({ ark: d }); await db.prepare("UPDATE arkadas SET durum = 'tamam', zaman = ? WHERE a = ? AND b = ?").bind(simdi, o, kim.id).run(); return json({ ark: 'tamam' }); }
+      if (is === 'sil') { await db.prepare('DELETE FROM arkadas WHERE (a = ? AND b = ?) OR (a = ? AND b = ?)').bind(kim.id, o, o, kim.id).run(); return json({ ark: 'yok' }); }
+      return hata('Geçersiz.', 400);
+    }
+    if ((p[0] === 'akis' || p[0] === 'kesfet') && m === 'GET') {
+      const once = Math.min(Number(url.searchParams.get('once')) || simdi + 1, simdi + 1);
+      const kosul = p[0] === 'akis'
+        ? "(g.kullanici_id = ?1 OR (g.gorunur IN ('herkes', 'arkadas') AND (g.kullanici_id IN (SELECT k FROM ark) OR g.kullanici_id IN (SELECT k FROM grp))) OR (g.gorunur = 'grup' AND g.kullanici_id IN (SELECT k FROM grp)))"
+        : "g.gorunur = 'herkes'";
+      const r = await db.prepare(ARK_CTE + GSEC + 'WHERE ' + kosul + ' AND g.gizli = 0 AND g.zaman < ?2 AND ' + ENGEL + ' ORDER BY g.zaman DESC LIMIT 20').bind(kim.id, once).all();
+      const l = (r.results || []).map(gYaz);
+      const ek = {};
+      if (p[0] === 'akis' && !url.searchParams.get('once')) { const n = await db.prepare("SELECT COUNT(*) n FROM arkadas WHERE b = ? AND durum = 'bekle'").bind(kim.id).first(); ek.istek = n ? n.n : 0; }
+      return json(Object.assign({ liste: l, son: l.length === 20 ? l[19].zaman : null }, ek));
+    }
+    if (p[0] === 'gonderi' && !p[1] && m === 'POST') {
+      const g = await govde(req) || {}; const tur = ['antrenman', 'kart'].indexOf(g.tur) >= 0 ? g.tur : '';
+      const gorunur = ['herkes', 'arkadas', 'grup'].indexOf(g.gorunur) >= 0 ? g.gorunur : 'arkadas';
+      if (!tur) return hata('Geçersiz.', 400);
+      if (!(await sinir(db, R, 'gonderi:' + kim.id, 20, 86400))) return hata('Bugün yeterince paylaştın.', 429);
+      const metin = temiz(g.metin, 280).replace(/[<>]/g, ''); if (YASAK.test(metin)) return hata('Uygunsuz ifade var.', 400);
+      const v = g.veri || {}; let veri;
+      if (tur === 'antrenman') veri = { ad: temiz(v.ad, 40), dk: sayiN(v.dk, 0, 600), set: sayiN(v.set, 0, 200), hacim: sayiN(v.hacim, 0, 200000), rekor: sayiN(v.rekor, 0, 50), hareket: (Array.isArray(v.hareket) ? v.hareket : []).slice(0, 4).map((x) => temiz(x, 40)) };
+      else veri = { baslik: temiz(v.baslik, 60) };
+      let gorsel = null;
+      if (g.gorsel) { const mt = String(g.gorsel).match(/^data:image\/(jpeg|webp);base64,[A-Za-z0-9+/=]+$/); if (!mt || g.gorsel.length > 700000) return hata('Görsel uygun değil.', 400); gorsel = g.gorsel; }
+      if (tur === 'kart' && !gorsel) return hata('Kart görseli yok.', 400);
+      // aynı antrenman iki kez düşmesin (çift dokunuş / yeniden deneme)
+      if (tur === 'antrenman') { const ayni = await db.prepare("SELECT id FROM gonderi WHERE kullanici_id = ? AND tur = 'antrenman' AND zaman > ? AND veri = ?").bind(kim.id, simdi - 3600e3, JSON.stringify(veri)).first(); if (ayni) return json({ id: ayni.id }); }
+      const r = await db.prepare('INSERT INTO gonderi (kullanici_id, tur, veri, metin, gorunur, gorsel, zaman) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id').bind(kim.id, tur, JSON.stringify(veri), metin || null, gorunur, gorsel ? 1 : 0, simdi).first();
+      if (gorsel) await db.prepare('INSERT INTO gonderi_gorsel (gonderi_id, veri) VALUES (?, ?)').bind(r.id, gorsel).run();
+      return json({ id: r.id });
+    }
+    if (p[0] === 'gonderi' && p[1]) {
+      const id = parseInt(p[1], 10) || 0;
+      const x = await db.prepare(ARK_CTE + GSEC + 'WHERE g.id = ?2 AND ' + GORUR + ' AND ' + ENGEL).bind(kim.id, id).first();
+      if (!x || (x.gizli && x.kullanici_id !== kim.id && !admin)) return hata('Bulunamadı.', 404);
+      if (p[2] === 'gorsel' && m === 'GET') {
+        const r = await db.prepare('SELECT veri FROM gonderi_gorsel WHERE gonderi_id = ?').bind(id).first();
+        const mt = r && String(r.veri).match(/^data:(image\/(?:jpeg|webp));base64,(.+)$/);
+        if (!mt) return new Response('', { status: 404, headers: { 'cache-control': 'no-store' } });
+        return new Response(Uint8Array.from(atob(mt[2]), (c) => c.charCodeAt(0)), { headers: { 'content-type': mt[1], 'cache-control': 'private, max-age=604800', 'x-content-type-options': 'nosniff' } });
+      }
+      if (!p[2] && m === 'GET') return json({ gonderi: gYaz(x) });
+      if (p[2] === 'saygi' && m === 'POST') {
+        if (x.kullanici_id === kim.id) return hata('Kendine saygı zaten var.', 400);
+        if (!(await sinir(db, R, 'saygi:' + kim.id, 200, 3600))) return hata('Biraz yavaş.', 429);
+        if (x.ben) await db.batch([db.prepare('DELETE FROM saygi WHERE gonderi_id = ? AND kullanici_id = ?').bind(id, kim.id), db.prepare('UPDATE gonderi SET saygi = MAX(0, saygi - 1) WHERE id = ?').bind(id)]);
+        else await db.batch([db.prepare('INSERT OR IGNORE INTO saygi (gonderi_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(id, kim.id, simdi), db.prepare('UPDATE gonderi SET saygi = saygi + 1 WHERE id = ?').bind(id)]);
+        return json({ sen: !x.ben, saygi: Math.max(0, (x.saygi || 0) + (x.ben ? -1 : 1)) });
+      }
+      if (p[2] === 'sil' && m === 'POST') {
+        if (x.kullanici_id !== kim.id && !admin) return hata('Silemezsin.', 403);
+        await db.batch([db.prepare('DELETE FROM saygi WHERE gonderi_id = ?').bind(id), db.prepare('DELETE FROM gonderi_gorsel WHERE gonderi_id = ?').bind(id), db.prepare('DELETE FROM gonderi WHERE id = ?').bind(id)]);
+        return json({ ok: true });
+      }
+      if (p[2] === 'sikayet' && m === 'POST') {
+        if (!(await sinir(db, R, 'sikayet:' + kim.id, 10, 3600))) return hata('Çok fazla şikâyet.', 429);
+        const g = await govde(req) || {};
+        await db.prepare("INSERT OR IGNORE INTO sikayet (tur, hedef_id, kullanici_id, neden, zaman) VALUES ('gonderi', ?, ?, ?, ?)").bind(id, kim.id, temiz(g.neden, 200), simdi).run();
+        const n = await db.prepare("SELECT COUNT(DISTINCT kullanici_id) n FROM sikayet WHERE tur = 'gonderi' AND hedef_id = ? AND durum = 'acik'").bind(id).first();
+        if (n && n.n >= 3) await db.prepare('UPDATE gonderi SET gizli = 1 WHERE id = ?').bind(id).run();
+        return json({ ok: true });
+      }
+      return hata('Bulunamadı.', 404);
+    }
+    if (p[0] === 'grup') {
+      const uyeMi = async (gid) => !!(await db.prepare('SELECT 1 FROM grup_uye WHERE grup_id = ? AND kullanici_id = ?').bind(gid, kim.id).first());
+      const hb = haftaBas();
+      if (!p[1] && m === 'GET') {
+        const r = await db.prepare('SELECT g.id, g.ad, g.hedef, g.kod, (SELECT COUNT(*) FROM grup_uye WHERE grup_id = g.id) n, (SELECT COUNT(*) FROM gonderi o WHERE o.tur = \'antrenman\' AND o.zaman >= ?2 AND o.kullanici_id IN (SELECT kullanici_id FROM grup_uye WHERE grup_id = g.id)) hafta FROM grup g JOIN grup_uye u ON u.grup_id = g.id WHERE u.kullanici_id = ?1 ORDER BY u.zaman').bind(kim.id, hb).all();
+        return json({ liste: r.results || [] });
+      }
+      if (!p[1] && m === 'POST') {
+        const g = await govde(req) || {}; const ad = temiz(g.ad, 30).replace(/[<>]/g, ''); const hedef = sayiN(g.hedef || 12, 2, 60);
+        if (ad.length < 2) return hata('Gruba bir ad ver.', 400); if (YASAK.test(ad)) return hata('Uygunsuz ifade var.', 400);
+        const n = await db.prepare('SELECT COUNT(*) n FROM grup_uye WHERE kullanici_id = ?').bind(kim.id).first(); if (n && n.n >= 5) return hata('En fazla 5 grupta olabilirsin.', 400);
+        if (!(await sinir(db, R, 'grup:' + kim.id, 5, 86400))) return hata('Bugün yeterince grup açtın.', 429);
+        let kod = ''; for (let d = 0; d < 5; d++) { kod = kodUret(); if (!(await db.prepare('SELECT 1 FROM grup WHERE kod = ?').bind(kod).first())) break; }
+        const id = crypto.randomUUID();
+        await db.batch([db.prepare('INSERT INTO grup (id, ad, kod, sahip, hedef, olusturma) VALUES (?, ?, ?, ?, ?, ?)').bind(id, ad, kod, kim.id, hedef, simdi), db.prepare('INSERT INTO grup_uye (grup_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(id, kim.id, simdi)]);
+        return json({ id, kod });
+      }
+      if (p[1] === 'katil' && m === 'POST') {
+        if (!(await sinir(db, R, 'grupkatil:' + kim.id, 20, 3600))) return hata('Biraz yavaş.', 429);
+        const g = await govde(req) || {}; const gr = await db.prepare('SELECT id, ad FROM grup WHERE kod = ?').bind(temiz(g.kod, 8).toUpperCase()).first();
+        if (!gr) return hata('Bu kodla bir grup yok.', 404);
+        if (await uyeMi(gr.id)) return json({ id: gr.id, ad: gr.ad });
+        const n = await db.prepare('SELECT (SELECT COUNT(*) FROM grup_uye WHERE grup_id = ?) g, (SELECT COUNT(*) FROM grup_uye WHERE kullanici_id = ?) b').bind(gr.id, kim.id).first();
+        if (n.g >= 8) return hata('Grup dolu (8 kişi).', 400); if (n.b >= 5) return hata('En fazla 5 grupta olabilirsin.', 400);
+        await db.prepare('INSERT OR IGNORE INTO grup_uye (grup_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(gr.id, kim.id, simdi).run();
+        return json({ id: gr.id, ad: gr.ad });
+      }
+      const gid = temiz(p[1], 64); const gr = await db.prepare('SELECT * FROM grup WHERE id = ?').bind(gid).first();
+      if (!gr || !(await uyeMi(gid))) return hata('Grup bulunamadı.', 404);
+      if (!p[2] && m === 'GET') {
+        const u = await db.prepare('SELECT ' + KSEC + ', u.zaman katilim FROM grup_uye u JOIN kullanicilar k ON k.id = u.kullanici_id WHERE u.grup_id = ? ORDER BY u.zaman').bind(gid).all();
+        const uyeler = u.results || []; const ids = uyeler.map((x) => x.id);
+        const ph = ids.map(() => '?').join(',');
+        const a = await db.prepare("SELECT kullanici_id, zaman FROM gonderi WHERE tur = 'antrenman' AND zaman >= ? AND kullanici_id IN (" + ph + ')').bind(hb, ...ids).all();
+        const son = await db.prepare("SELECT kullanici_id, MAX(zaman) z FROM gonderi WHERE tur = 'antrenman' AND kullanici_id IN (" + ph + ') GROUP BY kullanici_id').bind(...ids).all();
+        const sonM = {}; (son.results || []).forEach((x) => { sonM[x.kullanici_id] = x.z; });
+        const gunler = {}; (a.results || []).forEach((x) => { const gi = Math.floor((x.zaman - hb) / 864e5); (gunler[x.kullanici_id] = gunler[x.kullanici_id] || [0, 0, 0, 0, 0, 0, 0])[Math.max(0, Math.min(6, gi))]++; });
+        const ak = await db.prepare(ARK_CTE + GSEC + "WHERE g.kullanici_id IN (SELECT kullanici_id FROM grup_uye WHERE grup_id = ?2) AND g.gorunur IN ('herkes', 'arkadas', 'grup') AND g.gizli = 0 AND g.zaman > ?3 ORDER BY g.zaman DESC LIMIT 30").bind(kim.id, gid, simdi - 21 * 864e5).all();
+        const durt = await db.prepare('SELECT d.kimden, k.ad, d.zaman FROM grup_durt d JOIN kullanicilar k ON k.id = d.kimden WHERE d.grup_id = ? AND d.kime = ? AND d.zaman > ? ORDER BY d.zaman DESC LIMIT 5').bind(gid, kim.id, simdi - 3 * 864e5).all();
+        return json({ grup: { id: gr.id, ad: gr.ad, kod: gr.kod, hedef: gr.hedef, sahip: gr.sahip === kim.id, hafta: (a.results || []).length, haftaBas: hb,
+          jam: gr.jam && gr.jam_zaman > simdi - 4 * 3600e3 ? { kod: gr.jam, zaman: gr.jam_zaman } : null,
+          uyeler: uyeler.map((x) => Object.assign(kisiYaz(x), { ben: x.id === kim.id, gunler: gunler[x.id] || [0, 0, 0, 0, 0, 0, 0], son: sonM[x.id] || null })),
+          akis: (ak.results || []).map(gYaz), durt: (durt.results || []).map((x) => ({ ad: gorunen(x.ad), zaman: x.zaman })) } });
+      }
+      if (p[2] === 'durt' && m === 'POST') {
+        const g = await govde(req) || {}; const kime = temiz(g.kime, 64);
+        if (!kime || kime === kim.id || !(await db.prepare('SELECT 1 FROM grup_uye WHERE grup_id = ? AND kullanici_id = ?').bind(gid, kime).first())) return hata('Geçersiz.', 400);
+        if (!(await sinir(db, R, 'durt:' + kim.id + ':' + kime, 1, 86400))) return hata('Bugün zaten haber verdin.', 429);
+        await db.prepare('INSERT OR REPLACE INTO grup_durt (grup_id, kime, kimden, zaman) VALUES (?, ?, ?, ?)').bind(gid, kime, kim.id, simdi).run();
+        return json({ ok: true });
+      }
+      if (p[2] === 'jam' && m === 'POST') {
+        const g = await govde(req) || {}; const kod = String(g.kod || '').toUpperCase();
+        if (kod && !/^[A-Z0-9]{5}$/.test(kod)) return hata('Geçersiz.', 400);
+        if (kod && !(await db.prepare('SELECT 1 FROM jam WHERE kod = ? AND sahip_id = ? AND bitis > ?').bind(kod, kim.id, simdi).first())) return hata('Ortak antrenman bulunamadı.', 404);
+        await db.prepare('UPDATE grup SET jam = ?, jam_zaman = ? WHERE id = ?').bind(kod || null, kod ? simdi : null, gid).run();
+        return json({ ok: true });
+      }
+      if (p[2] === 'ekle' && m === 'POST') {
+        const g = await govde(req) || {}; const kime = temiz(g.kime, 64);
+        if ((await arkDurum(kime)) !== 'tamam') return hata('Yalnızca arkadaşlarını ekleyebilirsin.', 400);
+        const n = await db.prepare('SELECT (SELECT COUNT(*) FROM grup_uye WHERE grup_id = ?) g, (SELECT COUNT(*) FROM grup_uye WHERE kullanici_id = ?) b').bind(gid, kime).first();
+        if (n.g >= 8) return hata('Grup dolu (8 kişi).', 400); if (n.b >= 5) return hata('O kişi zaten 5 grupta.', 400);
+        await db.prepare('INSERT OR IGNORE INTO grup_uye (grup_id, kullanici_id, zaman) VALUES (?, ?, ?)').bind(gid, kime, simdi).run();
+        return json({ ok: true });
+      }
+      if (p[2] === 'duzen' && m === 'POST') {
+        if (gr.sahip !== kim.id) return hata('Yalnızca kuran değiştirebilir.', 403);
+        const g = await govde(req) || {}; const ad = temiz(g.ad, 30).replace(/[<>]/g, ''); if (ad.length < 2 || YASAK.test(ad)) return hata('Geçersiz ad.', 400);
+        await db.prepare('UPDATE grup SET ad = ?, hedef = ? WHERE id = ?').bind(ad, sayiN(g.hedef || gr.hedef, 2, 60), gid).run(); return json({ ok: true });
+      }
+      if (p[2] === 'ayril' && m === 'POST') {
+        await db.batch([db.prepare('DELETE FROM grup_uye WHERE grup_id = ? AND kullanici_id = ?').bind(gid, kim.id), db.prepare('DELETE FROM grup_durt WHERE grup_id = ? AND (kime = ? OR kimden = ?)').bind(gid, kim.id, kim.id)]);
+        const kalan = await db.prepare('SELECT kullanici_id FROM grup_uye WHERE grup_id = ? ORDER BY zaman LIMIT 1').bind(gid).first();
+        if (!kalan) await db.batch([db.prepare('DELETE FROM grup_durt WHERE grup_id = ?').bind(gid), db.prepare('DELETE FROM grup WHERE id = ?').bind(gid)]);
+        else if (gr.sahip === kim.id) await db.prepare('UPDATE grup SET sahip = ? WHERE id = ?').bind(kalan.kullanici_id, gid).run();
+        return json({ ok: true });
+      }
+      return hata('Bulunamadı.', 404);
+    }
     /* ---------- etkinlikler: "Bostanlı'da koşu", "halı saha", herkes görür, isteyen katılır ---------- */
     if (p[0] === 'etkinlik') {
       const BRANS = ['fitness', 'kalistenik', 'crossfit', 'hiit', 'kosu', 'yuruyus', 'bisiklet', 'yuzme', 'yoga', 'pilates', 'kayak', 'futbol', 'basketbol', 'voleybol', 'tenis', 'padel', 'boks', 'kickboks', 'dovus', 'tirmanis'];
@@ -257,7 +447,12 @@ async function onRequestIc(ctx, R) {
       if (eng) return hata('Bulunamadı.', 404);
       let ac = {}; try { ac = JSON.parse(k.acik || '{}') || {}; } catch (e) { /* bozuk */ }
       let ilgi = []; try { ilgi = JSON.parse(k.ilgi || '[]') || []; } catch (e) { /* bozuk */ }
-      return json({ kisi: Object.assign({ id: k.id, ad: gorunen(k.ad), kadi: k.kullanici_adi || null, bio: k.bio || '', ilgi, rozet: ac.rozet || {}, ozet: ac.ozet || {}, ben: k.id === kim.id, fid: k.foto_v ? k.id : undefined, fv: k.foto_v || undefined }, rz(k)) });
+      const ark = k.id === kim.id ? 'ben' : await (async () => { const r = await db.prepare('SELECT a, durum FROM arkadas WHERE (a = ? AND b = ?) OR (a = ? AND b = ?)').bind(kim.id, k.id, k.id, kim.id).first(); return !r ? 'yok' : r.durum === 'tamam' ? 'tamam' : r.a === kim.id ? 'giden' : 'gelen'; })();
+      const an = await db.prepare("SELECT COUNT(*) n FROM arkadas WHERE (a = ? OR b = ?) AND durum = 'tamam'").bind(k.id, k.id).first();
+      const gl = await db.prepare("WITH ark AS (SELECT CASE WHEN a = ?1 THEN b ELSE a END k FROM arkadas WHERE (a = ?1 OR b = ?1) AND durum = 'tamam'), grp AS (SELECT DISTINCT u2.kullanici_id k FROM grup_uye u1 JOIN grup_uye u2 ON u1.grup_id = u2.grup_id WHERE u1.kullanici_id = ?1) " +
+        "SELECT g.id, g.tur, g.veri, g.metin, g.gorsel, g.zaman, g.saygi, (SELECT 1 FROM saygi WHERE gonderi_id = g.id AND kullanici_id = ?1) ben FROM gonderi g WHERE g.kullanici_id = ?2 AND g.gizli = 0 AND (g.kullanici_id = ?1 OR g.gorunur = 'herkes' OR (g.gorunur = 'arkadas' AND (?2 IN (SELECT k FROM ark) OR ?2 IN (SELECT k FROM grp))) OR (g.gorunur = 'grup' AND ?2 IN (SELECT k FROM grp))) ORDER BY g.zaman DESC LIMIT 12").bind(kim.id, k.id).all();
+      const gonderi = (gl.results || []).map((x) => { let v = {}; try { v = JSON.parse(x.veri || '{}') || {}; } catch (e) { /* bozuk */ } return { id: x.id, kid: k.id, ad: gorunen(k.ad), tur: x.tur, veri: v, metin: x.metin || '', gorsel: !!x.gorsel, zaman: x.zaman, saygi: x.saygi || 0, sen: !!x.ben, benim: k.id === kim.id }; });
+      return json({ kisi: Object.assign({ id: k.id, ad: gorunen(k.ad), kadi: k.kullanici_adi || null, bio: k.bio || '', ilgi, rozet: ac.rozet || {}, ozet: ac.ozet || {}, ben: k.id === kim.id, fid: k.foto_v ? k.id : undefined, fv: k.foto_v || undefined, ark, arkSayi: an ? an.n : 0, gonderi }, rz(k)) });
     }
     if (p[0] === 'kisi' && m === 'GET') {
       if (!(await sinir(db, R, 'kisi:' + kim.id, 30, 3600))) return hata('Çok fazla arama. Biraz sonra tekrar dene.', 429);
@@ -463,15 +658,15 @@ async function onRequestIc(ctx, R) {
     /* ---------- yönetim: moderasyon ---------- */
     if (p[0] === 'sikayetler' && m === 'GET') {
       if (!admin) return hata('Yetkin yok.', 403);
-      const r = await db.prepare("SELECT s.tur, s.hedef_id, COUNT(*) adet, MAX(s.zaman) son, group_concat(s.neden, ' · ') nedenler, CASE s.tur WHEN 'konu' THEN (SELECT baslik || ': ' || substr(metin, 1, 200) FROM konular WHERE id = s.hedef_id) ELSE (SELECT substr(metin, 1, 240) FROM cevaplar WHERE id = s.hedef_id) END metin, CASE s.tur WHEN 'konu' THEN (SELECT gizli FROM konular WHERE id = s.hedef_id) ELSE (SELECT gizli FROM cevaplar WHERE id = s.hedef_id) END gizli FROM sikayet s WHERE s.durum = 'acik' GROUP BY s.tur, s.hedef_id ORDER BY son DESC LIMIT 100").all();
+      const r = await db.prepare("SELECT s.tur, s.hedef_id, COUNT(*) adet, MAX(s.zaman) son, group_concat(s.neden, ' · ') nedenler, CASE s.tur WHEN 'konu' THEN (SELECT baslik || ': ' || substr(metin, 1, 200) FROM konular WHERE id = s.hedef_id) WHEN 'gonderi' THEN (SELECT 'Gönderi: ' || coalesce(metin, '') || ' ' || coalesce(veri, '') FROM gonderi WHERE id = s.hedef_id) ELSE (SELECT substr(metin, 1, 240) FROM cevaplar WHERE id = s.hedef_id) END metin, CASE s.tur WHEN 'konu' THEN (SELECT gizli FROM konular WHERE id = s.hedef_id) WHEN 'gonderi' THEN (SELECT gizli FROM gonderi WHERE id = s.hedef_id) ELSE (SELECT gizli FROM cevaplar WHERE id = s.hedef_id) END gizli FROM sikayet s WHERE s.durum = 'acik' GROUP BY s.tur, s.hedef_id ORDER BY son DESC LIMIT 100").all();
       return json({ liste: r.results || [] });
     }
     if (p[0] === 'moderasyon' && m === 'POST') {
       if (!admin) return hata('Yetkin yok.', 403);
-      const g = await govde(req); const tur = g && (g.tur === 'konu' || g.tur === 'cevap') ? g.tur : null; const id = parseInt(g && g.id, 10) || 0;
+      const g = await govde(req); const tur = g && (g.tur === 'konu' || g.tur === 'cevap' || g.tur === 'gonderi') ? g.tur : null; const id = parseInt(g && g.id, 10) || 0;
       if (!tur || !id) return hata('Geçersiz istek.', 400);
       await db.batch([
-        db.prepare('UPDATE ' + (tur === 'konu' ? 'konular' : 'cevaplar') + ' SET gizli = ? WHERE id = ?').bind(g.gizli ? 1 : 0, id),
+        db.prepare('UPDATE ' + (tur === 'konu' ? 'konular' : tur === 'gonderi' ? 'gonderi' : 'cevaplar') + ' SET gizli = ? WHERE id = ?').bind(g.gizli ? 1 : 0, id),
         db.prepare("UPDATE sikayet SET durum = 'kapali' WHERE tur = ? AND hedef_id = ?").bind(tur, id)
       ]);
       return json({ ok: true });
