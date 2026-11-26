@@ -2217,3 +2217,21 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .gerisay.go .gs-atla{color:rgba(255,255,255,.5)}
 .gerisay.go .gs-noktalar i{background:#fff}
 @keyframes goGel{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+/* Comeback modundan dönüş: sayaç (26 Kasım) */
+.donus{position:fixed;inset:0;z-index:70;background:#000;color:#f3f1ec;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;animation:dnGel .3s ease both}
+.donus.git{animation:gsCik .38s cubic-bezier(.23,1,.32,1) both}
+.dn-ust{position:absolute;top:calc(26px + env(safe-area-inset-top,0px));font-size:12px;font-weight:800;letter-spacing:.02em;color:#6b6a66}
+.dn-orta{display:flex;flex-direction:column;align-items:center;gap:8px}
+.dn-say{font-size:clamp(120px,40vw,180px);font-weight:900;letter-spacing:-.07em;line-height:.85;font-variant-numeric:tabular-nums;transition:color .25s ease}
+.donus.yakin .dn-say,.donus.sifir .dn-say{color:var(--kobalt)}
+.dn-k{font-size:14px;font-weight:700;color:#a3a098;transition:opacity .25s ease}
+.donus.sifir .dn-k{opacity:0;height:0;overflow:hidden}
+.dn-son{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px;opacity:0;transform:translateY(10px);transition:opacity .45s cubic-bezier(.23,1,.32,1),transform .45s cubic-bezier(.23,1,.32,1)}
+.donus.sifir .dn-son{opacity:1;transform:none}
+.dn-b{font-size:36px;font-weight:900;letter-spacing:-.045em;line-height:1}
+.dn-b .nokta{color:var(--kobalt)}
+.dn-a{font-size:15px;font-weight:600;color:#a3a098;max-width:28ch;line-height:1.45}
+.dn-gec{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom,0px));font-size:12px;font-weight:700;color:#5a5960}
+@keyframes dnGel{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.donus,.dn-son,.dn-say{animation:none;transition:none}}
+body.az-hareket .dn-son,body.az-hareket .dn-say{transition:none}

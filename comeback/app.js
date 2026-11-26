@@ -202,7 +202,7 @@
   const askidaMi = () => ['askida', 'comeback'].indexOf(uyelik().durum) >= 0;
   function uyelikGuncelle(u) {
     if (!hesap || !u) return; const once = uyelik().durum; hesap.uyelik = u;
-    if (u.dondu) { toast('Geri döndün. Üyeliğin yeniden açık.'); try { kutla(false); } catch (e) { /* yok */ } }
+    if (u.dondu) donusEkrani();
     if (once !== u.durum && !S.seans) { const sY = window.scrollY; render(); window.scrollTo(0, sY); }
   }
   const tarihKisa = (t) => { const d = new Date(t + 'T12:00:00'); return d.getDate() + ' ' + AY[d.getMonth()]; };
@@ -3568,6 +3568,29 @@
   // küçük ilerleme halkası (widget): açılışta dolar
   const halka = (p) => '<svg class="halka" viewBox="0 0 44 44" aria-hidden="true"><circle class="iz" cx="22" cy="22" r="18"/><circle class="dolu" cx="22" cy="22" r="18" style="--p:' + Math.min(100, Math.max(0, p)) + '"/></svg>';
   /* antrenman bitince tek seferlik kutlama: kobalt ve krem parçalar başlıktan dökülür; rekor varsa limon da katılır */
+  // Comeback modundan dönüş: kaç gün uzak kaldıysa o sayı büyük gelir, hızla 0'a iner, sonra "Geri döndün." (bir kez; dokununca geçer)
+  function donusEkrani() {
+    const eski = document.getElementById('donus'); if (eski) eski.remove();
+    let gun = sonAntrenmanAra(); if (!(gun > 0)) gun = 30; gun = Math.min(gun, 999);
+    const el = document.createElement('div'); el.id = 'donus'; el.className = 'donus'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+    el.innerHTML = '<span class="dn-ust">COMEBACK.</span><div class="dn-orta"><span class="dn-say num" aria-hidden="true">' + gun + '</span><span class="dn-k">gün uzaktaydın</span>' +
+      '<div class="dn-son"><span class="dn-b">Geri döndün<span class="nokta">.</span></span><span class="dn-a">Üyeliğin yeniden açık. Bugün ilk seti&nbsp;at.</span></div></div><span class="dn-gec">Devam etmek için dokun</span>' +
+      '<span class="gizli">' + gun + ' gün uzaktaydın. Geri döndün. Üyeliğin yeniden açık.</span>';
+    document.body.appendChild(el);
+    const say = el.querySelector('.dn-say');
+    let bitti = false; const kapat = () => { if (bitti) return; bitti = true; el.classList.add('git'); setTimeout(() => el.remove(), 380); };
+    el.addEventListener('click', kapat);
+    const son = () => { say.textContent = '0'; el.classList.add('sifir'); setTimeout(kapat, 3200); };
+    if (azHareket) { son(); return; }
+    const t0 = performance.now() + 450; const SURE = 1100;
+    (function kare(t) {
+      if (bitti) return;
+      const g = Math.max(0, Math.min(1, (t - t0) / SURE)); const e = 1 - Math.pow(1 - g, 3); // önce hızlı, sona doğru yavaş
+      const v = Math.round(gun * (1 - e)); if (say.textContent !== String(v)) say.textContent = v;
+      el.classList.toggle('yakin', v <= Math.max(3, gun * 0.15));
+      if (g < 1) requestAnimationFrame(kare); else son();
+    })(performance.now());
+  }
   function kutla(rekor) {
     if (azHareket) return; const c = document.createElement('canvas'); const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = window.innerWidth, H = window.innerHeight; c.width = W * dpr; c.height = H * dpr; c.className = 'kutlama'; c.setAttribute('aria-hidden', 'true'); document.body.appendChild(c);
