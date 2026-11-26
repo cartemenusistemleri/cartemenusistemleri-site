@@ -356,7 +356,7 @@ function tick(){
   $('#tot').textContent=dur(t);$('#tt').textContent=dur(t);
   $('#pct').textContent='%'+Math.round(p)+' hedef';$('#pct').className='lbl';
   $('#pg').style.strokeDashoffset=100-Math.min(100,p);
-  $('#ov').style.strokeDashoffset=100-Math.min(100,Math.max(0,p-100));
+  $('#ov').style.strokeDashoffset=100-Math.min(100,Math.max(0,p-100));$('#pg').style.opacity=p>0.5?1:0;$('#ov').style.opacity=p>100.5?1:0;
   $('#goal').textContent=t>=g?('Hedef '+S.hedef+' sa · +'+dur(t-g)+' fazla'):('Hedef '+S.hedef+' sa · kalan '+dur(g-t));
   const bar=$('#tbar');bar.style.width=Math.min(100,p)+'%';
 }
