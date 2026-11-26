@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#F4F1EA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Faith.">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/faith/manifest.json">
+<link rel="apple-touch-icon" href="/faith/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/faith/icon-192.png">
+<title>Faith. — Namaz takibi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: sakin, disiplinli, bağırmayan — bir sporcunun defteri
+   IDEA: günlük antrenman kartı gibi işaretlenen beş vakit
+   PICTURE: sıradaki vakit ve kalan süre, altında bugünün listesi
+   COLOUR and TYPE: Fildişi (#F4F1EA) zemin, mürekkep metin, kırmızı yalnızca logoda; Libre Caslon logo, Geist her yer
+   LAYOUT: tek sütun, 520px, alt sekme çubuğu */
+:root{--bg:#F4F1EA;--card:#FBFAF6;--line:#E2DDD2;--idle:#BDB7AB;--ink:#1A1A1A;--ink2:#3E3B36;--ink3:#6B6760;--brand:#B3121F;--on:#F4F1EA;color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Geist,system-ui,sans-serif;overflow-x:clip}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.app{max-width:520px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 22px 110px;display:flex;flex-direction:column;gap:18px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:'Libre Caslon Display',Georgia,serif;font-size:34px;letter-spacing:.04em;line-height:1;color:var(--brand)}
+.muted{color:var(--ink3);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px}
+h1,h2{font-weight:300;letter-spacing:-.02em;margin:0}
+h1{font-size:36px;line-height:1.05}h2{font-size:24px;line-height:1.2}
+.row2{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.segs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:6px}
+.segs i{height:3px;border-radius:2px;background:var(--line);transition:background-color .3s ease}
+.btn{min-height:46px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--on);padding:0 20px;font-size:15px;font-weight:500;transition:transform .16s cubic-bezier(.23,1,.32,1),opacity .2s ease}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:active,.ic:active,.chk:active{transform:scale(.98)}
+@media (hover:hover) and (pointer:fine){.btn:hover{opacity:.88}}
+.pillars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pillars div{display:flex;flex-direction:column;gap:2px;padding:12px 0 12px 12px;border-left:1px solid var(--line)}
+.pillars div:first-child{padding-left:0;border-left:0}
+.pl{font-family:'Libre Caslon Display',Georgia,serif;font-size:13px;letter-spacing:.08em;color:var(--ink2)}
+.pillars div:first-child .pl{color:var(--brand)}
+.pv{font-size:15px;font-weight:500}
+.list{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.chk{width:44px;height:44px;margin:0 -6px;flex:none;border:0;border-radius:999px;background:transparent;display:grid;place-items:center;padding:0;transition:transform .16s cubic-bezier(.23,1,.32,1)}
+.chk span{width:24px;height:24px;border-radius:999px;border:1.5px solid var(--idle);display:grid;place-items:center;transition:background-color .2s ease,border-color .2s ease}
+.chk.on span{background:var(--ink);border-color:var(--ink)}
+.chk svg{opacity:0;transition:opacity .2s ease}.chk.on svg{opacity:1}
+.grow{flex:1;display:flex;flex-direction:column}
+.nm{font-size:16px;font-weight:500}.nt{font-size:12px;color:var(--ink3)}.nt.now{color:var(--brand)}
+.ic{width:44px;height:44px;flex:none;border:0;border-radius:999px;background:transparent;display:grid;place-items:center;color:var(--idle);padding:0}
+.ic.on{color:var(--ink)}
+.tag{font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--ink3);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+form,.form{display:flex;flex-direction:column;gap:12px}
+label{font-size:13px;color:var(--ink3);display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=time],select{min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 14px;font-size:16px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.day{min-width:44px;min-height:40px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:13px}
+.day.on{background:var(--ink);color:var(--on);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:72px repeat(7,minmax(0,1fr));gap:6px;align-items:center}
+.grid b{font-weight:400;font-size:12px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grid .h{text-align:center;font-size:11px;color:var(--ink3)}
+.grid .h.t{color:var(--brand);font-weight:500}
+.cell{height:28px;border-radius:8px;border:1px solid var(--line);background:transparent;padding:0}
+.cell.on{background:var(--ink);border-color:var(--ink)}
+.cell.na{border-style:dashed;opacity:.5;cursor:default}
+.bar{display:flex;align-items:center;gap:10px;font-size:13px}
+.bar span:first-child{width:72px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .tr{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--ink)}
+.note{font-size:13px;color:var(--ink3);line-height:1.5}
+.sw{width:48px;height:28px;border-radius:999px;border:0;background:var(--line);position:relative;flex:none;padding:0;transition:background-color .2s ease}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:transform .22s cubic-bezier(.23,1,.32,1)}
+.sw.on{background:var(--ink)}.sw.on::after{transform:translateX(20px)}
+.sel{min-height:40px;font-size:13px;padding:0 10px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;background:rgba(244,241,234,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--line);padding:6px 8px calc(10px + env(safe-area-inset-bottom))}
+nav div{display:flex;justify-content:space-around;width:100%;max-width:520px}
+nav a{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px;min-height:44px;padding-top:6px;font-size:11px;color:var(--ink3);text-decoration:none}
+nav a.on{color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--on);font-size:13px;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s ease;pointer-events:none}
+.toast.show{opacity:1}
+.sheetbg{position:fixed;inset:0;background:rgba(26,26,26,.35);display:flex;align-items:flex-end;justify-content:center;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.sheetbg.show{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:520px;background:var(--bg);border-radius:20px 20px 0 0;padding:22px 22px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;transform:translateY(24px);transition:transform .25s cubic-bezier(.32,.72,0,1)}
+.sheetbg.show .sheet{transform:none}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;color:var(--ink2)}
+.tabs{display:flex;gap:6px}.tabs button{flex:1;min-height:40px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:13px}.tabs button.on{background:var(--ink);color:var(--on);border-color:var(--ink)}
+.install{display:flex;align-items:center;gap:12px}
+.install .grow{gap:2px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><span class="logo">FAITH.</span><span class="muted" id="dateCity"></span></div>
+
+<section id="v-bugun">
+<div class="card install" id="installCard"><div class="grow"><span class="pv">Ana ekrana ekle</span><span class="nt">Uygulama gibi tek dokunuşla aç.</span></div><button class="btn" data-install style="min-height:40px;font-size:13px">Ekle</button><button class="ic" id="installX" aria-label="Kapat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div class="card" id="hero" style="margin-top:18px">
+<span class="muted" id="heroLbl">Sıradaki vakit</span>
+<div class="row2"><h1 id="heroName">—</h1><span class="muted num" id="heroTime"></span></div>
+<span style="color:var(--ink2);font-size:15px" id="heroLeft"></span>
+<div class="segs" id="segs"><i></i><i></i><i></i><i></i><i></i></div>
+</div>
+<div class="pillars" style="margin-top:18px">
+<div><span class="pl">FAITH</span><span class="pv num" id="pFaith">0 gün</span><span class="nt">aralıksız seri</span></div>
+<div><span class="pl">PASSION</span><span class="pv num" id="pPassion">—</span><span class="nt">ilk yarım saatte</span></div>
+<div><span class="pl">GOD</span><span class="pv">Niyet</span><span class="nt">Allah rızası için</span></div>
+</div>
+<div class="row2" style="margin-top:18px"><h2>Bugün</h2><span class="muted num" id="doneCount"></span></div>
+<div class="list" id="todayList"></div>
+<button class="btn ghost" id="addOpen" style="margin-top:12px">Namaz ekle</button>
+<div class="card form" id="addForm" hidden style="margin-top:12px">
+<label>Namazın adı<input type="text" id="fName" maxlength="40" placeholder="Hacet namazı"></label>
+<label>Saat (isteğe bağlı, hatırlatma için)<input type="time" id="fTime"></label>
+<label>Hangi günler<span class="days" id="fDays"></span></label>
+<div style="display:flex;gap:8px"><button class="btn" id="fSave" style="flex:1">Kaydet</button><button class="btn ghost" id="fCancel">Vazgeç</button></div>
+</div>
+</section>
+
+<section id="v-performans" hidden>
+<h1>Performans</h1>
+<div class="card"><div class="row2"><span class="pv">Son 7 gün</span><span class="muted">Kutuya dokunarak geçmiş günü düzeltebilirsin</span></div>
+<div class="grid" id="week"></div></div>
+<div class="card"><div class="row2"><span class="pv">Bu ay</span><span class="muted num" id="monthPct"></span></div><div class="form" id="bars"></div></div>
+</section>
+
+<section id="v-hatirlatma" hidden>
+<h1>Hatırlatmalar</h1>
+<div class="card"><div class="list" id="remList"></div></div>
+<button class="btn" id="icsBtn">Takvime ekle (30 gün)</button>
+<button class="btn ghost" id="notifBtn">Bu cihazda bildirimleri aç</button>
+<p class="note" id="remNote"></p>
+</section>
+
+<section id="v-ayarlar" hidden>
+<h1>Ayarlar</h1>
+<div class="card form">
+<label>Şehir<select id="city"></select></label>
+<p class="note">Vakitler Diyanet yöntemiyle (imsak 18°, yatsı 17°, temkinli) bu cihazda hesaplanır; Diyanet takviminden 1–2 dakika farklı olabilir.</p>
+</div>
+<div class="card"><span class="pv">Eklediğin namazlar</span><div class="list" id="customList"></div></div>
+<button class="btn ghost" data-install>Ana ekrana ekle</button>
+<p class="note" id="syncNote"></p>
+</section>
+</div>
+
+<nav><div>
+<a href="#bugun" data-v="bugun"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Bugün</a>
+<a href="#performans" data-v="performans"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Performans</a>
+<a href="#hatirlatma" data-v="hatirlatma"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Hatırlatma</a>
+<a href="#ayarlar" data-v="ayarlar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Ayarlar</a>
+</div></nav>
+<div class="sheetbg" id="sheetBg" aria-hidden="true"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT">
+<h2 id="shT">Ana ekrana ekle</h2>
+<div class="tabs"><button data-os="ios">iPhone</button><button data-os="android">Android</button></div>
+<ol class="steps" id="stIos"><li>Bu sayfayı <b>Safari</b>'de aç.</li><li>Alttaki <b>Paylaş</b> düğmesine dokun (kare ve yukarı ok).</li><li>Listeyi kaydırıp <b>Ana Ekrana Ekle</b>'yi seç, adı “Faith.” yap, <b>Ekle</b>'ye bas.</li></ol>
+<ol class="steps" id="stAndroid" hidden><li>Bu sayfayı <b>Chrome</b>'da aç.</li><li>Sağ üstteki <b>⋮</b> menüsüne dokun.</li><li><b>Ana ekrana ekle</b>'yi seç, adı “Faith.” yap, <b>Ekle</b>'ye bas.</li></ol>
+<p class="note">Telefon, bir sayfayı ana ekrana eklemek için bu onayı her zaman senden ister; tek dokunuşla otomatik eklenemiyor. Bir kez eklediğinde simgeye dokunmak yeterli.</p>
+<button class="btn" id="shClose">Tamam</button>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+{
+const PT=(()=>{const r=Math.PI/180,sin=d=>Math.sin(d*r),cos=d=>Math.cos(d*r),tan=d=>Math.tan(d*r),asin=x=>Math.asin(x)/r,acos=x=>Math.acos(x)/r,atan2=(y,x)=>Math.atan2(y,x)/r,acot=x=>Math.atan(1/x)/r,fix=(a,b)=>{a=a-b*Math.floor(a/b);return a<0?a+b:a};
+function julian(y,m,d){if(m<=2){y-=1;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5}
+function sunPos(jd){const D=jd-2451545,g=fix(357.529+.98560028*D,360),q=fix(280.459+.98564736*D,360),L=fix(q+1.915*sin(g)+.02*sin(2*g),360),e=23.439-.00000036*D,RA=atan2(cos(e)*sin(L),cos(L))/15;return{decl:asin(sin(e)*sin(L)),eqt:q/15-fix(RA,24)}}
+return function(date,lat,lng){const tz=3,jd=julian(date.getFullYear(),date.getMonth()+1,date.getDate())-lng/(15*24);
+const mid=t=>fix(12-sunPos(jd+t).eqt,24);
+const ang=(a,t,ccw)=>{const d=sunPos(jd+t).decl,n=mid(t),T=acos((-sin(a)-sin(d)*sin(lat))/(cos(d)*cos(lat)))/15;return n+(ccw?-T:T)};
+const asr=t=>{const d=sunPos(jd+t).decl;return ang(-acot(1+tan(Math.abs(lat-d))),t)};
+let t={f:5,s:6,d:12,a:13,m:18,i:18};
+for(let k=0;k<2;k++){const p={};for(const x in t)p[x]=t[x]/24;t={f:ang(18,p.f,true),s:ang(.833,p.s,true),d:mid(p.d),a:asr(p.a),m:ang(.833,p.m),i:ang(17,p.i)}}
+const mins=(h,o)=>Math.round((h+tz-lng/15)*60)+o;
+return{sabah:mins(t.f,0),gunes:mins(t.s,-7),ogle:mins(t.d,5),ikindi:mins(t.a,5),aksam:mins(t.m,8),yatsi:mins(t.i,0)}}})();
+
+const CITIES={adana:['Adana',37.0,35.3213],ankara:['Ankara',39.9334,32.8597],antalya:['Antalya',36.8969,30.7133],bursa:['Bursa',40.1885,29.061],diyarbakir:['Diyarbakır',37.9144,40.2306],eskisehir:['Eskişehir',39.7767,30.5206],gaziantep:['Gaziantep',37.0662,37.3833],istanbul:['İstanbul',41.0082,28.9784],izmir:['İzmir',38.4237,27.1428],kayseri:['Kayseri',38.7312,35.4787],kocaeli:['Kocaeli',40.8533,29.8815],konya:['Konya',37.8746,32.4932],manisa:['Manisa',38.6191,27.4289],mersin:['Mersin',36.8,34.6333],sakarya:['Sakarya',40.7569,30.3781],samsun:['Samsun',41.2928,36.3313],tekirdag:['Tekirdağ',40.978,27.511],trabzon:['Trabzon',41.0015,39.7178]};
+const FARZ=[['sabah','Sabah'],['ogle','Öğle'],['ikindi','İkindi'],['aksam','Akşam'],['yatsi','Yatsı']];
+const DAYS=['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0'),hm=m=>pad(Math.floor(m/60)%24)+':'+pad(m%60);
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const wd=d=>(d.getDay()+6)%7;
+const CHECK='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F4F1EA" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const BELL='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+
+let S={city:'istanbul',rem:{sabah:{on:true,off:10},ogle:{on:true,off:10},ikindi:{on:true,off:10},aksam:{on:true,off:10},yatsi:{on:true,off:10}},custom:[]};
+let M={};
+let db=null,uid=null,cloud=false;
+const LS='faith-v1';
+function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LS)||'null');if(j){S=Object.assign(S,j.S||{});M=j.M||{}}}catch(e){}}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify({S,M}))}catch(e){}}
+const queue={};
+function write(key,body){saveLocal();if(!cloud)return;const run=async()=>{try{await db.collection('data/users/'+uid).doc(key).set(JSON.parse(JSON.stringify(body)))}catch(e){if(e&&e.code==='invalid_argument'){cloud=false;$('syncNote').textContent='Bu görünümde buluta kaydedilemiyor; veriler bu cihazda tutuluyor.'}}};queue[key]=(queue[key]||Promise.resolve()).then(run)}
+const saveS=()=>write('settings',S);
+const mKey=d=>'m-'+ymd(d).slice(0,7);
+const dayRec=(d,create)=>{const k=mKey(d),dd=String(d.getDate());if(!M[k]){if(!create)return null;M[k]={days:{}}}if(!M[k].days)M[k].days={};if(!M[k].days[dd]){if(!create)return null;M[k].days[dd]={}}return M[k].days[dd]};
+const isDone=(d,id)=>{const r=dayRec(d,false);return !!(r&&r[id])};
+function toggle(d,id){const r=dayRec(d,true);if(r[id])delete r[id];else r[id]=Date.now();write(mKey(d),M[mKey(d)]);render()}
+
+const timesFor=d=>{const c=CITIES[S.city]||CITIES.istanbul;return PT(d,c[1],c[2])};
+const customFor=d=>S.custom.filter(c=>!c.days||c.days.includes(wd(d)));
+function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
+
+function streak(){const today=new Date();let d=today,n=0;const full=x=>FARZ.every(([id])=>isDone(x,id));if(!full(d))d=addDays(d,-1);while(full(d)&&n<3650){n++;d=addDays(d,-1)}return n}
+function passion(){let ok=0,all=0;const today=new Date();for(let i=0;i<30;i++){const d=addDays(today,-i),r=dayRec(d,false);if(!r)continue;const t=timesFor(d);for(const [id] of FARZ){if(!r[id])continue;const x=new Date(r[id]);if(ymd(x)!==ymd(d))continue;all++;const m=x.getHours()*60+x.getMinutes();if(m>=t[id]&&m-t[id]<=30)ok++}}return all?Math.round(ok/all*100):null}
+
+function hero(){const t=timesFor(new Date()),n=nowMin();const order=['sabah','ogle','ikindi','aksam','yatsi'];let next=order.find(id=>t[id]>n),nextT,name;
+if(next){nextT=t[next]-n;name=FARZ.find(f=>f[0]===next)[1];$('heroTime').textContent=hm(t[next])}else{const tt=timesFor(addDays(new Date(),1));nextT=tt.sabah+1440-n;name='Sabah';$('heroTime').textContent='yarın '+hm(tt.sabah)}
+$('heroName').textContent=name;const h=Math.floor(nextT/60),m=nextT%60;$('heroLeft').textContent=(h?h+' saat ':'')+m+' dakika kaldı';
+let cur=null;if(n>=t.sabah&&n<t.gunes)cur='sabah';else if(n>=t.ogle&&n<t.ikindi)cur='ogle';else if(n>=t.ikindi&&n<t.aksam)cur='ikindi';else if(n>=t.aksam&&n<t.yatsi)cur='aksam';else if(n>=t.yatsi||n<t.sabah)cur='yatsi';
+[...$('segs').children].forEach((el,i)=>{const id=order[i];el.style.background=isDone(new Date(),id)?'var(--ink)':id===cur?'var(--brand)':''});return{t,cur}}
+
+function renderToday(){const d=new Date(),{t,cur}=hero(),items=[];
+for(const [id,name] of FARZ){const done=isDone(d,id);const now=id===cur&&!done;let note=done?'Kılındı · '+hm(new Date(dayRec(d,false)[id]).getHours()*60+new Date(dayRec(d,false)[id]).getMinutes()):now?'Şu anki vakit':(id==='sabah'?'Güneş '+hm(t.gunes):'');items.push({id,name,time:hm(t[id]),note,now,done,bell:S.rem[id]&&S.rem[id].on,farz:true})}
+for(const c of customFor(d)){const id='c_'+c.id;items.push({id,name:c.name,time:c.time||'',note:isDone(d,id)?'Kılındı':(c.days&&c.days.length<7?c.days.map(x=>DAYS[x]).join(' '):'Her gün'),done:isDone(d,id),bell:c.time&&S.rem[id]&&S.rem[id].on,custom:true})}
+$('todayList').innerHTML=items.map(it=>`<div class="item"><button class="chk ${it.done?'on':''}" data-t="${esc(it.id)}" aria-label="${esc(it.name)} ${it.done?'kılındı, geri al':'kılındı olarak işaretle'}"><span>${CHECK}</span></button><div class="grow"><span class="nm">${esc(it.name)}${it.custom?'<span class="tag">nafile</span>':''}</span><span class="nt ${it.now?'now':''}">${esc(it.note)}</span></div><span class="num" style="color:var(--ink2);font-size:15px">${esc(it.time)}</span>${it.farz||it.time?`<button class="ic ${it.bell?'on':''}" data-b="${esc(it.id)}" aria-label="${esc(it.name)} hatırlatması">${BELL}</button>`:'<span style="width:44px"></span>'}</div>`).join('');
+$('doneCount').textContent=FARZ.filter(([id])=>isDone(d,id)).length+' / 5 kılındı';
+$('pFaith').textContent=streak()+' gün';const p=passion();$('pPassion').textContent=p===null?'—':'%'+p}
+
+function renderPerf(){const today=new Date(),days=[...Array(7)].map((_,i)=>addDays(today,i-6));
+const rows=[...FARZ.map(([id,n])=>({id,n})),...S.custom.map(c=>({id:'c_'+c.id,n:c.name,c}))];
+let h='<span></span>'+days.map((d,i)=>`<span class="h ${i===6?'t':''}">${DAYS[wd(d)]}</span>`).join('');
+for(const r of rows){h+=`<b title="${esc(r.n)}">${esc(r.n)}</b>`+days.map(d=>{const due=!r.c||!r.c.days||r.c.days.includes(wd(d));return due?`<button class="cell ${isDone(d,r.id)?'on':''}" data-d="${ymd(d)}" data-t="${esc(r.id)}" aria-label="${esc(r.n)} ${ymd(d)}"></button>`:'<span class="cell na"></span>'}).join('')}
+$('week').innerHTML=h;
+const first=new Date(today.getFullYear(),today.getMonth(),1),n=today.getDate();let tot=0,dn=0;
+$('bars').innerHTML=rows.map(r=>{let due=0,c=0;for(let i=0;i<n;i++){const d=addDays(first,i);if(r.c&&r.c.days&&!r.c.days.includes(wd(d)))continue;due++;if(isDone(d,r.id))c++}if(!r.c){tot+=due;dn+=c}const p=due?Math.round(c/due*100):0;return `<div class="bar"><span>${esc(r.n)}</span><span class="tr"><i style="width:${p}%"></i></span><span class="num" style="width:40px;text-align:right">%${p}</span></div>`}).join('');
+$('monthPct').textContent='Farzlar %'+(tot?Math.round(dn/tot*100):0)}
+
+function renderRem(){const t=timesFor(new Date());const rows=[...FARZ.map(([id,n])=>({id,n,time:hm(t[id])})),...S.custom.filter(c=>c.time).map(c=>({id:'c_'+c.id,n:c.name,time:c.time}))];
+$('remList').innerHTML=rows.map(r=>{const st=S.rem[r.id]||{on:false,off:10};return `<div class="item"><div class="grow"><span class="nm">${esc(r.n)}</span><span class="nt num">${esc(r.time)}</span></div><select class="sel" data-o="${esc(r.id)}" aria-label="${esc(r.n)} ne zaman">${[0,5,10,15,30].map(o=>`<option value="${o}" ${st.off===o?'selected':''}>${o?o+' dk önce':'Vaktinde'}</option>`).join('')}</select><button class="sw ${st.on?'on':''}" data-s="${esc(r.id)}" aria-label="${esc(r.n)} hatırlatması ${st.on?'açık':'kapalı'}"></button></div>`}).join('')}
+
+function renderSet(){$('city').innerHTML=Object.entries(CITIES).map(([k,v])=>`<option value="${k}" ${k===S.city?'selected':''}>${v[0]}</option>`).join('');
+$('customList').innerHTML=S.custom.length?S.custom.map(c=>`<div class="item"><div class="grow"><span class="nm">${esc(c.name)}</span><span class="nt">${esc((c.time||'saat yok')+' · '+(c.days&&c.days.length<7?c.days.map(x=>DAYS[x]).join(' '):'her gün'))}</span></div><button class="btn ghost" data-del="${esc(c.id)}" style="min-height:40px;font-size:13px">Sil</button></div>`).join(''):'<p class="note" style="margin:8px 0 0">Henüz eklenmiş namaz yok. Bugün sekmesindeki "Namaz ekle" ile ekleyebilirsin.</p>'}
+
+function render(){const c=CITIES[S.city]||CITIES.istanbul;$('dateCity').textContent=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long'})+' · '+c[0];renderToday();renderPerf();renderRem();renderSet()}
+
+function view(){const v=(location.hash||'#bugun').slice(1);const ok=['bugun','performans','hatirlatma','ayarlar'].includes(v)?v:'bugun';for(const s of document.querySelectorAll('section'))s.hidden=s.id!=='v-'+ok;for(const a of document.querySelectorAll('nav a'))a.classList.toggle('on',a.dataset.v===ok);window.scrollTo(0,0)}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)}
+
+let fDays=[0,1,2,3,4,5,6];
+function drawDays(){$('fDays').innerHTML=DAYS.map((d,i)=>`<button type="button" class="day ${fDays.includes(i)?'on':''}" data-day="${i}">${d}</button>`).join('')}
+$('addOpen').onclick=()=>{$('addForm').hidden=false;$('addOpen').hidden=true;fDays=[0,1,2,3,4,5,6];drawDays();$('fName').focus()};
+$('fCancel').onclick=()=>{$('addForm').hidden=true;$('addOpen').hidden=false};
+$('fDays').onclick=e=>{const b=e.target.closest('[data-day]');if(!b)return;const i=+b.dataset.day;fDays=fDays.includes(i)?fDays.filter(x=>x!==i):[...fDays,i].sort();drawDays()};
+$('fSave').onclick=()=>{const name=$('fName').value.trim();if(!name){$('fName').focus();return}if(!fDays.length){toast('En az bir gün seç');return}const id=Date.now().toString(36);S.custom.push({id,name,time:$('fTime').value||'',days:fDays.slice()});if($('fTime').value)S.rem['c_'+id]={on:true,off:0};saveS();$('fName').value='';$('fTime').value='';$('addForm').hidden=true;$('addOpen').hidden=false;render();toast(name+' eklendi')};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-t]');if(t){toggle(t.dataset.d?new Date(t.dataset.d+'T12:00'):new Date(),t.dataset.t);return}
+const b=e.target.closest('[data-b],[data-s]');if(b){const id=b.dataset.b||b.dataset.s;S.rem[id]=S.rem[id]||{on:false,off:10};S.rem[id].on=!S.rem[id].on;saveS();render();return}
+const del=e.target.closest('[data-del]');if(del){if(del.dataset.sure){S.custom=S.custom.filter(c=>c.id!==del.dataset.del);delete S.rem['c_'+del.dataset.del];saveS();render();toast('Silindi')}else{del.dataset.sure='1';del.textContent='Emin misin?'}}});
+document.addEventListener('change',e=>{if(e.target.id==='city'){S.city=e.target.value;saveS();render()}else if(e.target.dataset.o){const id=e.target.dataset.o;S.rem[id]=S.rem[id]||{on:true,off:10};S.rem[id].off=+e.target.value;saveS()}});
+
+function ics(){const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Faith//TR','CALSCALE:GREGORIAN','X-WR-CALNAME:Faith.'];const stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';const z=(d,m)=>{const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),0,m-180));return x.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z'};
+for(let i=0;i<30;i++){const d=addDays(new Date(),i),t=timesFor(d);const ev=[...FARZ.map(([id,n])=>({id,n,m:t[id]})),...customFor(d).filter(c=>c.time).map(c=>({id:'c_'+c.id,n:c.name,m:+c.time.slice(0,2)*60+ +c.time.slice(3)}))];
+for(const e of ev){const st=S.rem[e.id];if(!st||!st.on)continue;out.push('BEGIN:VEVENT','UID:'+e.id+'-'+ymd(d)+'@faith','DTSTAMP:'+stamp,'DTSTART:'+z(d,e.m),'DTEND:'+z(d,e.m+15),'SUMMARY:'+e.n+(e.id.startsWith('c_')?'':' namazı')+' — FAITH.','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e.n,'TRIGGER:-PT'+st.off+'M','END:VALARM','END:VEVENT')}}
+out.push('END:VCALENDAR');return out.join('\r\n')}
+
+let timers=[];
+function schedule(){timers.forEach(clearTimeout);timers=[];if(!('Notification' in window)||Notification.permission!=='granted')return;const d=new Date(),t=timesFor(d),n=d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
+const ev=[...FARZ.map(([id,nm])=>({id,nm,m:t[id]})),...customFor(d).filter(c=>c.time).map(c=>({id:'c_'+c.id,nm:c.name,m:+c.time.slice(0,2)*60+ +c.time.slice(3)}))];
+for(const e of ev){const st=S.rem[e.id];if(!st||!st.on)continue;const at=e.m-st.off;if(at>n)timers.push(setTimeout(()=>{try{new Notification('FAITH. · '+e.nm,{body:st.off?st.off+' dakika sonra vakit giriyor ('+hm(e.m)+')':'Vakit girdi ('+hm(e.m)+')'})}catch(x){}},(at-n)*60000))}}
+
+const inClaude=!!window.claude;
+if(inClaude){$('icsBtn').hidden=true;$('notifBtn').hidden=true;$('remNote').textContent='Telefon alarmı ve bildirim, uygulamanın kendi sitesindeki sürümünde çalışır: "Takvime ekle" ile 30 günlük vakitler takvimine alarmlı olarak eklenir. Buradaki ayarlar o sürümle aynıdır.'}
+else{$('remNote').textContent='"Takvime ekle" 30 günlük vakitleri telefon takvimine alarmlı olarak ekler; ayda bir yenile. Bildirimler yalnızca bu sayfa açıkken gelir.';
+$('icsBtn').onclick=()=>{const b=new Blob([ics()],{type:'text/calendar'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='faith-hatirlatmalar.ics';document.body.appendChild(a);a.click();a.remove();toast('Takvim dosyası hazırlandı')};
+if(!('Notification' in window))$('notifBtn').hidden=true;else $('notifBtn').onclick=async()=>{const p=await Notification.requestPermission();toast(p==='granted'?'Bildirimler açık':'İzin verilmedi');schedule()}}
+
+
+const isAndroid=/android/i.test(navigator.userAgent);
+function osTab(os){for(const b of document.querySelectorAll('[data-os]'))b.classList.toggle('on',b.dataset.os===os);$('stIos').hidden=os!=='ios';$('stAndroid').hidden=os!=='android'}
+let deferred=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e});window.addEventListener('appinstalled',()=>{S.installHidden=true;saveS();installCard();toast('Ana ekrana eklendi')});
+async function openSheet(){if(deferred){deferred.prompt();try{await deferred.userChoice}catch(x){}deferred=null;return}osTab(isAndroid?'android':'ios');$('sheetBg').classList.add('show');$('sheetBg').setAttribute('aria-hidden','false')}
+function closeSheet(){$('sheetBg').classList.remove('show');$('sheetBg').setAttribute('aria-hidden','true')}
+document.addEventListener('click',e=>{if(e.target.closest('[data-install]'))openSheet();const o=e.target.closest('[data-os]');if(o)osTab(o.dataset.os);if(e.target.id==='sheetBg'||e.target.id==='shClose')closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+function installCard(){$('installCard').hidden=!!(standalone||S.installHidden)}
+$('installX').onclick=()=>{S.installHidden=true;saveS();installCard()};
+loadLocal();render();view();schedule();installCard();
+window.addEventListener('hashchange',view);
+setInterval(()=>{renderToday()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){render();schedule()}});
+
+if(inClaude)(async()=>{try{const u=await window.claude.use('user');db=await window.claude.use('db');uid=u?await u.id():null;if(!db||!uid){$('syncNote').textContent='Veriler bu cihazda tutuluyor.';return}cloud=true;
+const timer=setTimeout(()=>{$('syncNote').textContent='Bulut verisine şu an ulaşılamıyor; bu cihazdaki kayıt gösteriliyor.'},10000);
+db.collection('data/users/'+uid).onSnapshot(snap=>{if(!snap.metadata.fromCache){clearTimeout(timer);$('syncNote').textContent='Kayıtların hesabına bağlı; her cihazda aynı.'}
+if(snap.empty&&!snap.metadata.fromCache){if(Object.keys(M).length||S.custom.length){saveS();for(const k in M)write(k,M[k])}return}
+for(const doc of snap.docs){const v=doc.data();if(!v)continue;if(doc.id==='settings')S=Object.assign(S,JSON.parse(JSON.stringify(v)));else if(doc.id.startsWith('m-'))M[doc.id]=JSON.parse(JSON.stringify(v))}saveLocal();render();installCard()},e=>{clearTimeout(timer);cloud=false;$('syncNote').textContent='Veriler bu cihazda tutuluyor.'})}catch(e){}})();
+}
+</script>
+</body>
+</html>
