@@ -9,9 +9,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Faith.">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="/faith/manifest.json">
-<link rel="apple-touch-icon" href="/faith/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="/faith/icon-192.png">
+<link rel="manifest" href="/faith/manifest.json?v=2">
+<link rel="apple-touch-icon" href="/faith/apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" href="/faith/icon-192.png?v=2">
 <title>Faith. — Namaz takibi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .app{max-width:520px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 22px 110px;display:flex;flex-direction:column;gap:18px}
 .top{display:flex;justify-content:space-between;align-items:center}
-.logo{font-family:'Libre Caslon Display',Georgia,serif;font-size:34px;letter-spacing:.04em;line-height:1;color:var(--brand)}
+.logo{font-family:'Libre Caslon Display',Georgia,serif;font-size:38px;letter-spacing:.01em;line-height:1;color:var(--brand)}
 .muted{color:var(--ink3);font-size:13px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px}
 h1,h2{font-weight:300;letter-spacing:-.02em;margin:0}
@@ -163,7 +163,7 @@ button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
 </head>
 <body>
 <div class="app">
-<div class="top"><span class="logo">FAITH.</span><span class="muted" id="dateCity"></span></div>
+<div class="top"><span class="logo">Faith.</span><span class="muted" id="dateCity"></span></div>
 
 <section id="v-bugun">
 <div class="banner" id="acctBanner" hidden><div class="grow"><span class="pv" style="font-size:14px">Kayıtların yalnızca bu cihazda</span><span class="nt">Hesabına bağlanınca her şey sunucuda saklanır.</span></div><a class="btn" href="#ayarlar" style="min-height:40px;font-size:13px;display:inline-flex;align-items:center;text-decoration:none">Bağlan</a></div>
