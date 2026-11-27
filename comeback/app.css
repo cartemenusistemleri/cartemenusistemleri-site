@@ -2441,3 +2441,19 @@ body.gece .hk-gun.sec{box-shadow:0 0 0 2px #F3F1EC}
 .hk-d-liste li:first-child{border-top:0}
 .hk-d-liste .num{color:var(--ikincil);font-weight:700;white-space:nowrap}
 body.gece .hk-ok{background:#1A1A1F;color:#F3F1EC}
+
+/* kart rengi seçici (Kobalt · Gece · Beyaz · Krom) */
+.kr-renkler{display:flex;gap:10px}
+.kr-renk{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;-webkit-tap-highlight-color:transparent}
+.kr-renk i{width:100%;height:46px;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(22,22,26,.08);transition:transform .2s var(--ease),box-shadow .2s ease}
+.kr-renk span{font-size:12.5px;font-weight:700;color:var(--ikincil)}
+.kr-renk[aria-checked="true"] i{box-shadow:0 0 0 2.5px var(--kutu),0 0 0 4.5px var(--murekkep);transform:scale(.96)}
+.kr-renk[aria-checked="true"] span{color:var(--murekkep)}
+.kr-renk:focus-visible i{outline:2px solid var(--kobalt);outline-offset:3px}
+.kr-kobalt i{background:#2E4BFF}
+.kr-gece i{background:radial-gradient(80% 90% at 85% 10%,rgba(46,75,255,.5),transparent 60%),#0B0B0D}
+.kr-beyaz i{background:#F3F1EC}
+.kr-krom i{background:linear-gradient(160deg,#3a3a42,#141417 50%,#2f2f36)}
+body.gece .kr-renk[aria-checked="true"] i{box-shadow:0 0 0 2.5px #1A1A1F,0 0 0 4.5px #F3F1EC}
+body.gece .kr-renk[aria-checked="true"] span{color:#F3F1EC}
+.bk-onizle img{transition:opacity .25s ease}

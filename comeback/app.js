@@ -3175,7 +3175,7 @@
     return ustK + '<div class="izgara">' + l.map((x, si) => gcSeans(x, si === l.length - 1 ? x.fb || fbGun : x.fb)).join('') + gez + '</div>';
   }
   function gcSeans(x, fb) {
-    const bas = x.bas ? saatYaz(x.bas) : '', bit = x.bit ? saatYaz(x.bit) : '';
+    const bas = x.bas ? sureYaz(x.bas) : '', bit = x.bit ? sureYaz(x.bit) : '';
     const kafa = '<div class="t koyu genis gc-kafa"><div class="satir"><span class="k">' + (bas ? bas + (bit ? ' – ' + bit : '') : 'Antrenman') + '</span>' + (x.kisa ? '<span class="k">Bugün zor · kısa</span>' : x.jam ? '<span class="k">Ortak antrenman</span>' : '') + '</div>' +
       '<b class="gc-ad">' + esc(x.ad || 'Antrenman') + '<span class="nokta">.</span></b>' +
       '<div class="gc-sayilar num"><div><b>' + dkYaz(x.dk || 0) + '</b><span>süre</span></div><div><b>' + x.set + '</b><span>çalışma seti</span></div>' + (x.isn ? '<div><b>' + x.isn + '</b><span>ısınma</span></div>' : '') + '<div><b>' + sayi(x.hacim) + '</b><span>kg hacim</span></div>' + ((x.rk || []).length ? '<div><b>' + x.rk.length + '</b><span>rekor</span></div>' : '') + '</div></div>';
@@ -3540,18 +3540,19 @@
 
 
   /* ---------- antrenman sonu kartı: 4 tema, 1080×1920 ---------- */
-  const BK_TEMA = [['rakam', 'Rakam'], ['nokta', 'Noktalar'], ['rekor', 'Rekor'], ['hafta', 'Hafta']];
-  const bkTema = () => { const t = (S.ayar || {}).kartTema; return BK_TEMA.some((x) => x[0] === t) ? t : 'nokta'; };
+  const BK_TEMA = [['afis', 'Afiş'], ['rakam', 'Rakam'], ['nokta', 'Noktalar'], ['rekor', 'Rekor'], ['hafta', 'Hafta']];
+  const bkTema = () => { const t = (S.ayar || {}).kartTema; return BK_TEMA.some((x) => x[0] === t) ? t : 'afis'; };
   let bkOn = { anahtar: '', url: '' };
   function bkKutu(b) {
     const t = bkTema(); setTimeout(bkOnizle, 0);
     return '<div class="t genis bk-kutu"><div class="satir"><span class="k">Antrenman kartın</span><span class="ik">istediğin temayı seç</span></div>' +
       '<div class="haplar bk-tema" role="radiogroup" aria-label="Kart teması">' + BK_TEMA.map((x) => '<button class="hap" role="radio" data-act="bk-tema" data-t="' + x[0] + '" aria-checked="' + (x[0] === t) + '" aria-pressed="' + (x[0] === t) + '">' + x[1] + '</button>').join('') + '</div>' +
-      '<div class="bk-onizle"><img id="bkImg" alt="Antrenman kartı önizlemesi: ' + esc(b.ad) + ', ' + b.set + ' set"' + (bkOn.anahtar === t + b.tarih + b.set ? ' src="' + bkOn.url + '"' : '') + '></div>' +
+      (t === 'afis' ? krRenkSec(krRenk()) : '') +
+      '<div class="bk-onizle"><img id="bkImg" alt="Antrenman kartı önizlemesi: ' + esc(b.ad) + ', ' + b.set + ' set"' + (bkOn.anahtar === t + krRenk() + b.tarih + b.set ? ' src="' + bkOn.url + '"' : '') + '></div>' +
       '<button class="btn ana" data-act="bk-paylas">Hikâyede paylaş' + IK.ok + '</button></div>';
   }
   function bkOnizle() {
-    const im = document.getElementById('bkImg'); const b = S.sonSeans; if (!im || !b) return; const t = bkTema(); const an = t + b.tarih + b.set;
+    const im = document.getElementById('bkImg'); const b = S.sonSeans; if (!im || !b) return; const t = bkTema(); const an = t + krRenk() + b.tarih + b.set;
     if (bkOn.anahtar === an) { if (im.getAttribute('src') !== bkOn.url) im.src = bkOn.url; return; }
     try { const c = bitisKarti(b, t); bkOn = { anahtar: an, url: c.toDataURL('image/jpeg', 0.86) }; im.src = bkOn.url; } catch (e) { /* çizilemedi */ }
   }
@@ -3574,6 +3575,7 @@
     return c;
   }
   function bitisKarti(b, tema) {
+    if (tema === 'afis') return bitisAfis(b, krRenk());
     const W = 1080, H = 1920; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
     const F = getComputedStyle(document.body).fontFamily; const P = 84;
     const yaz = (t, X, Y, boyut, kal, renk, ls, hiza) => { x.fillStyle = renk; x.font = kal + ' ' + boyut + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; x.textAlign = hiza || 'left'; x.fillText(t, X, Y); return x.measureText(t).width; };
@@ -3645,6 +3647,120 @@
     return c;
   }
 
+
+  /* ---------- Kobalt afiş kart ailesi (B): düzen × renk teması, 1080×1920 ---------- */
+  const KR_RENK = [['kobalt', 'Kobalt'], ['gece', 'Gece'], ['beyaz', 'Beyaz'], ['krom', 'Krom']];
+  const KR_PAL = {
+    kobalt: { bg: '#2E4BFF', yazi: '#FFFFFF', ik: '#DCE2FF', nokta: '#0B0B0D', iz: 'rgba(255,255,255,.2)', cub: '#FFFFFF', chip: 'rgba(255,255,255,.14)', bant: '#0B0B0D', bYazi: '#FFFFFF', bIk: '#8B8A92', bNokta: '#3D5CFF', cizgi: 'rgba(255,255,255,.3)', halka: 'rgba(255,255,255,.08)' },
+    gece: { bg: '#0B0B0D', isik: 'rgba(46,75,255,.28)', yazi: '#F3F1EC', ik: '#8B8A92', nokta: '#3D5CFF', iz: 'rgba(255,255,255,.12)', cub: '#3D5CFF', chip: 'rgba(255,255,255,.08)', bant: '#2E4BFF', bYazi: '#FFFFFF', bIk: '#DCE2FF', bNokta: '#0B0B0D', cizgi: 'rgba(255,255,255,.18)', halka: 'rgba(61,92,255,.16)' },
+    beyaz: { bg: '#F3F1EC', yazi: '#16161A', ik: '#6B6A64', nokta: '#2E4BFF', iz: 'rgba(22,22,26,.1)', cub: '#2E4BFF', chip: 'rgba(22,22,26,.07)', bant: '#2E4BFF', bYazi: '#FFFFFF', bIk: '#DCE2FF', bNokta: '#0B0B0D', cizgi: 'rgba(22,22,26,.2)', halka: 'rgba(46,75,255,.08)' },
+    krom: { bg: '#18181C', krom: true, yazi: '#ECECF0', ik: '#9C9CA6', nokta: '#3D5CFF', iz: 'rgba(255,255,255,.12)', cub: '#D4D4DA', chip: 'rgba(255,255,255,.08)', bant: '#ECECF0', bYazi: '#16161A', bIk: '#5F5D57', bNokta: '#2E4BFF', cizgi: 'rgba(255,255,255,.2)', halka: 'rgba(255,255,255,.05)' }
+  };
+  const krRenk = () => { const t = (S.ayar || {}).kartRenk; return KR_PAL[t] ? t : 'kobalt'; };
+  function krTuval(renk) {
+    const W = 1080, H = 1920, P = 88; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    const F = getComputedStyle(document.body).fontFamily; const pal = KR_PAL[renk] || KR_PAL.kobalt;
+    const metal = (y1, y2) => { const g = x.createLinearGradient(0, y1, 0, y2); g.addColorStop(0, '#FFFFFF'); g.addColorStop(.35, '#D4D4DA'); g.addColorStop(.52, '#6D6D75'); g.addColorStop(.7, '#ECECF0'); g.addColorStop(1, '#8D8D95'); return g; };
+    x.fillStyle = pal.bg; x.fillRect(0, 0, W, H);
+    if (pal.isik) { const g = x.createRadialGradient(W * .8, 260, 40, W * .8, 260, 1100); g.addColorStop(0, pal.isik); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    if (pal.krom) { const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#2B2B31'); g.addColorStop(.5, '#141417'); g.addColorStop(1, '#232328'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    const font = (b, k, ls) => { x.font = k + ' ' + b + 'px ' + F; if ('letterSpacing' in x) x.letterSpacing = (ls || 0) + 'px'; };
+    const yaz = (t, X, Y, b, k, renk2, ls, hiza) => { font(b, k, ls); x.fillStyle = renk2; x.textAlign = hiza || 'left'; x.fillText(t, X, Y); const w = x.measureText(t).width; x.textAlign = 'left'; return w; };
+    const olc = (t, b, k, ls) => { font(b, k, ls); return x.measureText(t).width; };
+    const sigdir = (t, b, k, gen, ls) => { while (b > 40 && olc(t, b, k, ls) > gen) b -= 4; return b; };
+    // büyük yazı: kromda metal geçiş, ötekilerde düz
+    const buyuk = (t, X, Y, b, ls) => { const dolgu = pal.krom ? metal(Y - b * .8, Y) : pal.yazi; return yaz(t, X, Y, b, 900, dolgu, ls); };
+    const cizgili = (t, X, Y, b, ls) => { font(b, 900, ls); x.lineWidth = Math.max(4, b / 42); x.strokeStyle = pal.krom ? metal(Y - b * .8, Y) : pal.yazi; x.lineJoin = 'round'; x.strokeText(t, X, Y); return x.measureText(t).width; };
+    const ust = (sol, sag) => { yaz(sol, P, P + 44, 40, 800, pal.ik, 3); if (sag) yaz(sag, W - P, P + 44, 40, 800, pal.ik, 3, 'right'); };
+    const logo = (Y, yaziR, noktaR) => { const w = yaz('COMEBACK', P, Y, 66, 900, yaziR || pal.yazi, -3); yaz('.', P + w + 2, Y, 66, 900, noktaR || pal.nokta, 0); };
+    const hap = (t, X, Y, limon) => { font(40, 800, 0); const w = x.measureText(t).width + 56; x.fillStyle = limon ? '#D9F05A' : pal.chip; x.beginPath(); x.roundRect(X, Y - 52, w, 76, 38); x.fill(); yaz(t, X + 28, Y, 40, 800, limon ? '#16161A' : pal.yazi, 0); return w; };
+    const cubuk = (X, Y, w, h, oran) => { x.fillStyle = pal.iz; x.beginPath(); x.roundRect(X, Y, w, h, h / 2); x.fill(); if (oran > 0) { x.fillStyle = pal.krom ? metal(Y, Y + h) : pal.cub; x.beginPath(); x.roundRect(X, Y, Math.max(h, w * oran), h, h / 2); x.fill(); } };
+    const halka = (cx, cy, r, k) => { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.lineWidth = k; x.strokeStyle = pal.halka; x.stroke(); };
+    return { c, x, W, H, P, pal, yaz, olc, sigdir, buyuk, cizgili, ust, logo, hap, cubuk, halka, font };
+  }
+  function haftaVeri() {
+    const bas = haftaBasi(); const hb = tarihKey(bas); const son = new Date(bas); son.setDate(son.getDate() + 6);
+    const gunler = []; for (let i = 0; i < 7; i++) { const d = new Date(bas); d.setDate(d.getDate() + i); const a = S.gunluk[tarihKey(d)] && S.gunluk[tarihKey(d)].antrenman; gunler.push(a ? a.set || 1 : 0); }
+    const antr = Object.keys(S.gunluk).filter((k) => k >= hb && k <= tarihKey(son) && S.gunluk[k].antrenman).map((k) => S.gunluk[k].antrenman);
+    const soz = sozDurum(bas); const hedef = soz ? soz.soz : (S.profil ? S.profil.gun : 0);
+    const rekor = Object.keys(S.hgec || {}).reduce((t, id) => t + ((S.rekor[id] && (S.hgec[id] || []).some((z) => z.t >= hb && z.kg === S.rekor[id].kg && z.tk === S.rekor[id].tekrar)) ? 1 : 0), 0);
+    return { bas, son, no: haftaNo(bas), gunler, n: antr.length, hedef, set: antr.reduce((t, a) => t + (a.set || 0), 0), dk: antr.reduce((t, a) => t + (a.dk || 0), 0), hacim: antr.reduce((t, a) => t + (a.hacim || 0), 0), rekor, kas: istKas(hb, tarihKey(son)) };
+  }
+  const krSure = (dk) => Math.floor(dk / 60) + ':' + String(dk % 60).padStart(2, '0');
+  const tonYaz = (kg) => (kg >= 1000 ? sayi(kg / 1000, 1) + ' t' : sayi(kg) + ' kg');
+  const aralikYaz = (a, b) => a.getDate() + (a.getMonth() !== b.getMonth() ? ' ' + AY[a.getMonth()].toLocaleUpperCase('tr') : '') + '–' + b.getDate() + ' ' + AY[b.getMonth()].toLocaleUpperCase('tr');
+  const HK_DUZEN = [['serit', 'Hafta şeridi'], ['dev', 'Dev sayı'], ['kas', 'Kas dağılımı']];
+  function haftaAfis(duzen, renk) {
+    const v = haftaVeri(); const k = krTuval(renk); const { x, W, H, P, pal } = k;
+    if (duzen === 'dev') {
+      k.ust('HAFTA ' + v.no, aralikYaz(v.bas, v.son));
+      const sayiT = String(v.n); const wn = k.cizgili(sayiT, P - 36, 1080, 880, -60);
+      if (v.hedef) k.yaz('/' + v.hedef, P - 36 + wn + 10, 1080, 280, 900, pal.ik, -12);
+      const soz = v.hedef && v.n >= v.hedef ? 'Söz tutuldu' : v.n ? 'Bu hafta geldim' : 'Hafta yeni başladı';
+      const ws = k.buyuk(soz, P, 1230, 84, -3); k.yaz('.', P + ws + 2, 1230, 84, 900, pal.nokta, 0);
+      x.fillStyle = pal.bant; x.fillRect(0, 1450, W, H - 1450);
+      [[String(v.set), 'set'], [krSure(v.dk), 'saat'], [String(v.rekor), 'rekor']].forEach((s2, i) => { const X = P + i * 312; k.yaz(s2[0], X, 1590, 84, 900, i === 2 && v.rekor ? (pal.krom ? pal.bNokta : '#D9F05A') : pal.bYazi, -3); k.yaz(s2[1], X, 1645, 40, 700, pal.bIk, 0); });
+      k.logo(H - P - 4, pal.bYazi, pal.bNokta); return k.c;
+    }
+    if (duzen === 'kas') {
+      k.halka(W - 40, 1150, 400, 110);
+      k.ust('HAFTA ' + v.no, v.n + ' ANTRENMAN');
+      const sira = KAS_GRUBU.map((g) => [g[0], Math.round(v.kas[g[0]] || 0)]).filter((z) => z[1] > 0).sort((a, b) => b[1] - a[1]);
+      const satir = sira.length >= 2 ? [sira[0][0] + ' ve ' + sira[1][0].toLocaleLowerCase('tr'), 'önde'] : sira.length ? [sira[0][0], 'önde'] : ['Her set', 'sayılır'];
+      const bb = k.sigdir(satir[0], 168, 900, W - 2 * P, -8);
+      k.buyuk(satir[0], P, 400, bb, -8); const w2 = k.buyuk(satir[1], P, 400 + bb * .92, bb, -8); k.yaz('.', P + w2 + 4, 400 + bb * .92, bb, 900, pal.nokta, 0);
+      const l = sira.slice(0, 6); const mx = Math.max(1, ...l.map((z) => z[1])); const y0 = 820;
+      l.forEach((z, i) => { const Y = y0 + i * 112; k.yaz(z[0], P, Y + 22, 46, 800, pal.yazi, 0); k.cubuk(P + 270, Y - 6, W - 2 * P - 380, 30, z[1] / mx); k.yaz(String(z[1]), W - P, Y + 22, 44, 800, pal.ik, 0, 'right'); });
+      if (!l.length) k.yaz('Bu hafta henüz set yok.', P, y0 + 22, 46, 700, pal.ik);
+      let X = P; X += k.hap(v.set + ' set', X, 1700) + 16; X += k.hap(krSure(v.dk) + ' saat', X, 1700) + 16; if (v.rekor) k.hap(v.rekor + ' rekor', X, 1700, true);
+      k.logo(H - P - 4); return k.c;
+    }
+    // şerit
+    k.ust(aralikYaz(v.bas, v.son), v.n + (v.hedef ? ' / ' + v.hedef : '') + ' GÜN');
+    const hb = k.sigdir('HAFTA', 250, 900, W - 2 * P, -14); k.cizgili('HAFTA', P - 6, 190 + hb * .86, hb, -14);
+    const wn = k.buyuk(String(v.no), P - 6, 190 + hb * 1.72, hb, -14); k.yaz('.', P - 6 + wn + 6, 190 + hb * 1.72, hb, 900, pal.nokta, 0);
+    const mx = Math.max(1, ...v.gunler); const bw = (W - 2 * P - 6 * 28) / 7; const tab = 1440, yuk = 420;
+    v.gunler.forEach((sy, i) => { const X = P + i * (bw + 28); const h = sy ? Math.max(60, yuk * sy / mx) : 22; x.fillStyle = sy ? (pal.krom ? '#D4D4DA' : pal.cub) : pal.iz; x.beginPath(); x.roundRect(X, tab - h, bw, h, 22); x.fill(); k.yaz(KISA_GUN[i].slice(0, 1), X + bw / 2, tab + 64, 40, 800, pal.ik, 0, 'center'); });
+    x.fillStyle = pal.cizgi; x.fillRect(P, 1560, W - 2 * P, 3);
+    [[String(v.set), 'set'], [krSure(v.dk), 'saat'], [tonYaz(v.hacim), 'kaldırılan']].forEach((s2, i) => { const X = i === 2 ? W - P : P + i * 330; k.yaz(s2[0], X, 1660, 84, 900, pal.yazi, -3, i === 2 ? 'right' : 'left'); k.yaz(s2[1], X, 1712, 40, 700, pal.ik, 0, i === 2 ? 'right' : 'left'); });
+    k.logo(H - P - 4); return k.c;
+  }
+  // antrenman bitti: afiş (B4)
+  function bitisAfis(b, renk) {
+    const k = krTuval(renk); const { x, W, H, P, pal } = k; const d = new Date(b.tarih);
+    k.halka(W - 30, 1050, 420, 120);
+    k.ust((isNaN(d) ? '' : GUN_AD[haftaGunu(d)] + ' · ' + d.getDate() + ' ' + AY[d.getMonth()]).toLocaleUpperCase('tr'), b.dk + ' DK');
+    // başlık: iki satıra sığdır
+    const kel = String(b.ad).split(' '); let s1 = b.ad, s2 = '';
+    if (kel.length > 1 && k.olc(b.ad, 184, 900, -8) > W - 2 * P) { s1 = kel.slice(0, -1).join(' '); s2 = kel[kel.length - 1]; }
+    const bb = Math.min(k.sigdir(s1, 184, 900, W - 2 * P, -8), s2 ? k.sigdir(s2 + '.', 184, 900, W - 2 * P, -8) : 999);
+    let Y = 200 + bb; const w1 = k.buyuk(s1, P, Y, bb, -8);
+    if (s2) { Y += bb * .9; const w2 = k.buyuk(s2, P, Y, bb, -8); k.yaz('.', P + w2 + 4, Y, bb, 900, pal.nokta, 0); } else k.yaz('.', P + w1 + 4, Y, bb, 900, pal.nokta, 0);
+    const r = (b.rk || [])[0]; if (r) k.hap('Yeni rekor · ' + r.ad + ' ' + sayi(r.kg, 1) + ' kg', P, Y + 150, true);
+    const l = (b.hk || []).filter((h) => h.kg || h.tk).sort((a, c) => e1rm(c.kg || 0, c.tk || 0) - e1rm(a.kg || 0, a.tk || 0)).slice(0, 4);
+    let y = 1500 - l.length * 112;
+    l.forEach((h) => { x.fillStyle = pal.cizgi; x.fillRect(P, y - 70, W - 2 * P, 3); const ad = h.ad.length > 22 ? h.ad.slice(0, 21) + '…' : h.ad; k.yaz(ad, P, y, 50, 700, pal.yazi, 0); k.yaz(h.kg ? sayi(h.kg, 1) + ' × ' + h.tk : h.tk + ' tekrar', W - P, y, 50, 900, pal.yazi, 0, 'right'); y += 112; });
+    [[String(b.set), 'set'], [tonYaz(b.hacim || 0), 'kaldırılan']].forEach((s3, i) => { const X = P + i * 250; k.yaz(s3[0], X, 1660, 88, 900, pal.yazi, -3); k.yaz(s3[1], X, 1712, 40, 700, pal.ik, 0); });
+    k.logo(H - P - 4); return k.c;
+  }
+  // haftalık kart stüdyosu: düzen + renk seç, önizle, paylaş
+  let hkOn = { anahtar: '', url: '' };
+  function ekranHaftaKart() {
+    if (!S.profil) return ekranKarsilama();
+    const dz = (S.ayar || {}).haftaDuzen || 'serit'; const rn = krRenk(); setTimeout(hkOnizle, 0);
+    return ust(geri('#/ilerleme'), '<span class="alt">Paylaş</span>') + '<h1 class="baslik">Haftanı paylaş<span class="nokta">.</span></h1>' +
+      '<div class="izgara"><div class="t genis bk-kutu"><span class="k">Düzen</span><div class="haplar" role="radiogroup">' + HK_DUZEN.map((z) => '<button class="hap" role="radio" data-act="hk-duzen" data-d="' + z[0] + '" aria-pressed="' + (dz === z[0]) + '" aria-checked="' + (dz === z[0]) + '">' + z[1] + '</button>').join('') + '</div>' +
+      krRenkSec(rn) +
+      '<div class="bk-onizle"><img id="hkImg" alt="Haftalık paylaşım kartı önizlemesi"' + (hkOn.anahtar === dz + rn ? ' src="' + hkOn.url + '"' : '') + '></div>' +
+      '<button class="btn ana" data-act="hk-paylas">Hikâyede paylaş' + IK.ok + '</button>' +
+      (hesap ? '<div class="haplar" style="justify-content:center"><button class="hap" data-act="kart-akis" data-kart="hafta" data-g="arkadas">Akışa koy · arkadaşlar</button></div>' : '') + '</div></div>';
+  }
+  const krRenkSec = (rn) => '<span class="k" style="margin-top:4px">Renk</span><div class="kr-renkler" role="radiogroup" aria-label="Kart rengi">' + KR_RENK.map((z) => '<button type="button" class="kr-renk kr-' + z[0] + '" role="radio" data-act="kr-renk" data-r="' + z[0] + '" aria-checked="' + (rn === z[0]) + '" aria-label="' + z[1] + '"><i></i><span>' + z[1] + '</span></button>').join('') + '</div>';
+  function hkOnizle() {
+    const im = document.getElementById('hkImg'); if (!im) return; const dz = (S.ayar || {}).haftaDuzen || 'serit'; const rn = krRenk(); const an = dz + rn;
+    if (hkOn.anahtar === an && hkOn.gun === tarihKey()) { if (im.getAttribute('src') !== hkOn.url) im.src = hkOn.url; return; }
+    try { hkOn = { anahtar: an, gun: tarihKey(), url: haftaAfis(dz, rn).toDataURL('image/jpeg', 0.86) }; im.src = hkOn.url; } catch (e) { /* çizilemedi */ }
+  }
   async function gorselPaylas(c, ad, baslik) {
     const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
     const dosya = new File([blob], ad, { type: 'image/png' });
@@ -4509,6 +4625,7 @@
     else if (parca[0] === 'siralama') { html = ekranSiralama(); sekme = 'ilerleme'; }
     else if (parca[0] === 'bitti') { html = ekranBitti(); sekme = 'antrenman'; }
     else if (parca[0] === 'takviye') { html = ekranTakviye(); sekme = 'beslenme'; }
+    else if (parca[0] === 'kart') { html = ekranHaftaKart(); sekme = 'ilerleme'; }
     else if (parca[0] === 'paylas') { html = ekranPaylas(); sekme = 'antrenman'; }
     else if (parca[0] === 'gelen') { html = ekranGelen(parca[1]); sekme = 'bugun'; }
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
@@ -4802,6 +4919,7 @@
     },
     async 'soz-paylas'() { await gorselPaylas(sozKarti(), 'comeback-soz.png', 'COMEBACK. haftalık planım'); olay('paylas'); },
     async paylas() {
+      if (!/^#\/kart/.test(location.hash)) { git('#/kart/hafta'); return; }
       const c = haftaKarti(); olay('paylas');
       const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
       const dosya = new File([blob], 'comeback-hafta.png', { type: 'image/png' });
@@ -4813,6 +4931,9 @@
     },
     'foto-aci'(el) { fotoAci = el.dataset.deger; karsilastir = 50; render(); },
     async 'foto-sil'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; toast('Silmek için tekrar bas.'); return; } try { await fotoIslem('sil', el.dataset.a); } catch (e) { /* yok */ } if (fotoUrl[el.dataset.a]) URL.revokeObjectURL(fotoUrl[el.dataset.a]); delete fotoUrl[el.dataset.a]; fotoListe = (fotoListe || []).filter((a) => a !== el.dataset.a); render(); },
+    'hk-duzen'(el) { S.ayar = S.ayar || {}; S.ayar.haftaDuzen = el.dataset.d; kaydet(); document.querySelectorAll('[data-act="hk-duzen"]').forEach((b) => { const a = b === el; b.setAttribute('aria-pressed', String(a)); b.setAttribute('aria-checked', String(a)); }); hkOnizle(); },
+    'kr-renk'(el) { S.ayar = S.ayar || {}; S.ayar.kartRenk = el.dataset.r; kaydet(); document.querySelectorAll('[data-act="kr-renk"]').forEach((b) => b.setAttribute('aria-checked', String(b === el))); hkOnizle(); bkOnizle(); },
+    async 'hk-paylas'() { olay('paylas'); try { await gorselPaylas(haftaAfis((S.ayar || {}).haftaDuzen || 'serit', krRenk()), 'comeback-hafta.png', 'COMEBACK. haftam'); } catch (e) { toast('Görsel hazırlanamadı.'); } },
     'rapor-ay'(el) { raporAy = +el.dataset.deger; render(); },
     'ist-donem'(el) { istDonem = el.dataset.d; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     su(el) { const g = gun(); g.su = Math.max(0, (g.su || 0) + (+el.dataset.ml)); if (+el.dataset.ml > 0) olay('su'); kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY); if (+el.dataset.ml > 0 && !azHareket) { const b = document.querySelector('.su-bardak'); if (b) b.classList.add('dol'); }
@@ -5166,7 +5287,7 @@
     'rz-kapat'() { rzDetay = null; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'pf-vitrin'(el) { const id = el.dataset.id; rzDetay = null; S.profil.vitrin = S.profil.vitrin === id ? '' : id; kaydet(true); profilAcikGonder(); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'hs-metrik'(el) { hsMetrik = el.dataset.m === 'e1' ? 'e1' : 'kg'; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
-    'bk-tema'(el) { S.ayar = S.ayar || {}; S.ayar.kartTema = el.dataset.t; kaydet(); document.querySelectorAll('[data-act="bk-tema"]').forEach((b) => { const s2 = b.dataset.t === el.dataset.t; b.setAttribute('aria-checked', String(s2)); b.setAttribute('aria-pressed', String(s2)); }); bkOnizle(); const im = document.getElementById('bkImg'); if (im && im.animate && !azHareket) im.animate([{ opacity: 0.4, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' }); },
+    'bk-tema'(el) { S.ayar = S.ayar || {}; const eski = bkTema(); S.ayar.kartTema = el.dataset.t; kaydet(); if ((eski === 'afis') !== (el.dataset.t === 'afis')) { const sY = window.scrollY; render(); window.scrollTo(0, sY); return; } document.querySelectorAll('[data-act="bk-tema"]').forEach((b) => { const s2 = b.dataset.t === el.dataset.t; b.setAttribute('aria-checked', String(s2)); b.setAttribute('aria-pressed', String(s2)); }); bkOnizle(); const im = document.getElementById('bkImg'); if (im && im.animate && !azHareket) im.animate([{ opacity: 0.4, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.23,1,.32,1)' }); },
     async 'gun-paylas'(el) { const g = S.program.gunler.find((x) => x.id === el.dataset.id); if (!g) return; try { await gorselPaylas(gunKarti(g), 'comeback-bugun.png', 'COMEBACK. · bugün ' + g.ad); } catch (e) { toast('Görsel hazırlanamadı.'); } },
     async 'bk-paylas'() { if (!S.sonSeans) return; try { await gorselPaylas(bitisKarti(S.sonSeans, bkTema()), 'comeback-antrenman.png', 'COMEBACK. antrenmanım'); } catch (e) { toast('Görsel hazırlanamadı.'); } },
     'kas-sec'(el) { kasSec = kasSec === el.dataset.g ? null : el.dataset.g; rekorAcik = false; const sY = window.scrollY; render(); window.scrollTo(0, sY); },
@@ -5394,7 +5515,8 @@
     async 'kart-akis'(el) {
       el.disabled = true;
       try {
-        if (el.dataset.kart === 'bitis') { if (!S.sonSeans) return; await kartAkisa(bitisKarti(S.sonSeans, bkTema()), S.sonSeans.ad, el.dataset.g); }
+        if (el.dataset.kart === 'hafta') { await kartAkisa(haftaAfis((S.ayar || {}).haftaDuzen || 'serit', krRenk()), 'Haftam', el.dataset.g); }
+        else if (el.dataset.kart === 'bitis') { if (!S.sonSeans) return; await kartAkisa(bitisKarti(S.sonSeans, bkTema()), S.sonSeans.ad, el.dataset.g); }
         else { const g = S.program.gunler.find((x) => x.id === el.dataset.id); if (!g) return; await kartAkisa(gunKarti(g), 'Bugün ' + g.ad, el.dataset.g); }
       } catch (e) { toast('Kart hazırlanamadı.'); } finally { el.disabled = false; }
     },
