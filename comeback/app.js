@@ -2097,11 +2097,12 @@
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
     return ust(logo, profilBtn()) +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + uyelikKart() + hocaAnaKutu() + aylikRaporKutu() + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (ilkGun ? antr + (haftaPlanKutu(false) || '') : (haftaPlanKutu(false) || '') + antr) + (haftaPlanKutu(false) ? '' : (haftaKart() || sozKutu())) +
+      '<div class="izgara">' + uyelikKart() + aylikRaporKutu() + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (ilkGun ? antr + (haftaPlanKutu(false) || '') : (haftaPlanKutu(false) || '') + antr) + (haftaPlanKutu(false) ? '' : (haftaKart() || sozKutu())) +
       tartiKutu() + besKutu(tp, h, kalan) +
       '<a class="t koyu h150 seri-kutu" href="#/ilerleme">' + seriKart('Hafta serisi') + '</a>' +
       '<a class="t h150 koc-mini" href="#/koc"><span class="k">' + (S.kocSec ? 'Koç ' + esc(S.kocSec.ad) : 'Koç') + '</span><b class="koc-mini-b">Bir yerin mi ağrıyor?</b><span class="ik">Sor, programına göre cevaplasın.</span></a>' +
       akisMini() +
+      hocaAnaKutu() +
       ekleKutu(false) +
       '</div>';
   }
@@ -2146,7 +2147,7 @@
     const setT = sg.hareketler.reduce((a, x) => a + (+x.set || 0), 0);
     const tur = akTur(sg);
     const mSat = (ik, yazi, ozn) => '<' + (ozn.href ? 'a href="' + ozn.href + '"' : 'button type="button" data-act="' + ozn.act + '"' + (ozn.ek || '')) + ' class="uc-satir" role="menuitem">' + akIk(ik) + '<span>' + yazi + '</span></' + (ozn.href ? 'a' : 'button') + '>';
-    const menu = '<div class="uc-kap"><button type="button" class="uc-btn" data-act="uc-ac" aria-haspopup="menu" aria-expanded="false" aria-label="Diğer seçenekler"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>' +
+    const menu = '<div class="uc-kap ust-uc"><button type="button" class="uc-btn" data-act="uc-ac" aria-haspopup="menu" aria-expanded="false" aria-label="Diğer seçenekler"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>' +
       '<div class="uc-menu" role="menu">' +
         mSat('zor', 'Bugün zor · 20 dk', { act: 'basla', ek: ' data-id="' + sg.id + '" data-kisa="1"' }) +
         mSat('duzen', 'Programı düzenle', { href: '#/program' }) +
@@ -2165,12 +2166,12 @@
             (alt.length ? alt.map((id) => '<button class="hap" data-act="degissec" data-id="' + sg.id + ':' + i + ':' + id + '">' + esc(D.HAREKET[id].ad) + '</button>').join('') : '<span class="ik">Ortamına uygun başka hareket bulunamadı.</span>') +
             '</div></div>' : '') + '</div>';
       }).join('') + '</div></div></div>';
-    return ust(logo, profilBtn()) +
+    return ust(logo, '<div class="ust-sag">' + profilBtn() + menu + '</div>') +
       '<h1 class="baslik">Antrenman<span class="nokta">.</span></h1>' +
       '<div class="yatay" role="tablist" aria-label="Program günleri">' + pr.gunler.map((g) => '<button class="hap" role="tab" data-act="gunsec" data-id="' + g.id + '" aria-pressed="' + (g.id === sg.id) + '">' + GUN_KISA[g.hafta] + ' · ' + esc(g.ad) + (g === bugunku ? ' · bugün' : '') + '</button>').join('') + '</div>' +
       '<div class="izgara"><div class="t genis ak-kart ak-' + tur + (akAcik ? ' acik' : '') + '">' +
         '<span class="ak-arka" aria-hidden="true"><svg class="ak-desen" viewBox="0 0 220 200">' + AK_DESEN[tur] + '</svg></span>' +
-        '<div class="ak-ust"><span class="k num">' + GUN_AD[sg.hafta] + (sg === bugunku ? ' · bugün' : '') + ' · ' + setT + ' set' + (sg.dk ? ' · ~' + sg.dk + ' dk' : '') + '</span>' + menu + '</div>' +
+        '<div class="ak-ust"><span class="k num">' + GUN_AD[sg.hafta] + (sg === bugunku ? ' · bugün' : '') + ' · ' + setT + ' set' + (sg.dk ? ' · ~' + sg.dk + ' dk' : '') + '</span></div>' +
         '<button type="button" class="ak-ad" data-act="ak-ac" aria-expanded="' + akAcik + '"><span class="ak-isim">' + esc(sg.ad) + '<span class="nokta-k">.</span></span><span class="ak-ipucu">' + (akAcik ? 'Gizle' : 'Hareketleri gör') + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span></button>' +
       '</div>' +
       '<div class="t genis ak-liste' + (akAcik ? ' acik' : '') + '">' + detay + '</div></div>' +
@@ -2838,7 +2839,7 @@
     takviye: '<rect x="4" y="9" width="16" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.2 8.6l5.6 7.8"/>',
     catal: '<path d="M6 3v6a2 2 0 0 0 4 0V3M8 3v18"/><path d="M17 21V3c-2.2 1.4-3 4-3 7 0 1.7.9 3 3 3"/>',
     tarti: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 10a3.5 3.5 0 0 1 7 0"/><path d="M12 10l1.5-1.8"/>',
-    tabak: '<circle cx="12" cy="13" r="7.5"/><circle cx="12" cy="13" r="3.8"/><path d="M8 3.5c1 .8 1 1.7 0 2.5M12 3c1 .8 1 1.7 0 2.5M16 3.5c1 .8 1 1.7 0 2.5"/>'
+    tabak: '<path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M8.5 4.5c.9.9.9 2 0 3M12 3.5c.9.9.9 2 0 3M15.5 4.5c.9.9.9 2 0 3"/>'
   };
   const bIk = (k) => '<span class="b-ik" aria-hidden="true"><svg viewBox="0 0 24 24">' + B_IK[k] + '</svg></span>';
   // su bardağı: günün suyu kadar dolu; her bardak eklenince ağzına kadar dolar, sonra yerine iner
@@ -3969,14 +3970,28 @@
       const sinif = ['hk-gun', bitti ? 'bitti' : '', plan ? 'plan' : '', gecti && plan && !bitti ? 'kacti' : '', bugun ? 'bugun' : ''].join(' ').replace(/\s+/g, ' ').trim();
       const ic = '<span class="hk-ad">' + g + '</span><span class="hk-no num">' + d.getDate() + '</span><span class="hk-isaret" aria-hidden="true"></span>';
       const durum = bitti ? 'antrenman yapıldı' : plan ? (gecti ? 'planlıydı, yapılmadı' : 'antrenman günü') : 'dinlenme';
-      // günlere dokunarak değişmez (yanlışlıkla değişiyordu); değiştirmek için Antrenman → ⋯ → Haftalık plan
-      return '<span class="' + sinif + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '">' + ic + '</span>';
+      // dokununca plan değişmez; o günün antrenmanı altta açılır (plan değişikliği: Antrenman → ⋯ → Haftalık plan)
+      return '<button type="button" class="' + sinif + (hkSec === i ? ' sec' : '') + '" data-act="hk-goster" data-i="' + i + '" aria-pressed="' + (hkSec === i) + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '. Ne var, görmek için dokun.">' + ic + '</button>';
     }).join('');
     const n = secili.length;
     const alt = sirada ? (sirada.bugun ? 'Bugün: ' : 'Sıradaki: ' + GUN_AD[sirada.i] + ' · ') + esc(sirada.ad) : (n ? 'Bu haftanın planlı günleri bitti.' : 'Bu hafta plan yok.');
     return '<div class="t genis hk-kutu"><div class="satir" style="flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px"><span class="k">' + (p ? 'Haftalık Plan' : 'Bu hafta') + '</span><span class="k num">' + yapilan + ' / ' + n + ' gün</span></div>' +
       '<div class="hk-gunler" role="group" aria-label="Bu haftanın günleri">' + hucre + '</div>' +
-      '<div class="hk-son"><span class="hk-alt">' + alt + '</span></div></div>';
+      (hkSec != null ? hkDetay(bas, hkSec, secili) : '<div class="hk-son"><span class="hk-alt">' + alt + '</span></div>') + '</div>';
+  }
+  // haftalık kartta seçilen günün önizlemesi: o gün ne var (antrenman, yapıldıysa özeti, dinlenme)
+  let hkSec = null;
+  function hkDetay(bas, i, secili) {
+    const d = new Date(bas); d.setDate(d.getDate() + i); const k = tarihKey(d); const bugunK = tarihKey();
+    const yap = S.gunluk[k] && S.gunluk[k].antrenman; const g = !yap && secili.indexOf(i) >= 0 ? gunIcin(d) : null;
+    const ok = (yon, dis) => '<button type="button" class="hk-ok" data-act="hk-goster" data-i="' + (i + yon) + '"' + (dis ? ' disabled' : '') + ' aria-label="' + (yon < 0 ? 'Önceki gün' : 'Sonraki gün') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (yon < 0 ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6') + '"/></svg></button>';
+    let ic;
+    if (yap) ic = '<span class="k">Yapıldı</span><b class="hk-d-ad">' + esc(yap.ad) + '<span class="nokta">.</span></b><span class="ik num">' + yap.set + ' set · ' + sayi(yap.hacim) + ' kg · ' + yap.dk + ' dk</span><a class="metin-btn kucuk-metin" href="#/gecmis/' + k + '">Set set gör' + IK.ok.replace('<svg', '<svg width="14" height="14" style="fill:none;stroke:currentColor;stroke-width:2.4"') + '</a>';
+    else if (g && g.hareketler.length) ic = '<span class="k">' + (k === bugunK ? 'Bugün' : k < bugunK ? 'Planlıydı' : 'Planlı') + ' · ' + g.hareketler.reduce((a, x) => a + (+x.set || 0), 0) + ' set</span><b class="hk-d-ad">' + esc(g.ad) + '<span class="nokta">.</span></b>' +
+      '<ul class="hk-d-liste">' + g.hareketler.filter((x) => D.HAREKET[x.id]).map((x) => '<li><span>' + esc(D.HAREKET[x.id].ad) + '</span><span class="num">' + (x.set || '') + (x.tekrar ? ' × ' + esc(String(x.tekrar)) : '') + '</span></li>').join('') + '</ul>' +
+      (k === bugunK && !S.seans ? '<button class="btn ana kucuk" data-act="basla" data-id="' + g.id + '" style="align-self:flex-start">Başla' + IK.ok + '</button>' : '');
+    else ic = '<span class="k">' + (k < bugunK ? 'Geçti' : 'Plan dışı') + '</span><b class="hk-d-ad">Dinlenme<span class="nokta">.</span></b><span class="ik">Dinlenmek de antrenmanın parçası.</span>';
+    return '<div class="hk-detay"><div class="hk-d-ust">' + ok(-1, i === 0) + '<span class="k">' + GUN_AD[i] + ' ' + d.getDate() + ' ' + AY[d.getMonth()] + '</span>' + ok(1, i === 6) + '</div><div class="hk-d-ic">' + ic + '</div></div>';
   }
   function ekranHaftaPlan() {
     if (!S.profil) return ekranKarsilama();
@@ -4956,6 +4971,7 @@
     },
     'hp-gun'(el) { if (!hpTaslak) return; const i = +el.dataset.i; const j = hpTaslak.gunler.indexOf(i); if (j >= 0) hpTaslak.gunler.splice(j, 1); else hpTaslak.gunler.push(i); const sY = window.scrollY; render(); window.scrollTo(0, sY); sicra('.hp-gun[data-i="' + i + '"]'); },
     'hp-kaydet'() { if (!hpTaslak || !hpTaslak.gunler.length) return; haftaPlanUygula(planHaftasi(), hpTaslak.gunler); kaydet(true); olay('haftaplan'); toast('Söz verildi: bu hafta ' + hpTaslak.gunler.length + ' gün. Gerisi sende.'); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
+    'hk-goster'(el) { const i = +el.dataset.i; hkSec = hkSec === i && el.classList.contains('hk-gun') ? null : Math.max(0, Math.min(6, i)); const sY = window.scrollY; render(); window.scrollTo(0, sY); },
     'hk-gun'(el) {
       const bas = haftaBasi(); const i = +el.dataset.i; const p = (S.haftaPlan || {})[tarihKey(bas)];
       const secili = (p ? p.gunler : hpVarsayilan(bas)).slice(); const j = secili.indexOf(i);

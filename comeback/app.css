@@ -2413,3 +2413,31 @@ body.gece .uv-koc{background:#f3f1ec;color:#16161a;--uv-zemin:#f3f1ec}
 .his-yardim{display:inline-flex;align-items:center;gap:4px;padding:0;color:var(--kobalt)}
 body.gece .ist-fark.art{color:#8EA0FF}
 body.gece .tarti-in{background:#1A1A1F;color:#F3F1EC}
+
+/* v70: profil resminde halka yok; Antrenman'da ⋯ profil resminin altında; haftalık kartta gün önizlemesi */
+.ust-profil .av,body.gece .ust-profil .av{box-shadow:none}
+.ust-sag{display:flex;flex-direction:column;align-items:center;gap:6px}
+.ust-uc .uc-btn{width:38px;height:30px;border-radius:15px;background:var(--kutu);color:var(--murekkep)}
+.ust-uc.acik .uc-btn{background:var(--murekkep);color:var(--kutu)}
+body.gece .ust-uc .uc-btn{background:#1A1A1F;color:#F3F1EC}
+body.gece .ust-uc.acik .uc-btn{background:#F3F1EC;color:#000}
+.ust-uc .uc-menu{top:calc(100% + 8px);right:-2px;z-index:40}
+.ust:has(.uc-kap.acik){position:relative;z-index:40}
+.hk-gun{cursor:pointer}
+.hk-gun:active{transform:scale(.94)}
+.hk-gun.sec{box-shadow:0 0 0 2px var(--murekkep);z-index:1}
+body.gece .hk-gun.sec{box-shadow:0 0 0 2px #F3F1EC}
+.hk-detay{border-top:1px solid var(--zemin);padding-top:10px;display:flex;flex-direction:column;gap:8px;animation:hkAc .34s var(--ease) both}
+@keyframes hkAc{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.hk-d-ust{display:flex;align-items:center;justify-content:space-between}
+.hk-ok{width:32px;height:32px;border-radius:16px;border:0;background:var(--zemin);color:var(--murekkep);display:grid;place-items:center;cursor:pointer;transition:transform .16s var(--ease)}
+.hk-ok:active{transform:scale(.9)}
+.hk-ok:disabled{opacity:.3;cursor:default}
+.hk-ok svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.hk-d-ic{display:flex;flex-direction:column;gap:6px;animation:hkAc .3s var(--ease) both}
+.hk-d-ad{font-size:24px;font-weight:900;letter-spacing:-.04em;line-height:1.05}
+.hk-d-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.hk-d-liste li{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;font-weight:600;padding:7px 0;border-top:1px solid var(--zemin)}
+.hk-d-liste li:first-child{border-top:0}
+.hk-d-liste .num{color:var(--ikincil);font-weight:700;white-space:nowrap}
+body.gece .hk-ok{background:#1A1A1F;color:#F3F1EC}

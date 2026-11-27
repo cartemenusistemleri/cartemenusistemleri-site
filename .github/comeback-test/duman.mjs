@@ -59,7 +59,7 @@ const temizle = (p) => p.evaluate(() => { const k = document.getElementById('kap
     await p.evaluate(() => { location.hash = '#/antrenman'; }); await bekle(p, 500);
     await p.click('[data-act="uc-ac"]'); await bekle(p, 350);
     (await p.$('.uc-kap.acik')) ? tamam('üç nokta menüsü açıldı') : hata('üç nokta menüsü açılmadı');
-    await p.click('h1.baslik'); await bekle(p, 350);
+    await p.click('.ak-kart .ak-ust .k', { position: { x: 5, y: 5 } }); await bekle(p, 350);
     (await p.$('.uc-kap.acik')) ? hata('üç nokta menüsü dışarı dokununca kapanmadı') : tamam('üç nokta menüsü kapandı');
     await p.click('[data-act="ak-ac"]'); await bekle(p, 500);
     (await p.$('.ak-liste.acik')) ? tamam('günün hareketleri açıldı') : hata('günün hareketleri açılmadı');
