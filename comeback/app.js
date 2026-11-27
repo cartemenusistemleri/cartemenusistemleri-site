@@ -3694,8 +3694,9 @@
     const v = haftaVeri(); const k = krTuval(renk); const { x, W, H, P, pal } = k;
     if (duzen === 'dev') {
       k.ust('HAFTA ' + v.no, aralikYaz(v.bas, v.son));
-      const sayiT = String(v.n); const wn = k.cizgili(sayiT, P - 36, 1080, 880, -60);
-      if (v.hedef) k.yaz('/' + v.hedef, P - 36 + wn + 10, 1080, 280, 900, pal.ik, -12);
+      // dev sayı içi dolu; eğik çizgiyle arasında boşluk (harf aralığı eksi olduğundan genişliğe geri eklenir)
+      const sayiT = String(v.n); const wn = k.buyuk(sayiT, P - 36, 1080, 880, -60) + 60;
+      if (v.hedef) k.yaz('/' + v.hedef, P - 36 + wn + 36, 1080, 280, 900, pal.ik, -12);
       const soz = v.hedef && v.n >= v.hedef ? 'Söz tutuldu' : v.n ? 'Bu hafta geldim' : 'Hafta yeni başladı';
       const ws = k.buyuk(soz, P, 1230, 84, -3); k.yaz('.', P + ws + 2, 1230, 84, 900, pal.nokta, 0);
       x.fillStyle = pal.bant; x.fillRect(0, 1450, W, H - 1450);
