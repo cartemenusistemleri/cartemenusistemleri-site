@@ -482,7 +482,9 @@
 
   /* ---------- ortak parçalar ---------- */
   const ust = (sol, sag) => '<header class="ust">' + sol + (sag || '') + '</header>';
-  const logo = '<a class="logo logo-yigin" href="#/" aria-label="COMEBACK. ana sayfa"><span aria-hidden="true">COME</span><span class="lg-e" aria-hidden="true">BACK</span><span class="lg-e" aria-hidden="true">BACK</span><span aria-hidden="true">BACK<i>.</i></span></a>';
+  const logo = '<a class="logo logo-tek" href="#/" aria-label="COMEBACK. ana sayfa"><span aria-hidden="true">COMEBACK<i>.</i></span></a>';
+  // sağ üstte profil resmi: menü, profil ve ayarlar buradan; yeni bir şey gelince köşesinde küçük işaret
+  const profilBtn = () => { const n = hesap ? gelenSayi() : 0; return '<a class="ust-profil' + (n ? ' yeni' : '') + '" href="#/profil" aria-label="Profil ve ayarlar' + (n ? ' · yeni bildirim var' : '') + '">' + benAvatar('') + '</a>'; };
   const geri = (h, etiket) => '<a class="ikon-btn" href="' + h + '" aria-label="' + (etiket || 'Geri') + '">' + IK.geri + '</a>';
 
   /* ---------- ekranlar ---------- */
@@ -773,14 +775,25 @@
     } catch (e) { if (id) hp.ogr = { hata: 'Bağlantı kurulamadı.' }; else hp.liste = []; }
     hp.yuk = false; render();
   }
+  // ana sayfada hocalara özel kutu: öğrenciler, bu hafta kim geldi, mesajlar, davet kodu
+  function hocaAnaKutu() {
+    if (!hocaMi()) return '';
+    if (!hp.liste && !hp.yuk) setTimeout(() => hpYukle(), 0);
+    const l = hp.liste || []; const gelen = l.filter((o) => (+o.haftalik || 0) > 0).length;
+    const yuz = l.slice(0, 4).map((o) => '<span class="hk-ogr" title="' + esc(o.ad) + '">' + basHarf(o.ad) + '<i style="--o:' + Math.min(1, (+o.haftalik || 0) / Math.max(1, +o.gun || 4)).toFixed(2) + '"></i></span>').join('');
+    return '<section class="t koyu genis hoca-ana" aria-label="Hoca paneli">' +
+      '<div class="ha-ust"><span class="k b-baslik">' + unvanSvg('koc', 22) + 'Hoca paneli</span>' + (hp.kod ? '<span class="ha-kod num">Kod ' + esc(hp.kod) + '</span>' : '') + '</div>' +
+      '<div class="ha-orta"><div class="yigin"><b class="ha-sayi num">' + (hp.liste ? l.length : '–') + '</b><span class="ik">öğrenci</span></div><div class="yigin"><b class="ha-sayi num">' + (hp.liste ? gelen : '–') + '</b><span class="ik">bu hafta geldi</span></div>' + (yuz ? '<div class="ha-yuz" aria-hidden="true">' + yuz + '</div>' : '') + '</div>' +
+      '<div class="ha-dugmeler"><a class="btn beyaz" href="#/hoca">Öğrencilerim' + IK.ok + '</a><a class="btn ha-mesaj" href="#/mesajlar">Mesajlar' + (okunmamis ? '<i class="mn-sayac num">' + okunmamis + '</i>' : '') + '</a></div></section>';
+  }
   const HEDEF_AD = { kas: 'Kas', yag: 'Yağ yakımı', guc: 'Güç', kondisyon: 'Kondisyon' };
   function ekranHoca(id) {
     if (!hocaMi()) { location.hash = '#/profil'; return ''; }
     if (id) return ekranHocaOgrenci(id);
-    if (!hp.liste) { hpYukle(); return ust(geri('#/profil'), '<span class="alt">Hoca paneli</span>') + '<h1 class="baslik">Öğrencilerim<span class="nokta">.</span></h1>' + iskelet(3); }
-    return ust(geri('#/profil'), '<button class="ikon-btn" data-act="hp-yenile" aria-label="Yenile" style="background:#fff">' + IK.degis + '</button>') +
+    if (!hp.liste) { hpYukle(); return ust(geri('#/'), '<span class="alt">Hoca paneli</span>') + '<h1 class="baslik">Öğrencilerim<span class="nokta">.</span></h1>' + iskelet(3); }
+    return ust(geri('#/'), '<button class="ikon-btn" data-act="hp-yenile" aria-label="Yenile" style="background:#fff">' + IK.degis + '</button>') +
       '<h1 class="baslik">Öğrencilerim<span class="nokta">.</span></h1>' +
-      '<div class="izgara"><div class="t kobalt genis" style="gap:6px"><span class="k">Davet kodun</span><span class="dev num" style="font-size:52px;letter-spacing:.06em">' + esc(hp.kod || '—') + '</span><span style="opacity:.85;font-size:14px;line-height:1.45">Öğrencin uygulamada Profil → Hocam alanına bu kodu yazınca sana bağlanır.</span>' +
+      '<div class="izgara"><div class="t kobalt genis" style="gap:6px"><span class="k">Davet kodun</span><span class="dev num" style="font-size:52px;letter-spacing:.06em">' + esc(hp.kod || '—') + '</span><span style="opacity:.85;font-size:14px;line-height:1.45">Öğrencin uygulamada Menü → Topluluk ayarları → Hocam alanına bu kodu yazınca sana bağlanır.</span>' +
       '<div class="satir" style="gap:8px;justify-content:flex-start"><button class="btn beyaz" data-act="hp-kod-paylas" style="min-height:42px">Paylaş</button><button class="metin-btn" data-act="hp-kod-yenile" style="color:#fff;opacity:.85">Kodu yenile</button></div></div>' +
       (hp.liste.length ? hp.liste.map((o) => '<a class="t genis" href="#/hoca/' + encodeURIComponent(o.id) + '" style="gap:4px"><div class="satir"><b style="font-size:20px">' + esc(o.ad) + '</b><span class="etiket">' + (+o.haftalik || 0) + ' / ' + ((+o.gun) || '?') + ' bu hafta</span></div><span class="ik">' + esc([HEDEF_AD[o.hedef] || '', o.kilo ? sayi(o.kilo, 1) + ' kg' : '', o.program || ''].filter(Boolean).join(' · ')) + '</span><span class="ik">Son antrenman: ' + (o.son_antrenman ? esc(o.son_antrenman.tarih + ' · ' + o.son_antrenman.ad) : 'henüz yok') + '</span></a>').join('') : '<div class="t bos genis"><b>Henüz öğrencin yok.</b><span class="ik">Kodunu öğrencilerinle paylaş.</span></div>') +
       '</div>';
@@ -1789,9 +1802,9 @@
   const TAKVIYE_ZAMAN = [['sabah', 'Sabah'], ['ogle', 'Öğle'], ['aksam', 'Akşam'], ['once', 'Antrenman öncesi'], ['sonra', 'Antrenman sonrası']];
   function takviyeKutu(g) {
     const l = S.takviye || [];
-    if (!l.length) return '<a class="t genis takviye-kutu" href="#/takviye" style="flex-direction:row;align-items:center;justify-content:space-between"><span class="yigin"><span class="k">Takviyeler</span><b>Kreatin, vitamin, sitrülin… takip et</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>';
+    if (!l.length) return '<a class="t genis takviye-kutu" href="#/takviye" style="flex-direction:row;align-items:center;justify-content:space-between"><span class="yigin"><span class="k b-baslik">' + bIk('takviye') + 'Takviyeler</span><b>Kreatin, vitamin, sitrülin… takip et</b></span>' + IK.ok.replace('<svg', '<svg width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2.4;flex:none"') + '</a>';
     const al = (g.takviye || {}); const n = l.filter((x) => al[x.id]).length;
-    return '<div class="t genis takviye-kutu"><div class="satir"><span class="k">Takviyeler · ' + n + ' / ' + l.length + '</span><a class="metin-btn kucuk-metin" href="#/takviye">Düzenle</a></div><div class="haplar">' +
+    return '<div class="t genis takviye-kutu"><div class="satir"><span class="k b-baslik">' + bIk('takviye') + 'Takviyeler · ' + n + ' / ' + l.length + '</span><a class="metin-btn kucuk-metin" href="#/takviye">Düzenle</a></div><div class="haplar">' +
       l.map((x) => '<button class="hap takviye' + (al[x.id] ? ' alindi' : '') + '" data-act="tk-al" data-id="' + x.id + '" aria-pressed="' + !!al[x.id] + '">' + (al[x.id] ? IK.tik.replace('<svg', '<svg width="14" height="14" style="fill:none;stroke:currentColor;stroke-width:3"') : '') + esc(x.ad) + (x.doz ? ' · ' + esc(x.doz) : '') + '</button>').join('') + '</div></div>';
   }
   function ekranTakviye() {
@@ -1852,8 +1865,11 @@
     const kucuk = boy < 40; const id = 'uy' + un + boy;
     const yazi = { kurucu: 'KURUCU · COMEBACK. · KURUCU · COMEBACK. ·', ekip: 'COMEBACK. EKİBİ · COMEBACK. EKİBİ ·', koc: 'KOÇ · COMEBACK. · KOÇ · COMEBACK. ·' }[un];
     const ic = { kurucu: '<path class="uv-dolu" d="M50 31l5.4 11.9 12.9 1.4-9.6 8.7 2.8 12.7L50 59.2 38.5 65.7l2.8-12.7-9.6-8.7 12.9-1.4z"/>',
-      ekip: kucuk ? '<circle class="uv-dolu" cx="50" cy="50" r="15"/>' : '<text class="uv-dolu" x="50" y="53.5" text-anchor="middle" font-size="10" font-weight="900" letter-spacing="-.4">COMEBACK.</text>',
-      koc: '<g class="uv-cizgi"><path d="M34 45h21a10.5 10.5 0 1 1-10.5 10.5"/><path d="M34 45v8h10.5"/><path d="M55 45l8-5.5"/></g><circle class="uv-dolu" cx="55" cy="55.5" r="2.8"/>' }[un];
+      ekip: kucuk ? '<path class="uv-dolu" d="M50 18l26 10v20c0 16-11 28-26 33-15-5-26-17-26-33V28z"/><path class="uv-cizgi" style="stroke:var(--kobalt);stroke-width:7" d="M38 49l8 8 16-17"/>' : '<text class="uv-dolu" x="50" y="53.5" text-anchor="middle" font-size="10" font-weight="900" letter-spacing="-.4">COMEBACK.</text>',
+      // hoca: boyuna asılan kart (askı ipi + kart); kim hoca herkes bir bakışta anlasın
+      koc: kucuk ? '<g class="uv-cizgi" style="stroke-width:7"><path d="M33 16l17 24 17-24"/></g><rect class="uv-dolu" x="29" y="40" width="42" height="46" rx="7"/><rect class="uv-delik" x="43" y="45" width="14" height="5" rx="2.5"/><rect class="uv-delik" x="37" y="60" width="26" height="5" rx="2.5"/><rect class="uv-delik" x="37" y="71" width="17" height="5" rx="2.5"/>'
+        : '<g class="uv-cizgi"><path d="M38 24l12 17 12-17"/></g><rect class="uv-dolu" x="36" y="41" width="28" height="32" rx="5"/><rect class="uv-delik" x="45.5" y="44.5" width="9" height="3.4" rx="1.7"/><rect class="uv-delik" x="40" y="55" width="20" height="3.4" rx="1.7"/><rect class="uv-delik" x="40" y="62" width="12" height="3.4" rx="1.7"/>',
+      }[un];
     const halka = kucuk ? '' : '<defs><path id="' + id + '" d="M50 50m-39.5 0a39.5 39.5 0 1 1 79 0a39.5 39.5 0 1 1-79 0"/></defs><text class="uv-dolu" font-size="6.4" font-weight="800"><textPath href="#' + id + '" textLength="246" lengthAdjust="spacing">' + yazi + '</textPath></text><circle class="uv-ic" cx="50" cy="50" r="31"/>';
     return '<span class="uv uv-' + un + '" style="--b:' + boy + 'px" role="img" aria-label="' + UNVAN[un] + '" title="' + UNVAN[un] + '"><svg viewBox="0 0 100 100">' + halka + ic + '</svg></span>';
   }
@@ -2061,9 +2077,9 @@
     if (ara != null && ara >= 10 && !g.antrenman && antr.indexOf('Bugünün antrenmanı') >= 0) antr = antr.replace('<span class="btn beyaz"', '<span class="ik" style="color:rgba(255,255,255,.85)">Geri Dönüş Modu: ' + ara + ' gün aradan sonra yükleri biraz hafifletiyoruz. Bıraktığın yerden.</span><span class="btn beyaz"');
     const sa = new Date().getHours();
     const selam = sa < 5 ? 'İyi geceler' : sa < 12 ? 'Günaydın' : sa < 18 ? 'İyi günler' : 'İyi akşamlar';
-    return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
+    return ust(logo, profilBtn()) +
       '<h1 class="baslik">' + selam + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' + uyelikKart() + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (ilkGun ? antr + (haftaPlanKutu(false) || '') : (haftaPlanKutu(false) || '') + antr) + (haftaPlanKutu(false) ? '' : (haftaKart() || sozKutu())) +
+      '<div class="izgara">' + uyelikKart() + hocaAnaKutu() + (dogumGunuMu(S.profil) ? '<div class="t limon genis dg-kart"><span class="k">Bugün senin günün</span><span class="orta">İyi ki doğdun' + (S.profil.ad ? ', ' + esc(S.profil.ad) : '') + '<span class="nokta">.</span></span><span style="font-size:15px;font-weight:600;line-height:1.45">' + S.profil.yas + ' yaşın güçlü geçsin. Bugün antrenman yaparsan rekoru kutlamaya say.</span></div>' : '') + atananBant() + gelenBant() + (ilkGun ? antr + (haftaPlanKutu(false) || '') : (haftaPlanKutu(false) || '') + antr) + (haftaPlanKutu(false) ? '' : (haftaKart() || sozKutu())) +
       besKutu(tp, h, kalan) +
       '<a class="t koyu h150 seri-kutu" href="#/ilerleme">' + seriKart('Hafta serisi') + '</a>' +
       '<a class="t h150 koc-mini" href="#/koc"><span class="k">' + (S.kocSec ? 'Koç ' + esc(S.kocSec.ad) : 'Koç') + '</span><b class="koc-mini-b">Bir yerin mi ağrıyor?</b><span class="ik">Sor, programına göre cevaplasın.</span></a>' +
@@ -2075,19 +2091,53 @@
   /* --- antrenman --- */
   let secilenGun = null; let degisMod = false;
   let degisAcik = null;
+  // günün antrenman kartının arka planı: antrenmanın türüne göre sade bir desen (itiş, çekiş, alt gövde, üst gövde, tüm vücut)
+  function akTur(g) {
+    const ad = String(g.ad || '').toLocaleLowerCase('tr');
+    if (/itiş|itis|push|göğüs|gogus/.test(ad)) return 'itis';
+    if (/çekiş|cekis|pull|sırt|sirt/.test(ad)) return 'cekis';
+    if (/bacak|leg|alt gövde|alt govde|kalça/.test(ad)) return 'alt';
+    const t = gunTonu(g); return t === 'ton-alt' ? 'alt' : t === 'ton-ust' ? 'ust' : 'tam';
+  }
+  const AK_DESEN = {
+    itis: '<path d="M40 150l60-50 60 50M40 115l60-50 60 50M40 80l60-50 60 50"/>',
+    cekis: '<path d="M40 40l60 50 60-50M40 75l60 50 60-50M40 110l60 50 60-50"/>',
+    alt: '<path d="M30 180V120M62 180V92M94 180V64M126 180V36M158 180V8"/>',
+    ust: '<circle cx="110" cy="100" r="84"/><circle cx="110" cy="100" r="58"/><circle cx="110" cy="100" r="30"/><circle cx="110" cy="100" r="9"/>',
+    tam: '<circle cx="110" cy="100" r="70"/><path d="M20 100h180M110 10v180"/><circle cx="110" cy="100" r="28"/>'
+  };
+  const AK_IK = {
+    zor: '<path d="M12 3v4M12 17v4M5 12H3M21 12h-2"/><circle cx="12" cy="12" r="5"/>',
+    duzen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+    paylas: '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v6h14v-6"/>',
+    akis: '<path d="M4 6h16M4 12h16M4 18h10"/>',
+    gecmis: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4M12 8v4l3 2"/>',
+    hafta: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    degis: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>'
+  };
+  const akIk = (k) => '<svg viewBox="0 0 24 24" aria-hidden="true">' + AK_IK[k] + '</svg>';
+  let akAcik = false;
   function ekranAntrenman() {
     if (!S.profil) return ekranKarsilama();
     if (S.seans) return ekranSeans();
     const pr = S.program;
-    if (!pr.gunler.some((g) => g.hareketler.length)) return ust(logo, '<span class="alt">' + esc(pr.ad) + '</span>') + '<h1 class="baslik">Antrenman<span class="nokta">.</span></h1><div class="t kobalt"><span class="k">Programın boş</span><span style="font-size:17px;font-weight:700;line-height:1.4">Günlerini ve hareketlerini seç, set ve tekrarlarını yaz. İstersen koçun yorumlasın.</span></div><a class="btn ana buyuk-btn" href="#/program">Programımı yaz' + IK.ok + '</a>';
+    if (!pr.gunler.some((g) => g.hareketler.length)) return ust(logo, profilBtn()) + '<h1 class="baslik">Antrenman<span class="nokta">.</span></h1><div class="t kobalt"><span class="k">Programın boş</span><span style="font-size:17px;font-weight:700;line-height:1.4">Günlerini ve hareketlerini seç, set ve tekrarlarını yaz. İstersen koçun yorumlasın.</span></div><a class="btn ana buyuk-btn" href="#/program">Programımı yaz' + IK.ok + '</a>';
     const bugunku = bugunkuGun();
     const sg = pr.gunler.find((x) => x.id === secilenGun) || bugunku || pr.gunler[0];
     const bitti = gun().antrenman;
-    return ust(logo, '<span class="alt">' + esc(pr.ad) + '</span>') +
-      '<h1 class="baslik">Antrenman<span class="nokta">.</span></h1>' +
-      '<div class="yatay" role="tablist" aria-label="Program günleri">' + pr.gunler.map((g) => '<button class="hap" role="tab" data-act="gunsec" data-id="' + g.id + '" aria-pressed="' + (g.id === sg.id) + '">' + GUN_KISA[g.hafta] + ' · ' + esc(g.ad) + (g === bugunku ? ' · bugün' : '') + '</button>').join('') + '</div>' +
-      '<div class="izgara"><div class="t kobalt genis ara-sb" style="min-height:150px"><div class="k satir num"><span>' + GUN_AD[sg.hafta] + '</span><span>' + sg.hareketler.reduce((a, x) => a + x.set, 0) + ' set' + (sg.dk ? ' · ~' + sg.dk + ' dk' : '') + '</span></div><span class="dev" style="font-size:46px">' + esc(sg.ad) + '<span style="color:var(--koyu)">.</span></span></div>' +
-      '<div class="t genis" style="padding:4px 16px"><div class="liste-ust"><span class="k num">' + sg.hareketler.length + ' hareket</span><button class="metin-btn kucuk-metin" data-act="degis-mod" aria-pressed="' + degisMod + '">' + (degisMod ? 'Bitti' : 'Değiştir') + '</button></div><div class="liste">' + sg.hareketler.map((x, i) => {
+    const setT = sg.hareketler.reduce((a, x) => a + (+x.set || 0), 0);
+    const tur = akTur(sg);
+    const mSat = (ik, yazi, ozn) => '<' + (ozn.href ? 'a href="' + ozn.href + '"' : 'button type="button" data-act="' + ozn.act + '"' + (ozn.ek || '')) + ' class="uc-satir" role="menuitem">' + akIk(ik) + '<span>' + yazi + '</span></' + (ozn.href ? 'a' : 'button') + '>';
+    const menu = '<div class="uc-kap"><button type="button" class="uc-btn" data-act="uc-ac" aria-haspopup="menu" aria-expanded="false" aria-label="Diğer seçenekler"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>' +
+      '<div class="uc-menu" role="menu">' +
+        mSat('zor', 'Bugün zor · 20 dk', { act: 'basla', ek: ' data-id="' + sg.id + '" data-kisa="1"' }) +
+        mSat('duzen', 'Programı düzenle', { href: '#/program' }) +
+        mSat('hafta', 'Haftalık plan', { href: '#/haftaplan' }) +
+        mSat('paylas', 'Bu günü paylaş', { act: 'gun-paylas', ek: ' data-id="' + sg.id + '"' }) +
+        (hesap ? mSat('akis', 'Akışa koy', { act: 'kart-akis', ek: ' data-kart="gun" data-id="' + sg.id + '" data-g="arkadas"' }) : '') +
+        mSat('gecmis', 'Geçmiş', { href: '#/gecmis' }) +
+      '</div></div>';
+    const detay = '<div class="ak-detay"><div class="ak-detay-ic"><div class="liste-ust"><span class="k num">' + sg.hareketler.length + ' hareket</span><button class="metin-btn kucuk-metin" data-act="degis-mod" aria-pressed="' + degisMod + '">' + (degisMod ? 'Bitti' : 'Değiştir') + '</button></div><div class="liste">' + sg.hareketler.map((x, i) => {
         const hk = hedefKilo(x.id);
         const acik = degisAcik === sg.id + ':' + i;
         const alt = acik ? M.alternatifler(gunProfil(sg), x, sg.hareketler.map((y) => y.id)) : [];
@@ -2096,10 +2146,18 @@
           (acik ? '<div class="degis-liste"><span class="ik">Bu hareket yoksa ya da yapamıyorsan, aynı kası çalıştıran biriyle değiştir:</span><div class="haplar">' +
             (alt.length ? alt.map((id) => '<button class="hap" data-act="degissec" data-id="' + sg.id + ':' + i + ':' + id + '">' + esc(D.HAREKET[id].ad) + '</button>').join('') : '<span class="ik">Ortamına uygun başka hareket bulunamadı.</span>') +
             '</div></div>' : '') + '</div>';
-      }).join('') + '</div></div></div>' +
+      }).join('') + '</div></div></div>';
+    return ust(logo, profilBtn()) +
+      '<h1 class="baslik">Antrenman<span class="nokta">.</span></h1>' +
+      '<div class="yatay" role="tablist" aria-label="Program günleri">' + pr.gunler.map((g) => '<button class="hap" role="tab" data-act="gunsec" data-id="' + g.id + '" aria-pressed="' + (g.id === sg.id) + '">' + GUN_KISA[g.hafta] + ' · ' + esc(g.ad) + (g === bugunku ? ' · bugün' : '') + '</button>').join('') + '</div>' +
+      '<div class="izgara"><div class="t genis ak-kart ak-' + tur + (akAcik ? ' acik' : '') + '">' +
+        '<span class="ak-arka" aria-hidden="true"><svg class="ak-desen" viewBox="0 0 220 200">' + AK_DESEN[tur] + '</svg></span>' +
+        '<div class="ak-ust"><span class="k num">' + GUN_AD[sg.hafta] + (sg === bugunku ? ' · bugün' : '') + ' · ' + setT + ' set' + (sg.dk ? ' · ~' + sg.dk + ' dk' : '') + '</span>' + menu + '</div>' +
+        '<button type="button" class="ak-ad" data-act="ak-ac" aria-expanded="' + akAcik + '"><span class="ak-isim">' + esc(sg.ad) + '<span class="nokta-k">.</span></span><span class="ak-ipucu">' + (akAcik ? 'Gizle' : 'Hareketleri gör') + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span></button>' +
+      '</div>' +
+      '<div class="t genis ak-liste' + (akAcik ? ' acik' : '') + '">' + detay + '</div></div>' +
       (bitti ? '<div class="t limon"><span class="k">Bugün ' + esc(bitti.ad) + ' tamamlandı</span><span style="font-weight:700">İstersen yine de yeni bir antrenman başlatabilirsin.</span></div>' : '') +
       '<button class="btn ana buyuk-btn" data-act="basla" data-id="' + sg.id + '">' + esc(sg.ad) + ' başlat' + IK.ok + '</button>' +
-      '<div class="ant-alt"><button class="metin-btn" data-act="basla" data-id="' + sg.id + '" data-kisa="1">Bugün zor · 20 dk</button><a class="metin-btn" href="#/program">Programı düzenle</a><button class="metin-btn" data-act="gun-paylas" data-id="' + sg.id + '">Bu günü paylaş</button>' + (hesap ? '<button class="metin-btn" data-act="kart-akis" data-kart="gun" data-id="' + sg.id + '" data-g="arkadas">Akışa koy</button>' : '') + '<a class="metin-btn" href="#/gecmis">Geçmiş</a></div>' +
       (S.jam ? '<a class="t koyu jam-giris" href="#/jam"><span class="k">Jam</span><b>Ortak antrenmandasın · ' + esc(S.jam.kod) + '</b></a>' : '');
   }
 
@@ -2756,9 +2814,21 @@
 
   /* --- beslenme --- */
   // beslenme özeti: tek kart, halka + kalan + üç makro
+  // beslenme kutularının başındaki küçük simgeler
+  const B_IK = {
+    kalori: '<path d="M12 3c.9 3 5 5.2 5 10a5 5 0 0 1-10 0c0-2.4 1.3-4 2.4-5 .3 1.6 1 2.6 2.1 3.1C11.4 8.6 11 6 12 3z"/>',
+    takviye: '<rect x="4" y="9" width="16" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.2 8.6l5.6 7.8"/>',
+    catal: '<path d="M6 3v6a2 2 0 0 0 4 0V3M8 3v18"/><path d="M17 21V3c-2.2 1.4-3 4-3 7 0 1.7.9 3 3 3"/>',
+    tabak: '<circle cx="12" cy="13" r="7.5"/><circle cx="12" cy="13" r="3.8"/><path d="M8 3.5c1 .8 1 1.7 0 2.5M12 3c1 .8 1 1.7 0 2.5M16 3.5c1 .8 1 1.7 0 2.5"/>'
+  };
+  const bIk = (k) => '<span class="b-ik" aria-hidden="true"><svg viewBox="0 0 24 24">' + B_IK[k] + '</svg></span>';
+  // su bardağı: günün suyu kadar dolu; her bardak eklenince ağzına kadar dolar, sonra yerine iner
+  function suBardak(oran) {
+    return '<span class="su-bardak" aria-hidden="true" style="--d:' + Math.max(0.06, Math.min(1, oran)).toFixed(3) + '"><svg viewBox="0 0 24 24"><defs><clipPath id="suKes"><path d="M6.6 4.6h10.8l-1.3 14.5a1.6 1.6 0 0 1-1.6 1.5H9.5a1.6 1.6 0 0 1-1.6-1.5z"/></clipPath></defs><g clip-path="url(#suKes)"><rect class="su-dolu" x="0" y="4" width="24" height="17"/></g><path class="su-cizgi" d="M6 4h12l-1.4 15.2a2 2 0 0 1-2 1.8H9.4a2 2 0 0 1-2-1.8z"/></svg></span>';
+  }
   function besOzet(tp, h, kalan) {
     const tamam = hedefTamam(tp.k, h.kcal); const v = Math.round(tamam ? tp.k : Math.abs(kalan));
-    return '<div class="t genis bo-kutu' + (tamam ? ' limon' : '') + '"><div class="bo-ust">' + halka(yuzde(tp.k, h.kcal)) + '<span class="k">' + (tamam ? 'Hedef tamam' : kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + v + '">' + sayi(v) + '</span><span class="ik num">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></div>' +
+    return '<div class="t genis bo-kutu' + (tamam ? ' limon' : '') + '"><div class="bo-ust">' + halka(yuzde(tp.k, h.kcal)) + '<span class="k b-baslik">' + bIk('kalori') + (tamam ? 'Hedef tamam' : kalan >= 0 ? 'Kalan kalori' : 'Hedefin üstünde') + '</span><span class="buyuk num" data-say="' + v + '">' + sayi(v) + '</span><span class="ik num">' + sayi(tp.k) + ' / ' + sayi(h.kcal) + ' kcal</span></div>' +
       '<div class="bo-makro num">' + [['Protein', tp.p, h.protein, 'p'], ['Karb.', tp.kh, h.karb, 'kh'], ['Yağ', tp.y, h.yag, 'y']].map((m) => '<div class="bo-m ' + m[3] + (m[1] > m[2] * 1.1 ? ' asim' : '') + '"><span>' + m[0] + '</span><b>' + sayi(m[1]) + '<i> / ' + m[2] + ' g</i></b><span class="bo-iz" role="img" aria-label="' + m[0] + ' hedefinin yüzde ' + yuzde(m[1], m[2]) + '\'i"><span style="width:' + yuzde(m[1], m[2]) + '%"></span></span></div>').join('') + '</div></div>';
   }
   function ekranBeslenme() {
@@ -2770,22 +2840,30 @@
       return '<div class="t genis" style="padding:12px 16px 4px;align-self:start"><div class="satir"><span style="font-size:13px;font-weight:800">' + OGUN_AD[t] + '</span><span class="satir" style="gap:10px"><span class="ik num">' + sayi(toplam(l).k) + ' kcal</span><button class="metin-btn kucuk-metin" data-act="ogun-kaydet" data-tur="' + t + '">Kaydet</button></span></div><div class="liste">' +
         l.map((o) => '<div><div class="ad"><b>' + esc(o.ad) + '</b><span class="ik num">' + sayi(o.g) + ' g · ' + sayi(o.k) + ' kcal · P ' + sayi(o.p) + ' g</span></div><button class="sil" data-act="ogun-sil" data-id="' + o.id + '" aria-label="' + esc(o.ad) + ' kaydını sil">' + IK.kapat + '</button></div>').join('') + '</div></div>';
     }).join('');
-    return ust(logo, '<span class="alt">' + tarihYazi() + '</span>') +
+    return ust(logo, profilBtn()) +
       '<h1 class="baslik">Beslenme<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       besOzet(tp, h, kalan) +
       '<a class="t kobalt genis" href="#/ekle/foto" style="flex-direction:row;align-items:center;justify-content:space-between;min-height:76px"><div class="yigin"><span class="k">Hızlı ekle</span><b style="font-size:17px">Tabağının fotoğrafını çek</b></div><span class="ikon-btn" style="background:#fff;color:var(--kobalt)">' + IK.kamera + '</span></a>' +
       '<div class="genis bes-ekle"><a class="hap" href="#/ekle/ara">' + IK.ara.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2.2"') + 'Listeden ara</a><a class="hap" href="#/ekle/elle">' + IK.arti.replace('<svg', '<svg width="16" height="16" style="fill:none;stroke:currentColor;stroke-width:2.2"') + 'Elle gir</a></div>' +
       (grup || '<div class="t bos genis" style="align-items:flex-start"><b class="be-baslik" style="font-size:22px">Tabak boş<span class="nokta">.</span></b><span class="ik">İlk öğününü fotoğrafla ya da listeden ekle.</span></div>') +
-      suKutu(g) + takviyeKutu(g) + tekrarKutu(g) + bplanKutu(g) + oneriKutu(h.kcal - tp.k, h.protein - tp.p) +
+      besIkili() + oneriKutu(h.kcal - tp.k, h.protein - tp.p) + (S.bplan ? bplanKutu(g) : '') +
+      suKutu(g) + takviyeKutu(g) + tekrarKutu(g) +
       '</div>';
   }
 
+  // yan yana iki kutu: beslenme programı ve günün saatine göre "ne yesem?"
+  function besIkili() {
+    const ad = { kahvalti: ['Sabah', 'ne yesem?'], ogle: ['Öğlen', 'ne yesem?'], ara: ['Ara öğün', 'ne olsun?'], aksam: ['Akşam', 'ne yesem?'] }[ogunTuru()];
+    return '<div class="bes-ikili genis">' +
+      '<a class="t bes-mini" href="#/bplan">' + bIk('catal') + '<b>Beslenme<br>programı</b><span class="ik">' + (S.bplan ? 'Gün ' + (bpBugunIdx() + 1) : 'Hedefine göre') + '</span></a>' +
+      '<button type="button" class="t koyu bes-mini" data-act="oneri"' + (oneriYuk ? ' disabled aria-busy="true"' : '') + '>' + bIk('tabak') + '<b>' + ad[0] + '<br>' + ad[1] + '</b><span class="ik">' + (oneriYuk ? 'Düşünüyor…' : oneri ? 'Başka öner' : 'Kalan kalorine göre') + '</span></button></div>';
+  }
   /* su, tekrar, kayıtlı öğün, yemek önerisi */
   const suHedef = () => Math.round(((S.kilo.length ? S.kilo[S.kilo.length - 1].kg : S.profil.kilo) * 35) / 250) * 250; // ~35 ml/kg
   function suKutu(g) {
     const ml = g.su || 0; const h = suHedef(); const bardak = Math.round(ml / 250);
-    return '<div class="t genis su-kutu"><div class="satir"><span class="k">Su</span><span class="ik num"><b style="color:var(--murekkep)">' + sayi(ml / 1000, 2) + ' L</b> / ~' + sayi(h / 1000, 1) + ' L · ' + bardak + ' bardak</span></div>' +
+    return '<div class="t genis su-kutu"><div class="satir"><span class="k b-baslik">' + suBardak(ml / h) + 'Su</span><span class="ik num"><b style="color:var(--murekkep)">' + sayi(ml / 1000, 2) + ' L</b> / ~' + sayi(h / 1000, 1) + ' L · ' + bardak + ' bardak</span></div>' +
       '<div class="su-satir"><div class="cubuk" role="img" aria-label="Su hedefinin yüzde ' + yuzde(ml, h) + '\'i"><span style="width:' + yuzde(ml, h) + '%;background:var(--kobalt)"></span></div>' +
       '<button class="yuvarlak" data-act="su" data-ml="-250" aria-label="Bir bardak çıkar"' + (ml ? '' : ' disabled') + '>−</button><button class="btn ana kucuk" data-act="su" data-ml="250">+ Bardak</button></div>' +
       '<details class="su-diger"><summary>Başka miktar</summary><div class="haplar su-haplar"><button class="btn cerceve kucuk" data-act="su" data-ml="500">+ 0,5 L</button><button class="btn cerceve kucuk" data-act="su" data-ml="1000">+ 1 L</button></div>' +
@@ -2806,10 +2884,11 @@
   function oneriKutu(kalanK, kalanP) {
     const tur = ogunTuru();
     const baslik = tur === 'aksam' ? 'Akşam ne yesem?' : tur === 'kahvalti' ? 'Kahvaltıda ne yesem?' : tur === 'ogle' ? 'Öğlen ne yesem?' : 'Ara öğün ne olsun?';
-    let ic = '<span class="ik" style="color:var(--koyu-ikincil)">Kalan ' + sayi(Math.max(0, kalanK)) + ' kcal ve ' + sayi(Math.max(0, kalanP)) + ' g proteinine göre Türk mutfağından öneri ve kısa tarif.</span>';
+    if (!oneri && !oneriYuk) return '';
+    let ic = '<span class="ik" style="color:var(--koyu-ikincil)">' + (oneriYuk ? 'Kalan kalorine ve proteinine göre bakıyor…' : 'Şu an öneri gelmedi. Biraz sonra tekrar dene.') + '</span>';
     if (oneri && oneri.liste.length) ic = oneri.liste.map((x, i) => '<div class="oneri"><div class="satir"><b>' + esc(x.ad) + '</b><button class="btn beyaz kucuk-btn" data-act="oneri-ekle" data-i="' + i + '">Ekle</button></div><span class="ik num" style="color:var(--koyu-ikincil)">~' + sayi(x.k) + ' kcal · P ' + sayi(x.p) + ' g · ' + sayi(x.g) + ' g</span>' + (x.tarif ? '<p class="oneri-tarif">' + esc(x.tarif) + '</p>' : '') + '</div>').join('') + aiOy('yemek', 'o' + kisaKimlik(oneri.liste.map((x) => x.ad).join('|')), oneri.liste.map((x) => x.ad).join(' / '), true);
     return '<div class="t koyu genis" style="gap:10px"><div class="satir"><span class="k">' + baslik + '</span>' + (oneri ? '<button class="metin-btn kucuk-metin" data-act="oneri" style="color:var(--mavi-gece)">Başka öner</button>' : '') + '</div>' + ic +
-      (!oneri ? '<button class="btn beyaz" data-act="oneri"' + (oneriYuk ? ' disabled' : '') + ' style="align-self:flex-start;min-height:44px">' + (oneriYuk ? 'Düşünüyor…' : 'Öner') + IK.ok + '</button>' : '') + '</div>';
+      '</div>';
   }
 
   /* öğün ekleme */
@@ -2827,7 +2906,6 @@
       return bas + '<form data-form="ara" class="t" role="search"><label class="alan"><span>Yemek ya da ürün adı</span><input name="q" id="araQ" autocomplete="off" placeholder="ör. domates, tavuk, ayran" style="font-size:24px" value="' + esc(aramaQ) + '"></label></form>' +
         yemKatHaplar() +
         '<div class="t" style="padding:4px 16px"><div class="liste" id="yerelListe">' + yerelListe(aramaQ) + '</div></div>' +
-        '<button class="btn cerceve" data-act="marka-ara"' + (aramaQ.trim().length < 2 ? ' disabled' : '') + ' id="markaBtn">' + IK.ara + 'Marketteki ürünlerde ara</button>' +
         '<div id="markaSonuc">' + markaListe() + '</div>' +
         '<p class="not">Marka ürünleri Open Food Facts açık veritabanından gelir; her ürün kayıtlı olmayabilir.</p>';
     }
@@ -2881,7 +2959,7 @@
     if (sozcuk.length) {
       const puan = (y) => { const m = yAra(y); if (!sozcuk.every((w) => m.indexOf(w) >= 0)) return -1; const a = ' ' + normal(y.ad); return (a.indexOf(' ' + sozcuk[0]) === 0 ? 3 : 0) + (a.indexOf(' ' + sozcuk[0]) >= 0 ? 2 : 0) + (a.indexOf(sozcuk[0]) >= 0 ? 1 : 0); };
       const l = hepsi.map((y) => [y, puan(y)]).filter((x) => x[1] >= 0).sort((a, b) => b[1] - a[1] || a[0].ad.length - b[0].ad.length).slice(0, 40).map((x) => x[0]);
-      if (!l.length) return '<div><span class="ik">Listemizde yok. Marketteki ürünlerde arayabilir ya da "Elle" sekmesinden ekleyebilirsin.</span></div>';
+      if (!l.length) return '<div><span class="ik">Listemizde yok. Market ürünleri aşağıda; orada da yoksa "Elle" sekmesinden ekle.</span></div>';
       return l.map(yemSatir).join('');
     }
     if (yemKat) {
@@ -2974,6 +3052,31 @@
     if (l && l.length) return l;
     const a = S.gunluk[k] && S.gunluk[k].antrenman; return a ? [Object.assign({ ozet: 1 }, a)] : [];
   }
+  // beslenme geçmişi: antrenman geçmişi gibi gün gün; her gün kalori, protein, su ve hedef tuttu mu
+  function bgGunler() { return Object.keys(S.gunluk).filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && k <= tarihKey() && ((S.gunluk[k].ogun || []).length || S.gunluk[k].su)).sort().reverse(); }
+  function ekranBesGecmis(t) {
+    if (!S.profil) return ekranKarsilama();
+    const h = S.hedef;
+    if (t && S.gunluk[t]) {
+      const g = S.gunluk[t]; const d = tgun(t); const tp = toplam(g.ogun || []);
+      const grup = ['kahvalti', 'ogle', 'ara', 'aksam'].map((o) => { const l = (g.ogun || []).filter((x) => x.ogun === o); if (!l.length) return '';
+        return '<div class="t genis" style="padding:12px 16px 4px"><div class="satir"><span class="k">' + OGUN_AD[o] + '</span><span class="ik num">' + sayi(toplam(l).k) + ' kcal</span></div><div class="liste">' + l.map((x) => '<div><div class="ad"><b>' + esc(x.ad) + '</b><span class="ik num">' + sayi(x.g) + ' g · ' + sayi(x.k) + ' kcal · P ' + sayi(x.p) + ' g</span></div></div>').join('') + '</div></div>'; }).join('');
+      return ust(geri('#/bgecmis'), '<span class="alt">' + GUN_AD[haftaGunu(d)] + '</span>') + '<h1 class="baslik">' + d.getDate() + ' ' + AY[d.getMonth()] + '<span class="nokta">.</span></h1><div class="izgara">' +
+        '<div class="t genis' + (hedefTamam(tp.k, h.kcal) ? ' limon' : '') + '"><span class="k b-baslik">' + bIk('kalori') + (hedefTamam(tp.k, h.kcal) ? 'Hedef tuttu' : 'Günün toplamı') + '</span><span class="buyuk num">' + sayi(tp.k) + '<span style="font-size:16px;font-weight:700"> kcal</span></span><span class="ik num">Protein ' + sayi(tp.p) + ' g · Karb. ' + sayi(tp.kh) + ' g · Yağ ' + sayi(tp.y) + ' g' + (g.su ? ' · Su ' + sayi(g.su / 1000, 1) + ' L' : '') + '</span></div>' +
+        (grup || bosEkran('Öğün yazılmamış', 'Bu gün yalnızca su kaydı var.')) + '</div>';
+    }
+    const gl = bgGunler();
+    if (!gl.length) return ust(geri('#/menu/beslenme'), '<span class="alt">Beslenme</span>') + '<h1 class="baslik">Beslenme geçmişi<span class="nokta">.</span></h1><div class="izgara">' + bosEkran('Henüz kayıt yok', 'Yazdığın her öğün burada gün gün durur: kalori, protein, su.', '<a class="btn ana kucuk" href="#/beslenme">Beslenmeye git' + IK.ok + '</a>') + '</div>';
+    const aylar = {}; gl.forEach((k) => { (aylar[k.slice(0, 7)] = aylar[k.slice(0, 7)] || []).push(k); });
+    return ust(geri('#/menu/beslenme'), '<span class="alt">Beslenme</span>') + '<h1 class="baslik">Beslenme geçmişi<span class="nokta">.</span></h1><div class="izgara">' +
+      Object.keys(aylar).sort().reverse().map((ay) => {
+        const gunler = aylar[ay]; const [y, m] = ay.split('-'); const tut = gunler.filter((k) => hedefTamam(toplam(S.gunluk[k].ogun || []).k, h.kcal)).length;
+        const ort = Math.round(gunler.reduce((a, k) => a + toplam(S.gunluk[k].ogun || []).k, 0) / gunler.length);
+        return '<section class="t genis gc-ay"><div class="satir"><span class="k">' + AY[+m - 1] + ' ' + y + '</span><span class="k num">Ort. ' + sayi(ort) + ' kcal · ' + tut + ' gün hedefte</span></div><div class="gc-liste">' +
+          gunler.map((k) => { const d = tgun(k); const g = S.gunluk[k]; const tp = toplam(g.ogun || []); const ok = hedefTamam(tp.k, h.kcal);
+            return '<a class="gc-satir" href="#/bgecmis/' + k + '"><span class="gc-tarih num"><b>' + d.getDate() + '</b><span>' + GUN_KISA[haftaGunu(d)] + '</span></span><span class="gc-orta"><b class="num">' + sayi(tp.k) + ' kcal' + (ok ? ' <i class="bg-tik" aria-label="hedef tuttu"></i>' : '') + '</b><span class="num">P ' + sayi(tp.p) + ' g · ' + (g.ogun || []).length + ' kalem' + (g.su ? ' · ' + sayi(g.su / 1000, 1) + ' L su' : '') + '</span></span><svg class="mn-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>'; }).join('') + '</div></section>';
+      }).join('') + '</div>';
+  }
   function gcSatir(k, x) {
     const d = tgun(k); const rek = (x.rk || []).length;
     return '<a class="gc-satir" href="#/gecmis/' + k + '"><span class="gc-tarih num"><b>' + d.getDate() + '</b><span>' + GUN_KISA[haftaGunu(d)] + '</span></span>' +
@@ -3059,20 +3162,18 @@
       grafik = '<svg class="grafik" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Kilo ' + sayi(kilolar[0].kg, 1) + ' kilogramdan ' + sayi(kilolar[kilolar.length - 1].kg, 1) + ' kilograma"><line class="izgara-c" x1="0" y1="' + (H - 6) + '" x2="' + W + '" y2="' + (H - 6) + '"/><polyline class="cizgi" points="' + pts.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + '"/><circle class="son" cx="' + pts[pts.length - 1][0] + '" cy="' + pts[pts.length - 1][1] + '" r="5"/></svg>';
     }
     const fark = kilolar.length >= 2 ? kilolar[kilolar.length - 1].kg - kilolar[0].kg : 0;
-    return ust(logo) + '<h1 class="baslik">İlerleme<span class="nokta">.</span></h1>' +
+    return ust(logo, profilBtn()) + '<h1 class="baslik">İlerleme<span class="nokta">.</span></h1>' +
       '<div class="izgara">' +
       '<div class="t koyu h150">' + seriKart('Hafta serisi') + '</div>' +
       '<div class="t kobalt h150"><span class="k">' + (sozDurum(haftaBasi()) ? 'Haftalık Plan' : 'Bu hafta') + '</span><span class="buyuk num">' + buHafta + '<span style="font-size:20px;letter-spacing:0;color:var(--kobalt-yumusak)"> / ' + (sozDurum(haftaBasi()) ? sozDurum(haftaBasi()).soz : S.profil.gun) + '</span></span><span class="k">antrenman</span></div>' +
       sonAntrenmanKart() + seninComeback() +
       '<div class="t genis"><div class="satir"><span class="k">Kilo</span><span class="num" style="font-weight:800">' + (kilolar.length ? sayi(kilolar[kilolar.length - 1].kg, 1) + ' kg' : '') + (kilolar.length >= 2 ? ' <span style="color:var(--kobalt)">' + (fark > 0 ? '+' : '') + sayi(fark, 1) + '</span>' : '') + '</span></div>' + grafik +
       '<form data-form="kilo" class="satir" style="margin-top:4px"><label class="mini" style="flex:1"><span>Bugünkü tartın, kg</span><input name="kg" inputmode="decimal" placeholder="' + sayi(S.profil.kilo, 1) + '"></label><button class="btn siyah" type="submit" style="align-self:flex-end;min-height:44px">Kaydet</button></form></div>' +
-      (hicAntr ? bosEkran('İlerlemen ilk antrenmanla başlar', 'Kasların, rekorların, 6 aylık ızgaran ve rozetlerin ilk antrenmanı bitirdiğin gün burada dolmaya başlar.', '<a class="btn ana kucuk" href="#/antrenman">Antrenmana git' + IK.ok + '</a>') : kasHaritasi() +
-      (rekorlar.length ? rekorKutu(rekorlar) : '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Rekorların</span><div class="liste"><div style="display:block;border:0">' + bosEkran('Henüz rekor yok', 'İlk seti kaydet. İlk rekor zaten o.', '<a class="btn ana kucuk" href="#/antrenman">Antrenmana git' + IK.ok + '</a>') + '</div></div></div>') +
-      antrenmanIzgara() + kartKoleksiyon() +
-      rozetKutu()) +
+      (hicAntr ? bosEkran('İlerlemen ilk antrenmanla başlar', 'Kasların, rekorların, 6 aylık ızgaran ve rozetlerin ilk antrenmanı bitirdiğin gün burada dolmaya başlar.', '<a class="btn ana kucuk" href="#/antrenman">Antrenmana git' + IK.ok + '</a>') : (rekorlar.length ? rekorKutu(rekorlar) : '<div class="t genis" style="padding:12px 16px 4px"><span class="k">Rekorların</span><div class="liste"><div style="display:block;border:0">' + bosEkran('Henüz rekor yok', 'İlk seti kaydet. İlk rekor zaten o.', '<a class="btn ana kucuk" href="#/antrenman">Antrenmana git' + IK.ok + '</a>') + '</div></div></div>') +
+      antrenmanIzgara() + kartKoleksiyon()) +
       mGrup('Daha fazlası', [mSatir('#/gecmis', 'program', 'Antrenman geçmişi', 'Her antrenman, set set'), mSatir('#/siralama', 'siralama', 'Sıralama', 'Bütün üyeler arasında haftalık ve aylık'), mSatir('#/olcu', 'hedef', 'Ölçüler', (S.olcu || []).length ? 'Bel ' + sayi(S.olcu[S.olcu.length - 1].bel || 0, 1) + ' cm' : 'Bel, göğüs, kol'), mSatir('#/rapor', 'plan', 'Aylık rapor', AY[new Date().getMonth()] + ' özeti')]) +
       (hicAntr ? '' : '<button class="btn cerceve buyuk-btn genis" data-act="paylas">Bu haftanı paylaş · hikâye görseli</button>') +
-      '</div>' + '<div class="nokta-son" id="noktaSon" aria-hidden="true"><canvas></canvas><span>Kimse izlemiyor. Sen yine de geldin.</span></div>';
+      '</div>';
   }
 
   /* ---------- vücut ölçüleri ve fotoğraflar (fotoğraflar yalnızca bu cihazda, IndexedDB) ---------- */
@@ -3607,7 +3708,7 @@
   }
   // dokunulan öğe küçük bir yayla yerine oturur
   function sicra(sec) { const e = document.querySelector(sec); if (e && e.animate && !azHareket) e.animate([{ transform: 'scale(.86)' }, { transform: 'scale(1.06)', offset: 0.6 }, { transform: 'scale(1)' }], { duration: 320, easing: 'cubic-bezier(.23,1,.32,1)' }); }
-  function navRozet() { const a = nav.querySelector('a[data-tab="profil"]'); if (a) a.classList.toggle('yeni', gelenSayi() > 0); }
+  function navRozet() { const n = hesap ? gelenSayi() : 0; document.querySelectorAll('.ust-profil').forEach((a) => a.classList.toggle('yeni', n > 0)); const z = document.querySelector('.mn-gelen'); if (z) z.classList.toggle('yeni', n > 0); }
   async function okunmamisYukle() {
     if (!hesap || document.hidden) return;
     try {
@@ -3748,25 +3849,25 @@
       const sinif = ['hk-gun', bitti ? 'bitti' : '', plan ? 'plan' : '', gecti && plan && !bitti ? 'kacti' : '', bugun ? 'bugun' : ''].join(' ').replace(/\s+/g, ' ').trim();
       const ic = '<span class="hk-ad">' + g + '</span><span class="hk-no num">' + d.getDate() + '</span><span class="hk-isaret" aria-hidden="true"></span>';
       const durum = bitti ? 'antrenman yapıldı' : plan ? (gecti ? 'planlıydı, yapılmadı' : 'antrenman günü') : 'dinlenme';
-      if (gecti || bitti || (bugun && S.seans)) return '<span class="' + sinif + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '">' + ic + '</span>';
-      return '<button type="button" class="' + sinif + '" data-act="hk-gun" data-i="' + i + '" aria-pressed="' + plan + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '. Değiştirmek için dokun.">' + ic + '</button>';
+      // günlere dokunarak değişmez (yanlışlıkla değişiyordu); değiştirmek için Antrenman → ⋯ → Haftalık plan
+      return '<span class="' + sinif + '" aria-label="' + GUN_AD[i] + ' ' + d.getDate() + ', ' + durum + '">' + ic + '</span>';
     }).join('');
     const n = secili.length;
-    const alt = sirada ? (sirada.bugun ? 'Bugün: ' : 'Sıradaki: ' + GUN_AD[sirada.i] + ' · ') + esc(sirada.ad) : (n ? 'Bu haftanın planlı günleri bitti.' : 'Bu hafta plan yok. Geleceğin günlere dokun.');
+    const alt = sirada ? (sirada.bugun ? 'Bugün: ' : 'Sıradaki: ' + GUN_AD[sirada.i] + ' · ') + esc(sirada.ad) : (n ? 'Bu haftanın planlı günleri bitti.' : 'Bu hafta plan yok.');
     return '<div class="t genis hk-kutu"><div class="satir" style="flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px"><span class="k">' + (p ? 'Haftalık Plan' : 'Bu hafta') + '</span><span class="k num">' + yapilan + ' / ' + n + ' gün</span></div>' +
       '<div class="hk-gunler" role="group" aria-label="Bu haftanın günleri">' + hucre + '</div>' +
-      '<div class="hk-son"><span class="hk-alt">' + alt + '</span>' + (p && n ? '<button type="button" class="metin-btn hk-paylas" data-act="soz-paylas">' + (yapilan >= n ? 'Plan tamam · paylaş' : 'Planını paylaş') + '</button>' : '') + '</div></div>';
+      '<div class="hk-son"><span class="hk-alt">' + alt + '</span></div></div>';
   }
   function ekranHaftaPlan() {
     if (!S.profil) return ekranKarsilama();
     const bas = planHaftasi(); const p = (S.haftaPlan || {})[tarihKey(bas)];
-    return ust(geri('#/profil')) + '<h1 class="baslik">Haftalık plan<span class="nokta">.</span></h1>' +
+    return ust(geri('#/antrenman')) + '<h1 class="baslik">Haftalık plan<span class="nokta">.</span></h1>' +
       '<div class="izgara">' + haftaPlanKutu(true) +
       (p ? '<div class="t genis"><span class="k">Bu haftanın takvimi</span>' + KISA_GUN.map((g, i) => { const d = new Date(bas); d.setDate(d.getDate() + i); const pg = gunIcin(d); return '<div class="satir num" style="padding:6px 0;border-top:' + (i ? '1px solid var(--zemin)' : '0') + '"><span>' + GUN_AD[i] + ' ' + d.getDate() + '</span><b>' + (pg ? esc(pg.ad) : '<span class="ik">dinlenme</span>') + '</b></div>'; }).join('') + '</div>' : '') +
       '<p class="ik genis" style="padding:0 4px">Pazar günü gelecek haftayı, pazartesi bu haftayı planlaman için ana sayfada hatırlatırız.</p></div>';
   }
 
-  // Menü (alt çubukta COMEBACK.) — uygulamanın her köşesine buradan gidilir
+  // Menü (sağ üstteki profil resminden) — uygulamanın her köşesine buradan gidilir
   const MIK = {
     program: '<path d="M4 6h16M4 12h10M4 18h7"/><path d="M17 15l2 2 3-4"/>',
     plan: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>',
@@ -3788,52 +3889,83 @@
     agirlik: '<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>',
     gorunum: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/>',
     zil: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+    catal: '<path d="M6 3v6a2 2 0 0 0 4 0V3M8 3v18"/><path d="M17 21V3c-2.2 1.4-3 4-3 7 0 1.7.9 3 3 3"/>',
+    ayar: '<circle cx="12" cy="12" r="2.6"/><path d="M12 3.5v2.2M12 18.3v2.2M4.6 7.75l1.9 1.1M17.5 15.15l1.9 1.1M4.6 16.25l1.9-1.1M17.5 8.85l1.9-1.1"/><circle cx="12" cy="12" r="6.3"/>',
+    gelen: '<path d="M4 13l2.4-8h11.2L20 13v6H4z"/><path d="M4 13h4.6l1.3 2.6h4.2l1.3-2.6H20"/>',
+    mola: '<circle cx="12" cy="12" r="8.5"/><path d="M10 9v6M14 9v6"/>',
+    gecmis: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4M12 8v4l3 2"/>',
     veri: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>'
   };
   const OK_SAG = '<svg class="mn-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
   function mSatir(href, ik, baslik, alt, renk, sayac) {
-    return '<a class="mn-satir" href="' + href + '"' + (href.indexOf('http') === 0 || href.indexOf('.html') > 0 ? ' target="_blank" rel="noopener"' : '') + '><span class="mn-ik' + (renk ? ' ' + renk : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + MIK[ik] + '</svg></span><span class="mn-yazi"><b>' + baslik + '</b>' + (alt ? '<span>' + alt + '</span>' : '') + '</span>' + (sayac ? '<i class="mn-sayac num" aria-label="' + sayac + ' yeni">' + sayac + '</i>' : '') + OK_SAG + '</a>';
+    const ikon = ik === 'logo' ? '<span class="mn-logo" aria-hidden="true"><span>COME</span><span>BACK<i>.</i></span></span>' : '<svg viewBox="0 0 24 24" aria-hidden="true">' + MIK[ik] + '</svg>';
+    return '<a class="mn-satir" href="' + href + '"' + (href.indexOf('http') === 0 || href.indexOf('.html') > 0 ? ' target="_blank" rel="noopener"' : '') + '><span class="mn-ik' + (ik === 'logo' ? ' kobalt' : renk ? ' ' + renk : '') + '">' + ikon + '</span><span class="mn-yazi"><b>' + baslik + '</b>' + (alt ? '<span>' + alt + '</span>' : '') + '</span>' + (sayac ? '<i class="mn-sayac num" aria-label="' + sayac + ' yeni">' + sayac + '</i>' : '') + OK_SAG + '</a>';
   }
   function mGrup(ad, satirlar) {
     const ic = satirlar.filter(Boolean).join(''); if (!ic) return '';
     return '<section class="mn-grup genis"' + (ad ? ' aria-label="' + ad + '"><h2 class="mn-baslik">' + ad + '</h2>' : '>') + '<div class="mn-kutu">' + ic + '</div></section>';
   }
+  // Menü: sağ üstteki profil resminden açılır. Üstte profil, Gelen kutusu; altında beş kategori, her biri kendi sayfasında
+  const MENU_KAT = [
+    ['antrenman', 'Antrenman ayarları', 'agirlik', 'Program, haftalık plan, takip ve zil'],
+    ['beslenme', 'Beslenme', 'catal', 'Günlük hedef, beslenme programı, takviyeler'],
+    ['topluluk', 'Topluluk ayarları', 'topluluk', 'Mesajlar, arkadaşlar, hocam, akış'],
+    ['uygulama', 'Uygulama ayarları', 'ayar', 'Tema, simge, hatırlatıcılar, hesap'],
+    ['comeback', 'COMEBACK.', 'logo', 'Yardım ve görüş, gizlilik, koşullar']
+  ];
+  function menuKat(kat) {
+    const tk = S.takviye || [];
+    if (kat === 'antrenman') return mGrup('', [
+      mSatir('#/plan', 'program', 'Programım', esc(S.program.ad) + ' · ayrıntılar ve düzenleme'),
+      mSatir('#/haftaplan', 'plan', 'Haftalık plan', 'Haftada kaç gün, hangi günler'),
+      mSatir('#/ayar/antrenman', 'agirlik', 'Takip ve zil', 'Takip detayı, dinlenme zili, ekran açık kalsın'),
+      mSatir('#/gecmis', 'gecmis', 'Antrenman geçmişi', 'Her antrenman, set set')
+    ]) + mGrup('Birlikte', [
+      mSatir('#/jam', 'jam', 'Ortak antrenman', 'Arkadaşınla aynı anda, Jam ile'),
+      mSatir('#/paylas', 'gonder', 'Program gönder', 'Arkadaşına programını yolla')
+    ]) + (hesap && uyelik().durum !== 'muaf' ? mGrup('Üyelik', [mSatir(askidaMi() ? '#/comeback' : '#/mazeret', 'mola', askidaMi() ? 'Comeback' : 'Ara vereceğim', askidaMi() ? 'Üyeliğin askıda · geri dön' : uyelik().durum === 'mazeret' ? 'Mazeretin açık' : 'Sakatlık, hastalık, tatil: süren işlemesin')]) : '');
+    if (kat === 'beslenme') return mGrup('', [
+      mSatir('#/hedef', 'hedef', 'Günlük hedef', sayi(S.hedef.kcal) + ' kcal · ' + S.hedef.protein + ' g protein'),
+      mSatir('#/bplan', 'catal', 'Beslenme programı', S.bplan ? esc(S.bplan.ad) : 'Yapay zekâ ile hazırla'),
+      mSatir('#/takviye', 'takviye', 'Takviyeler', tk.length ? tk.map((x) => esc(x.ad)).slice(0, 3).join(', ') : 'Takviye takibini aç'),
+      mSatir('#/bgecmis', 'gecmis', 'Beslenme geçmişi', 'Gün gün ne yedin, ne kadar')
+    ]);
+    if (kat === 'topluluk') return mGrup('', [
+      hesap ? mSatir('#/mesajlar', 'mesaj', 'Mesajlar', okunmamis ? okunmamis + ' okunmamış mesaj' : (hocaMi() ? 'Öğrencilerinle yazış' : 'Hocanla yazış'), okunmamis ? 'kobalt' : '', okunmamis) : '',
+      hesap ? mSatir('#/topluluk', 'topluluk', 'Akış ve gruplar', 'Arkadaşların, Keşfet, grup, etkinlik, forum') : '',
+      hesap ? mSatir('#/arkadas', 'kisi', 'Arkadaşlar', sos.istek ? sos.istek + ' yeni istek' : 'Ekle, istekleri gör', sos.istek ? 'limon' : '', sos.istek) : '',
+      hocaMi() ? mSatir('#/hoca', 'ogrenci', 'Hoca paneli', 'Öğrencilerin, programlar, antrenmanlar') : '',
+      mSatir('#/topluluk/rehber', 'plan', 'Rehber', 'Her kas grubu için kısa yazılar'),
+      hesap ? mSatir('#/ayar/topluluk', 'gizlilik', 'Akışta kim görsün', (GORUNUR.find((x) => x[0] === akisAyar()) || ['', ''])[1]) : ''
+    ]) + hocaKutu().replace('class="t h130"', 'class="t genis"');
+    if (kat === 'uygulama') return mGrup('', [
+      mSatir('#/ayar/gorunum', 'gorunum', 'Görünüm', 'Tema, uygulama simgesi, animasyonlar'),
+      mSatir('#/ayar/hatirlat', 'zil', 'Hatırlatıcılar', 'Su, takviye, antrenman'),
+      mSatir('#/ayar/hesap', 'veri', 'Hesap ve veriler', hesap ? esc(hesap.eposta) : 'Cihazı sıfırla')
+    ]);
+    if (kat === 'comeback') return mGrup('', [
+      mSatir('#/gorus', 'gorus', 'Yardım ve görüş', 'Sorun, hata, öneri · hepsini okuyoruz'),
+      mSatir('gizlilik.html', 'gizlilik', 'Gizlilik', 'Hangi veriyi neden saklıyoruz'),
+      mSatir('kosullar.html', 'kosul', 'Kullanım koşulları', 'Kurallar, devam kuralı, sorumluluklar'),
+      hesap && hesap.rol === 'admin' ? mSatir('#/yonetim', 'yonetim', 'Yönetim', 'Yalnızca sen görürsün', 'koyu') : ''
+    ]) + '<p class="mn-soz genis">Make the COMEBACK<span class="nokta">.</span></p>';
+    return '';
+  }
+  function ekranMenuKat(kat) {
+    if (!S.profil) return ekranKarsilama();
+    const k = MENU_KAT.find((x) => x[0] === kat); if (!k) { location.hash = '#/profil'; return ''; }
+    return ust(geri('#/profil', 'Menüye dön'), '<span class="alt">Menü</span>') + '<h1 class="baslik">' + (kat === 'comeback' ? 'COMEBACK' : esc(k[1])) + '<span class="nokta">.</span></h1>' +
+      '<div class="izgara">' + menuKat(kat) + '</div>' + (kat === 'comeback' ? surumNot() : '');
+  }
   function ekranProfil() {
     if (!S.profil) return ekranKarsilama();
-    const p = S.profil; const tk = S.takviye || [];
+    const p = S.profil; const n = hesap ? gelenSayi() : 0;
     const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
-    return ust(logo) + '<h1 class="baslik">Menü<span class="nokta">.</span></h1>' +
-      '<div class="izgara">' +
-      '<a class="t genis mn-profil" href="#/profilim">' + benAvatar('buyuk') + '<span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + isimEk({ vt: p.vitrin && benimRozet(p.vitrin) ? p.vitrin : '', un: hesap && hesap.unvan }) + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · bilgiler, hedef, hesap</span></span>' + OK_SAG + '</a>' +
-      (hesap ? mGrup('', [mSatir('#/bildirim', 'zil', 'Gelenler', gelenSayi() ? 'Sana gelen yeni şeyler var' : 'İstekler, davetler, programlar, mesajlar', gelenSayi() ? 'kobalt' : '', gelenSayi())]) : '') +
-      mGrup('Antrenman', [
-        mSatir('#/plan', 'program', 'Programım', esc(S.program.ad) + ' · ayrıntılar ve düzenleme'),
-        mSatir('#/haftaplan', 'plan', 'Haftalık plan', 'Bu hafta hangi günler geliyorsun'),
-        hesap && uyelik().durum !== 'muaf' ? mSatir(askidaMi() ? '#/comeback' : '#/mazeret', 'zil', askidaMi() ? 'Comeback' : 'Ara vereceğim', askidaMi() ? 'Üyeliğin askıda · geri dön' : uyelik().durum === 'mazeret' ? 'Mazeretin açık' : 'Sakatlık, hastalık, tatil: süren işlemesin') : '',
-        mSatir('#/jam', 'jam', 'Ortak antrenman', 'Arkadaşınla aynı anda, Jam ile'),
-        mSatir('#/paylas', 'gonder', 'Program gönder', 'Arkadaşına programını yolla')
-      ]) +
-      (hocaMi() ? mGrup('Hoca paneli', [mSatir('#/hoca', 'ogrenci', 'Öğrencilerim', 'Kod, programlar, antrenmanlar', 'kobalt')]) : '') +
-      mGrup('Beslenme', [
-        mSatir('#/hedef', 'hedef', 'Günlük hedef', sayi(S.hedef.kcal) + ' kcal · ' + S.hedef.protein + ' g protein'),
-        mSatir('#/bplan', 'bplan', 'Beslenme programı', S.bplan ? esc(S.bplan.ad) : 'Yapay zekâ ile hazırla'),
-        mSatir('#/takviye', 'takviye', 'Takviyeler', tk.length ? tk.map((x) => esc(x.ad)).slice(0, 3).join(', ') : 'Takviye takibini aç')
-      ]) +
-      mGrup('Topluluk', [
-        hesap ? mSatir('#/mesajlar', 'mesaj', 'Mesajlar', okunmamis ? okunmamis + ' okunmamış mesaj' : (hocaMi() ? 'Öğrencilerinle yazış' : 'Hocanla yazış'), 'kobalt', okunmamis) : '',
-        hesap ? mSatir('#/topluluk', 'topluluk', 'Akış ve gruplar', 'Arkadaşların, Keşfet, grup, etkinlik, forum', 'limon', sos.istek) : '',
-        hesap ? mSatir('#/arkadas', 'ogrenci', 'Arkadaşlar', 'Ekle, istekleri gör') : '',
-        mSatir('#/topluluk/rehber', 'plan', 'Rehber', 'Her kas grubu için kısa yazılar'),
-        ''
-      ]) +
-      hocaKutu().replace('class="t h130"', 'class="t genis"') +
-      ayarGrup() +
-      mGrup('COMEBACK.', [
-        mSatir('#/gorus', 'gorus', 'Yardım ve görüş', 'Sorun, hata, öneri · hepsini okuyoruz'),
-        hesap && hesap.rol === 'admin' ? mSatir('#/yonetim', 'yonetim', 'Yönetim', 'Yalnızca sen görürsün', 'koyu') : '',
-        mSatir('gizlilik.html', 'gizlilik', 'Gizlilik', 'Hangi veriyi neden saklıyoruz'),
-        mSatir('kosullar.html', 'kosul', 'Kullanım koşulları', 'Kurallar, devam kuralı, sorumluluklar')
-      ]) +
+    return ust(geri('#/', 'Ana sayfaya dön'), '<span class="alt">Menü</span>') +
+      '<div class="izgara mn-sayfa">' +
+      '<a class="t genis mn-profil" href="#/profilim">' + benAvatar('buyuk') + '<span class="mn-yazi"><b>' + esc(p.ad || 'Profilim') + isimEk({ vt: p.vitrin && benimRozet(p.vitrin) ? p.vitrin : '', un: hesap && hesap.unvan }) + '</b><span class="num">' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span>Profilim · düzenle, rozetler, bilgiler</span></span>' + OK_SAG + '</a>' +
+      (hesap ? '<a class="t genis mn-gelen' + (n ? ' yeni' : '') + '" href="#/bildirim"><span class="mn-zil" aria-hidden="true"><svg viewBox="0 0 24 24">' + MIK.zil + '</svg></span><span class="mn-yazi"><b>Gelen kutusu</b><span>' + (n ? 'Sana gelen ' + n + ' yeni şey var' : 'İstekler, davetler, programlar, mesajlar') + '</span></span>' + (n ? '<i class="mn-sayac num" aria-label="' + n + ' yeni">' + n + '</i>' : '') + OK_SAG + '</a>' : '') +
+      mGrup('', MENU_KAT.map((k) => mSatir('#/menu/' + k[0], k[2], k[1], k[3]))) +
       '</div>' + surumNot();
   }
   const surumNot = () => '<p class="surum-not num">COMEBACK. · sürüm ' + uygSurum + '</p>';
@@ -3861,7 +3993,7 @@
     (gelenler || []).forEach((a) => l.push(['#/gelen/' + a.id, 'gonder', esc(a.gonderen) + ' sana program gönderdi', esc(a.program.ad || 'Program') + ' · bak, beğenirsen al', '']));
     bild.durt.forEach((d) => l.push(['#/topluluk/grup/' + encodeURIComponent(d.grup), 'jam', esc(d.ad) + ': Bekliyoruz.', esc(d.grupAd) + ' · ' + zamanOnce(d.zaman), d.zaman > bildOnceki ? 'limon' : '']));
     try { localStorage.setItem(BILD_GOR, String(Date.now())); } catch (e) { /* yok */ } setTimeout(navRozet, 0);
-    return ust(geri('#/profil'), '<span class="alt">Gelenler</span>') + '<h1 class="baslik">Gelenler<span class="nokta">.</span></h1>' +
+    return ust(geri('#/profil'), '<span class="alt">Menü</span>') + '<h1 class="baslik">Gelen kutusu<span class="nokta">.</span></h1>' +
       '<div class="izgara">' + (l.length ? mGrup('', l.map((x) => mSatir(x[0], x[1], x[2], x[3], x[4]))) : bosEkran('Yeni bir şey yok', 'Arkadaş istekleri, gruptan gelen "Bekliyoruz.", sana gönderilen programlar ve mesajlar burada toplanır.')) + '</div>';
   }
   // grup davet bağlantısı (#/katil/<kod>): katılmadan önce bir kez sor
@@ -3913,16 +4045,7 @@
         mSatir('#/hedef', 'hedef', 'Hedefimi değiştir', 'Kas, yağ yakma, gün, odak, çalışma yeri')
       ]) +
       kadiKutu() +
-      ayarGrup() +
       '</div>';
-  }
-  function ayarGrup() {
-    return mGrup('Ayarlar', [
-      mSatir('#/ayar/antrenman', 'agirlik', 'Antrenman', 'Takip detayı, zil, ekran açık kalsın'),
-      mSatir('#/ayar/gorunum', 'gorunum', 'Görünüm', 'Tema, uygulama simgesi, animasyonlar'),
-      mSatir('#/ayar/hatirlat', 'zil', 'Hatırlatıcılar', 'Su, takviye, antrenman'),
-      mSatir('#/ayar/hesap', 'veri', 'Hesap ve veriler', hesap ? esc(hesap.eposta) : 'Cihazı sıfırla')
-    ]);
   }
   function veriBolum() {
     return !veriAcik ? '<button class="mn-satir mn-dugme" data-act="veri-ac" aria-expanded="false"><span class="mn-ik"><svg viewBox="0 0 24 24" aria-hidden="true">' + MIK.veri + '</svg></span><span class="mn-yazi"><b>Hesap ve veriler</b><span>Hesabı silme, cihazı sıfırlama</span></span>' + OK_SAG + '</button>'
@@ -3934,7 +4057,7 @@
   // ayar alt sayfaları: her biri tek konu
   function ekranAyar(bolum) {
     if (!S.profil) return ekranKarsilama();
-    const B = { antrenman: 'Antrenman', gorunum: 'Görünüm', hatirlat: 'Hatırlatıcılar', hesap: 'Hesap' };
+    const B = { antrenman: 'Takip ve zil', gorunum: 'Görünüm', hatirlat: 'Hatırlatıcılar', hesap: 'Hesap', topluluk: 'Akış' };
     if (!B[bolum]) bolum = 'antrenman';
     let ic = '';
     if (bolum === 'antrenman') ic =
@@ -3947,6 +4070,8 @@
         '<span class="k" style="margin-top:6px">Ses seviyesi</span><div class="haplar">' + Object.keys(SEVIYE).map((k) => '<button class="hap" data-act="ses-seviye" data-deger="' + k + '" aria-pressed="' + (sesSeviye() === k) + '">' + SEVIYE[k][0] + '</button>').join('') + '</div>' +
         '<span class="ik">Dokununca bir kez çalar. Titreşim her zaman açık. Müzik dinlerken ses gelince müzik kısa süre kısılır, sonra devam eder (iPhone\'da iOS 16.4 ve üstü).</span>' +
         '</div>' +
+      '';
+    else if (bolum === 'topluluk') ic =
       (hesap ? '<div class="t genis" style="gap:10px"><span class="k">Akış · bitirdiğin antrenmanı kimler görsün</span><div class="haplar">' + GORUNUR.map((x) => '<button class="hap" data-act="akis-ayar" data-deger="' + x[0] + '" aria-pressed="' + (akisAyar() === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
         '<span class="ik">Antrenmanın adı, süresi, set sayısı, toplam kilo, ilk üç hareket ve rekor sayısı paylaşılır. Vücut ölçülerin, ağrıların ve notların paylaşılmaz.</span></div>' : '') +
       '';
@@ -3965,7 +4090,7 @@
       '<div class="genis hesap-alt"><a href="#/gorus">Yardım ve görüş</a><a href="gizlilik.html" target="_blank" rel="noopener">Gizlilik</a><a href="kosullar.html" target="_blank" rel="noopener">Kullanım koşulları</a></div>' +
       '';
     }
-    return ust(geri('#/profilim')) + '<h1 class="baslik">' + B[bolum] + '<span class="nokta">.</span></h1><div class="izgara">' + ic + '</div>';
+    return ust(geri('#/menu/' + ({ antrenman: 'antrenman', topluluk: 'topluluk' }[bolum] || 'uygulama'))) + '<h1 class="baslik">' + B[bolum] + '<span class="nokta">.</span></h1><div class="izgara">' + ic + '</div>';
   }
 
   /* ---------- hafta kartları ve haftalık kapanış ----------
@@ -4221,6 +4346,7 @@
     else if (parca[0] === 'porsiyon') { html = ekranPorsiyon(); sekme = 'beslenme'; }
     else if (parca[0] === 'ilerleme') { html = ekranIlerleme(); sekme = 'ilerleme'; }
     else if (parca[0] === 'profil') { html = ekranProfil(); sekme = 'profil'; }
+    else if (parca[0] === 'menu') { html = ekranMenuKat(parca[1] || ''); sekme = 'profil'; }
     else if (parca[0] === 'haftaplan') { html = ekranHaftaPlan(); sekme = 'profil'; }
     else if (parca[0] === 'profilim') { if (sonRota !== 'profilim') { veriAcik = false; silAcik = false; sifirOnay = false; } html = ekranProfilim(); sekme = 'profil'; }
     else if (parca[0] === 'comeback') { html = ekranComeback(); sekme = 'bugun'; }
@@ -4237,6 +4363,7 @@
     else if (parca[0] === 'olcu') { html = ekranOlcu(); sekme = 'ilerleme'; }
     else if (parca[0] === 'rapor') { html = ekranRapor(); sekme = 'ilerleme'; }
     else if (parca[0] === 'gecmis') { html = ekranGecmis(parca[1]); sekme = 'ilerleme'; }
+    else if (parca[0] === 'bgecmis') { html = ekranBesGecmis(parca[1]); sekme = 'beslenme'; }
     else if (parca[0] === 'kisi' && parca[1]) { if (parca[2] === 'onizle' && sonRota !== parca.join('/')) delete kisiOnbellek[decodeURIComponent(parca[1])]; html = ekranKisi(decodeURIComponent(parca[1]), parca[2] === 'onizle'); sekme = 'profil'; }
     else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
     else if (parca[0] === 'hoca') { html = ekranHoca(parca[1] ? decodeURIComponent(parca[1]) : null); sekme = 'profil'; }
@@ -4251,7 +4378,11 @@
     else if (parca[0] === 'yonetim') { html = ekranYonetim(); sekme = 'profil'; }
     else { html = ekranBugun(); sekme = 'bugun'; }
     const odS0 = app.querySelector('.od-sayfa'); const odTop = odS0 ? odS0.scrollTop : -1;
+    // yatay hap satırları (günler, topluluk sekmeleri) yeniden çizilince başa kaymasın
+    const yEski = Array.prototype.map.call(app.querySelectorAll('.yatay'), (e) => e.scrollLeft); const grupEski = sonRota != null ? sonRota.split('/')[0] : null;
     app.innerHTML = html;
+    if (grupEski === (parca[0] || '')) app.querySelectorAll('.yatay').forEach((e, i) => { if (yEski[i]) e.scrollLeft = yEski[i]; });
+    app.querySelectorAll('.yatay').forEach((e) => { const a = e.querySelector('[aria-pressed="true"]'); if (!a) return; const sol = a.offsetLeft - e.offsetLeft; if (sol < e.scrollLeft + 8 || sol + a.offsetWidth > e.scrollLeft + e.clientWidth - 8) e.scrollTo({ left: Math.max(0, sol - 24), behavior: azHareket || grupEski !== (parca[0] || '') ? 'auto' : 'smooth' }); });
     if (odTop >= 0) { const o = app.querySelector('.od-sayfa'); if (o) { o.classList.add('kalici'); o.scrollTop = odTop; const pr = app.querySelector('.od-perde'); if (pr) pr.classList.add('kalici'); } }
     if (dinlenme) dinKonum();
     temaUygula(); simgeUygula();
@@ -4278,15 +4409,18 @@
     const rota = parca.join('/');
     const yeni = rota !== sonRota; sonRota = rota;
     if (yeni) {
-      app.classList.remove('gec'); void app.offsetWidth; app.classList.add('gec');
+      app.classList.remove('gec', 'sekme'); void app.offsetWidth; app.classList.add('gec');
+      if (sekmeKardes) app.classList.add('sekme'); // aynı sayfanın sekmeleri arasında: başlık yerinde durur, yalnızca içerik süzülür
       let s = 0;
-      app.querySelectorAll('.baslik, .t, .btn.buyuk-btn').forEach((el) => { el.style.setProperty('--s', Math.min(s++, 9)); });
+      app.querySelectorAll('.baslik, .t, .btn.buyuk-btn, .mn-grup').forEach((el) => { el.style.setProperty('--s', Math.min(s++, 9)); });
       clearTimeout(gecZaman); gecZaman = setTimeout(() => app.classList.remove('gec'), 1100);
       if (!azHareket) app.querySelectorAll('[data-say]').forEach(say);
     }
     pilKonum(yeni && pilIlk);
   }
-  let sonRota = null; let gecZaman; let pilIlk = false;
+  let sonRota = null; let gecZaman; let pilIlk = false; let sekmeKardes = false;
+  // aynı ekranın sekmeleri (Akış/Keşfet/Grup…, Fotoğraf/Ara/Elle): arasında geçerken sayfa başa atlamaz
+  const sekmeGrup = (h) => { h = (h || '').split('?')[0]; if (/^#\/topluluk(\/(kesfet|grup|etkinlik|forum|meydan|rehber))?$/.test(h)) return 'topluluk'; if (/^#\/ekle\/(foto|ara|elle)$/.test(h)) return 'ekle'; return ''; };
   const sistemAzHareket = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let azHareket = sistemAzHareket || !!(S.ayar && S.ayar.anim === 'az');
   document.body.classList.toggle('az-hareket', azHareket && !sistemAzHareket);
@@ -4338,7 +4472,12 @@
     const onceki = sonHash; sonHash = location.hash;
     const m = /^#\/program\/ekle\/(\d+)/.exec(onceki || '');
     if (m && !/^#\/program\/ekle\//.test(location.hash)) { pFiltreSifirla(); if (location.hash === '#/program') pDonGun = +m[1]; }
-    iptalOnay = false; sifirOnay = false; offAcik = false; if (barkodAkis) barkodDurdur(); render(); window.scrollTo(0, 0);
+    iptalOnay = false; sifirOnay = false; offAcik = false; if (barkodAkis) barkodDurdur();
+    const kardes = !!sekmeGrup(onceki) && sekmeGrup(onceki) === sekmeGrup(location.hash);
+    const y0 = kardes ? document.querySelector('#app .yatay') : null; const yTop = y0 ? y0.getBoundingClientRect().top : null;
+    sekmeKardes = kardes; render(); sekmeKardes = false;
+    const y1 = yTop != null ? document.querySelector('#app .yatay') : null;
+    if (y1) window.scrollTo(0, Math.max(0, y1.getBoundingClientRect().top + window.scrollY - Math.max(0, yTop))); else window.scrollTo(0, 0);
     // antrenman sürerken sekmeye dönünce kaldığın harekete in
     if (location.hash === '#/antrenman' && S.seans && !/^#\/antrenman/.test(onceki || '')) aktifeKaydir(false);
     if (pDonGun != null) { const e = document.getElementById('pdgun-' + pDonGun); pDonGun = null; if (e) { let y = 0; for (let n = e; n; n = n.offsetParent) y += n.offsetTop; window.scrollTo(0, Math.max(0, y - 12)); } }
@@ -4363,6 +4502,13 @@
       s.textContent = Math.max(2, Math.min(6, parseInt(s.textContent, 10) + parseInt(el.dataset.yon, 10)));
     },
     gunsec(el) { secilenGun = el.dataset.id; degisAcik = null; render(); },
+    'ak-ac'(el) {
+      akAcik = !akAcik; el.setAttribute('aria-expanded', String(akAcik));
+      const k = el.closest('.ak-kart'); if (k) k.classList.toggle('acik', akAcik);
+      const l = document.querySelector('.ak-liste'); if (l) l.classList.toggle('acik', akAcik);
+      const ip = el.querySelector('.ak-ipucu'); if (ip) ip.firstChild.textContent = akAcik ? 'Gizle' : 'Hareketleri gör';
+    },
+    'uc-ac'(el) { const k = el.closest('.uc-kap'); const ac = !k.classList.contains('acik'); ucKapat(); if (ac) { k.classList.add('acik'); el.setAttribute('aria-expanded', 'true'); } },
     degisac(el) { degisAcik = degisAcik === el.dataset.id ? null : el.dataset.id; render(); },
     degissec(el) {
       const [gid, i, yeni] = el.dataset.id.split(':'); const g = S.program.gunler.find((x) => x.id === gid); if (!g) return;
@@ -4532,7 +4678,7 @@
     'foto-aci'(el) { fotoAci = el.dataset.deger; karsilastir = 50; render(); },
     async 'foto-sil'(el) { if (el.dataset.onay !== '1') { el.dataset.onay = '1'; toast('Silmek için tekrar bas.'); return; } try { await fotoIslem('sil', el.dataset.a); } catch (e) { /* yok */ } if (fotoUrl[el.dataset.a]) URL.revokeObjectURL(fotoUrl[el.dataset.a]); delete fotoUrl[el.dataset.a]; fotoListe = (fotoListe || []).filter((a) => a !== el.dataset.a); render(); },
     'rapor-ay'(el) { raporAy = +el.dataset.deger; render(); },
-    su(el) { const g = gun(); g.su = Math.max(0, (g.su || 0) + (+el.dataset.ml)); if (+el.dataset.ml > 0) olay('su'); kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY);
+    su(el) { const g = gun(); g.su = Math.max(0, (g.su || 0) + (+el.dataset.ml)); if (+el.dataset.ml > 0) olay('su'); kaydet(); const sY = window.scrollY; render(); window.scrollTo(0, sY); if (+el.dataset.ml > 0 && !azHareket) { const b = document.querySelector('.su-bardak'); if (b) b.classList.add('dol'); }
       const o = document.querySelector('.su-kutu .orta'); if (o && o.animate && !azHareket) o.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-6px) scale(1.04)', offset: 0.4 }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.34,1.5,.64,1)' }); },
     dunden(el) {
       const t = el.dataset.tur; const dun = S.gunluk[dunKey()]; if (!dun) return;
@@ -5035,7 +5181,7 @@
     'hp-yenile'() { hp.liste = null; render(); },
     async 'hp-kod-yenile'() { const r = await histek('kod', 'POST'); if (r.ok) { hp.kod = r.j.kod; toast('Yeni kod hazır. Eski kod artık çalışmaz.'); render(); } },
     async 'hp-kod-paylas'() {
-      const metin = 'COMEBACK. uygulamasında Profil → Hocam alanına şu kodu yaz: ' + hp.kod;
+      const metin = 'COMEBACK. uygulamasında Menü → Topluluk ayarları → Hocam alanına şu kodu yaz: ' + hp.kod;
       try { if (navigator.share) { await navigator.share({ text: metin }); return; } } catch (e) { if (e.name === 'AbortError') return; }
       try { await navigator.clipboard.writeText(metin); toast('Kopyalandı.'); } catch (e) { toast(metin); }
     },
@@ -5232,6 +5378,10 @@
   });
   ['pointerup', 'pointercancel'].forEach((ev) => document.addEventListener(ev, basiliBitir));
   window.addEventListener('blur', basiliBitir);
+  // üç nokta menüsü: dışarı dokununca ya da içinden bir seçim yapılınca yumuşakça kapanır
+  function ucKapat() { document.querySelectorAll('.uc-kap.acik').forEach((k) => { k.classList.remove('acik'); const b = k.querySelector('.uc-btn'); if (b) b.setAttribute('aria-expanded', 'false'); }); }
+  document.addEventListener('click', (e) => { if (!e.target.closest('.uc-btn')) ucKapat(); }, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') ucKapat(); });
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-act]'); if (!el) return;
     if (tikYut && el.classList.contains('od-adim-btn')) { tikYut = false; e.preventDefault(); return; }
@@ -5249,7 +5399,8 @@
       aramaQ = el.value; aramaSonuc = null;
       document.getElementById('yerelListe').innerHTML = yerelListe(aramaQ);
       document.getElementById('markaSonuc').innerHTML = '';
-      document.getElementById('markaBtn').disabled = aramaQ.trim().length < 2;
+      // market ürünleri ayrıca düğmeyle aranmaz: yazmayı bırakınca kendiliğinden gelir
+      clearTimeout(markaZaman); if (aramaQ.trim().length >= 3) markaZaman = setTimeout(() => markaAra(aramaQ), 650);
       return;
     }
     if (el.dataset && el.dataset.in === 'foto-not') { fotoNot = el.value; return; }
@@ -5593,6 +5744,7 @@
   }
 
   /* ---------- ağ: ürün araması, barkod, fotoğraf ---------- */
+  let markaZaman = null;
   async function markaAra(q) {
     aramaSonuc = { yukleniyor: true }; const kutu = document.getElementById('markaSonuc'); if (kutu) kutu.innerHTML = markaListe();
     try {
@@ -5600,6 +5752,7 @@
       const j = await r.json();
       aramaSonuc = r.ok ? { urunler: j.urunler || [] } : { hata: j.hata || 'Arama şu an yapılamıyor.' };
     } catch (e) { aramaSonuc = { hata: 'Bağlantı kurulamadı. İnternetini kontrol et.' }; }
+    if (q !== aramaQ) return; // bu arada başka bir şey yazıldı
     const k2 = document.getElementById('markaSonuc'); if (k2) k2.innerHTML = markaListe();
   }
   async function barkodBul(kod) {

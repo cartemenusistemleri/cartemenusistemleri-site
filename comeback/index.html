@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-kobalt.png?v=20">
 <script>try{var sg=localStorage.getItem('comeback:simge');document.documentElement.setAttribute('data-simge',sg||'kobalt');if(['gunduz','gece','beyaz','limon','krom','tekrar'].indexOf(sg)>=0){document.querySelector('link[rel="manifest"]').href='manifest-'+sg+'.webmanifest?v=10';document.querySelector('link[rel="apple-touch-icon"]').href=sg==='gece'?'apple-touch-icon.png?v=20':'apple-touch-icon-'+sg+'.png?v=20';}}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="stylesheet" href="/comeback/app.css?v=67">
+<link rel="stylesheet" href="/comeback/app.css?v=68">
 </head>
 <body>
 <main id="app" class="app" aria-live="polite"></main>
@@ -36,16 +36,15 @@
   <span class="nav-pil" aria-hidden="true"></span>
   <a href="#/" data-tab="bugun" aria-label="Bugün"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"/></svg><span class="nav-ad">Bugün</span></a>
   <a href="#/antrenman" data-tab="antrenman" aria-label="Antrenman"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg><span class="nav-ad">Antrenman</span></a>
-  <a href="#/beslenme" data-tab="beslenme" aria-label="Beslenme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg><span class="nav-ad">Beslenme</span></a>
+  <a href="#/beslenme" data-tab="beslenme" aria-label="Beslenme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v6a2 2 0 0 0 4 0V3M8 3v18"/><path d="M17 21V3c-2.2 1.4-3 4-3 7 0 1.7.9 3 3 3"/></svg><span class="nav-ad">Beslenme</span></a>
   <a href="#/ilerleme" data-tab="ilerleme" aria-label="İlerleme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M7 15l4-4 3 3 5-6"/></svg><span class="nav-ad">İlerleme</span></a>
-  <a href="#/profil" data-tab="profil" aria-label="COMEBACK. menü, profil ve ayarlar"><span class="nav-kelime" aria-hidden="true"><span>COME</span><span>BACK<i>.</i></span></span><svg class="nav-masa" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg><span class="nav-masa" aria-hidden="true">Menü</span></a>
 </nav>
 <div id="toast" class="toast" role="status" hidden></div>
 <script src="/comeback/data.js?v=9"></script>
 <script src="/comeback/kutuphane.js?v=12"></script>
 <script src="/comeback/motor.js?v=14"></script>
 <script src="/comeback/rehber.js?v=1"></script>
-<script src="/comeback/app.js?v=75"></script>
+<script src="/comeback/app.js?v=76"></script>
 <script>if ('serviceWorker' in navigator) addEventListener('load', () => {
   const ilk = !navigator.serviceWorker.controller; let yenilendi = false;
   // yeni sürüm devreye girince sayfayı bir kez yenile (ilk kurulumda değil)

@@ -49,10 +49,34 @@ const temizle = (p) => p.evaluate(() => { const k = document.getElementById('kap
     (await p.$('.seri-kutu .nd')) ? tamam('ana sayfada hafta noktaları') : hata('hafta noktaları yok');
     p.hatalar.length ? hata('sayfa JS hatası: ' + p.hatalar.join(' | ')) : tamam('hata yok'); await p.context().close(); }
 
+  console.log('Gezinme ve menü');
+  { const p = await sayfa(b); await p.goto(ADRES); await bekle(p, 1200); await temizle(p);
+    (await p.$('.ust-profil')) ? tamam('sağ üstte profil resmi') : hata('sağ üstte profil resmi yok');
+    (await p.$$eval('#nav a[data-tab]', (l) => l.length)) === 4 ? tamam('alt çubukta 4 sekme') : hata('alt çubuk 4 sekme değil');
+    await p.click('.ust-profil'); await bekle(p, 450);
+    (await p.$$eval('a[href^="#/menu/"]', (l) => l.length)) === 5 ? tamam('menüde 5 kategori') : hata('menü kategorileri eksik');
+    for (const k of ['antrenman', 'beslenme', 'topluluk', 'uygulama', 'comeback']) { await p.evaluate((h) => { location.hash = h; }, '#/menu/' + k); await bekle(p, 300); (await p.$('.mn-satir')) ? tamam('menü/' + k + ' açıldı') : hata('menü/' + k + ' boş'); }
+    await p.evaluate(() => { location.hash = '#/antrenman'; }); await bekle(p, 500);
+    await p.click('[data-act="uc-ac"]'); await bekle(p, 350);
+    (await p.$('.uc-kap.acik')) ? tamam('üç nokta menüsü açıldı') : hata('üç nokta menüsü açılmadı');
+    await p.click('h1.baslik'); await bekle(p, 350);
+    (await p.$('.uc-kap.acik')) ? hata('üç nokta menüsü dışarı dokununca kapanmadı') : tamam('üç nokta menüsü kapandı');
+    await p.click('[data-act="ak-ac"]'); await bekle(p, 500);
+    (await p.$('.ak-liste.acik')) ? tamam('günün hareketleri açıldı') : hata('günün hareketleri açılmadı');
+    await p.evaluate(() => { location.hash = '#/topluluk'; }); await bekle(p, 1300);
+    await p.evaluate(() => { const y = document.querySelector('#app .yatay'); y.scrollLeft = y.scrollWidth; }); await bekle(p, 100);
+    const once = await p.evaluate(() => { const y = document.querySelector('#app .yatay'); return { sol: y.scrollLeft, ust: y.getBoundingClientRect().top }; });
+    await p.click('#app .yatay a[href="#/topluluk/meydan"]'); await bekle(p, 600);
+    const sonra = await p.evaluate(() => { const y = document.querySelector('#app .yatay'); return { sol: y.scrollLeft, ust: y.getBoundingClientRect().top }; });
+    sonra.sol > 0 && Math.abs(sonra.ust - once.ust) < 3 ? tamam('topluluk sekmesinde yer korunuyor') : hata('topluluk sekmesi başa atıyor (' + JSON.stringify([once, sonra]) + ')');
+    await p.evaluate(() => { location.hash = '#/bgecmis'; }); await bekle(p, 400);
+    (await p.$('.gc-satir')) ? tamam('beslenme geçmişi dolu') : hata('beslenme geçmişi boş');
+    p.hatalar.length ? hata('gezinme JS hatası: ' + p.hatalar.join(' | ')) : tamam('hata yok'); await p.context().close(); }
+
   console.log('Antrenman odak akışı');
   for (const boy of [844, 667]) {
     const p = await sayfa(b, { boy }); await p.goto(ADRES + '#/antrenman'); await bekle(p, 1200); await temizle(p);
-    await p.click('[data-act="basla"]'); await bekle(p, 3800);
+    await p.click('.buyuk-btn[data-act="basla"]'); await bekle(p, 3800);
     (await p.$('[data-act="od-isindim"]')) ? tamam(boy + ' · ısınma sayfası') : hata(boy + ' · ısınma sayfası yok');
     await p.click('[data-act="od-isindim"]'); await bekle(p, 600);
     const art = '.od-adim-btn[data-alan="kg"]:not([data-d^="-"])'; await p.click(art); await bekle(p, 200);
