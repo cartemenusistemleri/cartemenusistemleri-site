@@ -218,7 +218,7 @@ async function uyelikIsle(db, kim, veri) {
   const o = await uyelikOku(db, kim); if (donus) o.dondu = true;
   return o;
 }
-const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan', 'kisa', 'giris_afis', 'giris_wa', 'giris_ig', 'giris_qr']);
+const OLAYLAR = new Set(['antrenman_bitti', 'ogun_foto', 'ogun_barkod', 'ogun_liste', 'ogun_elle', 'koc_mesaj', 'program_ozel', 'program_yorum', 'kurulum', 'su', 'paylas', 'off_gun', 'program_paylas', 'program_al', 'program_kur', 'antrenman_his', 'takviye', 'siralama', 'jam', 'bplan', 'gun_degis', 'haftaplan', 'kisa', 'giris_afis', 'giris_wa', 'giris_ig', 'giris_qr', 'gidisat', 'istatistik']);
 // Hesap güvenliği bildirimi (şifre / e-posta değişti). Gönderilemezse işlem yine tamamlanır.
 async function bilgiPostasi(env, kime, ad0, konu, metin) {
   try {
