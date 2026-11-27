@@ -786,6 +786,34 @@
       '<div class="ha-orta"><div class="yigin"><b class="ha-sayi num">' + (hp.liste ? l.length : '–') + '</b><span class="ik">öğrenci</span></div><div class="yigin"><b class="ha-sayi num">' + (hp.liste ? gelen : '–') + '</b><span class="ik">bu hafta geldi</span></div>' + (yuz ? '<div class="ha-yuz" aria-hidden="true">' + yuz + '</div>' : '') + '</div>' +
       '<div class="ha-dugmeler"><a class="btn beyaz" href="#/hoca">Öğrencilerim' + IK.ok + '</a><a class="btn ha-mesaj" href="#/mesajlar">Mesajlar' + (okunmamis ? '<i class="mn-sayac num">' + okunmamis + '</i>' : '') + '</a></div></section>';
   }
+  /* ---------- hoca silüeti: fotoğraf yerine markanın silüet avatarı ---------- */
+  const HOCA_SIL = [['e1', 'Erkek'], ['e2', 'Erkek'], ['k1', 'Kadın'], ['k2', 'Kadın']];
+  let hsSecili = null, hsYuk = false;
+  function ekranHocaAvatar() {
+    if (!hocaMi()) { location.hash = '#/profilim'; return ''; }
+    return ust(geri('#/profilim'), '<span class="alt">Hoca silüeti</span>') +
+      '<h1 class="baslik">Silüetini seç<span class="nokta">.</span></h1>' +
+      '<p class="ik hs-acik">Fotoğraf koymak istemezsen profilinde, mesajlarda ve öğrencilerinin ekranında bu silüet görünür.</p>' +
+      '<div class="hs-izgara" role="radiogroup" aria-label="Hoca silüetleri">' + HOCA_SIL.map(([id, ad]) => '<button class="hs-kart' + (hsSecili === id ? ' secili' : '') + '" role="radio" aria-checked="' + (hsSecili === id) + '" data-act="hs-sec" data-id="' + id + '"><img src="/comeback/img/hoca/' + id + '.webp" alt="' + ad + ' hoca silüeti" loading="lazy" decoding="async" width="300" height="400"><span>' + ad + '</span></button>').join('') + '</div>' +
+      '<button class="btn ana buyuk-btn hs-kaydet" data-act="hs-kaydet"' + (hsSecili && !hsYuk ? '' : ' disabled') + '>' + (hsYuk ? 'Kaydediliyor…' : 'Profil resmim yap') + '</button>';
+  }
+  // seçilen silüetin baş-gövde kısmını 192 px kare WebP yapar (sunucu sınırı 60 KB)
+  function hsHazirla(id) {
+    return new Promise((ok, red) => {
+      const im = new Image();
+      im.onload = () => {
+        const w = im.naturalWidth, h = im.naturalHeight, k = Math.round(w * 0.86);
+        const c = document.createElement('canvas'); c.width = c.height = 192;
+        const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+        x.drawImage(im, (w - k) / 2, Math.round(h * 0.06), k, k, 0, 0, 192, 192);
+        let d = c.toDataURL('image/webp', 0.86);
+        if (!/^data:image\/webp/.test(d)) d = c.toDataURL('image/jpeg', 0.86);
+        ok(d);
+      };
+      im.onerror = () => red(new Error('silüet'));
+      im.src = '/comeback/img/hoca/' + id + '.webp';
+    });
+  }
   const HEDEF_AD = { kas: 'Kas', yag: 'Yağ yakımı', guc: 'Güç', kondisyon: 'Kondisyon' };
   function ekranHoca(id) {
     if (!hocaMi()) { location.hash = '#/profil'; return ''; }
@@ -4289,7 +4317,7 @@
     const kilo = S.kilo.length ? S.kilo[S.kilo.length - 1].kg : p.kilo;
     return ust(geri('#/profil'), '<span class="alt">Profilim</span>') +
       '<div class="izgara">' + profilHero() + profilSayilar() + profilBrans() + profilRozetler() +
-      (hesap ? '<div class="t genis pf-resim">' + benAvatar('dev' + (avatarYuk ? ' yukleniyor' : '')) + '<div class="yigin" style="gap:8px;min-width:0"><span class="k">Profil resmi</span><span class="ik" style="line-height:1.45">Sıralamada, mesajlarda ve ortak antrenmanda görünür.</span><div class="haplar"><label class="btn ana kucuk" style="cursor:pointer"><input type="file" accept="image/*" data-in="avatar" class="gizli">' + (hesap.foto ? 'Değiştir' : 'Resim seç') + '</label>' + (hesap.foto ? '<button class="btn cerceve kucuk" data-act="avatar-sil">Kaldır</button>' : '') + '</div></div></div>' : '') +
+      (hesap ? '<div class="t genis pf-resim">' + benAvatar('dev' + (avatarYuk ? ' yukleniyor' : '')) + '<div class="yigin" style="gap:8px;min-width:0"><span class="k">Profil resmi</span><span class="ik" style="line-height:1.45">Sıralamada, mesajlarda ve ortak antrenmanda görünür.</span><div class="haplar"><label class="btn ana kucuk" style="cursor:pointer"><input type="file" accept="image/*" data-in="avatar" class="gizli">' + (hesap.foto ? 'Değiştir' : 'Resim seç') + '</label>' + (hesap.foto ? '<button class="btn cerceve kucuk" data-act="avatar-sil">Kaldır</button>' : '') + '</div>' + (hocaMi() ? '<a class="metin-btn kucuk-metin hs-sec-bag" href="#/hoca-avatar">Fotoğraf yerine hoca silüeti seç' + IK.ok + '</a>' : '') + '</div></div>' : '') +
       '<div class="t koyu genis num"><span class="k">Bilgilerin</span><span style="font-weight:700;font-size:15px">' + (p.cinsiyet === 'k' ? 'Kadın' : 'Erkek') + ' · ' + p.yas + ' yaş · ' + p.boy + ' cm · ' + sayi(kilo, 1) + ' kg</span><span class="ik">' + ad + ' · ' + spor + ' · haftada ' + p.gun + ' gün' + ((p.odak || []).length ? ' · odak: ' + p.odak.map((o) => (M.ODAK[o] ? M.ODAK[o].ad : o).toLowerCase()).join(', ') : '') + ((p.sakatlik || []).length ? ' · dikkat: ' + p.sakatlik.map((k) => (K.SAKATLIK.find((x) => x[0] === k) || [k, k])[1].toLowerCase()).join(', ') : '') + '</span></div>' +
       mGrup('Profil', [
         hesap ? mSatir('#/kisi/' + encodeURIComponent(hesap.id) + '/onizle', 'gorunum', 'Başkaları böyle görür', 'Açık profilinin önizlemesi') : '',
@@ -4619,6 +4647,7 @@
     else if (parca[0] === 'bgecmis') { html = ekranBesGecmis(parca[1]); sekme = 'beslenme'; }
     else if (parca[0] === 'kisi' && parca[1]) { if (parca[2] === 'onizle' && sonRota !== parca.join('/')) delete kisiOnbellek[decodeURIComponent(parca[1])]; html = ekranKisi(decodeURIComponent(parca[1]), parca[2] === 'onizle'); sekme = 'profil'; }
     else if (parca[0] === 'koc') { html = ekranKoc(); sekme = 'bugun'; }
+    else if (parca[0] === 'hoca-avatar') { html = ekranHocaAvatar(); sekme = 'profil'; }
     else if (parca[0] === 'hoca') { html = ekranHoca(parca[1] ? decodeURIComponent(parca[1]) : null); sekme = 'profil'; }
     else if (parca[0] === 'hoca-program') { html = ekranHocaProgram(); sekme = 'bugun'; }
     else if (parca[0] === 'jam') { html = ekranJam(); sekme = 'antrenman'; }
@@ -5557,6 +5586,8 @@
     'mk-yenile'() { mk.liste = null; render(); },
     'kirp-iptal'() { kirpKapat(); },
     'kirp-kaydet'() { if (!kirp) return; let d; try { d = kirpSonuc(); } catch (e) { d = null; } kirpKapat(); if (d) avatarYukle(null, d); else toast('Bu resim kırpılamadı. Başka bir resim dene.'); },
+    'hs-sec'(el) { hsSecili = el.dataset.id; render(); },
+    async 'hs-kaydet'() { if (!hsSecili || hsYuk) return; hsYuk = true; render(); try { const d = await hsHazirla(hsSecili); await avatarYukle(null, d); hsYuk = false; location.hash = '#/profilim'; } catch (e) { hsYuk = false; toast('Silüet yüklenemedi. Bir daha dene.'); render(); } },
     'avatar-sil'() { istek('foto', 'DELETE').then((r) => { if (r.ok) { hesap.foto = 0; toast('Profil resmi kaldırıldı.'); render(); } else toast(r.j.hata || 'Olmadı. Bir daha dene.'); }); },
     'veri-ac'() { veriAcik = true; render(); },
     'veri-kapat'() { veriAcik = false; silAcik = false; sifirOnay = false; render(); },
