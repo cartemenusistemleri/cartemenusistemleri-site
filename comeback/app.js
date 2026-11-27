@@ -93,8 +93,13 @@
     clearTimeout(kayitZaman);
     S.guncelleme = Date.now();
     const yaz = () => { try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); } catch (e) { /* depolama kapalı; hesapla eşitleniyor */ } senkronPlanla(); try { if (hatAcikMi()) hatPlanla(); } catch (e) { /* henüz hazır değil */ } };
-    if (hemen) yaz(); else kayitZaman = setTimeout(yaz, 300);
+    if (hemen) yaz(); else kayitZaman = setTimeout(() => { kayitZaman = null; yaz(); }, 300);
   }
+  // uygulama arka plana atılır, kapanır ya da telefon kilitlenirse bekleyen kaydı hemen yaz (antrenman ortasında veri kaybolmasın)
+  const kayitBosalt = () => { if (kayitZaman) { clearTimeout(kayitZaman); kayitZaman = null; try { localStorage.setItem(ANAHTAR, JSON.stringify(S)); } catch (e) { /* yok */ } } };
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') kayitBosalt(); });
+  window.addEventListener('pagehide', kayitBosalt);
+  window.addEventListener('freeze', kayitBosalt);
 
   /* ---------- hesap ve eşitleme ---------- */
   let hesap = null;        // { id, ad, eposta, rol }
@@ -254,7 +259,10 @@
     } catch (e) { cevrimdisi = true; }
   }
   window.addEventListener('online', () => { gecmisGonder(); akisGonder(); });
-  window.addEventListener('pagehide', () => { if (hesap && senkronZaman) { clearTimeout(senkronZaman); try { fetch(API + 'veri', { method: 'PUT', keepalive: true, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ json: JSON.stringify(S), guncelleme: S.guncelleme }) }); } catch (e) { /* yok */ } } });
+  const senkronBosalt = () => { if (hesap && senkronZaman) { clearTimeout(senkronZaman); senkronZaman = null; try { fetch(API + 'veri', { method: 'PUT', keepalive: true, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ json: JSON.stringify(S), guncelleme: S.guncelleme }) }); } catch (e) { /* yok */ } } };
+  window.addEventListener('pagehide', senkronBosalt);
+  // arka plana atılınca da hesaba gönder: telefon uygulamayı arka planda öldürürse antrenman hesapta kalır
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') senkronBosalt(); });
   const gun = (k) => { const key = k || tarihKey(); if (!S.gunluk[key]) S.gunluk[key] = { ogun: [], antrenman: null }; return S.gunluk[key]; };
 
   /* ---------- program motoru (motor.js + kutuphane.js) ---------- */
